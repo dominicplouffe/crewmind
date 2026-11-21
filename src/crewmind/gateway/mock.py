@@ -7,6 +7,7 @@ exercised exactly as with a real provider.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from collections.abc import Callable
@@ -23,6 +24,9 @@ class ScriptedTurn(BaseModel):
     tools: list[dict[str, Any]] = Field(default_factory=list[dict[str, Any]])
     usage: TokenUsage = Field(default_factory=lambda: TokenUsage(input=100, output=20))
     fail: str | None = Field(default=None, description="Raise this as a provider error.")
+    word_delay_ms: int = Field(
+        default=0, ge=0, description="Pause between streamed words, as a slow model would."
+    )
 
 
 DEFAULT_SCRIPT = [ScriptedTurn(text="Nothing to do.")]
@@ -79,4 +83,6 @@ class MockProvider:
         if on_delta is not None:
             for word in re.findall(r"\S+\s*", turn.text):
                 on_delta(word)
+                if turn.word_delay_ms:
+                    await asyncio.sleep(turn.word_delay_ms / 1000)
         return CompletionResponse(text=turn.text, tool_calls=calls, usage=turn.usage)

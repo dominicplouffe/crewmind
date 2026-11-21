@@ -333,35 +333,26 @@ test("the theme switch works and the project page is accessible in both themes (
   await page.getByRole("button", { name: "Close panel" }).click();
 });
 
-test("the reply bubble grows as words arrive, and Esc asks the server to stop the run (CHAT-3, CHAT-4)", async () => {
-  // A long reply, so the stream lasts long enough to act on (the mock sends words as fast as it can).
-  const words = Array.from({ length: 6000 }, (_, index) => (index % 1000 === 999 ? `mark${index}` : "a"));
-  setCeoScript([{ text: words.join(" ") }]);
+test("the reply bubble grows as words arrive, and Esc stops the run (CHAT-3, CHAT-4)", async () => {
+  // A slow reply: the mock pauses between words, as a real model would.
+  const words = Array.from({ length: 400 }, (_, index) => (index === 399 ? "lastword" : "a"));
+  setCeoScript([{ text: words.join(" "), word_delay_ms: 25 }]);
   await recordTyping(page);
+  const before = await agentMessages().count();
   await sendMessage(page, "Write something long");
   const bubble = page.getByTestId("typing");
   await expect(bubble).toBeVisible({ timeout: 30_000 });
-  const asked = page.waitForRequest((request) => request.url().endsWith("/v1/runs/interrupt"));
+  await expect.poll(async () => (await typingSeen(page)).length, { timeout: 10_000 }).toBeGreaterThan(2);
+  const asked = page.waitForResponse((response) => response.url().endsWith("/v1/runs/interrupt"));
   await page.getByRole("textbox", { name: "Message" }).press("Escape");
-  const request = await asked;
-  expect(request.postDataJSON()).toMatchObject({ run_id: expect.stringMatching(/^[0-9a-f]{32}$/) });
-  const response = await request.response();
-  if (response?.ok()) {
-    await expect(bubble).toHaveCount(0);
-  } else {
-    // The mock run has already finished when its words stream, so the server refuses; its words are shown.
-    const refusal = (await response?.json()) as { message: string };
-    await expect(page.getByTestId("notice-error").last()).toContainText(refusal.message);
-    await page.getByTestId("notice-error").last().getByRole("button", { name: "Dismiss" }).click();
-  }
+  const response = await asked;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON()).toMatchObject({ run_id: expect.stringMatching(/^[0-9a-f]{32}$/) });
+  await expect(bubble).toHaveCount(0);
   setCeoScript(PLAN_SCRIPT);
-  await expect(bubble).toHaveCount(0, { timeout: 40_000 });
-  const seen = await typingSeen(page);
-  expect(seen.length).toBeGreaterThan(2);
-  if (!response?.ok()) {
-    await expect(agentMessages().last()).toContainText("mark5999");
-    await expect(agentMessages().last().getByRole("button", { name: "Show more" })).toBeVisible();
-  }
+  await page.waitForTimeout(3000);
+  await expect(page.getByText("lastword")).toHaveCount(0);
+  expect(await agentMessages().count()).toBe(before);
 });
 
 test("polling keeps the chat working when the live stream is blocked", async () => {
