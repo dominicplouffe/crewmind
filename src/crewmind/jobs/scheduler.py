@@ -29,7 +29,7 @@ from crewmind.domain.accounts.model import (
 from crewmind.domain.accounts.people import LINK_EXPIRED
 from crewmind.domain.accounts.token_operations import TOKEN_EXPIRED
 from crewmind.domain.budget import service as budget
-from crewmind.domain.conversation import corrections, speaking
+from crewmind.domain.conversation import corrections, sessions, speaking
 from crewmind.domain.execution import runs
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import Hold, ProjectState
@@ -176,6 +176,7 @@ class Scheduler:
         try:
             async with self._sessions() as session, session.begin():
                 await runs.reap(session, self._settings, now)
+                await sessions.close_idle(session, self._settings, now)
         except Exception:
             logger.exception("scheduler: reaping failed this tick")
         for job in self.install_jobs:

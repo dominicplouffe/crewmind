@@ -22,6 +22,7 @@ from crewmind.domain.conversation.corrections import CORRECTION_MACHINE
 from crewmind.domain.conversation.decisions import DECISION_MACHINE
 from crewmind.domain.conversation.directives import CARD_MACHINE, DIRECTIVE_MACHINE
 from crewmind.domain.conversation.orders import ORDER_MACHINE
+from crewmind.domain.conversation.sessions import CHAT_SESSION_MACHINE
 from crewmind.domain.execution.model import RUN_MACHINE, SEAT_MACHINE, TEAM_MACHINE
 from crewmind.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
 from crewmind.domain.projects.model import (
@@ -91,6 +92,7 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.17:Standing order", ORDER_MACHINE, NOTHING),
         ("7.17:Closed decision", DECISION_MACHINE, NOTHING),
         ("7.17:Correction", CORRECTION_MACHINE, NOTHING),
+        ("7.17:Chat session", CHAT_SESSION_MACHINE, NOTHING),
         ("7.18:Model credential", CREDENTIAL_MACHINE, NOTHING),
         ("7.18:Circuit breaker", BREAKER_MACHINE, NOTHING),
     ],

@@ -128,3 +128,25 @@ class HeldPost(Base):
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     due_at: Mapped[datetime] = mapped_column(UtcDateTime, index=True)
     delivered_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+
+
+class ChatSession(Base):
+    """An agent's chat session: many chat runs, one per reply. It is not a run and is never
+    reaped (MSG-11, section 7.17)."""
+
+    __tablename__ = "chat_sessions"
+
+    id: Mapped[int] = mapped_column(SequenceId, primary_key=True, autoincrement=True)
+    project_id: Mapped[str] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), index=True
+    )
+    seat_id: Mapped[str] = mapped_column(String(32), index=True)
+    state: Mapped[str] = mapped_column(String(16))
+    generation: Mapped[int] = mapped_column(default=1)
+    fingerprint: Mapped[str] = mapped_column(String(64))
+    restarts: Mapped[list[Any]] = mapped_column(JSON)
+    held_reason: Mapped[str | None] = mapped_column(Text)
+    held_at_message: Mapped[int | None] = mapped_column(SequenceId)
+    opened_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    last_message_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    closed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)

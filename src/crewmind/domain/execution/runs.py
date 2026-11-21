@@ -347,6 +347,12 @@ async def finish(
     return True
 
 
+FailedHook = Callable[[AsyncSession, Run, datetime], Awaitable[None]]
+failed_hooks: list[FailedHook] = []
+"""Steps run when a run fails or is reaped. The conversation domain counts a chat run's
+failure as an involuntary restart of its chat session (MSG-11)."""
+
+
 async def _end(
     session: AsyncSession,
     run: Run,
@@ -363,6 +369,8 @@ async def _end(
     await notices.settle(session, run.id, failed=retryable and run.attempt < MAX_ATTEMPTS)
     if retryable:
         await _retry(session, run, now)
+        for hook in failed_hooks:
+            await hook(session, run, now)
 
 
 async def _retry(session: AsyncSession, run: Run, now: datetime) -> None:

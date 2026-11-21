@@ -16,7 +16,7 @@ from typing import Any, Protocol
 
 import httpx
 
-from crewmind.runner.agent import Stop, agent_loop
+from crewmind.runner.agent import DONE, WARM_FLAG, Stop, agent_loop
 
 
 @dataclass(frozen=True)
@@ -26,6 +26,9 @@ class SandboxSpec:
     token: str
     api_url: str
     workspace: Path
+    warm: tuple[str, int] | None = None
+    """For a chat run: the agent and the generation of its chat session. A sandbox that
+    keeps warm processes reuses one for the same pair (MSG-11)."""
 
 
 class SandboxHandle(Protocol):
@@ -109,25 +112,88 @@ class _ProcessHandle:
         await self._process.wait()
 
 
+class _WarmHandle:
+    """One chat run handled by a warm process: the token goes in on standard input and
+    the result comes back as a line."""
+
+    def __init__(self, owner: UnisolatedSandbox, seat_id: str, process: asyncio.subprocess.Process):
+        self._owner = owner
+        self._seat_id = seat_id
+        self._process = process
+
+    async def wait(self) -> int:
+        assert self._process.stdout is not None
+        line = (await self._process.stdout.readline()).decode().strip()
+        if line.startswith(DONE):
+            return int(line.removeprefix(DONE))
+        await self._owner.end_warm(self._seat_id)
+        return 1
+
+    async def kill(self) -> None:
+        await self._owner.end_warm(self._seat_id)
+
+
 class UnisolatedSandbox:
     """Development only (EXE-12): the harness is a process on the host, in the workspace
-    directory, with a clean environment. It can read whatever the server's user can."""
+    directory, with a clean environment. It can read whatever the server's user can.
+
+    A chat run reuses the agent's warm process while its chat session lasts (MSG-11)."""
 
     mode = "unisolated"
 
-    async def start(self, spec: SandboxSpec) -> SandboxHandle:
+    def __init__(self) -> None:
+        self._warm: dict[str, tuple[int, asyncio.subprocess.Process]] = {}
+
+    async def _spawn(self, spec: SandboxSpec, *flags: str) -> asyncio.subprocess.Process:
         spec.workspace.mkdir(parents=True, exist_ok=True)
-        process = await asyncio.create_subprocess_exec(
+        piped = asyncio.subprocess.PIPE if flags else asyncio.subprocess.DEVNULL
+        return await asyncio.create_subprocess_exec(
             sys.executable,
             "-I",
             "-m",
             "crewmind.runner.agent",
+            *flags,
             cwd=spec.workspace,
             env={**sandbox_environment(spec), "PYTHONPATH": os.pathsep.join(sys.path)},
-            stdout=asyncio.subprocess.DEVNULL,
+            stdin=piped,
+            stdout=piped,
             stderr=asyncio.subprocess.DEVNULL,
         )
-        return _ProcessHandle(process)
+
+    async def start(self, spec: SandboxSpec) -> SandboxHandle:
+        if spec.warm is None:
+            return _ProcessHandle(await self._spawn(spec))
+        seat_id, generation = spec.warm
+        kept = self._warm.get(seat_id)
+        if kept is None or kept[0] != generation or kept[1].returncode is not None:
+            await self.end_warm(seat_id)
+            kept = (generation, await self._spawn(spec, WARM_FLAG))
+            self._warm[seat_id] = kept
+        process = kept[1]
+        assert process.stdin is not None
+        process.stdin.write(f"{spec.token}\n".encode())
+        await process.stdin.drain()
+        return _WarmHandle(self, seat_id, process)
+
+    async def end_warm(self, seat_id: str) -> None:
+        kept = self._warm.pop(seat_id, None)
+        if kept is not None and kept[1].returncode is None:
+            with contextlib.suppress(ProcessLookupError):
+                kept[1].kill()
+            await kept[1].wait()
+
+    async def keep_warm(self, seats: dict[str, int]) -> None:
+        """End every warm process whose session has closed or moved to a new generation."""
+        for seat_id, (generation, _) in list(self._warm.items()):
+            if seats.get(seat_id) != generation:
+                await self.end_warm(seat_id)
+
+    @property
+    def warm_processes(self) -> dict[str, int]:
+        """Each agent with a live warm process, and that process's id."""
+        return {
+            seat: kept[1].pid for seat, kept in self._warm.items() if kept[1].returncode is None
+        }
 
 
 class _ContainerHandle:

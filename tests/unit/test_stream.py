@@ -67,7 +67,10 @@ async def test_IF_3_6_the_stream_carries_messages_changes_and_the_words_of_a_rep
     assert "".join(words) == "The plan is ready and costs little."
     assert len(words) == 7
     assert kinds.index("reply") < len(kinds) - 1 - kinds[::-1].index("message")
-    assert {data["type"] for kind, data in seen if kind == "change"} == {"run.state_changed"}
+    assert {data["type"] for kind, data in seen if kind == "change"} == {
+        "run.state_changed",
+        "chat_session.state_changed",
+    }
     assert len([kind for kind in kinds if kind == "change"]) >= 3
     assert all(data["seat"] == "CEO" for kind, data in seen if kind == "reply")
 

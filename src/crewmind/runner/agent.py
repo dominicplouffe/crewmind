@@ -183,9 +183,13 @@ def fit_in_a_message(text: str, most: int) -> str:
     return text if len(text) <= most else text[: most - len(CUT_NOTE)] + CUT_NOTE
 
 
-async def _main() -> int:
-    token = os.environ["CREWMIND_RUN_TOKEN"]
-    api = os.environ["CREWMIND_AGENT_API"]
+WARM_FLAG = "--warm"
+DONE = "done "
+"""A warm process handles one chat run per line of standard input (the run's token) and
+answers each with `done <exit code>` (MSG-11)."""
+
+
+async def _one_run(api: str, token: str) -> int:
     headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient(base_url=api, headers=headers, timeout=None) as client:
         try:
@@ -197,6 +201,17 @@ async def _main() -> int:
             print(f"failed: {error}", file=sys.stderr)
             return 1
     return 0
+
+
+async def _main() -> int:
+    api = os.environ["CREWMIND_AGENT_API"]
+    if WARM_FLAG not in sys.argv:
+        return await _one_run(api, os.environ["CREWMIND_RUN_TOKEN"])
+    while True:
+        line = await asyncio.to_thread(sys.stdin.readline)
+        if not line.strip():
+            return 0
+        print(f"{DONE}{await _one_run(api, line.strip())}", flush=True)
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ process that reached the server only through the agent API and the model gateway
 from __future__ import annotations
 
 import json
+import subprocess
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -33,6 +34,17 @@ def wait_for(read: Callable[[], Items], wanted: Callable[[Items], Any], what: st
             return found
         time.sleep(0.5)
     raise AssertionError(f"no {what} within {REPLY_LIMIT_SECONDS} seconds")
+
+
+def warm_processes(server_pid: int) -> list[str]:
+    """The warm agent processes the server has started."""
+    found = subprocess.run(
+        ["pgrep", "-P", str(server_pid), "-f", "crewmind.runner.agent --warm"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return found.stdout.split()
 
 
 def first_reply(items: Items) -> dict[str, Any] | None:
@@ -79,6 +91,18 @@ def test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process(
         runs = wait_for(runs_now, all_finished, "finished run")
         assert runs[0]["kind"] == "chat"
         assert install.run("budget", "show", "--project-id", project)["spent"] > 0
+
+        # MSG-11: the next reply comes from the same warm agent process.
+        assert install.server is not None
+        first_warm = warm_processes(install.server.pid)
+        assert len(first_warm) == 1
+        install.run("chat", "send", "--project-id", project, "--body", "And after that?")
+        wait_for(
+            history,
+            lambda items: [m for m in items if m["author_kind"] == "agent"][1:],
+            "second reply",
+        )
+        assert warm_processes(install.server.pid) == first_warm
 
         page = httpx.get(f"{install.url}/accept/anything")
         assert "content-security-policy" in page.headers

@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
 from crewmind.domain.budget import service as budget
-from crewmind.domain.conversation import directives
+from crewmind.domain.conversation import directives, sessions
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.conversation.service import Author, MessageKind
 from crewmind.domain.execution import notices, runs
@@ -161,7 +161,7 @@ async def dispatch(
                 await runs.queue(session, seat, RunKind.WORK, reasons, now)
         if RunKind.CHAT in allowed and not await runs.has_open_run(session, seat.id, RunKind.CHAT):
             waiting = await conversation.unanswered_from_people(session, seat)
-            if waiting:
+            if waiting and await sessions.on_message(session, project, seat, waiting[0], now):
                 await runs.queue(
                     session, seat, RunKind.CHAT, [f"message {waiting[0].id} from a person"], now
                 )

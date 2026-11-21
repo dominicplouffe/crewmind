@@ -37,6 +37,7 @@ from crewmind.storage.models.models import (
     ProviderCeiling,
 )
 from crewmind.storage.models.pinned import (
+    ChatSession,
     ClosedDecision,
     Correction,
     ExampleMark,
@@ -56,6 +57,7 @@ __all__ = [
     "Base",
     "BrowserSession",
     "Channel",
+    "ChatSession",
     "ClosedDecision",
     "Correction",
     "Directive",

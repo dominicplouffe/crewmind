@@ -17,8 +17,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
 from crewmind.domain.artifacts import service as artifacts
+from crewmind.domain.conversation import sessions as chat_sessions
 from crewmind.domain.execution import runs
-from crewmind.domain.execution.model import HEARTBEAT_EVERY
+from crewmind.domain.execution.model import HEARTBEAT_EVERY, RunKind
 from crewmind.domain.execution.runs import Lease
 from crewmind.domain.settings.service import SettingsService
 from crewmind.runner.sandbox import Sandbox, SandboxSpec
@@ -65,8 +66,15 @@ class Runner:
         free = self._workers - self.busy
         async with self._sessions() as session, session.begin():
             leases = await runs.lease(session, self._settings, self.id, free, self._clock())
+            warm = await chat_sessions.warm_seats(session)
+        keep_warm = getattr(self._sandbox, "keep_warm", None)
+        if keep_warm is not None:
+            await keep_warm(warm)
         for lease in leases:
-            task = asyncio.create_task(self._execute(lease))
+            generation = warm.get(lease.seat_id) if lease.kind == RunKind.CHAT else None
+            task = asyncio.create_task(
+                self._execute(lease, (lease.seat_id, generation) if generation else None)
+            )
             self._tasks.add(task)
             task.add_done_callback(self._tasks.discard)
         return len(leases)
@@ -76,13 +84,14 @@ class Runner:
         while self._tasks:
             await asyncio.gather(*list(self._tasks), return_exceptions=True)
 
-    async def _execute(self, lease: Lease) -> None:
+    async def _execute(self, lease: Lease, warm: tuple[str, int] | None = None) -> None:
         spec = SandboxSpec(
             run_id=lease.run_id,
             project_id=lease.project_id,
             token=lease.token,
             api_url=self._api_url,
             workspace=self._workspaces / lease.project_id,
+            warm=warm,
         )
         spec.workspace.mkdir(parents=True, exist_ok=True)
         await self._before(lease, spec.workspace)
