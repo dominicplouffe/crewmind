@@ -22,7 +22,7 @@ from crewmind.surfaces.cli.invoke import LocalInvoker
 from crewmind.surfaces.cli.main import build_cli
 from crewmind.surfaces.mcp.server import build_mcp
 from tests.attack.test_models import FakeProvider
-from tests.support import App, OnLoop, invoker_for, run_cli
+from tests.support import App, OnLoop, agent_call, invoker_for, live_run, run_cli
 
 EXPECTED = [
     "project.created",
@@ -199,6 +199,24 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("models.set_payer", alice, project_id=paid, credential="main")
     await write("models.set_seat", alice, project_id=paid, seat="CEO", effort="low")
     await write("models.set_ceiling", admin, provider="anthropic", max_concurrent=3)
+    await write("artifacts.upload", alice, project_id=paid, name="a.txt", content_base64="YQ==")
+    await write("artifacts.mark", alice, project_id=paid, name="a.txt", mark="reference")
+    await write("artifacts.lock", alice, project_id=paid, name="a.txt")
+    await write("artifacts.unlock", alice, project_id=paid, name="a.txt")
+    begun = await app.ok("uploads.begin", alice, project_id=paid, name="b.txt", size=0)
+    await write("uploads.finish", alice, project_id=paid, upload_id=begun["upload_id"])
+    await write("projects.start", alice, project_id=paid)
+    await write("directives.issue", alice, project_id=paid, instruction="Write the plan.")
+    await write("chat.command", alice, project_id=paid, text="/hold")
+    await write("chat.quality", alice, project_id=paid, level="fast")
+    await write("budget.command", alice, project_id=paid, tokens=5_000_000)
+    await write("chat.brevity", alice, level="detailed")
+    live = await live_run(app, paid)
+    proposal = {"what": "Draft the launch plan.", "estimated_tokens": 1000, "reversible": True}
+    for decision in ("accept", "dismiss"):
+        await agent_call(app, live.token, "agent.propose_action", **proposal)
+        card = (await app.ok("cards.list", alice, project_id=paid))["items"][-1]["id"]
+        await write(f"cards.{decision}", alice, project_id=paid, card_id=card)
     await write("credentials.delete", alice, name="main")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
@@ -209,4 +227,13 @@ async def test_INV_21_every_write_operation_records_an_event(
         for operation in catalog
         if operation.reversibility is not Reversibility.READ and exposed_on(operation, Surface.API)
     }
-    assert recorded == writes
+    assert recorded == writes - set(NO_EVENT)
+
+
+# Writes that change no governed state, so they record no event (INV-21), and one covered
+# by its own test.
+NO_EVENT = {
+    "chat.mark_read": "a person's own read position",
+    "uploads.begin": "an upload in progress is not yet an artifact",
+    "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",
+}

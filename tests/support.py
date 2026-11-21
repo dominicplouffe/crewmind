@@ -22,6 +22,7 @@ from crewmind.runner.supervisor import Runner
 from crewmind.runtime import Runtime
 from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import build_api, route_method, route_path
+from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.cli.invoke import HttpInvoker
 
 PASSWORD = "correct horse battery staple"
@@ -53,6 +54,7 @@ class App:
             runtime.gateway,
             runtime.settings,
         )
+        add_file_routes(self.api, runtime.executor, runtime.authenticator, runtime.services)
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
@@ -66,6 +68,7 @@ class App:
             InProcessSandbox(httpx.ASGITransport(app=self.api)),
             api_url=self.runtime.config.base_url,
             workspaces=self.runtime.config.data_dir / "workspaces",
+            blobs=self.runtime.services.blobs,
             workers=workers,
             heartbeat_seconds=heartbeat_seconds,
         )
@@ -346,6 +349,9 @@ async def live_run(
     """Wake an agent, then lease and start its work run by hand, without a sandbox."""
     from crewmind.domain.execution import runs
 
+    stash: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_live_runs", {})
+    if (project_id, seat) in stash:
+        return stash.pop((project_id, seat))
     await wake(app, project_id, seat)
     await app.dispatcher.tick()
     now = app.runtime.clock()
@@ -354,9 +360,21 @@ async def live_run(
     for lease in leases:
         async with app.runtime.sessions() as session, session.begin():
             await runs.started(session, lease.run_id, runner_id, now)
-    mine = [lease for lease in leases if lease.project_id == project_id]
-    assert mine, "no run was leased"
-    return LiveRun(mine[-1].run_id, mine[-1].token, runner_id, seat)
+    from sqlalchemy import select as _select
+
+    from crewmind.storage.models import Seat as _Seat
+
+    async with app.runtime.sessions() as session:
+        names = {
+            row.id: row.name
+            for row in await session.scalars(_select(_Seat).where(_Seat.project_id == project_id))
+        }
+    for lease in leases:
+        if lease.project_id == project_id:
+            name = names[lease.seat_id]
+            stash[(project_id, name)] = LiveRun(lease.run_id, lease.token, runner_id, name)
+    assert (project_id, seat) in stash, "no run was leased"
+    return stash.pop((project_id, seat))
 
 
 async def agent_call(app: App, token: str | None, name: str, /, **values: Any) -> httpx.Response:

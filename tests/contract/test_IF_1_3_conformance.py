@@ -23,6 +23,7 @@ from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api import app as api
 from crewmind.surfaces.cli import main as cli
 from crewmind.surfaces.mcp import server as mcp
+from crewmind.surfaces.slash import adapter as slash
 from tests.support import Greeter, invoker_for, operation, sample_api, sample_catalog
 
 ALL_SCOPES = Caller(CallerKind.PERSON, "tester", mcp_scopes=frozenset({"read"}))
@@ -50,6 +51,7 @@ async def built_surfaces(source: Catalog, runtime: Runtime) -> dict[Surface, Set
         Surface.API: api.exposed_operations(api_app),
         Surface.CLI: cli.exposed_operations(cli.build_cli(source, invoker, invoker)),
         Surface.MCP: await mcp.exposed_operations(server, source),
+        Surface.SLASH: slash.exposed_operations(source),
     }
 
 
@@ -101,7 +103,7 @@ async def test_IF_1_3_a_written_exemption_covers_one_operation_on_one_surface(
 
 
 async def test_IF_1_3_a_surface_not_yet_built_is_exempt_as_a_whole(runtime: Runtime) -> None:
-    """IF-1.3: slash and Slack are exempt until their phases build them."""
+    """IF-1.3: Slack is exempt until its phase builds it; a slash command is generated."""
     greeter = Greeter()
     source = sample_catalog(greeter)
     operation(
@@ -111,7 +113,7 @@ async def test_IF_1_3_a_surface_not_yet_built_is_exempt_as_a_whole(runtime: Runt
         principals=frozenset({Principal.PERSON}),
         slash_command="/step",
     )
-    assert set(UNBUILT_SURFACES) == {Surface.SLASH, Surface.SLACK}
+    assert set(UNBUILT_SURFACES) == {Surface.SLACK}
     assert check_conformance(source, await built_surfaces(source, runtime)) == []
 
 

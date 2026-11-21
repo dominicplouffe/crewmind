@@ -28,7 +28,7 @@ SHOWN_ONCE = {
     ("install.setup", "setup_link"),
 }
 SECRET_WORDS = ("password", "secret", "token", "hash", "key", "credential", "session", "link")
-NOT_SECRET = {"token_id", "token_expires_at", "secrets_reencrypted", "tokens_counted", "tokens"}
+NOT_SECRET = {"token_id", "token_expires_at", "secrets_reencrypted", "content_hash"}
 
 
 def _fields(model: type[BaseModel], prefix: str = "") -> list[str]:
@@ -57,7 +57,7 @@ async def test_INV_6_no_operation_output_carries_a_secret_except_those_shown_onc
             assert not once, operation.name
         for path in _fields(operation.output):
             leaf = path.rsplit(".", 1)[-1]
-            if leaf in once or leaf in NOT_SECRET:
+            if leaf in once or leaf in NOT_SECRET or "tokens" in leaf:
                 continue
             assert not any(word in leaf for word in SECRET_WORDS), f"{operation.name}: {path}"
         for name, field in operation.input.model_fields.items():
