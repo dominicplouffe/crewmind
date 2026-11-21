@@ -180,3 +180,37 @@ async def test_runner_crash_mid_run_breaks_no_execution_invariant(
     assert rows[0].leased_by != rows[1].leased_by
     budget = await app.ok("budget.show", owner, project_id=project)
     assert budget["spent"] > 0
+
+
+async def test_EXE_5_a_task_cancelled_mid_query_does_not_keep_the_write_lock(app: App) -> None:
+    """EXE-5, NFR-9: on SQLite every transaction takes the write lock. A task cancelled at
+    any point inside a transaction (a killed runner, a dropped live stream) must release
+    it at once, or every other transaction stalls. Cancelled at many different moments,
+    the next transaction always starts promptly. On Postgres this passes trivially."""
+    from sqlalchemy import text
+
+    sessions = app.runtime.sessions
+    # A query with many rows, so a cancellation can land while its statement is unfinished.
+    many_rows = (
+        "WITH RECURSIVE counted(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM counted "
+        "WHERE n < 2000) SELECT n FROM counted"
+    )
+
+    cancel_step_seconds = 0.0002  # spreads the cancellations across a transaction
+
+    async def reader() -> None:
+        async with sessions() as session, session.begin():
+            for _ in range(50):
+                await session.execute(text(many_rows))
+
+    async def next_transaction() -> None:
+        async with sessions() as session, session.begin():
+            await session.execute(text("SELECT 1"))
+
+    await app.person("owner@example.com")
+    for moment in range(60):
+        task = asyncio.create_task(reader())
+        await asyncio.sleep(moment * cancel_step_seconds)
+        task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+        await asyncio.wait_for(next_transaction(), 2)

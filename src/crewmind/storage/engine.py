@@ -6,6 +6,8 @@ database's features except behind the storage adapter.
 
 from __future__ import annotations
 
+import contextlib
+import sqlite3
 from enum import StrEnum
 from typing import Any
 
@@ -57,6 +59,28 @@ def _configure_sqlite(connection: Any, _: Any) -> None:
     cursor.close()
 
 
+def _release_sqlite_lock_on_close(connection: Any, _: Any) -> None:
+    """Roll back on the SQLite connection itself whenever the pool closes one.
+
+    A task cancelled in the middle of a query leaves a statement unfinished. SQLite then
+    puts off the real close until that statement is garbage collected, and the open
+    transaction keeps the write lock meanwhile, so every other transaction waits. The
+    rollback is queued on the driver's own thread, ahead of the driver's close, and ends
+    the transaction whatever statements are pending.
+    """
+    driver = getattr(connection, "driver_connection", None)
+    raw = getattr(driver, "_connection", None)
+    queue = getattr(driver, "_tx", None)
+    if raw is None or queue is None:
+        return
+
+    def roll_back() -> None:
+        with contextlib.suppress(sqlite3.Error):
+            raw.rollback()
+
+    queue.put_nowait((None, roll_back))
+
+
 def _begin_sqlite(connection: Any) -> None:
     """Every SQLite transaction takes the write lock when it begins, so transactions run
     one at a time. This is the write lock under which a slim install leases runs (EXE-5)."""
@@ -68,5 +92,6 @@ def create_engine(url: str | URL) -> AsyncEngine:
     engine = create_async_engine(async_url(url), pool_pre_ping=True)
     if database_of(url) is Database.SQLITE:
         event.listen(engine.sync_engine, "connect", _configure_sqlite)
+        event.listen(engine.sync_engine, "close", _release_sqlite_lock_on_close)
         event.listen(engine.sync_engine, "begin", _begin_sqlite)
     return engine
