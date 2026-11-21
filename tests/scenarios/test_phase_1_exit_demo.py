@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import pytest
 from mcp import Client
 
 from crewmind.catalog import Surface, catalog
@@ -16,9 +17,11 @@ from crewmind.catalog.caller import Caller
 from crewmind.catalog.execute import Executor
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.surfaces import exposed_on
+from crewmind.domain.secrets.store import ensure_master_key
 from crewmind.surfaces.cli.invoke import LocalInvoker
 from crewmind.surfaces.cli.main import build_cli
 from crewmind.surfaces.mcp.server import build_mcp
+from tests.attack.test_models import FakeProvider
 from tests.support import App, OnLoop, invoker_for, run_cli
 
 EXPECTED = [
@@ -98,7 +101,9 @@ async def test_phase_1_exit_demo_every_change_is_in_the_event_log_on_every_surfa
     assert result.structured_content["items"] == from_api
 
 
-async def test_INV_21_every_write_operation_records_an_event(app: App) -> None:
+async def test_INV_21_every_write_operation_records_an_event(
+    app: App, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """INV-21: every state change appears in the event log. Each write operation is called
     once here, and each must add at least one event naming its actor."""
     from sqlalchemy import func, select
@@ -110,6 +115,8 @@ async def test_INV_21_every_write_operation_records_an_event(app: App) -> None:
             return await session.scalar(select(func.count()).select_from(Event)) or 0
 
     recorded: set[str] = set()
+    ensure_master_key(app.runtime.config.master_key_file)
+    FakeProvider(monkeypatch)
 
     async def write(name: str, actor: Any, /, **values: Any) -> dict[str, Any]:
         before = await events()
@@ -181,6 +188,18 @@ async def test_INV_21_every_write_operation_records_an_event(app: App) -> None:
         "projects.confirm_delete", alice, project_id=project, confirmation=code, name="Atlas"
     )
     await write("projects.cancel_delete", alice, project_id=project)
+    for name in ("add", "smoke", "refresh_lineup", "hide", "show"):
+        extra = {"provider": "anthropic", "key": "sk-test-key"} if name == "add" else {}
+        await write(f"credentials.{name}", alice, name="main", **extra)
+    await write(
+        "credentials.override_lineup", admin, name="main", model_class="fast", model="claude-x"
+    )
+    created = await write("projects.create", alice, name="Paid", type="deliver", goal="x")
+    paid = created["project_id"]
+    await write("models.set_payer", alice, project_id=paid, credential="main")
+    await write("models.set_seat", alice, project_id=paid, seat="CEO", effort="low")
+    await write("models.set_ceiling", admin, provider="anthropic", max_concurrent=3)
+    await write("credentials.delete", alice, name="main")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
     await write("auth.logout", alice)

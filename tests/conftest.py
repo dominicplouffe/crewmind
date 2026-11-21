@@ -91,7 +91,7 @@ async def runtime(database_url: str, tmp_path: Path, clock: FakeClock) -> AsyncI
         port=8420,
         public_url=None,
     )
-    built = build_runtime(config, clock)
+    built = build_runtime(config, clock, mock_default=True)
     yield built
     await built.close()
 

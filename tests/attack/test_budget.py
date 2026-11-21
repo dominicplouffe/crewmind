@@ -181,7 +181,9 @@ async def test_INV_8_every_model_call_is_metered_whatever_the_runs_ending(
         assert (line.input_tokens, line.output_tokens) == (1_000, 200)
         assert (line.cache_write_tokens, line.cache_read_tokens) == (50, 9_000)
         assert line.counted == 1_250
-        assert (line.provider, line.model, line.unit) == ("mock", "mock-1", "tokens")
+        assert (line.provider, line.unit) == ("mock", "tokens")
+        assert line.model is not None
+        assert line.model.startswith("mock-")
         assert line.seat_id is not None
 
 
