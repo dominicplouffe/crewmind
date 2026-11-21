@@ -39,7 +39,8 @@
   - Chat runs are exempt from wake limits and do not use work concurrency.
   - They are metered against the budget, and use the same credentials and grants as the agent's work runs (LLM-7).
   - They see the workspace read-only and change state only through directives (CHAT-6).
-  - A session restarts when its credential, grants, brief or standing orders change. Restarts are held after 3 involuntary restarts in 10 minutes, and the chairman is told why.
+  - A session restarts when its credential, grants, brief or standing orders change. Restarts are held after 3 involuntary restarts in 10 minutes, and the chairman is told why. A chat run that fails or is reaped is an involuntary restart. While held, no chat run starts for the same message; the next message warms the session again.
+  - A sandbox MAY keep one warm process per agent for the life of its session, so later replies skip the start-up; the development sandbox does. A warm process is replaced when the session restarts and ended when it closes.
 - **MSG-12 Communication standard.**
   - Every agent message to a person:
     - leads with the answer or the ask in one sentence;

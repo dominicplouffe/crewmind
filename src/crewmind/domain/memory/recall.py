@@ -8,6 +8,7 @@ extraction. Recalled text is data for the agent, never an instruction (P4).
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -20,6 +21,8 @@ from crewmind.domain.conversation.service import Author
 from crewmind.domain.memory.engine import MemoryEngine, Recalled
 from crewmind.domain.projects import lifecycle
 from crewmind.storage.models import Membership, Message, Project, Run, RunStep, Seat, Team
+
+logger = logging.getLogger(__name__)
 
 MODEL_CALL, TOOL_CALL = "model call", "tool call"
 OUTSIDE_TOOLS = ("agent.web_search",)
@@ -105,7 +108,13 @@ async def recall_section(
     no question to search with or nothing is found."""
     if limit <= 0 or not query.strip():
         return None
-    found = await engine.search(await scopes_for(session, seat), query, limit)
+    try:
+        found = await engine.search(await scopes_for(session, seat), query, limit)
+    except Exception as error:
+        # A run never fails because recall is unavailable: it goes on with pinned memory,
+        # which is exact and always present (MEM-1, NFR-9).
+        logger.warning("recall memory was not searched (%s)", type(error).__name__)
+        return None
     if not found:
         return None
     return (

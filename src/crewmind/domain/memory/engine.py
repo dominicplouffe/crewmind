@@ -22,6 +22,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol, cast
 
+from crewmind.catalog.refusal import Refusal
+from crewmind.catalog.rules import Rule, rules
+
+MEM_2 = rules.register(
+    Rule("MEM-2", "Recall memory runs locally: the model is on disk and nothing is fetched.")
+)
+
 EMBEDDING_MODEL = "BAAI/bge-small-en-v1.5"
 EMBEDDING_DIMENSIONS = 384
 COLLECTION = "crewmind_memories"
@@ -223,13 +230,19 @@ class Mem0Engine:
     def _loaded(self) -> Any:
         with self._build:
             if self._memory is None:
-                # NFR-1: Mem0 reports usage unless told not to. The model is read from
-                # disk, so nothing here needs the network.
+                if not any(self._model_dir.glob("models--*")):
+                    raise Refusal(
+                        "memory_model_missing",
+                        "Recall memory is unavailable: the embedding model is not installed.",
+                        rule=MEM_2.id,
+                        hint="In a source checkout, run "
+                        "`python -m crewmind.domain.memory.fetch_model` once.",
+                    )
+                # NFR-1: Mem0 reports usage unless told not to, and the model is read from
+                # disk, never fetched at run time. Nothing here needs the network.
                 os.environ["MEM0_TELEMETRY"] = "false"
                 os.environ["FASTEMBED_CACHE_PATH"] = str(self._model_dir)
-                os.environ.setdefault("HF_HUB_DISABLE_XET", "1")
-                if any(self._model_dir.glob("models--*")):
-                    os.environ["HF_HUB_OFFLINE"] = "1"
+                os.environ["HF_HUB_OFFLINE"] = "1"
                 self._directory.mkdir(parents=True, exist_ok=True)
                 mem0: Any = importlib.import_module("mem0")
                 self._memory = mem0.Memory.from_config(self._config())

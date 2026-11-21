@@ -4,6 +4,8 @@ INV-23, P3, P4, P9)."""
 from __future__ import annotations
 
 import json
+import socket
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -239,3 +241,35 @@ async def test_PRJ_10_a_purged_projects_memories_are_deleted_and_preferences_sta
     assert await engine.listed(f"project:{project}", 10) == []
     owner = await app.login(owner.email)
     assert len((await app.ok("memory.preferences", owner))["items"]) == 1
+
+
+@pytest.mark.attack("MEM-2")
+async def test_MEM_2_without_the_model_memory_refuses_plainly_and_fetches_nothing(
+    tmp_path: Path, migrated_url: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """MEM-2, NFR-1, NFR-9: with no model on disk the engine refuses with the command that
+    installs it, opens no connection to fetch one, and a run's context pack is still built
+    from pinned memory."""
+    from crewmind.catalog.refusal import Refusal
+    from crewmind.domain.memory import recall
+    from crewmind.storage.models import Seat
+
+    def no_network(self: socket.socket, address: Any) -> None:
+        raise AssertionError(f"tried to connect to {address}")
+
+    monkeypatch.setattr(socket.socket, "connect", no_network)
+    from crewmind.domain.memory.engine import Mem0Engine
+
+    built = Mem0Engine(tmp_path / "data", "sqlite:///unused.sqlite", tmp_path / "no-model")
+    with pytest.raises(Refusal) as refused:
+        await built.add("project:p", "A fact.", {})
+    assert refused.value.envelope.code == "memory_model_missing"
+    assert "fetch_model" in (refused.value.envelope.hint or "")
+
+    class NoSession:
+        async def scalar(self, *_: Any) -> None:
+            return None
+
+    seat = Seat(id="s", project_id="p", team_id=None)
+    section = await recall.recall_section(NoSession(), built, seat, "any question", 8)  # type: ignore[arg-type]
+    assert section is None

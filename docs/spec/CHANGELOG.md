@@ -13,6 +13,11 @@ Newest first. One line per change, citing the ids touched.
 - **MSG-4:** a pinned message that fits is proposed in the chairman's words; only a longer one is shortened by a model (R-49).
 - **MSG-3:** a directive that changes a chairman-only setting becomes an action card the chairman confirms (R-23).
 - **MSG-7:** the example-figure check is a mechanical lint (R-50).
+- **MEM-2:** the model is never fetched at run time; pgvector needs a superuser to enable it and is left out of restores.
+- **MEM-3:** names the scopes an agent reads; a chat run writes only its own.
+- **MEM-4:** where extraction runs, where facts go, and when they are untrusted.
+- **MEM-6:** what pinning an entry does.
+- **MSG-11:** what counts as an involuntary restart; a sandbox may keep a warm process.
 - **Appendix A (operational):** adds `CREWMIND_MEMORY_ENGINE` (MEM-2).
 - **MSG-12:** names the three parts the lint measures.
 - **MSG-7:** defines a figure and says the flag is feedback.
