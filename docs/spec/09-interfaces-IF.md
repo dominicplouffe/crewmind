@@ -13,7 +13,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
   - its chat slash command, if any.
 - **IF-1.2** HTTP routes, CLI commands, MCP tools, slash commands, Slack actions and agent API tools are thin adapters generated from, or registered against, that catalog. No surface contains business rules of its own. The surfaces are `api`, `cli`, `mcp`, `slash`, `slack` and `agent_api`.
 - **IF-1.3** A conformance test enumerates the catalog.
-  - Each operation declares the principals it serves (section 9.2): person, MCP client, agent run. It belongs on every surface those principals reach: a person reaches `api`, `cli`, `slash` and `slack`; an MCP client reaches `mcp`; an agent run reaches `agent_api`.
+  - Each operation declares the principals it serves (section 9.2): person, MCP client, agent run. It belongs on every surface those principals reach: a person reaches `api`, `cli` and `slack`, plus `slash` when the operation declares a slash command (IF-1.1); an MCP client reaches `mcp`; an agent run reaches `agent_api`. A host-local operation (IF-4.2) belongs on `cli` only.
   - The test fails when an operation is missing from a surface it belongs on, unless the catalog carries a written exemption reason for that operation and surface.
   - A surface not yet built is exempt as a whole, with the phase that builds it named. Once that phase starts, the exemption is removed. The same test checks that every decision-item kind appears on every surface listed in HUM-1.
 - **IF-1.4** Refusals are identical on every surface: the same machine code, the same rule id, the same plain sentence naming the rule and the legitimate path forward, and the arithmetic where numbers are involved (GOV-9).

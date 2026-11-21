@@ -2,6 +2,10 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.3 (21 Nov 2026): phase 0 bootstrap
+
+- **IF-1.3:** an operation belongs on the `slash` surface only when it declares a slash command, and a host-local operation belongs on `cli` only. This matches IF-1.1 ("its chat slash command, if any") and IF-4.2.
+
 ## Revision 2.2 (21 Nov 2026): plain, short output from every model call
 
 - **P18, LLM-15 (new), MSG-12, Appendix A:**
