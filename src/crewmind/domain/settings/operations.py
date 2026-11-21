@@ -15,7 +15,7 @@ from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.pagination import PageRequest, fetch_page
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
-from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.registry import Scope, SettingType
 from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
 from crewmind.services import services_of
 from crewmind.storage.models import SettingValue
@@ -28,6 +28,17 @@ class SettingItem(BaseModel):
     value: Any
     version: int = Field(description="0 means the registry default, never changed.")
     allowed: str
+    unit: str | None = Field(
+        default=None, description="What the value counts: seconds, bytes, tokens or percent."
+    )
+
+
+UNITS = {
+    SettingType.DURATION: "seconds",
+    SettingType.BYTES: "bytes",
+    SettingType.TOKENS: "tokens",
+    SettingType.PERCENT: "percent",
+}
 
 
 class SettingsView(BaseModel):
@@ -96,6 +107,7 @@ async def _view(context: Context, subject: Subject) -> SettingsView:
                 value=value,
                 version=stored[name].version if name in stored else 0,
                 allowed=services.registry.settings[name].spec_range,
+                unit=UNITS.get(services.registry.settings[name].type),
             )
             for name, value in values.items()
         ],

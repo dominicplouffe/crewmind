@@ -3393,6 +3393,11 @@ export interface components {
             allowed: string;
             /** Name */
             name: string;
+            /**
+             * Unit
+             * @description What the value counts: seconds, bytes, tokens or percent.
+             */
+            unit?: string | null;
             /** Value */
             value: unknown;
             /**
@@ -3643,6 +3648,11 @@ export interface components {
         };
         /** History */
         crewmind__domain__conversation__operations__History: {
+            /**
+             * Earlier
+             * @description Pass as `before` to read older messages. Absent at the start.
+             */
+            earlier?: number | null;
             /** Items */
             items: components["schemas"]["MessageItem"][];
             /** Next */
@@ -4487,6 +4497,8 @@ export interface operations {
                 channel?: string;
                 /** @description Only this thread. */
                 thread_id?: number | null;
+                /** @description Only messages older than this message id. */
+                before?: number | null;
             };
             header?: never;
             path?: never;

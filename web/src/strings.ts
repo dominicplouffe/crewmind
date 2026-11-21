@@ -235,7 +235,8 @@ export const t = {
     newValue: (name: string): string => `New value for ${name}`,
     reason: "Why are you changing it?",
     save: "Save",
-    allowed: (range: string): string => `Allowed: ${range}`,
+    allowed: (range: string, unit?: string | null): string =>
+      unit ? `Allowed: ${range}. The value is in ${unit}.` : `Allowed: ${range}`,
   },
   runs: {
     emptyTitle: "No runs yet.",

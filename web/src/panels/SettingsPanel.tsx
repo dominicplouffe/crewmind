@@ -108,7 +108,7 @@ function SettingsList({
               </button>
             </div>
             <p className="quiet" id={`setting-${setting.name}-allowed`}>
-              {t.settings.allowed(setting.allowed)}
+              {t.settings.allowed(setting.allowed, setting.unit)}
             </p>
             {editing === setting.name ? (
               <ChangeForm

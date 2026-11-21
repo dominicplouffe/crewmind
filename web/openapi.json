@@ -3185,6 +3185,18 @@
       "title": "Name",
       "type": "string"
      },
+     "unit": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What the value counts: seconds, bytes, tokens or percent.",
+      "title": "Unit"
+     },
      "value": {
       "title": "Value"
      },
@@ -3718,6 +3730,18 @@
    },
    "crewmind__domain__conversation__operations__History": {
     "properties": {
+     "earlier": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Pass as `before` to read older messages. Absent at the start.",
+      "title": "Earlier"
+     },
      "items": {
       "items": {
        "$ref": "#/components/schemas/MessageItem"
@@ -5048,6 +5072,24 @@
        ],
        "description": "Only this thread.",
        "title": "Thread Id"
+      }
+     },
+     {
+      "description": "Only messages older than this message id.",
+      "in": "query",
+      "name": "before",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Only messages older than this message id.",
+       "title": "Before"
       }
      }
     ],
