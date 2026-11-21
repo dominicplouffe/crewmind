@@ -1,8 +1,8 @@
 """The `crewmind` command, generated from the operation catalog (IF-1.2, section 9.4).
 
-This adapter holds no business rules. `projects.hold` is `crewmind projects hold`. Scalar
-inputs are options; any input can be given whole with `--input` as JSON. Every command has
-`--json` (IF-4.3), and exit codes follow IF-4.4.
+This adapter holds no business rules. `projects.hold` is `crewmind projects hold`. Inputs
+are options; any input can be given whole with `--input` as JSON. Every command has
+`--json` (IF-4.3), secrets come from hidden input (IF-4.5), and exit codes follow IF-4.4.
 """
 
 from __future__ import annotations
@@ -10,23 +10,21 @@ from __future__ import annotations
 import asyncio
 import inspect
 import json
-import os
+import socket
 import sys
-import types
-from collections.abc import Callable
+from collections.abc import Callable, Coroutine
 from enum import IntEnum
-from typing import Any, Union, get_args, get_origin
+from typing import Any, cast
 
 import typer
 from pydantic import BaseModel, ValidationError
-from pydantic.fields import FieldInfo
-from pydantic_core import PydanticUndefined
 from typer.core import TyperGroup
 
 from crewmind.catalog.operation import Operation
 from crewmind.catalog.refusal import ErrorEnvelope, Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog, catalog, load_domain_modules
 from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.surfaces.cli.config import CliState, api_address, current_token
 from crewmind.surfaces.cli.invoke import (
     HttpInvoker,
     Invoker,
@@ -34,8 +32,18 @@ from crewmind.surfaces.cli.invoke import (
     ServerUnreachable,
     http_client_factory,
 )
+from crewmind.surfaces.cli.options import command_name, parameters_for, values_from
 
-DEFAULT_API = "http://127.0.0.1:8420"
+HOST_GROUP = "install"
+"""Host-local operations (IF-4.2) are top-level commands: `install.up` is `crewmind up`."""
+
+ALIASES: dict[str, str] = {
+    "login": "auth.login",
+    "logout": "auth.logout",
+    "whoami": "auth.whoami",
+    "accept": "auth.use_link",
+}
+"""Short top-level names for everyday commands. Each is the same command as its operation."""
 
 
 class ExitCode(IntEnum):
@@ -58,34 +66,49 @@ EXIT_BY_KIND: dict[RefusalKind, ExitCode] = {
     RefusalKind.INVALID: ExitCode.USAGE,
 }
 
-_SCALARS: tuple[type, ...] = (str, int, float, bool)
+Around = Callable[[Catalog, Invoker, Operation, BaseModel], Coroutine[Any, Any, BaseModel]]
 
 
-def command_name(identifier: str) -> str:
-    return identifier.replace("_", "-")
+class SignedIn(BaseModel):
+    signed_in_as: str
+    role: str
+    token_expires_at: str | None
 
 
-def _scalar_type(annotation: Any) -> type | None:
-    """The scalar type behind an annotation, or None when it cannot be a command-line option."""
-    if annotation in _SCALARS:
-        return annotation
-    if get_origin(annotation) in (Union, types.UnionType):
-        members = [member for member in get_args(annotation) if member is not type(None)]
-        if len(members) == 1 and members[0] in _SCALARS:
-            return members[0]
-    return None
-
-
-def _option(field_name: str, field: FieldInfo, scalar: type) -> inspect.Parameter:
-    flag = f"--{command_name(field_name)}"
-    if scalar is bool:
-        flag = f"{flag}/--no-{command_name(field_name)}"
-    return inspect.Parameter(
-        field_name,
-        inspect.Parameter.KEYWORD_ONLY,
-        annotation=scalar | None,
-        default=typer.Option(None, flag, help=field.description),
+async def _login(
+    source: Catalog, invoker: Invoker, operation: Operation, payload: BaseModel
+) -> BaseModel:
+    """`crewmind login` stores a personal token, not the session (IF-4.1): sign in, mint a
+    token with the session, end the session, keep the token."""
+    session = (await invoker.invoke(operation, payload)).model_dump(mode="json")
+    bearer: str = session["session"]
+    mint = source.get("tokens.mint")
+    name = f"crewmind CLI on {socket.gethostname()}"
+    minted = (await invoker.invoke(mint, mint.input(name=name), bearer=bearer)).model_dump(
+        mode="json"
     )
+    logout = source.get("auth.logout")
+    await invoker.invoke(logout, logout.input(), bearer=bearer)
+    CliState(token=minted["token"], token_id=minted["token_id"]).save()
+    return SignedIn(
+        signed_in_as=session["name"], role=session["role"], token_expires_at=minted["expires_at"]
+    )
+
+
+async def _logout(
+    source: Catalog, invoker: Invoker, operation: Operation, payload: BaseModel
+) -> BaseModel:
+    """`crewmind logout` revokes the stored token on the server, then forgets it."""
+    state = CliState.load()
+    if state.token and state.token_id:
+        revoke = source.get("tokens.revoke")
+        await invoker.invoke(revoke, revoke.input(token_id=state.token_id), bearer=state.token)
+    CliState.clear()
+    return operation.output()
+
+
+AROUND: dict[str, Around] = {"auth.login": _login, "auth.logout": _logout}
+"""Client-side steps around two operations: where the CLI keeps its own token."""
 
 
 def _fail(envelope: ErrorEnvelope, code: ExitCode, json_output: bool) -> typer.Exit:
@@ -98,21 +121,34 @@ def _fail(envelope: ErrorEnvelope, code: ExitCode, json_output: bool) -> typer.E
     return typer.Exit(code)
 
 
+def _show(value: Any, indent: str = "") -> None:
+    """Print a result in plain lines."""
+    if isinstance(value, dict):
+        items = cast("dict[str, Any]", value)
+        for key, item in items.items():
+            if isinstance(item, dict | list) and item:
+                typer.echo(f"{indent}{key}:")
+                _show(item, indent + "  ")
+            else:
+                typer.echo(f"{indent}{key}: {'' if item is None else item}")
+    elif isinstance(value, list):
+        for item in cast("list[Any]", value):
+            if isinstance(item, dict):
+                row = cast("dict[str, Any]", item)
+                shown = ", ".join(f"{k}={v}" for k, v in row.items() if v is not None)
+                typer.echo(f"{indent}- {shown}")
+            else:
+                typer.echo(f"{indent}- {item}")
+
+
 def _print(result: BaseModel, json_output: bool) -> None:
     if json_output:
         typer.echo(result.model_dump_json())
-        return
-    for key, value in result.model_dump(mode="json").items():
-        typer.echo(f"{key}: {value}")
+    else:
+        _show(result.model_dump(mode="json"))
 
 
-def _command(operation: Operation, invoker: Invoker) -> Callable[..., None]:
-    scalar_fields = {
-        name: scalar
-        for name, field in operation.input.model_fields.items()
-        if (scalar := _scalar_type(field.annotation)) is not None
-    }
-
+def _command(source: Catalog, operation: Operation, invoker: Invoker) -> Callable[..., None]:
     def command(**options: Any) -> None:
         json_output: bool = options.pop("json_output")
         raw_input: str | None = options.pop("input_json")
@@ -125,8 +161,8 @@ def _command(operation: Operation, invoker: Invoker) -> Callable[..., None]:
                 raise typer.BadParameter(f"--input is not JSON: {error}") from error
             if not isinstance(loaded, dict):
                 raise typer.BadParameter("--input must be a JSON object")
-            values.update(loaded)  # pyright: ignore[reportUnknownArgumentType]
-        values.update({name: value for name, value in options.items() if value is not None})
+            values.update(cast("dict[str, Any]", loaded))
+        values.update(values_from(operation.input, options, may_prompt=not json_output))
         try:
             payload = operation.input.model_validate(values)
         except ValidationError as error:
@@ -135,8 +171,12 @@ def _command(operation: Operation, invoker: Invoker) -> Callable[..., None]:
                 for problem in error.errors()
             )
             raise typer.BadParameter(problems) from error
+        around = AROUND.get(operation.name)
         try:
-            result = asyncio.run(invoker.invoke(operation, payload))
+            if around is None:
+                result = asyncio.run(invoker.invoke(operation, payload))
+            else:
+                result = asyncio.run(around(source, invoker, operation, payload))
         except Refusal as refusal:
             envelope = refusal.envelope
             raise _fail(envelope, EXIT_BY_KIND[envelope.kind], json_output) from refusal
@@ -150,10 +190,7 @@ def _command(operation: Operation, invoker: Invoker) -> Callable[..., None]:
             raise _fail(envelope, ExitCode.UNREACHABLE, json_output) from error
         _print(result, json_output)
 
-    parameters = [
-        _option(name, operation.input.model_fields[name], scalar)
-        for name, scalar in scalar_fields.items()
-    ]
+    parameters = parameters_for(operation.input)
     parameters.append(
         inspect.Parameter(
             "input_json",
@@ -174,24 +211,11 @@ def _command(operation: Operation, invoker: Invoker) -> Callable[..., None]:
     )
     command.__signature__ = inspect.Signature(parameters)  # type: ignore[attr-defined]
     command.__annotations__ = {parameter.name: parameter.annotation for parameter in parameters}
-    command.__doc__ = _help(operation, scalar_fields)
+    command.__doc__ = operation.summary
     return command
 
 
-def _help(operation: Operation, scalar_fields: dict[str, type]) -> str:
-    required_elsewhere = [
-        name
-        for name, field in operation.input.model_fields.items()
-        if name not in scalar_fields and field.default is PydanticUndefined
-    ]
-    if not required_elsewhere:
-        return operation.summary
-    return f"{operation.summary}\n\nGive {', '.join(required_elsewhere)} with --input."
-
-
-def build_cli(
-    catalog: Catalog, invoker: Invoker, local_invoker: Invoker | None = None
-) -> typer.Typer:
+def build_cli(source: Catalog, invoker: Invoker, local_invoker: Invoker) -> typer.Typer:
     """Build the CLI with one command per operation that belongs on it."""
     app = typer.Typer(
         name="crewmind",
@@ -204,42 +228,48 @@ def build_cli(
     def root() -> None:  # pyright: ignore[reportUnusedFunction]
         pass
 
-    host = local_invoker or LocalInvoker()
     groups: dict[str, typer.Typer] = {}
-    for operation in catalog:
+    commands: dict[str, Callable[..., None]] = {}
+    for operation in source:
         if not exposed_on(operation, Surface.CLI):
+            continue
+        command = _command(source, operation, local_invoker if operation.host_local else invoker)
+        commands[operation.name] = command
+        if operation.group == HOST_GROUP:
+            app.command(name=command_name(operation.verb))(command)
             continue
         group = groups.get(operation.group)
         if group is None:
             group = typer.Typer(no_args_is_help=True)
             groups[operation.group] = group
             app.add_typer(group, name=command_name(operation.group))
-        chosen = host if operation.host_local else invoker
-        group.command(name=command_name(operation.verb))(_command(operation, chosen))
+        group.command(name=command_name(operation.verb))(command)
+    for alias, target in ALIASES.items():
+        if target in commands:
+            app.command(name=alias)(commands[target])
     return app
 
 
 def exposed_operations(app: typer.Typer) -> set[str]:
-    """The operation names the CLI actually offers: every command under a group."""
+    """The operation names the CLI actually offers. A top-level command is a host-local
+    operation unless it is a declared alias; anything else is reported under its own name."""
     names: set[str] = set()
     root = typer.main.get_command(app)
     if not isinstance(root, TyperGroup):
         return names
-    for group_name, group in root.commands.items():
-        if isinstance(group, TyperGroup):
-            for verb in group.commands:
-                names.add(f"{group_name}.{verb}".replace("-", "_"))
-        else:
-            names.add(group_name.replace("-", "_"))
+    for name, command in root.commands.items():
+        if isinstance(command, TyperGroup):
+            for verb in command.commands:
+                names.add(f"{name}.{verb}".replace("-", "_"))
+        elif name not in ALIASES:
+            names.add(f"{HOST_GROUP}.{name}".replace("-", "_"))
     return names
 
 
 def main() -> None:
     """Entry point of the `crewmind` command (IF-4.1)."""
+    from crewmind.runtime import host_executor
+
     load_domain_modules()
-    invoker = HttpInvoker(
-        http_client_factory(
-            os.environ.get("CREWMIND_API", DEFAULT_API), os.environ.get("CREWMIND_TOKEN")
-        )
-    )
-    build_cli(catalog, invoker)()
+    invoker = HttpInvoker(http_client_factory(api_address()), current_token)
+    build_cli(catalog, invoker, LocalInvoker(host_executor))()

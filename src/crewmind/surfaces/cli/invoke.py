@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Protocol
+from collections.abc import Awaitable, Callable
+from typing import Any, Protocol
 
 import httpx
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, SecretStr, ValidationError
 
+from crewmind.catalog.caller import HOST_OPERATOR
+from crewmind.catalog.execute import Executor
 from crewmind.catalog.operation import Operation
 from crewmind.catalog.refusal import ErrorEnvelope, Refusal
 from crewmind.surfaces.api.app import route_method, route_path
@@ -18,25 +20,46 @@ class ServerUnreachable(Exception):
 
 
 class Invoker(Protocol):
-    async def invoke(self, operation: Operation, payload: BaseModel) -> BaseModel: ...
+    async def invoke(
+        self, operation: Operation, payload: BaseModel, *, bearer: str | None = None
+    ) -> BaseModel: ...
+
+
+def _plain(payload: BaseModel) -> dict[str, Any]:
+    """Input as JSON data. Secrets are sent, never printed (IF-4.5)."""
+    data = payload.model_dump(mode="json")
+    for name in type(payload).model_fields:
+        value = getattr(payload, name)
+        if isinstance(value, SecretStr):
+            data[name] = value.get_secret_value()
+    return data
 
 
 class HttpInvoker:
     """Calls the operation's API route. This is how every command but the host-local ones runs."""
 
-    def __init__(self, client_factory: Callable[[], httpx.AsyncClient]) -> None:
+    def __init__(
+        self,
+        client_factory: Callable[[], httpx.AsyncClient],
+        token_source: Callable[[], str | None] = lambda: None,
+    ) -> None:
         self._client_factory = client_factory
+        self._token_source = token_source
 
-    async def invoke(self, operation: Operation, payload: BaseModel) -> BaseModel:
+    async def invoke(
+        self, operation: Operation, payload: BaseModel, *, bearer: str | None = None
+    ) -> BaseModel:
         path = route_path(operation.name)
+        token = bearer or self._token_source()
+        headers = {"Authorization": f"Bearer {token}"} if token else {}
+        data = _plain(payload)
         try:
             async with self._client_factory() as client:
                 if route_method(operation) == "GET":
-                    response = await client.get(
-                        path, params=payload.model_dump(mode="json", exclude_none=True)
-                    )
+                    params = {key: value for key, value in data.items() if value is not None}
+                    response = await client.get(path, params=params, headers=headers)
                 else:
-                    response = await client.post(path, json=payload.model_dump(mode="json"))
+                    response = await client.post(path, json=data, headers=headers)
         except httpx.TransportError as error:
             raise ServerUnreachable(str(error)) from error
         if response.is_success:
@@ -51,18 +74,22 @@ class HttpInvoker:
 
 
 class LocalInvoker:
-    """Runs a host-local operation in this process, without the server (IF-4.2)."""
+    """Runs a host-local operation in this process, as the host operator (IF-4.2)."""
 
-    async def invoke(self, operation: Operation, payload: BaseModel) -> BaseModel:
+    def __init__(self, executor_factory: Callable[[], Awaitable[Executor]]) -> None:
+        self._executor_factory = executor_factory
+
+    async def invoke(
+        self, operation: Operation, payload: BaseModel, *, bearer: str | None = None
+    ) -> BaseModel:
         if not operation.host_local:
             raise RuntimeError(f"{operation.name} is not host-local and must go through the API")
-        return await operation.handler(payload)
+        executor = await self._executor_factory()
+        return await executor.execute(operation, HOST_OPERATOR, payload)
 
 
-def http_client_factory(base_url: str, token: str | None) -> Callable[[], httpx.AsyncClient]:
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
-
+def http_client_factory(base_url: str) -> Callable[[], httpx.AsyncClient]:
     def factory() -> httpx.AsyncClient:
-        return httpx.AsyncClient(base_url=base_url, headers=headers)
+        return httpx.AsyncClient(base_url=base_url)
 
     return factory

@@ -1,6 +1,7 @@
-"""The HTTP API, generated from the operation catalog (IF-1.2, IF-3.1, IF-3.4).
+"""The HTTP API, generated from the operation catalog (IF-1.2, IF-3.1 to IF-3.7).
 
-This adapter holds no business rules. Each operation gets one route derived from its name:
+This adapter holds no business rules. It reads the credential, hands the call to the
+executor, and translates the answer. Each operation gets one route derived from its name:
 `projects.hold` is `POST /v1/projects/hold`; operations of class `read` use `GET`.
 """
 
@@ -9,19 +10,26 @@ from __future__ import annotations
 import inspect
 from collections.abc import Awaitable, Callable
 from typing import Annotated, Any
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
-from pydantic import BaseModel
 
+from crewmind.catalog.execute import Executor
 from crewmind.catalog.operation import Operation, Reversibility
 from crewmind.catalog.refusal import ErrorEnvelope, Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog
+from crewmind.catalog.rules import Rule, rules
 from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.domain.accounts.credentials import Authenticator
 
 API_PREFIX = "/v1"
+SESSION_COOKIE = "crewmind_session"
+IDEMPOTENCY_HEADER = "Idempotency-Key"
+
+IF_3_7 = rules.register(Rule("IF-3.7", "A browser session writes only from the app's own origin."))
 
 STATUS_BY_KIND: dict[RefusalKind, int] = {
     RefusalKind.RULE: 403,
@@ -31,6 +39,10 @@ STATUS_BY_KIND: dict[RefusalKind, int] = {
     RefusalKind.INVALID: 422,
 }
 
+# Operations after which the session cookie is set or cleared (ACC-2, IF-3.7).
+_SETS_COOKIE = "auth.login"
+_CLEARS_COOKIE = frozenset({"auth.logout", "auth.change_password"})
+
 
 def route_path(operation_name: str) -> str:
     return f"{API_PREFIX}/{operation_name.replace('.', '/')}"
@@ -38,23 +50,6 @@ def route_path(operation_name: str) -> str:
 
 def route_method(operation: Operation) -> str:
     return "GET" if operation.reversibility is Reversibility.READ else "POST"
-
-
-def _endpoint(operation: Operation) -> Callable[..., Awaitable[BaseModel]]:
-    async def endpoint(payload: Any) -> BaseModel:
-        return await operation.handler(payload)
-
-    annotation: Any = operation.input
-    if operation.reversibility is Reversibility.READ:
-        annotation = Annotated[operation.input, Query()]
-    parameter = inspect.Parameter(
-        "payload", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=annotation
-    )
-    endpoint.__signature__ = inspect.Signature(  # type: ignore[attr-defined]
-        [parameter], return_annotation=operation.output
-    )
-    endpoint.__annotations__ = {"payload": annotation, "return": operation.output}
-    return endpoint
 
 
 def invalid_input(detail: object) -> ErrorEnvelope:
@@ -66,7 +61,75 @@ def invalid_input(detail: object) -> ErrorEnvelope:
     )
 
 
-def build_api(catalog: Catalog) -> FastAPI:
+def _origin(url: str) -> str:
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}"
+
+
+def _credential(request: Request, operation: Operation, allowed_origin: str) -> str | None:
+    """The bearer token, or else the session cookie. A write carried by the cookie must come
+    from the app's own origin (IF-3.7): another site can send the cookie but not the token."""
+    header = request.headers.get("Authorization", "")
+    if header.lower().startswith("bearer "):
+        return header[7:].strip()
+    cookie = request.cookies.get(SESSION_COOKIE)
+    origin = request.headers.get("Origin")
+    is_write = operation.reversibility is not Reversibility.READ
+    if cookie and is_write and origin is not None and origin != allowed_origin:
+        raise Refusal(
+            "cross_origin_write",
+            f"A write from {origin} was refused: only {allowed_origin} may write with a "
+            "browser session.",
+            kind=RefusalKind.FORBIDDEN,
+            rule=IF_3_7.id,
+            hint="Use the app, or a personal token.",
+        )
+    return cookie
+
+
+def _endpoint(
+    operation: Operation, executor: Executor, authenticator: Authenticator, base_url: str
+) -> Callable[..., Awaitable[JSONResponse]]:
+    allowed_origin = _origin(base_url)
+    secure = base_url.startswith("https://")
+
+    async def endpoint(request: Request, payload: Any) -> JSONResponse:
+        credential = _credential(request, operation, allowed_origin)
+        caller = await authenticator.authenticate(credential)
+        result = await executor.execute(
+            operation, caller, payload, idempotency_key=request.headers.get(IDEMPOTENCY_HEADER)
+        )
+        response = JSONResponse(result.model_dump(mode="json"))
+        if operation.name == _SETS_COOKIE:
+            response.set_cookie(
+                SESSION_COOKIE,
+                result.model_dump()["session"],
+                httponly=True,
+                samesite="strict",
+                secure=secure,
+                path="/",
+            )
+        elif operation.name in _CLEARS_COOKIE:
+            response.delete_cookie(SESSION_COOKIE, path="/")
+        return response
+
+    annotation: Any = operation.input
+    if operation.reversibility is Reversibility.READ:
+        annotation = Annotated[operation.input, Query()]
+    parameters = [
+        inspect.Parameter("request", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=Request),
+        inspect.Parameter(
+            "payload", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=annotation
+        ),
+    ]
+    endpoint.__signature__ = inspect.Signature(parameters)  # type: ignore[attr-defined]
+    endpoint.__annotations__ = {"request": Request, "payload": annotation}
+    return endpoint
+
+
+def build_api(
+    catalog: Catalog, executor: Executor, authenticator: Authenticator, *, base_url: str
+) -> FastAPI:
     """Build the API with one route per operation that belongs on it."""
     app = FastAPI(title="crewmind", version="1")
 
@@ -92,11 +155,12 @@ def build_api(catalog: Catalog) -> FastAPI:
             continue
         app.add_api_route(
             route_path(operation.name),
-            _endpoint(operation),
+            _endpoint(operation, executor, authenticator, base_url),
             methods=[route_method(operation)],
             response_model=operation.output,
             operation_id=operation.name,
             summary=operation.summary,
+            description=f"Requires: {operation.authority.value}.",
             tags=[operation.group],
         )
     return app

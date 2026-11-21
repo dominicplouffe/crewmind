@@ -1,10 +1,13 @@
 """The MCP server, with one tool per operation generated from the catalog (IF-1.2, section 9.5).
 
-This adapter holds no business rules. `projects.hold` is the tool `projects_hold`.
+This adapter holds no business rules. `projects.hold` is the tool `projects_hold`. A client
+sees and calls only the tools its scopes grant; any other tool answers as unknown (IF-5.2).
 """
 
 from __future__ import annotations
 
+import json
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from mcp import Client
@@ -19,10 +22,28 @@ from mcp.types import (
 )
 from pydantic import ValidationError
 
+from crewmind.catalog.caller import ANONYMOUS, Caller
+from crewmind.catalog.execute import Executor
 from crewmind.catalog.operation import CatalogError, Operation
 from crewmind.catalog.refusal import ErrorEnvelope, Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog
 from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.surfaces.mcp.untrusted import for_ai_client
+
+CallerOf = Callable[[Any], Awaitable[Caller]]
+"""Finds the caller behind an MCP request context."""
+
+CALLER_STATE = "crewmind_caller"
+
+
+async def caller_from_http(context: Any) -> Caller:
+    """The caller the HTTP layer authenticated and attached to the request (IF-5.1)."""
+    request = getattr(context, "request", None)
+    if request is None:
+        return ANONYMOUS
+    caller = request.scope.get(CALLER_STATE, ANONYMOUS)
+    assert isinstance(caller, Caller)
+    return caller
 
 
 def tool_name(operation_name: str) -> str:
@@ -51,33 +72,46 @@ def _refused(envelope: ErrorEnvelope) -> CallToolResult:
     )
 
 
-def build_mcp(catalog: Catalog) -> Server[Any]:
+def _unknown(name: str) -> CallToolResult:
+    return _refused(
+        ErrorEnvelope(
+            kind=RefusalKind.NOT_FOUND,
+            code="unknown_tool",
+            message=f"There is no tool named {name}.",
+        )
+    )
+
+
+def build_mcp(
+    catalog: Catalog, executor: Executor, caller_of: CallerOf = caller_from_http
+) -> Server[Any]:
     """Build the MCP server with one tool per operation that belongs on it."""
     tools = _tools(catalog)
 
-    async def list_tools(_: Any, __: PaginatedRequestParams | None) -> ListToolsResult:
+    def granted(caller: Caller) -> dict[str, Operation]:
+        return {
+            name: operation
+            for name, operation in tools.items()
+            if operation.mcp_scope in caller.mcp_scopes
+        }
+
+    async def list_tools(context: Any, _: PaginatedRequestParams | None) -> ListToolsResult:
         return ListToolsResult(
             tools=[
                 Tool(
                     name=name,
                     description=operation.summary,
                     input_schema=operation.input.model_json_schema(),
-                    output_schema=operation.output.model_json_schema(),
                 )
-                for name, operation in tools.items()
+                for name, operation in granted(await caller_of(context)).items()
             ]
         )
 
-    async def call_tool(_: Any, params: CallToolRequestParams) -> CallToolResult:
-        operation = tools.get(params.name)
+    async def call_tool(context: Any, params: CallToolRequestParams) -> CallToolResult:
+        caller = await caller_of(context)
+        operation = granted(caller).get(params.name)
         if operation is None:
-            return _refused(
-                ErrorEnvelope(
-                    kind=RefusalKind.NOT_FOUND,
-                    code="unknown_tool",
-                    message=f"There is no tool named {params.name}.",
-                )
-            )
+            return _unknown(params.name)
         try:
             payload = operation.input.model_validate(params.arguments or {})
         except ValidationError as error:
@@ -94,13 +128,11 @@ def build_mcp(catalog: Catalog) -> Server[Any]:
                 )
             )
         try:
-            result = await operation.handler(payload)
+            result = await executor.execute(operation, caller, payload)
         except Refusal as refusal:
             return _refused(refusal.envelope)
-        return CallToolResult(
-            content=[TextContent(text=result.model_dump_json())],
-            structured_content=result.model_dump(mode="json"),
-        )
+        data = for_ai_client(result)
+        return CallToolResult(content=[TextContent(text=json.dumps(data))], structured_content=data)
 
     return Server("crewmind", on_list_tools=list_tools, on_call_tool=call_tool)
 
