@@ -26,8 +26,8 @@
   - "Not what I asked" (`/fix`) on an agent message records a correction: the message, the chairman's words, and the question that should have been answered.
   - It is pinned in that agent's memory, and in the CEO's if the agent is not the CEO, for `correction.ttl` \[30 days\] or until the chairman removes it.
   - It counts toward the agent's listening score (CHAT-12).
-- **MSG-7 Examples.** Text the chairman marks as an example (`/example`, or the toggle on an upload) is labelled ILLUSTRATION — NOT DATA in every context pack and every memory record derived from it. A mechanical platform lint, not a reviewer seat, flags any figure in a plan or deliverable that matches a number appearing only in an example.
-- **MSG-8 Reporting cadence** (`report.cadence` \[off\]). When set, unprompted CEO status posts between slots are held and delivered together at the next slot. They are queued, not refused, so no refusal loop can form (P1). These always go out at once:
+- **MSG-7 Examples.** Text the chairman marks as an example (`/example`, or the toggle on an upload) is labelled ILLUSTRATION — NOT DATA in every context pack and every memory record derived from it. A mechanical platform lint, not a reviewer seat, flags any figure in a plan or deliverable that matches a number appearing only in an example. A figure is a number of two or more digits, compared with separators removed. The flag is feedback: the file is still published, the chat says which figure, and the author is told.
+- **MSG-8 Reporting cadence** (`report.cadence` \[off\]). When set, unprompted CEO status posts between slots are held and delivered together at the next slot. They are queued, not refused, so no refusal loop can form (P1). Slots are evenly spaced through the day from the chairman's `brief.time` (08:00 when that is off), in the project's time zone. These always go out at once:
   - replies to the chairman;
   - decision cards and flags;
   - alarms;
@@ -49,7 +49,7 @@
     - states probabilities in plain words with a number ("likely, about 70%");
     - links artifacts instead of pasting documents.
   - Agents disagree with reasons, never praise the chairman's ideas, and when wrong say what it cost and what changes.
-  - A mechanical lint checks the measurable parts. On a failure, the agent is asked to rewrite once, metered; if it still fails, the message posts with a "long" or "unclear" marker.
+  - A mechanical lint checks the measurable parts: the length budget; a "Need from you:" line when a message to a person asks something; and a number beside any stated likelihood. An agent is told its budgets at the start of each run. On a failure, the agent is asked to rewrite once, metered; if it still fails, the message posts with a "long" or "unclear" marker.
   - The standard is feedback, never a refusal (P1).
   - **Agent-to-agent messages and notes** follow the same standard: they lead with the point, use plain words and link instead of pasting. They have a length budget of `agent.message_words` \[150\] words, excluding quoted material, and the same lint and rewrite-once feedback applies.
 - **MSG-13 One conversation model.** The app, terminal, Slack and email all read and write the same channels and read positions. No lane holds its own copy of the conversation.

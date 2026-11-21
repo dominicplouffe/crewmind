@@ -110,3 +110,21 @@ class PinnedNote(Base):
     seat_id: Mapped[str] = mapped_column(String(32), index=True)
     text: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class HeldPost(Base):
+    """A status post held until the next reporting slot (MSG-8)."""
+
+    __tablename__ = "held_posts"
+
+    id: Mapped[int] = mapped_column(SequenceId, primary_key=True, autoincrement=True)
+    project_id: Mapped[str] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), index=True
+    )
+    seat_id: Mapped[str] = mapped_column(String(32))
+    body: Mapped[str] = mapped_column(Text)
+    marker: Mapped[str | None] = mapped_column(String(16))
+    run_id: Mapped[str | None] = mapped_column(String(32))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    due_at: Mapped[datetime] = mapped_column(UtcDateTime, index=True)
+    delivered_at: Mapped[datetime | None] = mapped_column(UtcDateTime)

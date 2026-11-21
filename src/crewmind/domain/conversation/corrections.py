@@ -3,11 +3,12 @@ data (MSG-6, MSG-7, CHAT-8, CHAT-11, section 7.17)."""
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Authority, platform_job
@@ -271,6 +272,35 @@ async def expire(session: AsyncSession, project: Project, now: datetime) -> None
         )
 
 
+async def listening(session: AsyncSession, project_id: str) -> dict[str, tuple[int, int]]:
+    """CHAT-12: for each agent, its replies in the project chat and the corrections it has
+    been given. The listening score is corrections per 100 replies."""
+    target = await service.channel(session, project_id, service.PROJECT_CHAT)
+    replies = await session.execute(
+        select(Message.author_id, func.count())
+        .where(
+            Message.channel_id == target.id,
+            Message.author_kind == Author.AGENT,
+            Message.kind == MessageKind.MESSAGE,
+        )
+        .group_by(Message.author_id)
+    )
+    corrected = await session.execute(
+        select(Correction.seat_id, func.count())
+        .where(Correction.project_id == project_id)
+        .group_by(Correction.seat_id)
+    )
+    counts: dict[str, tuple[int, int]] = {seat: (count, 0) for seat, count in replies.all()}
+    for seat, count in corrected.all():
+        counts[seat] = (counts.get(seat, (0, 0))[0], count)
+    return counts
+
+
+def listening_score(replies: int, corrections: int) -> float | None:
+    """Corrections per 100 replies; nothing until the agent has replied (CHAT-12)."""
+    return round(100 * corrections / replies, 1) if replies else None
+
+
 async def example_ids(session: AsyncSession, project_id: str) -> set[int]:
     """The messages marked as examples in a project."""
     rows = await session.scalars(
@@ -356,3 +386,35 @@ async def unmark(context: Context, payload: MessageRef) -> ExampleItem:
             project_id=payload.project_id,
         )
     return ExampleItem(message_id=payload.message_id, is_example=False)
+
+
+_FIGURE = re.compile(r"\d[\d,.' ]*\d|\d")
+FIGURE_MIN_DIGITS = 2  # MSG-7: a figure is a number of two or more digits
+
+
+def figures(text: str) -> set[str]:
+    """The figures in a text, with separators removed so 5,000,000 and 5000000 match."""
+    found: set[str] = set()
+    for match in _FIGURE.findall(text):
+        digits = re.sub(r"\D", "", match)
+        if len(digits) >= FIGURE_MIN_DIGITS:
+            found.add(digits.lstrip("0") or "0")
+    return found
+
+
+async def example_only_figures(session: AsyncSession, project: Project, text: str) -> list[str]:
+    """MSG-7: the figures in `text` that the chairman gave only inside an example. A figure
+    that also appears in the goal or in a person's ordinary message is not flagged."""
+    marked = await example_ids(session, project.id)
+    if not marked:
+        return []
+    said = await session.scalars(
+        select(Message).where(
+            Message.project_id == project.id, Message.author_kind == Author.PERSON
+        )
+    )
+    in_examples: set[str] = set()
+    elsewhere = figures(project.goal)
+    for message in said:
+        (in_examples if message.id in marked else elsewhere).update(figures(message.body))
+    return sorted((in_examples - elsewhere) & figures(text), key=int)

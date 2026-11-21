@@ -24,6 +24,7 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
 from crewmind.runner.supervisor import Runner
@@ -140,6 +141,9 @@ def create_app(
                 asyncio.create_task(scheduler.run()),
                 asyncio.create_task(dispatcher.run()),
                 asyncio.create_task(alarms.run()),
+                asyncio.create_task(
+                    PlatformWorker(runtime.sessions, runtime.clock, runtime.gateway).run()
+                ),
             ]
         if run_runner:
             try:

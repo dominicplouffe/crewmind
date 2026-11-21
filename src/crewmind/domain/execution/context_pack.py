@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.domain.budget import service as budget
-from crewmind.domain.conversation import corrections
+from crewmind.domain.conversation import corrections, speaking
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.agent import AgentView
@@ -64,7 +64,8 @@ async def build(
     cap = int(await settings.get(session, _subject(view), "refusal.cap"))
     sections.append(
         f"# This run\n\nRun {run.id} ({run.kind}), attempt {run.attempt}. Woken because: "
-        f"{reasons}.\nAfter {cap} refused calls in one run, the run is ended."
+        f"{reasons}.\nAfter {cap} refused calls in one run, the run is ended.\n"
+        + await speaking.budget_line(session, settings, project)
     )
 
     seats = list(

@@ -159,7 +159,18 @@ async def agent_loop(client: httpx.AsyncClient, workspace: Path) -> str:
         if answer.get("warning"):
             messages.append({"role": "user", "content": answer["warning"]})
     if pack["run_kind"] == "chat" and text.strip():
-        await _post(client, POST_PATH, {"body": fit_in_a_message(text, pack["message_max"])})
+        most = pack["message_max"]
+        outcome = await _post(client, POST_PATH, {"body": fit_in_a_message(text, most)})
+        if outcome.get("posted") is False and outcome.get("held_until") is None:
+            # MSG-12: the platform sent the reply back once. Ask the model to rewrite it,
+            # then post what comes back; the second version is always posted.
+            messages.append({"role": "user", "content": outcome["feedback"]})
+            answer = await _post(
+                client, GATEWAY_PATH, {"system": pack["system_prompt"], "messages": messages}
+            )
+            if "refused" not in answer and answer["text"].strip():
+                text = answer["text"]
+            await _post(client, POST_PATH, {"body": fit_in_a_message(text, most)})
     return text
 
 

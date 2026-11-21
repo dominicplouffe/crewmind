@@ -216,6 +216,19 @@ async def paying_credential(
     return chosen or fallback
 
 
+async def platform_credential(
+    session: AsyncSession, project: Project, now: datetime
+) -> ModelCredential | None:
+    """The credential that pays the platform's own calls for a project: its primary, or
+    the fallback while the primary's breaker is open (LLM-7, LLM-14)."""
+    attached = await _attached(session, project.id)
+    chosen = attached.get((Use.PRIMARY, ""))
+    fallback = attached.get((Use.FALLBACK, ""))
+    if chosen is not None and not breaker_allows(chosen, now) and fallback is not None:
+        return fallback
+    return chosen or fallback
+
+
 class SeatResolver:
     """The one function that validates a seat and pins what it runs on, at hire, edit,
     start and lease (LLM-6, LLM-7, EXE-6)."""

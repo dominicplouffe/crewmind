@@ -15,6 +15,7 @@ from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.pagination import PageRequest, fetch_page
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.budget import service as budget
+from crewmind.domain.conversation import corrections
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import roster, runs
 from crewmind.domain.execution.model import RunKind, TeamState
@@ -44,6 +45,11 @@ class SeatItem(BaseModel):
     lead: bool
     state: str
     pause_reason: str | None
+    replies: int | None = Field(default=None, description="Its replies in the project chat.")
+    corrections: int | None = Field(default=None, description="Times you said: not what I asked.")
+    listening_score: float | None = Field(
+        default=None, description="Corrections per 100 replies. Lower is better."
+    )
 
 
 class Roster(BaseModel):
@@ -117,6 +123,7 @@ async def _roster(context: Context, project_id: str) -> Roster:
     teams = await context.session.scalars(
         select(Team.name).where(Team.project_id == project_id).order_by(Team.name)
     )
+    heard = await corrections.listening(context.session, project_id)
     return Roster(
         seats=[
             SeatItem(
@@ -127,6 +134,9 @@ async def _roster(context: Context, project_id: str) -> Roster:
                 lead=seat.is_lead,
                 state=seat.state,
                 pause_reason=seat.pause_reason,
+                replies=heard.get(seat.id, (0, 0))[0],
+                corrections=heard.get(seat.id, (0, 0))[1],
+                listening_score=corrections.listening_score(*heard.get(seat.id, (0, 0))),
             )
             for seat, role, team in rows.all()
         ],

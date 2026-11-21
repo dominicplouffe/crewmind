@@ -103,14 +103,17 @@ async def test_INV_23_a_chat_run_changes_no_state(app: App) -> None:
                 {"name": "agent_hire_team", "arguments": {"team": "ops", "role": "Generalist"}}
             ]
         },
-        {"text": "I cannot do that from chat. Shall I propose it?"},
+        {"text": "I cannot do that from chat. Shall I propose it?\nNeed from you: yes or no."},
     )
     await app.ok("chat.send", owner, project_id=project, body="Hire an ops team right now.")
     await app.work()
     roster = await app.ok("roster.show", owner, project_id=project)
     assert roster["teams"] == []
     history = (await app.ok("chat.history", owner, project_id=project))["items"]
-    assert history[-1]["body"] == "I cannot do that from chat. Shall I propose it?"
+    assert (
+        history[-1]["body"]
+        == "I cannot do that from chat. Shall I propose it?\nNeed from you: yes or no."
+    )
     runs = (await app.ok("runs.list", owner, project_id=project))["items"]
     trace = await app.ok("runs.trace", owner, project_id=project, run_id=runs[0]["run_id"])
     refusal = next(s for s in trace["steps"] if s.get("tool") == "agent.hire_team")

@@ -403,11 +403,12 @@ async def test_CHAT_2_history_opens_at_the_newest_messages_and_pages_back(app: A
 
 
 async def test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers(app: App) -> None:
-    """MSG-1, CHAT-3, INV-24: a chat reply over the message limit is posted cut, with a note,
-    as the answer to the question. The run does not loop."""
+    """MSG-1, MSG-12, CHAT-3, INV-24: a chat reply far over the limits is sent back once,
+    and when it is still too long it is posted cut, with a note and the "long" marker, as
+    the answer to the question. The run does not loop."""
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)
-    app.script("CEO/chat", {"text": "word " * 5000})
+    app.script("CEO/chat", {"text": "word " * 5000}, {"text": "word " * 5000})
     asked = await app.ok("chat.send", owner, project_id=project, body="Tell me everything.")
     assert await app.work() == 1
     assert await app.work() == 0
@@ -417,3 +418,4 @@ async def test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers(app:
     assert reply["reply_to"] == asked["id"]
     assert len(reply["body"]) == 20_000
     assert reply["body"].endswith("Ask for the rest.)")
+    assert reply["detail"] == {"lint": "long"}

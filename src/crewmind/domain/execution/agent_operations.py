@@ -6,6 +6,7 @@ agent, so no call names either.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -18,6 +19,7 @@ from crewmind.catalog.operation import Principal, Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.conversation import speaking
 from crewmind.domain.conversation.operations import MESSAGE_POSTED, MessageItem, item
 from crewmind.domain.conversation.service import MSG_1, MSG_2, Author, ChannelKind
 from crewmind.domain.execution import context_pack, roster
@@ -66,6 +68,20 @@ class PostInput(BaseModel):
     reply_to: int | None = Field(
         None, description="The message this answers. Default: the newest one addressed to you."
     )
+
+
+class PostOutcome(BaseModel):
+    """A message is posted, sent back once for a rewrite, or held for a reporting slot.
+    None of these is a refusal (MSG-8, MSG-12, P1)."""
+
+    posted: bool
+    id: int | None = None
+    body: str | None = None
+    reply_to: int | None = None
+    thread_id: int | None = None
+    marker: str | None = Field(default=None, description="long or unclear, if it still is.")
+    feedback: str | None = Field(default=None, description="What to change, or why it waits.")
+    held_until: datetime | None = None
 
 
 class HireInput(BaseModel):
@@ -174,7 +190,7 @@ async def read_messages(context: Context, payload: ReadInput) -> Messages:
     reversibility=Reversibility.REVERSIBLE,
     principals=AGENT,
 )
-async def post_message(context: Context, payload: PostInput) -> MessageItem:
+async def post_message(context: Context, payload: PostInput) -> PostOutcome:
     """MSG-1, MSG-2, CHAT-11: in the project chat the CEO may post at any time; any other
     agent only when addressed, or in a thread it was addressed in. A reply is threaded to
     the message it answers."""
@@ -214,16 +230,39 @@ async def post_message(context: Context, payload: PostInput) -> MessageItem:
     await check_pair(
         context.session, services_of(context).settings, view.project, target, thread_id, context.now
     )
+    prepared = await speaking.prepare(
+        context.session,
+        services_of(context).settings,
+        view.project,
+        seat,
+        view.run,
+        target,
+        reply_to,
+        payload.body,
+        context.now,
+    )
+    if prepared.feedback is not None:
+        return PostOutcome(posted=False, feedback=prepared.feedback)
+    if prepared.hold_until is not None:
+        speaking.hold(context.session, seat, view.run, prepared, context.now)
+        return PostOutcome(
+            posted=False,
+            held_until=prepared.hold_until,
+            feedback="Held, not refused: the chairman asked for status posts at set times. "
+            f"This one goes out at {prepared.hold_until:%H:%M} UTC with any others. "
+            "Do not post it again.",
+        )
     message = await conversation.post(
         context.session,
         target,
         author=Author.AGENT,
         author_id=seat.id,
         author_name=seat.name,
-        body=payload.body,
+        body=prepared.body,
         now=context.now,
         reply_to=reply_to,
         run_id=view.run.id,
+        detail={"lint": prepared.marker} if prepared.marker else None,
     )
     context.record(
         MESSAGE_POSTED,
@@ -231,7 +270,14 @@ async def post_message(context: Context, payload: PostInput) -> MessageItem:
         project_id=view.project.id,
         after={"channel": target.name, "author": seat.name},
     )
-    return item(message, target.name)
+    return PostOutcome(
+        posted=True,
+        id=message.id,
+        body=message.body,
+        reply_to=message.reply_to,
+        thread_id=message.thread_id,
+        marker=prepared.marker,
+    )
 
 
 async def _was_addressed(context: Context, seat: Seat, reply_to: int | None) -> bool:

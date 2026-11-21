@@ -392,3 +392,23 @@ async def test_MEM_1_an_agents_notes_are_its_own_and_stay_within_the_cap(app: Ap
     assert last["state"] == "active"
     assert "over its size" in last["note"]
     assert "Order 21:" in await pinned_text(app, owner, project)
+
+
+async def test_MSG_4_a_long_pinned_message_is_shortened_by_a_metered_call(app: App) -> None:
+    """MSG-4, LLM-14, LLM-15, P9: the platform proposes a sentence for a message too long
+    for one order, with a fast model call metered to the project and carrying the output
+    standard. The order stays proposed until the chairman confirms. At the wall, no call."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    long_body = "Keep every report to one page. " + "Detail follows here. " * 40
+    sent = await app.ok("chat.send", owner, project_id=project, body=long_body)
+    cut = await app.ok("orders.pin", owner, project_id=project, what=str(sent["id"]))
+    app.script("platform/shorten", {"text": "Keep every report to one page."})
+    assert await app.platform.shorten_orders() == 1
+    assert await app.platform.shorten_orders() == 0
+
+    (order,) = (await app.ok("orders.list", owner, project_id=project))["items"]
+    assert (order["id"], order["state"]) == (cut["id"], "proposed")
+    assert (order["text"], order["being_shortened"]) == ("Keep every report to one page.", False)
+    assert (await app.ok("budget.show", owner, project_id=project))["spent"] > 0
+    assert "Keep every report" not in await pinned_text(app, owner, project)

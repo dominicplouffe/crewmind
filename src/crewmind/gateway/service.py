@@ -20,10 +20,15 @@ from crewmind.domain.budget import service as budget
 from crewmind.domain.budget.service import GOV_6, Usage
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import runs
+from crewmind.domain.execution.context_pack import output_standard
 from crewmind.domain.execution.model import CAP_WARNING_SHARE, RunKind
 from crewmind.domain.models.service import (
+    LLM_6,
     MOCK,
     SECRET_OWNER,
+    lineup_of,
+    platform_credential,
+    provider_of,
     record_auth_failure,
     record_success,
     record_transient_failure,
@@ -35,8 +40,8 @@ from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway import outbound
 from crewmind.gateway.litellm_provider import is_auth_error, is_transient_error
 from crewmind.gateway.mock import MockProvider
-from crewmind.gateway.protocol import CompletionRequest, CompletionResponse
-from crewmind.gateway.registry import providers
+from crewmind.gateway.protocol import CompletionRequest, CompletionResponse, Turn
+from crewmind.gateway.registry import ModelClass, nearest_class, providers
 from crewmind.live import StreamHub
 from crewmind.storage.models import LedgerLine, ModelCredential, Project, Run, RunStep, Seat
 
@@ -189,6 +194,70 @@ class Gateway:
                     f"This run has used {total:,} of its {run.max_tokens:,} token cap. Wrap up."
                 )
         return response
+
+    async def platform_call(self, project_id: str, purpose: str, system: str, prompt: str) -> str:
+        """A model call the platform itself makes for a project: shortening an order,
+        extracting memories (LLM-14, LLM-15, P3, P9).
+
+        It runs on the fast class of the credential that pays the project, is metered to
+        the project like any other call, carries the output standard, and is refused at the
+        budget wall. No transaction is open while the provider is called."""
+        now = self._clock()
+        async with self._sessions() as session:
+            project = await session.get(Project, project_id)
+            assert project is not None
+            if (await budget.state(session, self._settings, project, now)).at_wall:
+                raise Refusal(
+                    "at_budget_wall",
+                    "The project is at its budget wall, so the platform makes no model calls.",
+                    rule=budget.GOV_3.id,
+                    hint="Raise the budget to continue.",
+                )
+            credential = await platform_credential(session, project, now)
+            provider = providers()[MOCK]
+            model, key, base_url = f"mock-{ModelClass.FAST}", None, None
+            if credential is not None:
+                provider = provider_of(credential)
+                lineup = await lineup_of(session, credential)
+                actual = nearest_class(ModelClass.FAST, set(lineup))
+                if actual is None:
+                    raise Refusal(
+                        "no_model",
+                        f"The credential {credential.name} has no model the platform can use.",
+                        rule=LLM_6.id,
+                        hint="Refresh the credential's lineup.",
+                    )
+                model, base_url = lineup[actual], credential.base_url
+                key = await self._secrets.reveal(session, (SECRET_OWNER, credential.id), "key")
+            credential_id = credential.id if credential else None
+        request = CompletionRequest(
+            system=f"{system}\n\n# How to write\n\n{output_standard()}",
+            messages=[Turn(role="user", content=prompt)],
+        )
+        if provider.name == MOCK:
+            response = await self.mock.complete(
+                request, seat_name="platform", run_kind=purpose, calls_so_far=0
+            )
+        else:
+            response = await outbound.call_model(
+                provider, request, model=model, api_key=key, base_url=base_url, effort=None
+            )
+        async with self._sessions() as session, session.begin():
+            project = await session.get(Project, project_id)
+            assert project is not None
+            await budget.record(
+                session,
+                self._settings,
+                project,
+                Usage(**response.usage.model_dump()),
+                self._clock(),
+                run_id=None,
+                seat_id=None,
+                credential_id=credential_id,
+                provider=provider.name,
+                model=model,
+            )
+        return response.text
 
     async def _failed(self, run_id: str, credential_id: str | None, error: Exception) -> None:
         """Account for a provider failure: transient ones feed the circuit breaker, and

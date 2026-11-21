@@ -27,7 +27,8 @@ from crewmind.domain.artifacts.service import (
     Kind,
 )
 from crewmind.domain.conversation import service as conversation
-from crewmind.domain.execution.agent import agent_of
+from crewmind.domain.execution import notices
+from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.services import services_of
@@ -555,6 +556,42 @@ async def publish(context: Context, payload: PublishInput) -> ArtifactItem:
         now=context.now,
     )
     artifact.purpose = payload.purpose
+    await _flag_example_figures(context, view, name, content)
     item = await _item(context, artifact)
     assert item is not None
     return item
+
+
+async def _flag_example_figures(
+    context: Context, view: AgentView, name: str, content: bytes
+) -> None:
+    """MSG-7: a mechanical lint. A deliverable that uses a figure the chairman gave only as
+    an example is flagged in the chat, and its author is told. It is feedback, not a
+    refusal: the file is published either way."""
+    from crewmind.domain.conversation import corrections
+
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError:
+        return
+    used = await corrections.example_only_figures(context.session, view.project, text)
+    if not used:
+        return
+    listed = ", ".join(used)
+    await conversation.platform_line(
+        context.session,
+        view.project.id,
+        f"Check {name}: it uses {listed}, which you gave only as an example "
+        f"({corrections.ILLUSTRATION}).",
+        context.now,
+        detail={"kind": "example figure", "artifact": name, "figures": used},
+    )
+    notices.notify(
+        context.session,
+        view.project.id,
+        view.seat.id,
+        "example figure used",
+        f"{name} uses {listed}, which the chairman gave only as an example, not as data. "
+        "Replace it with a real figure and say where it comes from, or remove it.",
+        context.now,
+    )

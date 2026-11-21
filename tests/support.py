@@ -16,6 +16,7 @@ from crewmind.catalog.define import operation as define
 from crewmind.catalog.execute import Context
 from crewmind.gateway.mock import ScriptedTurn
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.runner.sandbox import InProcessSandbox
 from crewmind.runner.supervisor import Runner
@@ -58,6 +59,7 @@ class App:
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+        self.platform = PlatformWorker(runtime.sessions, runtime.clock, runtime.gateway)
 
     def runner(self, workers: int = 4, heartbeat_seconds: float = 0.05) -> Runner:
         """A runner whose sandboxes run in this process, against this app."""
@@ -353,42 +355,47 @@ async def live_run(
     """Wake an agent, then lease and start its work run by hand, without a sandbox."""
     from crewmind.domain.execution import runs
 
-    stash: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_live_runs", {})
+    stash: dict[tuple[str, str], list[LiveRun]] = app.__dict__.setdefault("_live_runs", {})
     handed: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_handed_runs", {})
-    earlier = handed.pop((project_id, seat), None)
+    key = (project_id, seat)
+    earlier = handed.pop(key, None)
     if earlier is not None:
         # A second run for the same agent: the earlier one ends first, as it would.
         async with app.runtime.sessions() as session, session.begin():
             await runs.finish(
                 session, earlier.run_id, earlier.runner_id, app.runtime.clock(), failed=False
             )
-    if (project_id, seat) in stash:
-        handed[(project_id, seat)] = stash[(project_id, seat)]
-        return stash.pop((project_id, seat))
-    await wake(app, project_id, seat)
-    await app.dispatcher.tick()
-    now = app.runtime.clock()
-    async with app.runtime.sessions() as session, session.begin():
-        leases = await runs.lease(session, app.runtime.settings, runner_id, 50, now)
-    for lease in leases:
+    if not stash.get(key):
+        await wake(app, project_id, seat)
+        await app.dispatcher.tick()
+        now = app.runtime.clock()
         async with app.runtime.sessions() as session, session.begin():
-            await runs.started(session, lease.run_id, runner_id, now)
-    from sqlalchemy import select as _select
+            leases = await runs.lease(session, app.runtime.settings, runner_id, 50, now)
+        for lease in leases:
+            async with app.runtime.sessions() as session, session.begin():
+                await runs.started(session, lease.run_id, runner_id, now)
+        from sqlalchemy import select as _select
 
-    from crewmind.storage.models import Seat as _Seat
+        from crewmind.storage.models import Seat as _Seat
 
-    async with app.runtime.sessions() as session:
-        names = {
-            row.id: row.name
-            for row in await session.scalars(_select(_Seat).where(_Seat.project_id == project_id))
-        }
-    for lease in leases:
-        if lease.project_id == project_id:
-            name = names[lease.seat_id]
-            stash[(project_id, name)] = LiveRun(lease.run_id, lease.token, runner_id, name)
-    assert (project_id, seat) in stash, "no run was leased"
-    handed[(project_id, seat)] = stash[(project_id, seat)]
-    return stash.pop((project_id, seat))
+        async with app.runtime.sessions() as session:
+            names = {
+                row.id: row.name
+                for row in await session.scalars(
+                    _select(_Seat).where(_Seat.project_id == project_id)
+                )
+            }
+        # An agent can have a chat run and a work run at once. Both are kept, the work
+        # run first, so a test gets the same one every time.
+        for lease in sorted(leases, key=lambda lease: (lease.kind != "work", lease.run_id)):
+            if lease.project_id == project_id:
+                name = names[lease.seat_id]
+                stash.setdefault((project_id, name), []).append(
+                    LiveRun(lease.run_id, lease.token, runner_id, name)
+                )
+    assert stash.get(key), "no run was leased"
+    handed[key] = stash[key].pop(0)
+    return handed[key]
 
 
 async def agent_call(app: App, token: str | None, name: str, /, **values: Any) -> httpx.Response:
