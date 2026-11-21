@@ -16,6 +16,12 @@ class Authority(StrEnum):
     PROJECT_CHAIR = "project_chair"
     PROJECT_CHAIRMAN_ONLY = "project_chairman_only"
     HOST_OPERATOR = "host_operator"
+    AGENT = "agent"
+    AGENT_CEO = "agent_ceo"
+
+    @property
+    def is_agent(self) -> bool:
+        return self in (Authority.AGENT, Authority.AGENT_CEO)
 
     @property
     def names_a_project(self) -> bool:
@@ -29,6 +35,7 @@ class Authority(StrEnum):
 class CallerKind(StrEnum):
     ANONYMOUS = "anonymous"
     PERSON = "person"
+    AGENT = "agent"
     HOST_OPERATOR = "host"
     PLATFORM = "platform"
 
@@ -44,7 +51,8 @@ VIA_DIRECT = "direct"
 @dataclass(frozen=True)
 class Caller:
     """The actor behind a call (INV-21). `via` is `direct`, or `mcp:<client>` when a person's
-    MCP client acts for them (IF-5.4). `actor_id` is a person id, or a platform job's name."""
+    MCP client acts for them (IF-5.4). `actor_id` is a person id, a seat id for an agent, or
+    a platform job's name. An agent caller is bound to one run and one project (P3)."""
 
     kind: CallerKind
     actor_id: str = ""
@@ -52,6 +60,9 @@ class Caller:
     via: str = VIA_DIRECT
     mcp_scopes: frozenset[str] = frozenset()
     credential_id: str | None = None
+    run_id: str | None = None
+    project_id: str | None = None
+    seat_kind: str | None = None
 
     @property
     def person_id(self) -> str | None:

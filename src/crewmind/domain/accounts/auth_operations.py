@@ -6,6 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, SecretStr
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, Empty, operation
@@ -98,9 +99,11 @@ def _login_failed() -> Refusal:
     )
 
 
-async def _count_failure(context: Context, address: str) -> None:
-    """Record a failed login in its own transaction, so it survives the refusal (ACC-1)."""
-    async with context.sessions() as session, session.begin():
+def _login_failed_and_counted(address: str, now: datetime) -> Refusal:
+    """The refusal for a failed login. The failure is counted in its own transaction after
+    the refused call is rolled back, so it survives (ACC-1)."""
+
+    async def count(session: AsyncSession) -> None:
         attempts = await session.get(LoginAttempts, address)
         if attempts is None:
             attempts = LoginAttempts(address=address, failures=0, locked_until=None)
@@ -108,7 +111,11 @@ async def _count_failure(context: Context, address: str) -> None:
         attempts.failures += 1
         if attempts.failures >= LOGIN_FAILURES_BEFORE_LOCK:
             attempts.failures = 0
-            attempts.locked_until = context.now + LOGIN_LOCK
+            attempts.locked_until = now + LOGIN_LOCK
+
+    refusal = _login_failed()
+    refusal.afterwards = count
+    return refusal
 
 
 @operation(
@@ -134,8 +141,7 @@ async def login(context: Context, payload: LoginInput) -> LoginOutput:
     usable = person is not None and person.state == PersonState.ACTIVE
     stored_hash = person.password_hash if person is not None and usable else None
     if not verify_password(stored_hash, payload.password.get_secret_value()) or person is None:
-        await _count_failure(context, address)
-        raise _login_failed()
+        raise _login_failed_and_counted(address, context.now)
     if attempts is not None:
         await context.session.delete(attempts)
     plain, digest = mint_secret(SESSION_PREFIX)

@@ -22,7 +22,6 @@ class Surface(StrEnum):
 # (IF-1.3). Remove an entry when its phase starts.
 UNBUILT_SURFACES: dict[Surface, str] = {
     Surface.SLASH: "phase 2 (CHAT-5)",
-    Surface.AGENT_API: "phase 2 (IF-6.1)",
     Surface.SLACK: "phase 8 (INT-5)",
 }
 

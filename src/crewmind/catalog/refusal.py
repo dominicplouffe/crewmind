@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -42,6 +43,9 @@ class Refusal(Exception):
     ) -> None:
         super().__init__(message)
         self.envelope = ErrorEnvelope(kind=kind, code=code, message=message, rule=rule, hint=hint)
+        self.afterwards: Any = None
+        """An async function of a database session, run in its own transaction after the
+        refused call is rolled back: for what must be recorded even though the call failed."""
 
     @classmethod
     def from_envelope(cls, envelope: ErrorEnvelope) -> Refusal:

@@ -107,6 +107,18 @@ def authorize(operation: Operation, caller: Caller) -> None:
                 hint="Run it with the crewmind command on the server.",
             )
         return
+    if authority.is_agent:
+        if caller.kind is not CallerKind.AGENT:
+            raise unauthenticated()
+        if authority is Authority.AGENT_CEO and caller.seat_kind != "ceo":
+            raise Refusal(
+                "ceo_only",
+                "Only the CEO may do this.",
+                kind=RefusalKind.FORBIDDEN,
+                rule=ADMIN_ONLY.id,
+                hint="Suggest it to the CEO instead.",
+            )
+        return
     if caller.kind is not CallerKind.PERSON:
         raise unauthenticated()
     if authority is Authority.ADMIN and not caller.is_admin:
@@ -144,6 +156,21 @@ class Executor:
         idempotency_key: str | None = None,
     ) -> BaseModel:
         authorize(operation, caller)
+        try:
+            return await self._execute(operation, caller, payload, idempotency_key)
+        except Refusal as refusal:
+            if refusal.afterwards is not None:
+                async with self.sessions() as session, session.begin():
+                    await refusal.afterwards(session)
+            raise
+
+    async def _execute(
+        self,
+        operation: Operation,
+        caller: Caller,
+        payload: BaseModel,
+        idempotency_key: str | None,
+    ) -> BaseModel:
         async with self.sessions() as session, session.begin():
             context = Context(
                 caller=caller,
