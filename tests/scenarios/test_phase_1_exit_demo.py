@@ -217,6 +217,7 @@ async def test_INV_21_every_write_operation_records_an_event(
         await agent_call(app, live.token, "agent.propose_action", **proposal)
         card = (await app.ok("cards.list", alice, project_id=paid))["items"][-1]["id"]
         await write(f"cards.{decision}", alice, project_id=paid, card_id=card)
+    await write("runs.interrupt", alice, project_id=paid, run_id=live.run_id)
     await write("credentials.delete", alice, name="main")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)

@@ -250,6 +250,36 @@ def build_cli(source: Catalog, invoker: Invoker, local_invoker: Invoker) -> type
     return app
 
 
+CLIENT_COMMANDS = {"chat"}
+"""Interactive clients of catalog operations. `crewmind chat` is the project chat in the
+terminal (IF-4.8): it calls `chat.*`, `runs.interrupt` and the live stream, and defines no
+operation of its own."""
+
+
+def add_chat_command(app: typer.Typer) -> None:
+    @app.command(name="chat", help="Open a project's chat in the terminal.")
+    def chat(  # pyright: ignore[reportUnusedFunction]
+        project: str = typer.Argument(
+            None, help="The project's id or name. Default: your only one."
+        ),
+    ) -> None:
+        from crewmind.surfaces.cli.chat.app import ChatApp
+        from crewmind.surfaces.cli.chat.client import ChatClient, ChatError
+
+        client = ChatClient(http_client_factory(api_address()), current_token())
+        try:
+            projects = asyncio.run(client.projects())
+        except (ChatError, OSError) as error:
+            typer.echo(str(error), err=True)
+            raise typer.Exit(ExitCode.ERROR) from error
+        matches = [p for p in projects if project in (None, p["project_id"], p["name"])]
+        if len(matches) != 1:
+            names = ", ".join(p["name"] for p in projects) or "none"
+            typer.echo(f"Name one project. Yours: {names}.", err=True)
+            raise typer.Exit(ExitCode.USAGE)
+        ChatApp(client, matches[0]["project_id"], matches[0]["name"]).run()
+
+
 def exposed_operations(app: typer.Typer) -> set[str]:
     """The operation names the CLI actually offers. A top-level command is a host-local
     operation unless it is a declared alias; anything else is reported under its own name."""
@@ -261,7 +291,7 @@ def exposed_operations(app: typer.Typer) -> set[str]:
         if isinstance(command, TyperGroup):
             for verb in command.commands:
                 names.add(f"{name}.{verb}".replace("-", "_"))
-        elif name not in ALIASES:
+        elif name not in ALIASES and name not in CLIENT_COMMANDS:
             names.add(f"{HOST_GROUP}.{name}".replace("-", "_"))
     return names
 
@@ -272,4 +302,6 @@ def main() -> None:
 
     load_domain_modules()
     invoker = HttpInvoker(http_client_factory(api_address()), current_token)
-    build_cli(catalog, invoker, LocalInvoker(host_executor))()
+    app = build_cli(catalog, invoker, LocalInvoker(host_executor))
+    add_chat_command(app)
+    app()
