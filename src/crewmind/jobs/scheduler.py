@@ -29,6 +29,7 @@ from crewmind.domain.accounts.model import (
 from crewmind.domain.accounts.people import LINK_EXPIRED
 from crewmind.domain.accounts.token_operations import TOKEN_EXPIRED
 from crewmind.domain.budget import service as budget
+from crewmind.domain.conversation import corrections
 from crewmind.domain.execution import runs
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import Hold, ProjectState
@@ -133,7 +134,7 @@ def _expired(
 class Scheduler:
     """Runs the project jobs, in order, for every project, then the install jobs."""
 
-    project_jobs: tuple[ProjectJob, ...] = (lift_due_holds, purge_deleted)
+    project_jobs: tuple[ProjectJob, ...] = (lift_due_holds, purge_deleted, corrections.expire)
     install_jobs: tuple[InstallJob, ...] = (expire_credentials,)
 
     def __init__(

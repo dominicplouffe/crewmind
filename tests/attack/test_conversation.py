@@ -204,8 +204,13 @@ async def test_CHAT_5_a_slash_command_is_the_operation_it_names(app: App) -> Non
         "/lock",
         "/deliverables",
         "/help",
+        "/pin",
+        "/unpin",
+        "/decide",
+        "/fix",
+        "/example",
     }
-    assert "/pin" in helped["result"]["later"]
+    assert "/plan" in helped["result"]["later"]
 
     held = await slash(app, owner, project, "/hold until 2026-11-23T09:00:00Z note=Weekend")
     assert held["operation"] == "projects.hold"
@@ -235,7 +240,7 @@ async def test_CHAT_5_a_slash_command_is_the_operation_it_names(app: App) -> Non
         refused = await app.call("chat.command", owner, project_id=project, text=text)
         assert refused.status_code in (403, 404, 422), text
     assert (await app.ok("budget.show", owner, project_id=project))["wall"] == 30_000_000
-    unknown = await app.call("chat.command", owner, project_id=project, text="/pin this")
+    unknown = await app.call("chat.command", owner, project_id=project, text="/grill this")
     assert unknown.json()["code"] == "unknown_command"
 
 

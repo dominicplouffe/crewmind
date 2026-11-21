@@ -218,6 +218,33 @@ async def test_INV_21_every_write_operation_records_an_event(
         await agent_call(app, live.token, "agent.propose_action", **proposal)
         card = (await app.ok("cards.list", alice, project_id=paid))["items"][-1]["id"]
         await write(f"cards.{decision}", alice, project_id=paid, card_id=card)
+    order = await write("orders.pin", alice, project_id=paid, what="Always cite sources.")
+    await write("orders.retire", alice, project_id=paid, order_id=order["id"])
+    said = await app.ok("chat.send", alice, project_id=paid, body="Keep it to one page.")
+    proposed = await write("orders.pin", alice, project_id=paid, what=str(said["id"]))
+    await write("orders.confirm", alice, project_id=paid, order_id=proposed["id"])
+    again = await write("orders.pin", alice, project_id=paid, what=str(said["id"]))
+    await write("orders.discard", alice, project_id=paid, order_id=again["id"])
+    ruled = await write("decisions.decide", alice, project_id=paid, text="Scope: web only.")
+    await write("decisions.reopen", alice, project_id=paid, decision_id=ruled["id"])
+    await write(
+        "decisions.rule", alice, project_id=paid, decision_id=ruled["id"], ruling="Web and app."
+    )
+    app.runtime.clock.advance(minutes=1)  # pyright: ignore[reportFunctionMemberAccess]
+    await app.ok("artifacts.upload", alice, project_id=paid, name="new.txt", content_base64="YQ==")
+    asked = await agent_call(
+        app, live.token, "agent.request_reopen", decision_id=ruled["id"],
+        reason="A new file changes the picture a lot.",
+        evidence=[{"kind": "artifact", "ref": "new.txt"}],
+    )  # fmt: skip
+    await write(
+        "decisions.answer", alice, project_id=paid, request_id=asked.json()["id"], approve=False
+    )
+    await agent_call(app, live.token, "agent.post_message", body="Here is my answer.")
+    fixed = await write("corrections.record", alice, project_id=paid, words="Not that.")
+    await write("corrections.remove", alice, project_id=paid, correction_id=fixed["id"])
+    marked = await write("examples.mark", alice, project_id=paid, what="Say 12 offices.")
+    await write("examples.unmark", alice, project_id=paid, message_id=marked["message_id"])
     await write("runs.interrupt", alice, project_id=paid, run_id=live.run_id)
     await write("credentials.delete", alice, name="main")
     browser = "https://fcm.googleapis.com/fcm/send/abc"

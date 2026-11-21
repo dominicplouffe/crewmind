@@ -271,8 +271,12 @@ def sample_input(model: type[BaseModel], **known: Any) -> dict[str, Any]:
             values[name] = next(iter(annotation)).value
         elif get_origin(annotation) is dict:
             values[name] = {"run.concurrency": 5}
+        elif annotation is bool:
+            values[name] = True
         elif annotation is int:
             values[name] = 1
+        elif get_origin(annotation) is list:
+            values[name] = []
         elif "email" in name:
             values[name] = "someone@example.com"
         else:
@@ -350,7 +354,16 @@ async def live_run(
     from crewmind.domain.execution import runs
 
     stash: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_live_runs", {})
+    handed: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_handed_runs", {})
+    earlier = handed.pop((project_id, seat), None)
+    if earlier is not None:
+        # A second run for the same agent: the earlier one ends first, as it would.
+        async with app.runtime.sessions() as session, session.begin():
+            await runs.finish(
+                session, earlier.run_id, earlier.runner_id, app.runtime.clock(), failed=False
+            )
     if (project_id, seat) in stash:
+        handed[(project_id, seat)] = stash[(project_id, seat)]
         return stash.pop((project_id, seat))
     await wake(app, project_id, seat)
     await app.dispatcher.tick()
@@ -374,6 +387,7 @@ async def live_run(
             name = names[lease.seat_id]
             stash[(project_id, name)] = LiveRun(lease.run_id, lease.token, runner_id, name)
     assert (project_id, seat) in stash, "no run was leased"
+    handed[(project_id, seat)] = stash[(project_id, seat)]
     return stash.pop((project_id, seat))
 
 

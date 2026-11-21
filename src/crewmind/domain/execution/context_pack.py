@@ -9,10 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.domain.budget import service as budget
+from crewmind.domain.conversation import corrections
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.agent import AgentView
 from crewmind.domain.execution.model import SeatKind
+from crewmind.domain.memory import pinned
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
@@ -44,14 +46,16 @@ async def build(
     """Assemble the pack and mark what it delivers: notices are handed to the run, and the
     read position moves past the messages shown. Overflow stays unread (MSG-10)."""
     seat, project, run = view.seat, view.project, view.run
-    sections: list[str] = [f"# Goal\n\n{project.goal}"]
+    sections: list[str] = [(await pinned.pinned_for(session, project, seat)).render()]
+    examples = await corrections.example_ids(session, project.id)
 
     unanswered = await conversation.unanswered_from_people(session, seat)
     if unanswered:
         newest = unanswered[0]
+        body = corrections.labelled(newest.body, newest.id in examples)
         sections.append(
             "# The chairman's newest unanswered message\n\n"
-            f"[message {newest.id}] {newest.author_name}: {newest.body}\n\n"
+            f"[message {newest.id}] {newest.author_name}: {body}\n\n"
             "Answer this message first, and answer the question it asks."
         )
 
@@ -99,7 +103,8 @@ async def build(
         for name, message in shown:
             lines.append(
                 f"- [{name}, message {message.id}] {message.author_name} "
-                f"({message.author_kind}): {message.body}"
+                f"({message.author_kind}): "
+                f"{corrections.labelled(message.body, message.id in examples)}"
             )
         if len(items) > len(shown):
             lines.append(f"- [{items[0][0]}] {len(items) - len(shown)} more messages are queued.")

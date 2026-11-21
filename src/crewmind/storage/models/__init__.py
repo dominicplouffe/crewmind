@@ -36,6 +36,14 @@ from crewmind.storage.models.models import (
     ProjectCredential,
     ProviderCeiling,
 )
+from crewmind.storage.models.pinned import (
+    ClosedDecision,
+    Correction,
+    ExampleMark,
+    PinnedNote,
+    ReopenRequest,
+    StandingOrder,
+)
 from crewmind.storage.models.projects import HoldReason, Project
 from crewmind.storage.models.record import Event, IdempotencyKey, SettingValue, StoredSecret
 
@@ -47,8 +55,11 @@ __all__ = [
     "Base",
     "BrowserSession",
     "Channel",
+    "ClosedDecision",
+    "Correction",
     "Directive",
     "Event",
+    "ExampleMark",
     "FrozenThread",
     "HoldReason",
     "IdempotencyKey",
@@ -61,17 +72,20 @@ __all__ = [
     "ModelCredential",
     "Notice",
     "Person",
+    "PinnedNote",
     "Project",
     "ProjectCredential",
     "ProviderCeiling",
     "PushSubscription",
     "ReadPosition",
+    "ReopenRequest",
     "Role",
     "Run",
     "RunRefusal",
     "RunStep",
     "Seat",
     "SettingValue",
+    "StandingOrder",
     "StoredSecret",
     "Team",
     "Token",

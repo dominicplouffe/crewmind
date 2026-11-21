@@ -13,6 +13,8 @@ Newest first. One line per change, citing the ids touched.
 - **MSG-4:** a pinned message that fits is proposed in the chairman's words; only a longer one is shortened by a model (R-49).
 - **MSG-3:** a directive that changes a chairman-only setting becomes an action card the chairman confirms (R-23).
 - **MSG-7:** the example-figure check is a mechanical lint (R-50).
+- **MEM-1:** pinned sizes are estimated at 4 characters per token.
+- **MSG-5:** until evidence records exist, reopen evidence is a newer file version or person's message; the ruling stands until the chairman approves (Q-007).
 - **PLAN.md, traceability.csv:** the rest of MSG-11 (warm chat sessions) and the extractor part of LLM-14 are taken into phase 3.
 
 ## Revision 2.8 (21 Nov 2026): owner answers after phase 2

@@ -20,7 +20,7 @@
   - Active orders are in the pinned memory of every run (MEM-1).
 - **MSG-5 Closed decisions.**
   - `/decide` records a topic and a ruling, from the chairman's words, as a closed decision in every run's pinned memory.
-  - An agent may raise a closed topic again only by filing a reopen request that links evidence newer than the decision. Without newer evidence the request is refused.
+  - An agent may raise a closed topic again only by filing a reopen request that links evidence newer than the decision. Without newer evidence the request is refused. Until evidence records exist (WRK-12), evidence is a file version or a person's message dated after the decision. The request is shown to the chairman, and the ruling stands until the chairman approves it.
   - At most one reopen request per decision per `decision.reopen_cooldown` \[7 days\]. The chairman may reopen any decision at any time.
 - **MSG-6 Corrections.**
   - "Not what I asked" (`/fix`) on an agent message records a correction: the message, the chairman's words, and the question that should have been answered.
