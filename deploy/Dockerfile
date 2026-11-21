@@ -17,6 +17,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src ./src
 RUN uv sync --locked --no-dev
+# The local embedding model ships inside the image, so memory works offline (MEM-2).
+RUN .venv/bin/python -m crewmind.domain.memory.fetch_model
 COPY --from=web /web/dist ./src/crewmind/web_dist
 
 ENV PATH="/app/.venv/bin:$PATH" \
