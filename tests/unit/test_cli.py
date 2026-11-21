@@ -1,18 +1,118 @@
-"""The `crewmind` command starts with an empty catalog (phase 0 exit; IF-4.3)."""
+"""The `crewmind` command: help, secrets, options and stored login (IF-4.1, IF-4.3, IF-4.5)."""
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
+from pathlib import Path
+
+import pytest
+from typer.main import get_command
+from typer.testing import CliRunner
+
+from crewmind.catalog import catalog
+from crewmind.catalog.registry import load_domain_modules
+from crewmind.surfaces.cli.config import CliState
+from crewmind.surfaces.cli.main import ALIASES, ExitCode, build_cli
+from tests.support import PASSWORD, App, OnLoop, invoker_for, run_cli
 
 
 def test_IF_4_3_crewmind_help_runs() -> None:
-    """IF-4.3: `crewmind --help` exits 0 and describes the command."""
+    """IF-4.3: `crewmind --help` exits 0 and lists the command groups."""
     result = subprocess.run(
-        [sys.executable, "-c", "from crewmind.surfaces.cli.main import main; main()", "--help"],
-        capture_output=True,
-        text=True,
-        check=False,
+        [sys.executable, "-m", "crewmind", "--help"], capture_output=True, text=True, check=False
     )
     assert result.returncode == 0
-    assert "Usage" in result.stdout
+    for group in ("projects", "settings", "record", "login", "up", "doctor", "backup"):
+        assert group in result.stdout
+
+
+def test_IF_4_3_every_command_has_help_and_json() -> None:
+    """IF-4.3: every generated command offers --help and --json."""
+    load_domain_modules()
+    invoker = invoker_for(None)  # type: ignore[arg-type]
+    root = get_command(build_cli(catalog, invoker, invoker))
+    commands = []
+    for name, command in root.commands.items():  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
+        commands.extend(getattr(command, "commands", {name: command}).values())  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+    assert len(commands) >= len(catalog)  # pyright: ignore[reportUnknownArgumentType]
+    for command in commands:  # pyright: ignore[reportUnknownVariableType]
+        options = {option for parameter in command.params for option in parameter.opts}  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        assert "--json" in options, command.name  # pyright: ignore[reportUnknownMemberType]
+    for alias, target in ALIASES.items():
+        assert target in catalog, alias
+
+
+def test_IF_4_5_a_secret_is_never_a_command_line_argument() -> None:
+    """IF-4.5: no command takes a password as an argument. Each offers a file and standard
+    input instead, and a hidden prompt on a terminal."""
+    load_domain_modules()
+    invoker = invoker_for(None)  # type: ignore[arg-type]
+    cli = build_cli(catalog, invoker, invoker)
+    runner = CliRunner()
+    for arguments in (["login"], ["auth", "change-password"], ["accept"]):
+        text = runner.invoke(cli, [*arguments, "--help"]).output
+        assert "-file" in text
+        assert "-stdin" in text
+    refused = runner.invoke(cli, ["login", "--email", "a@example.com", "--password", PASSWORD])
+    assert refused.exit_code == ExitCode.USAGE
+    assert "No such option" in refused.output
+    missing = runner.invoke(cli, ["login", "--email", "a@example.com", "--json"])
+    assert missing.exit_code == ExitCode.USAGE
+    assert PASSWORD not in missing.output
+
+
+async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
+    app: App, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """IF-4.1, IF-4.5, ACC-3: `crewmind login` reads the password from a file, keeps a
+    personal token in a private file, never prints a credential, and ends its session.
+    `crewmind logout` revokes the token on the server."""
+    monkeypatch.setenv("CREWMIND_DATA_DIR", str(tmp_path / "cli"))
+    monkeypatch.delenv("CREWMIND_TOKEN", raising=False)
+    alice = await app.person("alice@example.com")
+    password_file = tmp_path / "password"
+    password_file.write_text(PASSWORD + "\n")
+    from crewmind.surfaces.cli.config import current_token
+    from crewmind.surfaces.cli.invoke import HttpInvoker
+    from tests.support import api_client_factory
+
+    invoker = OnLoop(HttpInvoker(api_client_factory(app.api), current_token))
+    cli = build_cli(catalog, invoker, invoker)
+
+    signed_in = await run_cli(
+        cli, ["login", "--email", alice.email, "--password-file", str(password_file), "--json"]
+    )
+    assert signed_in.exit_code == 0, signed_in.output
+    state = CliState.load()
+    assert state.token is not None
+    assert state.token.startswith("cm_pat_")
+    assert (CliState.path().stat().st_mode & 0o077) == 0
+    assert state.token not in signed_in.output
+    assert "cm_ses_" not in signed_in.output
+    assert json.loads(signed_in.stdout)["signed_in_as"] == "alice"
+
+    who = await run_cli(cli, ["whoami", "--json"])
+    assert json.loads(who.stdout)["email"] == alice.email
+    changed = await run_cli(
+        cli,
+        [
+            "settings",
+            "change-mine",
+            "--changes",
+            "chat.brevity=short",
+            "--changes",
+            "agenda.days=7",
+        ],
+    )
+    assert changed.exit_code == 0, changed.output
+    assert "chat.brevity: short" not in changed.output
+    assert "name=chat.brevity, value=short" in changed.output
+
+    sessions = await app.ok("record.list_install", await app.admin(), type="session.ended")
+    assert any(event["detail"]["cause"] == "sign-out" for event in sessions["items"])
+    out = await run_cli(cli, ["logout"])
+    assert out.exit_code == 0
+    assert not CliState.path().exists()
+    assert (await app.call("auth.whoami", state.token)).status_code == 401

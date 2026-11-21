@@ -9,9 +9,9 @@ import pytest
 
 from crewmind.catalog import Rule, rules
 from crewmind.catalog.registry import load_domain_modules
-from crewmind.surfaces.api.app import build_api
+from crewmind.runtime import Runtime
 from tests.attack.harness import Attacker, assert_refused, attacked_rules, rules_without_attack
-from tests.support import REFUSED_NAME, Greeter, api_client_factory, sample_catalog
+from tests.support import REFUSED_NAME, Greeter, api_client_factory, sample_api, sample_catalog
 
 
 def test_P10_every_registered_rule_has_an_attack_test() -> None:
@@ -35,14 +35,18 @@ def test_P10_a_rule_without_an_attack_is_reported(tmp_path: Path) -> None:
     assert rules_without_attack(registered, attacked_rules(tmp_path)) == ["SAMPLE-2", "SAMPLE-3"]
 
 
-async def test_P10_the_harness_attacks_through_the_public_api() -> None:
+async def test_P10_the_harness_attacks_through_the_public_api(runtime: Runtime) -> None:
     """P10, IF-1.4: the attacker calls the real API and the refusal is checked by rule and code."""
-    async with api_client_factory(build_api(sample_catalog(Greeter())))() as client:
+    async with api_client_factory(sample_api(runtime, sample_catalog(Greeter())))() as client:
         attacker = Attacker(client, {"forged": "not-a-real-token"})
-        response = await attacker.call(
-            "POST", "/v1/sample/greet", acting_as="forged", json={"name": REFUSED_NAME}
+        forged = await attacker.call(
+            "POST", "/v1/sample/greet", acting_as="forged", json={"name": "ada"}
         )
-        assert response.request.headers["Authorization"] == "Bearer not-a-real-token"
+        assert forged.request.headers["Authorization"] == "Bearer not-a-real-token"
+        assert forged.status_code == 401
+        response = await attacker.call(
+            "POST", "/v1/sample/greet", acting_as=None, json={"name": REFUSED_NAME}
+        )
         envelope = assert_refused(response, rule="SAMPLE-1", code="sample_refused")
         assert envelope.hint == "Greet someone else."
         allowed = await attacker.call(
