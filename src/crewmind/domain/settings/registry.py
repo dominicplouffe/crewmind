@@ -192,7 +192,9 @@ class SettingsRegistry:
         settings: dict[str, Setting],
         constraints: tuple[Constraint, ...],
         operational: dict[str, OperationalSetting],
+        version: str,
     ) -> None:
+        self.version = version
         self.settings = settings
         self.constraints = constraints
         self.operational = operational
@@ -233,4 +235,4 @@ def load_registry() -> SettingsRegistry:
         for name, fields in data["operational"].items()
     }
     constraints = tuple(Constraint.model_validate(item) for item in data["constraints"])
-    return SettingsRegistry(settings, constraints, operational)
+    return SettingsRegistry(settings, constraints, operational, data["version"])

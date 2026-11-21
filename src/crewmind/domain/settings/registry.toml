@@ -2,6 +2,8 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
+version = "2.4"
+
 [settings."quality"]
 type = "enum"
 scope = "project"
