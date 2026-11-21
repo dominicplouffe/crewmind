@@ -205,4 +205,4 @@ Phase 3 is built in its four parts. Of its 21 requirement ids, 17 are done and 4
 
 **Tests.** 307 Python tests on SQLite in about 80 seconds and 308 on Postgres in about 115 seconds; 71 web unit tests; 33 browser tests in about 2 minutes.
 
-**Open questions for the owner:** Q-006 (how to run the real-provider demo), Q-007 (what counts as reopen evidence before phase 4) and Q-008 (the slim memory target).
+**Owner answers (21 Nov 2026):** no real-provider test is needed (Q-006); reopen evidence as built (Q-007); the slim memory target is 400 MB before memory is first used and about 450 MB after (Q-008). Applied in spec revision 2.10.

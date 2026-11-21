@@ -122,7 +122,7 @@ Phase 2 is built in its four parts. Of its 85 requirement ids, 61 are done, 20 a
 | --- | --- |
 | Talk to a CEO in the web app, on the mock harness | Done. 20 browser tests drive the built app on the real server, with the agent as a separate process |
 | Talk to a CEO in `crewmind chat` | Done on the mock harness |
-| The same on one real provider | **Not run.** `tests/acceptance/test_live_provider.py` does it with `--live` and `ANTHROPIC_API_KEY`. The build session could not see the key |
+| The same on one real provider | **Dropped by the owner (Q-006).** No real-provider test is kept; real providers are covered by recorded responses. No real model has been called by the build |
 | An upload becomes an artifact | Done, small and chunked uploads |
 | A run is metered by token kind; only non-cached tokens count | Done |
 | Hitting the wall pauses the project | Done, and sends a push alarm |

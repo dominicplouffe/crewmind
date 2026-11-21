@@ -45,7 +45,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** talk to a CEO in the chat. It runs real work in a sandbox through the model gateway, metered in tokens, and stops at the wall.
 - **Exit demo:**
-  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness and on one real provider.
+  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
   - An upload becomes an artifact.
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.

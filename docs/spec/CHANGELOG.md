@@ -2,6 +2,12 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.10 (21 Nov 2026): owner answers after phase 3
+
+- **NFR-23:** idle memory under 400 MB applies before recall memory is first used; about 450 MB once it is in use (Q-008).
+- **PLAN.md:** the phase 2 exit demo no longer includes a run on a real provider; no real-provider test is kept (Q-006).
+- **MSG-5:** the interim meaning of reopen evidence is agreed as built (Q-007).
+
 ## Revision 2.9 (21 Nov 2026): phase 3 plan answers
 
 - **MEM-1:** pinned memory lives in the project database, not only Postgres (R-26). A chairman's write is never refused by a size cap; it opens a flag instead. Agent writes are refused at the cap, and a cap cannot be lowered below current use (R-28).

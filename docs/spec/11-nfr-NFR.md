@@ -107,7 +107,7 @@
   - **Nothing extra required:** no Postgres, no message broker, and no Slack, email, A2A or OpenTelemetry unless configured.
   - **Sandboxes:** containers when Docker is present; host-jail mode once it ships (phase 8).
   - **Install:** one command (for example `uv tool install crewmind`, then `crewmind up --slim`).
-  - **Targets:** idle memory under 400 MB; start in under 5 seconds.
+  - **Targets:** start in under 5 seconds; idle memory under 400 MB before recall memory is first used, and about 450 MB once it is in use, because the memory library and its embedding model stay loaded.
   - **Same rules everywhere.** Slim mode runs the same rules, operations and tests as a full server; only storage and process layout differ.
   - **Moving up:** `crewmind migrate --to postgres` moves a slim install to a full server with no data loss.
 - **NFR-24 Technology.** The rebuild is written in Python.

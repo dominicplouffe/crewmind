@@ -30,11 +30,6 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         default="sqlite",
         help="The database to run on. Postgres reads CREWMIND_TEST_POSTGRES_URL.",
     )
-    parser.addoption(
-        "--live",
-        action="store_true",
-        help="Also run tests that call a paid model. They read ANTHROPIC_API_KEY.",
-    )
 
 
 def _postgres_admin() -> tuple[sqlalchemy.URL, sqlalchemy.Engine]:
