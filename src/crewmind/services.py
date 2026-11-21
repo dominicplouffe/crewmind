@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from crewmind.domain.artifacts.service import BlobStore
 from crewmind.domain.settings.registry import SettingsRegistry, load_registry
 from crewmind.domain.settings.service import SettingsService
 
@@ -19,6 +20,11 @@ class Services:
     master_key_file: Path
     database_url: str
     registry: SettingsRegistry = field(default_factory=load_registry)
+
+    @property
+    def blobs(self) -> BlobStore:
+        """The content-addressed store for artifact bytes (ART-2)."""
+        return BlobStore(self.data_dir / "artifacts")
 
     @property
     def settings(self) -> SettingsService:
