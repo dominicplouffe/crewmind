@@ -50,6 +50,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `report.cadence` | off | off, or 1–4 slots a day | project | MSG-8 |
 | `chat.keep_warm` | 10 min | 1–60 min | install | MSG-11 |
 | `chat.brevity` | normal | short, normal, detailed | person | CHAT-13, MSG-12 |
+| `agent.message_words` | 150 (starting default) | 50–1,000 | project | MSG-12, LLM-15 |
 | `brief.time` | 08:00 local | any time; or off | person | HUM-11 |
 | `brief.away_after` | 4 h | 1–48 h | person | CHAT-15 |
 | `review.every` | 7 days | 1–30 days | project | HUM-9 |

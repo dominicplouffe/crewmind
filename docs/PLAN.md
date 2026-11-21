@@ -50,7 +50,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.
   - Killing a runner mid-run violates no execution invariant.
-- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-8, INV-9, INV-10, INV-11, INV-12, INV-13, INV-14, INV-15, INV-16, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; INT-8
+- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-8, INV-9, INV-10, INV-11, INV-12, INV-13, INV-14, INV-15, INV-16, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; INT-8
 
 ## Phase 3: Listening
 

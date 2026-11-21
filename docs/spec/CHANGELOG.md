@@ -2,6 +2,15 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.2 (21 Nov 2026): plain, short output from every model call
+
+- **P18, LLM-15 (new), MSG-12, Appendix A:**
+  - Every model call the platform makes or prepares carries one output standard: plain English, the answer first, no padding.
+  - Length is spent only where the task asks for it.
+  - A test fails if any prompt-building path omits the standard.
+  - Agent-to-agent messages and notes get a length budget, `agent.message_words` \[150\].
+  - Measured and fed back, never refused (P1). LLM-15 is in phase 2.
+
 ## Revision 2.1 (21 Nov 2026): phase 0 spec review answers
 
 Owner answers to the blocking items in `docs/spec-review.md`.

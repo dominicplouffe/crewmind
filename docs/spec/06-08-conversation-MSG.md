@@ -51,4 +51,5 @@
   - Agents disagree with reasons, never praise the chairman's ideas, and when wrong say what it cost and what changes.
   - A mechanical lint checks the measurable parts. On a failure, the agent is asked to rewrite once, metered; if it still fails, the message posts with a "long" or "unclear" marker.
   - The standard is feedback, never a refusal (P1).
+  - **Agent-to-agent messages and notes** follow the same standard: they lead with the point, use plain words and link instead of pasting. They have a length budget of `agent.message_words` \[150\] words, excluding quoted material, and the same lint and rewrite-once feedback applies.
 - **MSG-13 One conversation model.** The app, terminal, Slack and email all read and write the same channels and read positions. No lane holds its own copy of the conversation.
