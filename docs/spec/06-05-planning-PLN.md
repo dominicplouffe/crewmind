@@ -1,0 +1,47 @@
+### 6.5 Planning and dates (PLN)
+
+- **PLN-1 Requirements.**
+  - The CEO proposes requirements (not in Explore), and the chairman may add them directly. Each records its author.
+  - A proposed requirement is not scope; no work may be created against it.
+  - Accepting needs plan authority.
+  - Cutting, rewording, re-estimating or restaging a CEO-authored requirement needs scope authority. The same changes to a chairman-authored requirement are chairman-only (P7).
+  - Reopening applies to met or cut requirements only.
+  - Only the platform writes **met** (PLN-10).
+- **PLN-2 Ready for work.** Work may be created under a requirement only when:
+  - it is accepted;
+  - it has an estimate in runs;
+  - its dependencies are met;
+  - if the project uses stages (optional; default one stage), it is in the lowest stage with open work.
+
+  Dependencies form an acyclic graph. An edge that would close a loop is refused, and the loop is named.
+- **PLN-3 Fits the budget.**
+  - Adjusted runs = estimate × bias multiplier. The multiplier is measured from the 12 most recently settled requirements (at least 2 needed) and is never below 1.
+  - Plan tokens = adjusted runs of all open accepted requirements × median tokens per work run: on this project once 5 runs exist, otherwise on this install, otherwise unknown and stated.
+  - Accepting a requirement is refused, with the arithmetic, when plan tokens would exceed the tokens left before `budget.wrapup_at`. The chairman can raise the budget or accept it anyway.
+- **PLN-4 Throughput.** Throughput = completed work runs per active hour over the trailing 24 active hours, shown once at least 10 runs exist. Active hours exclude time the project was held, paused, or waiting only on the chairman.
+- **PLN-5 Projection.**
+  - Projection = remaining adjusted runs ÷ throughput, shown in hours or days.
+  - Without a measured throughput: remaining adjusted runs × median run duration ÷ `run.concurrency`, labelled "best case".
+  - With no estimates: "unknown".
+- **PLN-6 Commitment (Deliver only).**
+  - The CEO may propose one once a projection exists, only one at a time. The request has **no date field**: the date is the projection.
+  - Whoever holds date authority accepts it. The chairman may choose a later date of their own, or decline with a reason.
+  - Accepting fixes the settings version and the scope in force at that moment.
+  - The CEO may reset the date only to the current projection, and only while at risk or breached. Each reset shows the running reset count.
+- **PLN-7 Continuous re-projection.**
+  - On every scheduler tick the commitment becomes:
+    - **met:** all scope met;
+    - **breached:** the date passed with scope open;
+    - **at risk:** the projection is later than the date;
+    - otherwise **accepted**.
+  - Every transition is disclosed to the CEO.
+  - The chairman gets an alarm on breached, an action item on at risk and an FYI on met.
+- **PLN-8 Scope freeze.** While a commitment is at risk or breached, new CEO requirement proposals are refused with the arithmetic. Existing work continues. The chairman may still add scope or move the date, which re-projects at once.
+- **PLN-9 Target dates.** A chairman target date is stored with its source (an outside fact or the chairman's wish). It always reaches the CEO beside the platform's projection and the gap in days, so a target is never read as a pace.
+- **PLN-10 Requirement acceptance.**
+  - When every task under an in-progress requirement is closed, at least one is done, and work has changed since the last ruling, the requirement moves to checking.
+  - A command test is run by the platform: pass means met. Fail means back to in progress, with escalation to the CEO once after 3 failures.
+  - An observable test waits for a verdict from whoever holds verdict authority: an independent reviewer seat under autonomous, the chairman under supervised. A rejection needs a note and sticks.
+  - The test is not re-run, and the verdict not re-asked, until work under the requirement changes.
+- **PLN-11 Metric requirements** are read on a schedule, `metric.read_every` \[24 h\] (at most hourly), from sources outside the project. The project is **losing ground** when the latest reading is further from target than the oldest reading in a 6-reading window. A single bad reading is not enough.
+- **PLN-12 Stand-down conditions.** A team may carry a machine-checkable stand-down condition, such as "requirements met" or "a stage cleared". The platform stands the team down when the condition becomes true, unless the team still holds work.

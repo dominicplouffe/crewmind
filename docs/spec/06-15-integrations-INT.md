@@ -1,0 +1,82 @@
+### 6.15 Integrations (INT)
+
+- **INT-1 Signed webhooks.** Each project has signing secrets the chairman provisions. The signature (HMAC-SHA256 of the raw body) and a replay window are checked before parsing. Secrets never reach a run, so agents cannot forge platform-attested evidence. The delivery id gives idempotency.
+- **INT-2 GitHub events** (stars, forks, issues, PRs, comments) become platform-attested evidence. Events sent by accounts the project itself controls are ignored.
+- **INT-3 Generic signed events** carry a description, an optional source URL, a time, optional revenue (in money) and an optional "wake this agent". Revenue lines in the ledger can only come from INT-2 or INT-3.
+- **INT-4 Data sources.**
+  - The chairman connects outside MCP servers, with no auth, a bearer token, or OAuth with PKCE and audience binding.
+  - Their address and token never enter a sandbox; agents reach them only through the platform gateway.
+  - Each tool is classified when the source is added: read tools start allowed, write and unknown tools start denied.
+  - Only the chairman changes a permission, directly or by approving an agent's request.
+  - A denied call never leaves the server and counts toward the run's refusal cap.
+- **INT-5 Slack: one channel per project** (SHOULD).
+  - The admin connects one Slack app to the install, once, from a guided setup with a provided app manifest.
+  - Each project then has exactly one Slack channel: created automatically as `#crewmind-<project>`, or an existing channel the chairman picks.
+  - That channel mirrors the project chat both ways:
+    - messages and threads;
+    - `@agent` mentions;
+    - slash commands;
+    - decision cards with working buttons;
+    - deliverable links and alarms.
+  - Messages from Slack users linked to the chairman or a co-chair act as theirs. Anyone else's messages are shown to people as guest messages and never reach agents.
+  - Mirroring is best effort and never blocks anything. Slack tokens are never granted to a role.
+- **INT-6 Email: a mailbox per project.**
+  - The install's outbound mail account, configured once by the admin, sends alerts and daily briefs. It is separate from project mail.
+  - A project's mailbox is set by `email.mode` \[off\], one of:
+    - **Managed:** created on a mail server the admin connected (below). The chairman, or the Founder, picks the address. The platform creates the account, generates a strong password, stores it as the project's mailbox credential, and wires IMAP and SMTP. Nobody types or sees the password.
+    - **Manual:** the chairman enters a username, password, IMAP host, port and TLS mode, and SMTP host, port and TLS mode (with separate SMTP login details if the provider needs them), for any provider. The password is a credential: hidden input, human-only (IF-5.6).
+    - **Install alias:** an alias of the install mailbox, such as `crewmind+<project>@domain`, for installs with no mail server connected.
+  - **Mail servers.**
+    - The admin connects one or more mail servers to the install. Each connection records the server kind, its management endpoint, an admin API key, the domains projects may use, and the IMAP and SMTP hosts its mailboxes use.
+    - The admin key is a credential: encrypted, never in a sandbox, and used only by the mail provisioner.
+    - Servers are reached through a provisioning adapter with these operations: create, disable, enable and delete a mailbox; add and remove aliases; check DNS. Other servers are plug-ins.
+    - [Stalwart](https://stalw.art/docs/category/management-api) is the first supported kind. Its adapter targets Stalwart's JMAP-based management API, because the older REST management endpoints were [removed in 0.16](https://support.stalw.art/t/problem-with-using-rest-api-after-moving-to-v016/251). It is tested in CI against a pinned Stalwart version.
+  - **Mailbox lifecycle follows the project.**
+    - Stop disables sending, and a managed mailbox is disabled.
+    - Clone never copies a mailbox.
+    - Delete removes a managed mailbox at the end of `delete.grace` (PRJ-10).
+    - A manual mailbox is disconnected, never deleted.
+  - **Reading and sending.**
+    - The platform reads mail with IMAP IDLE where the server supports it, and polls every minute otherwise.
+    - It sends through SMTP via an outbox, so a retried run never sends twice.
+    - Mailbox credentials never enter a sandbox; agents read and send through the agent API.
+  - **Inbound security is automatic:**
+    - the allowlist;
+    - DMARC, DKIM and SPF alignment;
+    - an auto-reply and bounce filter;
+    - replies only to threads the project started, unless the chairman allows first contact from listed senders.
+
+    Accepted mail is untrusted material, never instructions (P4).
+  - **Limits:**
+    - `email.max_per_day` \[30\] emails a day;
+    - `email.max_new_threads_per_day` \[20\] new threads a day;
+    - threads freeze at `email.thread_freeze_after` \[40\] messages;
+    - attachments are at most 10 MB each and 25 MB per email.
+  - **Setup checks.** A project with email on cannot start until a test send and receive pass. For managed domains, `crewmind doctor` also checks the domain's MX, SPF, DKIM and DMARC records and names any fix.
+- **INT-7 Alerts.**
+  - One per-person setting, `alerts.level` \[decisions and alarms\], with three levels: everything, decisions and alarms, or alarms only. It applies across app push, the project's Slack channel and email.
+  - An item answered in the app or Slack within `alerts.grace` \[60 min\] is never emailed.
+  - At most `alerts.max_per_day` \[5\] decision emails in a rolling 24 hours; the rest go to the daily brief. Alarms (paused, budget wall, commitment breached, credential dead, watch failing) are never held back.
+  - Proposed scope and commitments, when they wait on the chairman, are chased after 3 hours, then daily, in one batched message per project.
+- **INT-8 Web search.**
+  - Providers with built-in search use it. Otherwise one install-wide search service is configured.
+  - Searches are counted in the ledger (count, not tokens), up to `search.max_per_day` \[200\] per project.
+  - A role that needs the web on a provider that cannot search, with no service configured, is refused before it runs (LLM-6).
+  - The search key never reaches a sandbox.
+- **INT-9 Code repository** (MAY). A project may get a private repository, provisioned with a platform token that never enters a sandbox. Agents push with a role-scoped credential.
+- **INT-10 Agents on email, and external agents.**
+  - **Agent addresses.** With `email.agent_addresses` \[off\] on, each seat whose role grants email gets its own mailbox account (for example `research.<project>@domain`). In managed mode the platform creates it on the project's mail server; in manual mode the chairman enters each agent's account details; the install-alias mode offers no agent addresses. The project address belongs to the CEO. Standing a seat down disables its mailbox, recalling it re-enables it, and deleting the project removes them all.
+  - **Waking.** Mail to an agent's address wakes that agent. Mail to the project address wakes the CEO.
+  - **Sending.** An agent whose role grants email sends from its own address, and the CEO sends from the project address. Mail goes only to the allowlist and only through the outbox. Without agent addresses, only the CEO sends.
+  - **The allowlist** is chairman-owned and never delegable. Each entry is an address or a whole domain, labelled **person** or **external agent**. Agents may request an entry; only the chairman adds one.
+  - **Automated senders.** Senders labelled external agent are expected to send automated mail, so they bypass the auto-reply filter. Bounces and out-of-office replies are still dropped.
+  - **Visible to people.** Every email thread appears in the project's Mail panel and in the activity feed. People can read all of them and reply as themselves. Email is a lane of the one conversation model (MSG-13).
+  - **Loop guard.** An email thread between a project agent and an external agent freezes after `thread.freeze_after` \[10\] consecutive messages with no task state change anywhere in the project. This is the same rule as MSG-9, and only the chairman unfreezes the thread.
+  - **No authority by email.** An external agent's mail can never create a directive, decide an item or change scope. At most it wakes an agent with material to weigh.
+- **INT-11 A2A: agent-to-agent protocol.** Alongside email, projects can talk to outside agents over the A2A protocol (version 1.x, pinned in CI).
+  - **Inbound.** With `a2a.enabled` \[off\] on, a project publishes an Agent Card for the CEO, and optionally for agents that have email addresses (INT-10), describing what each will do. Only callers on the chairman's allowlist, authenticated by a scheme the card declares (OAuth or bearer token), are accepted.
+  - **Inbound tasks are material, not orders.** An inbound task wakes the addressed agent, or the CEO, and arrives as a suggestion. It never creates a directive, decides an item or changes scope. Work for it happens only if the CEO accepts it into scope under the usual authority.
+  - **Outbound.** An agent whose role grants A2A may send tasks to outside agents on the allowlist, through the platform gateway, as data sources work (INT-4). Endpoint credentials never enter a sandbox. Each outbound task is a side effect (WRK-16) with an idempotency key, and replies are untrusted input.
+  - **One allowlist.** The chairman-owned allowlist from INT-10 holds A2A endpoints as well as email addresses and domains. Agents may request entries; only the chairman adds them.
+  - **Same guards as email.** The loop guard of INT-10 applies to A2A conversations. Every exchange appears in the project's External panel and the activity feed, and is recorded in the event log.
+  - **Status and streaming.** Long-running A2A tasks stream status into the chat. A crewmind project that delegates to another crewmind install sees the other side's status the same way.

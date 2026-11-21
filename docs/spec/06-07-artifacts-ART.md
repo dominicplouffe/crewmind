@@ -1,0 +1,21 @@
+### 6.7 Artifacts and files (ART)
+
+- **ART-1 Every file is an artifact.** Each artifact has:
+  - a name;
+  - a kind: deliverable, working, upload or report;
+  - versions, each with a content hash and an author (agent, person or platform);
+  - an audience: team, chairman or outside;
+  - the requirements it claims to satisfy (a claim, not a verdict);
+  - a status label: draft, in review, verified or delivered.
+- **ART-2 The workspace is visible.** Every file agents write in the workspace appears as a working artifact. It is snapshotted at the end of each run into content-addressed storage, so identical bytes are stored once. The chairman can browse, preview and download any of it.
+- **ART-3 One deliverables list.**
+  - Deliverables are working files an agent publishes, or reports the platform writes.
+  - The Deliverables panel shows the latest version of each deliverable, its status, the requirement it serves and its last change. Superseded versions fold away.
+  - Publishing a new deliverable for a requirement that already has one must name the deliverable it supersedes, or state why both are needed; otherwise it is refused.
+  - Every publication for the chairman or outside is announced in the chat with its opening lines.
+- **ART-4 Preview and download** in the chat and the app (CHAT-16). Text versions show a diff against the previous one.
+- **ART-5 Chairman locks.** The chairman can lock an artifact (`/lock`). Agent writes to a locked artifact are refused, and the agent is told to ask instead. Only the chairman unlocks.
+- **ART-6 Limits.** Up to `artifact.max_size` \[100 MB\] per file. Project storage up to `storage.quota` \[20 GB\], with a flag at 80%.
+- **ART-7 Reading.** Any agent in the project can read any artifact's bytes, in 64 KB pages. A missing file returns "exists: false", not a refusal.
+- **ART-8 Uploads** come from the chairman through the chat, CLI, Slack or MCP (CHAT-9). They are never executed by the platform.
+- **ART-9 Names.** Agents publish plain filenames only, with no paths. The platform versions each name.

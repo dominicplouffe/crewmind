@@ -1,0 +1,54 @@
+### 6.8 Conversation, directives and standing orders (MSG)
+
+- **MSG-1 Channels.**
+  - The **project chat** holds the chairman, co-chairs, observers (read-only), the CEO and any agent addressed in it. There is also **leadership** (CEO and leads) and one room per team.
+  - People can read every channel but post only in the project chat. Agents read and post only in their own channels.
+  - Posting into a team room with no other members is refused.
+  - Messages are 1–20,000 characters and may be threaded.
+- **MSG-2 Who speaks in the project chat.** The CEO may post at any time, subject to MSG-8. Other agents post only when addressed, or when replying in a thread they were addressed in. Agents never address the chairman through other channels.
+- **MSG-3 Directives.**
+  - A directive is created only by `/do <instruction>` or by the chairman pressing "Do it" on an action card (CHAT-7).
+  - It records its text, addressee (the CEO by default), author and time, and is echoed in the chat.
+  - An agent changes state from a chat run only while carrying out a directive it cites. Every op is checked against the directive's addressee and the agent's role.
+  - A directive cannot change anything P7 reserves except by applying a change the chairman has just written. For example, `/do set quality to best` applies the setting as the chairman's own change.
+  - A directive to an agent other than the CEO is shown to the CEO.
+  - On a held or paused project, a directive that changes work state waits until the project resumes (INV-20). `/resume` and settings changes apply at once.
+- **MSG-4 Standing orders.**
+  - The chairman pins a message (`/pin` or the pin button). The platform proposes a one-sentence order of 400 characters or fewer, which the chairman confirms or edits.
+  - At most 25 are active. `/unpin` retires one; retired orders stay listed as retired so agents know they are dead.
+  - The CEO may propose an order; only the chairman confirms.
+  - Active orders are in the pinned memory of every run (MEM-1).
+- **MSG-5 Closed decisions.**
+  - `/decide` records a topic and a ruling, from the chairman's words, as a closed decision in every run's pinned memory.
+  - An agent may raise a closed topic again only by filing a reopen request that links evidence newer than the decision. Without newer evidence the request is refused.
+  - At most one reopen request per decision per `decision.reopen_cooldown` \[7 days\]. The chairman may reopen any decision at any time.
+- **MSG-6 Corrections.**
+  - "Not what I asked" (`/fix`) on an agent message records a correction: the message, the chairman's words, and the question that should have been answered.
+  - It is pinned in that agent's memory, and in the CEO's if the agent is not the CEO, for `correction.ttl` \[30 days\] or until the chairman removes it.
+  - It counts toward the agent's listening score (CHAT-12).
+- **MSG-7 Examples.** Text the chairman marks as an example (`/example`, or the toggle on an upload) is labelled ILLUSTRATION — NOT DATA in every context pack and every memory record derived from it. A reviewer check flags any figure in a plan or deliverable that matches a number appearing only in an example.
+- **MSG-8 Reporting cadence** (`report.cadence` \[off\]). When set, unprompted CEO status posts between slots are held and delivered together at the next slot. They are queued, not refused, so no refusal loop can form (P1). These always go out at once:
+  - replies to the chairman;
+  - decision cards and flags;
+  - alarms;
+  - announcements of deliverables.
+- **MSG-9 Pair breaker.** When a thread's last `thread.freeze_after` \[10\] messages come from the same two agents with no human, and no task changed state anywhere in the project during that span, the thread freezes. Further posts are refused, the CEO is told, and only the chairman can unfreeze it.
+- **MSG-10 Unread delivery.** At most 10 unread messages per channel go into a run's context, oldest first, except that the chairman's newest unanswered message always comes first. Overflow is marked queued and is never marked read without being shown.
+- **MSG-11 Chat runs.**
+  - A message addressed to an agent starts or reuses a chat session for that agent. The session stays warm for `chat.keep_warm` \[10 min\] after the last message, then closes, so an idle chat costs nothing (P8).
+  - Chat runs are exempt from wake limits and do not use work concurrency.
+  - They are metered against the budget, and use the same credentials and grants as the agent's work runs (LLM-7).
+  - They see the workspace read-only and change state only through directives (CHAT-6).
+  - A session restarts when its credential, grants, brief or standing orders change. Restarts are held after 3 involuntary restarts in 10 minutes, and the chairman is told why.
+- **MSG-12 Communication standard.**
+  - Every agent message to a person:
+    - leads with the answer or the ask in one sentence;
+    - ends with a "Need from you:" line when it asks anything;
+    - keeps to the length budget for the chairman's brevity setting (short 60, normal 150, detailed 400 words, excluding quoted material);
+    - explains any term outside the project glossary on first use;
+    - states probabilities in plain words with a number ("likely, about 70%");
+    - links artifacts instead of pasting documents.
+  - Agents disagree with reasons, never praise the chairman's ideas, and when wrong say what it cost and what changes.
+  - A mechanical lint checks the measurable parts. On a failure, the agent is asked to rewrite once, metered; if it still fails, the message posts with a "long" or "unclear" marker.
+  - The standard is feedback, never a refusal (P1).
+- **MSG-13 One conversation model.** The app, terminal, Slack and email all read and write the same channels and read positions. No lane holds its own copy of the conversation.

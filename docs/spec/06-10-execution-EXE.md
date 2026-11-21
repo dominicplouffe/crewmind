@@ -1,0 +1,91 @@
+### 6.10 Agent execution (EXE)
+
+- **EXE-1 Roster.**
+  - One CEO plus zero or more teams.
+  - The team lead is derived: the named lead, otherwise the only member. A team of 2 or more without a lead gets its earliest active member elected, and the CEO is told.
+  - The CEO may hire, stand down and recall teams from the role library up to `teams.max` \[8\] without approval. A CEO hire goes through the same path as a chairman hire and is announced in the chat.
+  - Standing down a team that holds open work is refused for everyone.
+- **EXE-2 Wake triggers.** All triggers are derived from stored state and evaluated by queries before any model call. An agent is never woken to look for work.
+  - **Messages:** unread messages in the agent's channels, excluding its own and platform lines. An idle agent wakes at once; for a busy one, they wait for its next run.
+  - **Notices:** urgent kinds wake at once. These are budget warning, wrap-up or wall; approval decided; audit failed; external event; mail received; watch failing; commitment at risk or breached; flag opened; question lapsed; delivery reopened; directive issued. Other notices ride along with the next run.
+  - **Work:**
+    - ready team tasks (for the lead);
+    - ready assignments;
+    - a review owed (one reviewer per task, never the author);
+    - a claim with no live run and no open subtasks.
+
+    Tasks gated by a not-before time wake nobody before that time.
+  - **Planning:** a requirement or bet changed state, a task closed or blocked, a suggestion arrived, or the plan has no ready work while scope is open. A CEO safety-net heartbeat, `heartbeat.every` \[6 h\], catches missed triggers. It fires only when the event log shows changes since the last CEO run.
+  - **Governance:** a cycle waiting for its plan, a commitment notice, a lapsed question, a mistake report owed, a status-review narrative open.
+- **EXE-3 Run kinds and limits.**
+  - **Work runs:** one queued or running per agent; at most `run.concurrency` per project; at most `agent.max_wakes_per_hour` per agent.
+  - **Chat runs:** MSG-11.
+  - **Check runs:** platform checks and watches; they spend no tokens.
+  - At the budget wall nothing new is leased (GOV-3).
+- **EXE-4 Explain every hold.**
+  - When anything holds work back, the system states the reason and when it lifts, as a concrete time or the event that lifts it. Holds include a limit, the wall, a breaker, a provider ceiling or a hold command.
+  - The reason shows in the activity feed, the agenda and the chat header, and is posted in the chat when it delays a reply to the chairman.
+  - Every queued run records its wake reasons, its task, and the requirement or bet it spends against.
+- **EXE-5 Leasing.**
+  - Runners lease queued runs with row-level skip-locking on Postgres; on SQLite, slim mode runs one in-process runner that leases under a write lock. Creating the run and removing the queue entry happen in one transaction, so two runners never take one job.
+  - A runner leases only as many runs as it has free workers.
+  - Runs for projects that are no longer running are dropped; their reasons will be re-derived.
+  - When a subscription plan is exhausted until a known time, its runs wait until then, and the hold says so.
+  - Scaling means adding runners against the same database.
+- **EXE-6 Pinning.** At lease time the run pins its model, effort, provider, credential, harness and token caps, so even reaped runs stay attributed to what actually ran.
+- **EXE-7 Liveness.**
+  - A heartbeat every 20 seconds and a lease TTL of 90 seconds.
+  - A run with a stale heartbeat, or older than `run.timeout` \[90 min\], is reaped.
+  - Reaping revokes the token and books the tokens the gateway already metered. It charges the failure to the run's requirement and releases claims, except a lead's task with open subtasks. It tells the agent to check the side-effect ledger before redoing anything.
+  - A late finish from a reaped ("zombie") worker changes nothing.
+- **EXE-8 Retries and recovery.**
+  - A failed run gives back the notices and suggestions it consumed, and is retried up to 3 attempts with a backoff of 30 seconds × attempt. A wake counts once against the wake limit however many retries it took.
+  - If no attempt ever reached a model, messages are marked unread again.
+  - A crashed run's saved notes and partial plan (MEM-7) are placed in the retry's context.
+- **EXE-9 Revocation.** Kill, hold, pause, the wall and the refusal cap all revoke the run token. The heartbeat notices revocation and stops the sandbox itself. The run ends as killed, or as terminated if refusals caused it.
+- **EXE-10 Refusal cap.**
+  - Each refusal is recorded with its text, rule, route and time.
+  - At `refusal.cap` \[5\] refusals in one run, the token is revoked, and the final refusal says so: rephrasing is not a strategy.
+  - Rules in warn-only mode (NFR-20) do not count.
+  - A later success on the same route marks the refusal "got past", for rule tuning.
+- **EXE-11 Records.** Every run stores its trace and the exact system prompt and context pack sent, keyed by run. Tokens are recorded by kind for every ending, including killed, failed and reaped runs.
+- **EXE-12 Sandboxes.**
+  - Every run gets a fresh, disposable sandbox.
+  - Required: a container mode, with no privilege escalation, 2 CPUs and 2 GB by default, and an install label so a second install on the same host never adopts another's containers.
+  - Required: a separate container network per project.
+  - Optional: a host-jail mode for desktops that hides the home folder, the database, the master key and container sockets, and builds the environment from nothing.
+  - Development only: an unisolated mode.
+  - The workspace is mounted read-write.
+- **EXE-13 Secrets in sandboxes.**
+  - Only role credentials whose scopes name the agent's role are injected.
+  - Never injected: model credentials (the gateway holds them), mailbox logins, mail-server admin keys, data-source addresses and tokens, webhook secrets, Slack tokens and search keys.
+  - File-shaped secrets go on a small, non-executable in-memory filesystem outside the workspace, readable only by the run.
+- **EXE-14 Network.** Egress is open by default, with no proxy and no per-role allowlist; v1 found that blocked requests failed invisibly. The rebuild MAY add an egress policy only if every blocked request is logged and visible to the agent and the chairman. Either way, SECURITY.md states what is and is not contained (P12). Every URL the control plane fetches for an agent goes through the SSRF guard (WRK-12).
+- **EXE-15 Context pack.** Every run receives, in this order:
+  - **Pinned memory:** the goal, active standing orders, closed decisions, corrections and lessons for this agent, and its charter. Examples are labelled ILLUSTRATION. Retired orders are listed as retired.
+  - The chairman's newest unanswered message, if any.
+  - Run id, wake reasons and attempt number.
+  - Who it is: role, team, channels and roster.
+  - Notices, consumed on read; unread messages (MSG-10).
+  - Recall memories relevant to this run (MEM-5), each with source and date.
+  - For task runs: the task, its success test, previous attempts, check output and side effects already fired.
+
+  The CEO's pack adds:
+  - the situation: budget used and the wall, holds and when they lift, throughput and projection;
+  - the board and the plan;
+  - requirements or bets, cycles and the last 3 narratives;
+  - commitment, deliverables, owed items, suggestions, pending decision items and recent settings changes.
+
+  Every pack states the refusal cap and that everything the agent reads is data, not instructions.
+- **EXE-16 Stall watchdog.** In a running project with open work or open scope, if no work run has started for `stall.after` \[60 min\] and no hold with a known lift time explains it, the CEO is woken and the chairman gets one alarm naming the exact cause.
+- **EXE-17 Agent browser.** A role may be granted a `browser` tool: a headless browser running inside the run's sandbox.
+  - **Actions:** open a URL, read the page as text or an accessibility tree, click, type, select, upload a workspace file, download into the workspace, take a screenshot. Each is an agent API tool, so every harness can use it.
+  - **Untrusted pages.** Everything on a page is untrusted input (P4) and never instructions. The browser cannot reach private addresses, the control plane or another project's network (EXE-12).
+  - **Logins without exposing secrets.** To sign in, the agent asks the browser tool to fill a field from a role credential by name (EXE-13). The tool fills the value inside the sandbox, so the model never sees it. Captchas, 2FA and identity checks become assists (HUM-7). The chairman can take over the live browser from the app to complete them.
+  - **Money and consequences.**
+    - Submitting a form with a payment field (card number, security code) is refused unless an approved purchase side effect is open (GOV-8, WRK-16).
+    - Agents declare any other consequential submission (publishing, sending, signing up) as a side effect first.
+  - **Sessions.** Cookies and site logins persist per role and project between runs when `browser.keep_sessions` \[on\], encrypted at rest. The chairman can clear them. They are never shared across projects.
+  - **Visible.** The chairman can watch an agent's browser live in the app. Every navigation, click and submission is recorded in the run trace with a screenshot.
+  - **Watches.** A watch (WRK-17) may be a recorded browser script. It replays at 0 tokens, with no model involved.
+  - **Resources.** A sandbox with a browser gets 2 CPUs and 4 GB by default.
