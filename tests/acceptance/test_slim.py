@@ -50,6 +50,7 @@ class Install:
         self.env.pop("CREWMIND_TOKEN", None)
         self.data_dir = data_dir
         self.server: subprocess.Popen[str] | None = None
+        self.output = ""
 
     def run(self, *arguments: str, stdin: str | None = None, check: bool = True) -> Any:
         """Run the real command with --json and return its parsed output."""
@@ -89,7 +90,7 @@ class Install:
     def stop(self) -> None:
         if self.server is not None:
             self.server.terminate()
-            self.server.wait(timeout=10)
+            self.output, _ = self.server.communicate(timeout=10)
             self.server = None
 
     def memory_mb(self) -> float:
