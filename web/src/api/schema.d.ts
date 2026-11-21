@@ -623,6 +623,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/corrections/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the corrections you have given agents.
+         * @description Requires: project_observer.
+         */
+        get: operations["corrections.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/corrections/record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tell an agent its reply was not what you asked. It answers again and remembers.
+         * @description Requires: project_chair.
+         */
+        post: operations["corrections.record"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/corrections/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove a correction from an agent's pinned memory.
+         * @description Requires: project_chair.
+         */
+        post: operations["corrections.remove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/credentials/add": {
         parameters: {
             query?: never;
@@ -783,6 +843,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/decisions/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve or decline an agent's request to reopen a decision.
+         * @description Requires: project_chair.
+         */
+        post: operations["decisions.answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/decisions/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a topic with your ruling. Agents cannot raise it again without new evidence.
+         * @description Requires: project_chair.
+         */
+        post: operations["decisions.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/decisions/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's decisions and their rulings.
+         * @description Requires: project_observer.
+         */
+        get: operations["decisions.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/decisions/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reopen a closed decision. You can do this at any time.
+         * @description Requires: project_chair.
+         */
+        post: operations["decisions.reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/decisions/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List agents' requests to reopen decisions.
+         * @description Requires: project_observer.
+         */
+        get: operations["decisions.requests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/decisions/rule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Give a new ruling on a reopened decision, which closes it again.
+         * @description Requires: project_chair.
+         */
+        post: operations["decisions.rule"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/directives/issue": {
         parameters: {
             query?: never;
@@ -817,6 +997,46 @@ export interface paths {
         get: operations["directives.list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/examples/mark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark text as an example: an illustration agents must not use as data.
+         * @description Requires: project_chair.
+         */
+        post: operations["examples.mark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/examples/unmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove the example mark from a message.
+         * @description Requires: project_chair.
+         */
+        post: operations["examples.unmark"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1003,6 +1223,206 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/memory/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Correct a memory.
+         * @description Requires: project_chair.
+         */
+        post: operations["memory.edit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/forget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Forget a memory for good. It is deleted, not hidden.
+         * @description Requires: project_chair.
+         */
+        post: operations["memory.forget"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/forget_preference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Forget one of your own preferences.
+         * @description Requires: person.
+         */
+        post: operations["memory.forget_preference"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show what a project, a team or an agent remembers, newest first.
+         * @description Requires: project_observer.
+         */
+        get: operations["memory.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pin a memory so it is in front of the agents in every run.
+         * @description Requires: project_chair.
+         */
+        post: operations["memory.pin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/pinned": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show exactly what an agent is given at the start of every run.
+         * @description Requires: project_observer.
+         */
+        get: operations["memory.pinned"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/prefer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a preference that agents recall in every project you chair.
+         * @description Requires: person.
+         */
+        post: operations["memory.prefer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show your own preferences, which agents recall in every project you chair.
+         * @description Requires: person.
+         */
+        get: operations["memory.preferences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/remember": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a fact to a project's memory yourself.
+         * @description Requires: project_chair.
+         */
+        post: operations["memory.remember"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/memory/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search what a project remembers.
+         * @description Requires: project_observer.
+         */
+        get: operations["memory.search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/models/providers": {
         parameters: {
             query?: never;
@@ -1097,6 +1517,106 @@ export interface paths {
         get: operations["models.show"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm a proposed standing order, with your edit if you have one.
+         * @description Requires: project_chair.
+         */
+        post: operations["orders.confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Discard a proposed standing order.
+         * @description Requires: project_chair.
+         */
+        post: operations["orders.discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's standing orders: proposed, active and retired.
+         * @description Requires: project_observer.
+         */
+        get: operations["orders.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pin a standing order: one sentence every agent follows in every run.
+         * @description Requires: project_chair.
+         */
+        post: operations["orders.pin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/orders/retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retire a standing order. Agents are told it is no longer in force.
+         * @description Requires: project_chair.
+         */
+        post: operations["orders.retire"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2056,6 +2576,24 @@ export interface components {
              */
             browsers: number;
         };
+        /** AnswerInput */
+        AnswerInput: {
+            /**
+             * Approve
+             * @description Whether to reopen the decision.
+             */
+            approve: boolean;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Request Id
+             * @description The request's id, from `decisions requests`.
+             */
+            request_id: number;
+        };
         /** ArtifactItem */
         ArtifactItem: {
             /** Audience */
@@ -2363,6 +2901,59 @@ export interface components {
              */
             project_id: string;
         };
+        /** ConfirmInput */
+        ConfirmInput: {
+            /**
+             * Order Id
+             * @description The order's id, from `orders list`.
+             */
+            order_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Text
+             * @description Your edited sentence, if any.
+             */
+            text?: string | null;
+        };
+        /** CorrectionItem */
+        CorrectionItem: {
+            /** Agent */
+            agent: string;
+            /** Expires At */
+            expires_at: string | null;
+            /** Id */
+            id: number;
+            /** Note */
+            note?: string | null;
+            /** Question */
+            question: string;
+            /** State */
+            state: string;
+            /** Words */
+            words: string;
+        };
+        /** CorrectionList */
+        CorrectionList: {
+            /** Items */
+            items: components["schemas"]["CorrectionItem"][];
+        };
+        /** CorrectionRef */
+        CorrectionRef: {
+            /**
+             * Correction Id
+             * @description The correction's id, from `corrections list`.
+             */
+            correction_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
         /** CreateInput */
         CreateInput: {
             /**
@@ -2414,6 +3005,55 @@ export interface components {
              * @description The credential's name.
              */
             name: string;
+        };
+        /** DecideInput */
+        DecideInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Text
+             * @description The topic, a colon, then your ruling: `Taxes: never include them`.
+             */
+            text: string;
+        };
+        /** DecisionItem */
+        DecisionItem: {
+            /**
+             * Decided At
+             * Format: date-time
+             */
+            decided_at: string;
+            /** Id */
+            id: number;
+            /** Note */
+            note?: string | null;
+            /** Ruling */
+            ruling: string;
+            /** State */
+            state: string;
+            /** Topic */
+            topic: string;
+        };
+        /** DecisionList */
+        DecisionList: {
+            /** Items */
+            items: components["schemas"]["DecisionItem"][];
+        };
+        /** DecisionRef */
+        DecisionRef: {
+            /**
+             * Decision Id
+             * @description The decision's id, from `decisions list`.
+             */
+            decision_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
         };
         /** Definition */
         Definition: {
@@ -2486,6 +3126,24 @@ export interface components {
              */
             done?: boolean;
         };
+        /** EditInput */
+        EditInput: {
+            /**
+             * Memory Id
+             * @description The entry's id, from `memory list`.
+             */
+            memory_id: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Text
+             * @description The corrected fact.
+             */
+            text: string;
+        };
         /**
          * Effort
          * @enum {string}
@@ -2496,6 +3154,19 @@ export interface components {
          * @description An operation with no input.
          */
         Empty: Record<string, never>;
+        /** EntryRef */
+        EntryRef: {
+            /**
+             * Memory Id
+             * @description The entry's id, from `memory list`.
+             */
+            memory_id: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
         /** EventItem */
         EventItem: {
             /** Actor */
@@ -2536,6 +3207,40 @@ export interface components {
              */
             via: string;
         };
+        /** Evidence */
+        Evidence: {
+            /**
+             * Kind
+             * @description artifact or message.
+             * @enum {string}
+             */
+            kind: "artifact" | "message";
+            /**
+             * Ref
+             * @description The artifact's name, or the message's id.
+             */
+            ref: string;
+        };
+        /** ExampleInput */
+        ExampleInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * What
+             * @description The example text, or the id of a message of yours to mark.
+             */
+            what: string;
+        };
+        /** ExampleItem */
+        ExampleItem: {
+            /** Is Example */
+            is_example: boolean;
+            /** Message Id */
+            message_id: number;
+        };
         /** Feed */
         Feed: {
             /** Items */
@@ -2558,6 +3263,24 @@ export interface components {
             text: string;
             /** Type */
             type: string;
+        };
+        /** FixInput */
+        FixInput: {
+            /**
+             * Message Id
+             * @description The agent's message. Default: the newest one in the chat.
+             */
+            message_id?: number | null;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Words
+             * @description What was wrong, in your own words.
+             */
+            words: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2831,6 +3554,35 @@ export interface components {
              */
             project_id: string;
         };
+        /** MemoryItem */
+        MemoryItem: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Id */
+            id: string;
+            /**
+             * Scope
+             * @description project, team <name>, agent <name>, or your preferences.
+             */
+            scope: string;
+            /** Source */
+            source: string | null;
+            /** Text */
+            text: string;
+            /**
+             * Untrusted
+             * @description It came from outside the project (P4).
+             */
+            untrusted: boolean;
+        };
+        /** MemoryList */
+        MemoryList: {
+            /** Items */
+            items: components["schemas"]["MemoryItem"][];
+        };
         /** MessageItem */
         MessageItem: {
             /**
@@ -2866,6 +3618,19 @@ export interface components {
             run_id: string | null;
             /** Thread Id */
             thread_id: number | null;
+        };
+        /** MessageRef */
+        MessageRef: {
+            /**
+             * Message Id
+             * @description The message's id.
+             */
+            message_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
         };
         /** MintMcpInput */
         MintMcpInput: {
@@ -2923,6 +3688,45 @@ export interface components {
             quality: string;
             /** Seats */
             seats: components["schemas"]["SeatModel"][];
+        };
+        /** OrderItem */
+        OrderItem: {
+            /**
+             * Being Shortened
+             * @description A shorter sentence is being written for you.
+             */
+            being_shortened: boolean;
+            /** Id */
+            id: number;
+            /**
+             * Note
+             * @description Something for you to act on, if any.
+             */
+            note?: string | null;
+            /** Proposed By */
+            proposed_by: string;
+            /** State */
+            state: string;
+            /** Text */
+            text: string;
+        };
+        /** OrderList */
+        OrderList: {
+            /** Items */
+            items: components["schemas"]["OrderItem"][];
+        };
+        /** OrderRef */
+        OrderRef: {
+            /**
+             * Order Id
+             * @description The order's id, from `orders list`.
+             */
+            order_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
         };
         /** OverrideLineupInput */
         OverrideLineupInput: {
@@ -3027,6 +3831,53 @@ export interface components {
              * @description The person's id, from `people list`.
              */
             person_id: string;
+        };
+        /** PinInput */
+        PinInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * What
+             * @description The order in one sentence, or the id of a message of yours to pin.
+             */
+            what: string;
+        };
+        /** PinnedView */
+        PinnedView: {
+            /** Agent Cap */
+            agent_cap: number;
+            /** Agent Tokens */
+            agent_tokens: number;
+            /** Project Cap */
+            project_cap: number;
+            /** Project Tokens */
+            project_tokens: number;
+            /** Seat */
+            seat: string;
+            /**
+             * Text
+             * @description Exactly what this agent is given at the start of every run.
+             */
+            text: string;
+        };
+        /** PreferenceInput */
+        PreferenceInput: {
+            /**
+             * Text
+             * @description A preference, such as "plain English".
+             */
+            text: string;
+        };
+        /** PreferenceRef */
+        PreferenceRef: {
+            /**
+             * Memory Id
+             * @description The preference's id, from `memory preferences`.
+             */
+            memory_id: string;
         };
         /** ProjectItem */
         ProjectItem: {
@@ -3151,6 +4002,50 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** RememberInput */
+        RememberInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Scope
+             * @description project, team <name> or agent <name>.
+             * @default project
+             */
+            scope?: string;
+            /**
+             * Text
+             * @description The fact to remember.
+             */
+            text: string;
+        };
+        /** RequestItem */
+        RequestItem: {
+            /** Approved */
+            approved: boolean | null;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** By */
+            by: string;
+            /** Decision Id */
+            decision_id: number;
+            /** Evidence */
+            evidence: components["schemas"]["Evidence"][];
+            /** Id */
+            id: number;
+            /** Reason */
+            reason: string;
+        };
+        /** RequestList */
+        RequestList: {
+            /** Items */
+            items: components["schemas"]["RequestItem"][];
+        };
         /** RoleItem */
         RoleItem: {
             /** Description */
@@ -3175,6 +4070,24 @@ export interface components {
             seats: components["schemas"]["SeatItem"][];
             /** Teams */
             teams: string[];
+        };
+        /** RuleInput */
+        RuleInput: {
+            /**
+             * Decision Id
+             * @description The decision's id, from `decisions list`.
+             */
+            decision_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Ruling
+             * @description Your new ruling.
+             */
+            ruling: string;
         };
         /** RunItem */
         RunItem: {
@@ -3273,14 +4186,29 @@ export interface components {
         };
         /** SeatItem */
         SeatItem: {
+            /**
+             * Corrections
+             * @description Times you said: not what I asked.
+             */
+            corrections?: number | null;
             /** Kind */
             kind: string;
             /** Lead */
             lead: boolean;
+            /**
+             * Listening Score
+             * @description Corrections per 100 replies. Lower is better.
+             */
+            listening_score?: number | null;
             /** Name */
             name: string;
             /** Pause Reason */
             pause_reason: string | null;
+            /**
+             * Replies
+             * @description Its replies in the project chat.
+             */
+            replies?: number | null;
             /** Role */
             role: string;
             /** State */
@@ -4694,6 +5622,104 @@ export interface operations {
             };
         };
     };
+    "corrections.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorrectionList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "corrections.record": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FixInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorrectionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "corrections.remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectionRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CorrectionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "credentials.add": {
         parameters: {
             query?: never;
@@ -4945,6 +5971,202 @@ export interface operations {
             };
         };
     };
+    "decisions.answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "decisions.decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "decisions.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "decisions.reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "decisions.requests": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "decisions.rule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RuleInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "directives.issue": {
         parameters: {
             query?: never;
@@ -4997,6 +6219,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DirectiveList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "examples.mark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExampleInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "examples.unmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExampleItem"];
                 };
             };
             /** @description Validation Error */
@@ -5311,6 +6599,326 @@ export interface operations {
             };
         };
     };
+    "memory.edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.forget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntryRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.forget_preference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenceRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description project, team <name> or agent <name>. Default: all of them. */
+                scope?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EntryRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinnedView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.pinned": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description An agent's name. Default: the CEO. */
+                seat?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PinnedView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.prefer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenceInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryList"];
+                };
+            };
+        };
+    };
+    "memory.remember": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RememberInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "memory.search": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description What to look for. */
+                query: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemoryList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "models.providers": {
         parameters: {
             query?: never;
@@ -5449,6 +7057,170 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ModelsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "orders.confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "orders.discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "orders.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "orders.pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PinInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "orders.retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrderItem"];
                 };
             };
             /** @description Validation Error */

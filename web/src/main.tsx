@@ -6,6 +6,7 @@ import { applyTheme, currentTheme } from "./theme";
 import "./styles/base.css";
 import "./styles/chat.css";
 import "./styles/panels.css";
+import "./styles/memory.css";
 
 applyTheme(currentTheme());
 registerServiceWorker();

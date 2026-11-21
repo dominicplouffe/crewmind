@@ -5,10 +5,12 @@ import { get, post, type Message } from "../api/client";
 import { useAuth } from "../auth";
 import { Composer, type ComposerHandle } from "../chat/Composer";
 import { HeaderStrip } from "../chat/HeaderStrip";
+import { ListeningDialogs } from "../chat/ListeningDialogs";
 import type { MessageHandlers } from "../chat/MessageItem";
 import { MessageList } from "../chat/MessageList";
 import { PANEL_ORDER, type PanelId, type PanelState } from "../chat/panels";
 import { lastMessageId } from "../chat/state";
+import { useListening } from "../chat/useListening";
 import { useProjectChat } from "../chat/useProjectChat";
 import { useUploads } from "../chat/useUploads";
 import { AlertsButton } from "../components/AlertsButton";
@@ -26,6 +28,7 @@ export function Project(): JSX.Element {
   const { signOut } = useAuth();
   const theme = useThemeContext();
   const { state, actions } = useProjectChat(projectId);
+  const listening = useListening(projectId, state, actions);
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [palette, setPalette] = useState(false);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -82,8 +85,9 @@ export function Project(): JSX.Element {
       onTrace: (runId) => setPanel({ id: "runs", runId }),
       onAccept: actions.acceptCard,
       onDismiss: actions.dismissCard,
+      ...listening.handlers,
     }),
-    [actions, jump],
+    [actions, jump, listening.handlers],
   );
 
   // Ctrl/Cmd+K opens the command palette from anywhere on the page.
@@ -218,6 +222,7 @@ export function Project(): JSX.Element {
             onDismissPending={actions.dismissPending}
             onDismissNotice={actions.dismissNotice}
             onInterrupt={() => void actions.interrupt()}
+            onEarlier={actions.loadEarlier}
           />
           {dragging ? <p className="drop-hint">{t.composer.dropHint}</p> : null}
           <Composer
@@ -243,9 +248,11 @@ export function Project(): JSX.Element {
             handlers={handlers}
             onClose={closePanel}
             onPanel={setPanel}
+            onChanged={actions.refresh}
           />
         ) : null}
       </div>
+      <ListeningDialogs listening={listening} />
       {palette ? <CommandPalette items={paletteItems} onClose={() => setPalette(false)} /> : null}
     </div>
   );

@@ -3,6 +3,8 @@
  * provide another object of the same shape. Text that comes from the server is shown as given.
  */
 
+import { listening, memory } from "./strings.memory";
+
 const plural = (count: number, one: string, many: string): string => `${count} ${count === 1 ? one : many}`;
 
 export const t = {
@@ -99,6 +101,7 @@ export const t = {
       models: "Models",
       settings: "Settings",
       runs: "Runs",
+      memory: "Memory",
       thread: "Thread",
     },
   },
@@ -227,7 +230,10 @@ export const t = {
     noModel: "No model is available for this agent.",
     asked: (modelClass: string, effort: string): string => `Asked for: ${modelClass}, ${effort} effort`,
     paidBy: (payer: string): string => `Paid by ${payer}`,
+    listening: (line: string): string => `Listening: ${line}`,
   },
+  listening,
+  memory,
   settings: {
     project: "This project",
     mine: "Only for you",

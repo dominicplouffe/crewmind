@@ -1,15 +1,15 @@
 /** Loads a project's chat, keeps it live over the stream, and falls back to polling when the stream drops. */
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
-import { ApiError, get, post, type Message } from "../api/client";
+import { ApiError, get, post, type Order } from "../api/client";
 import { openStream } from "../api/sse";
 import { isCommand } from "../lib/autocomplete";
 import { t } from "../strings";
+import { loadAfter, loadPage } from "./history";
 import { initialState, lastMessageId, reduce, type ChatState } from "./state";
 
 const REFRESH_DEBOUNCE_MS = 250;
 const POLL_EVERY_MS = 4000;
 const TYPING_QUIET_MS = 15000;
-const PAGE_SIZE = 200;
 
 export interface ChatActions {
   send(body: string, replyTo: number | null): Promise<void>;
@@ -22,6 +22,12 @@ export interface ChatActions {
   projectAction(action: "start" | "hold" | "resume"): Promise<void>;
   refresh(): void;
   reportError(error: unknown): void;
+  /** Loads the page of messages before the oldest one shown. */
+  loadEarlier(): Promise<void>;
+  /** Shows a line from the server in the chat (for example a note that came back with a result). */
+  say(text: string): void;
+  setOrder(order: Order): void;
+  setExample(messageId: number, marked: boolean): void;
 }
 
 let keyCounter = 0;
@@ -30,22 +36,12 @@ function nextKey(): string {
   return `local-${keyCounter}`;
 }
 
-async function loadHistory(projectId: string, after: number): Promise<Message[]> {
-  const items: Message[] = [];
-  let cursor: string | undefined = after > 0 ? String(after) : undefined;
-  for (;;) {
-    const page = await get("/v1/chat/history", { project_id: projectId, limit: PAGE_SIZE, after: cursor });
-    items.push(...page.items);
-    if (!page.next) return items;
-    cursor = page.next;
-  }
-}
-
 export function useProjectChat(projectId: string): { state: ChatState; actions: ChatActions } {
   const [state, dispatch] = useReducer(reduce, initialState);
   const stateRef = useRef(state);
   stateRef.current = state;
   const refreshTimer = useRef<number | null>(null);
+  const loadingEarlier = useRef(false);
 
   const reportError = useCallback((error: unknown) => {
     const api = error instanceof ApiError ? error : null;
@@ -76,6 +72,15 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
     } catch {
       // The header keeps its last value; the next change or poll retries.
     }
+    try {
+      const [orders, requests] = await Promise.all([
+        get("/v1/orders/list", { project_id: projectId }),
+        get("/v1/decisions/requests", { project_id: projectId }),
+      ]);
+      dispatch({ type: "listening", orders: orders.items, requests: requests.items });
+    } catch {
+      // Status lines keep the buttons they had; the next change or poll retries.
+    }
   }, [projectId]);
 
   const refresh = useCallback(() => {
@@ -92,10 +97,10 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
     let stream: ReturnType<typeof openStream> | null = null;
     dispatch({ type: "reset" });
     void refreshNow();
-    loadHistory(projectId, 0)
-      .then((items) => {
+    loadPage(projectId)
+      .then(({ items, earlier }) => {
         if (closed) return;
-        dispatch({ type: "messages", items, loaded: true });
+        dispatch({ type: "history", items, earlier });
         stream = openStream(
           projectId,
           { message: lastMessageId(items), event: null },
@@ -126,7 +131,7 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
   useEffect(() => {
     if (state.live || !state.loaded) return;
     const timer = window.setInterval(() => {
-      loadHistory(projectId, lastMessageId(stateRef.current.messages))
+      loadAfter(projectId, lastMessageId(stateRef.current.messages))
         .then((items) => dispatch({ type: "messages", items }))
         .catch(() => undefined);
       void refreshNow();
@@ -230,6 +235,35 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
       },
       refresh,
       reportError,
+      async loadEarlier() {
+        const before = stateRef.current.earlier;
+        if (before === null || loadingEarlier.current) return;
+        loadingEarlier.current = true;
+        try {
+          const page = await loadPage(projectId, before);
+          dispatch({ type: "history", items: page.items, earlier: page.earlier });
+        } catch (error) {
+          reportError(error);
+        } finally {
+          loadingEarlier.current = false;
+        }
+      },
+      say(text) {
+        dispatch({
+          type: "notice",
+          notice: {
+            key: nextKey(),
+            kind: "result",
+            title: text,
+            text: "",
+            hint: null,
+            data: null,
+            afterMessage: lastMessageId(stateRef.current.messages),
+          },
+        });
+      },
+      setOrder: (order) => dispatch({ type: "order", order }),
+      setExample: (messageId, marked) => dispatch({ type: "example", messageId, marked }),
     }),
     [deliver, projectId, refresh, refreshNow, reportError],
   );

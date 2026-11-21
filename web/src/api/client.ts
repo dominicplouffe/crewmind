@@ -7,6 +7,12 @@ export type Header = Schemas["Header"];
 export type Card = Schemas["CardItem"];
 export type Artifact = Schemas["ArtifactItem"];
 export type Project = Schemas["ProjectItem"];
+export type Order = Schemas["OrderItem"];
+export type Decision = Schemas["DecisionItem"];
+export type ReopenRequest = Schemas["RequestItem"];
+export type Correction = Schemas["CorrectionItem"];
+export type MemoryEntry = Schemas["MemoryItem"];
+export type Seat = Schemas["SeatItem"];
 
 type Operation<P extends keyof paths, M extends "get" | "post"> = NonNullable<paths[P][M]>;
 type PathsWith<M extends "get" | "post"> = {

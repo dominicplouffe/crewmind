@@ -1,9 +1,10 @@
 /** The read-only panels: activity feed, budget, models. */
-import { get } from "../api/client";
+import { get, type Seat } from "../api/client";
 import { Empty, ErrorNote, Loading } from "../components/common";
 import { formatDateTime, formatNumber, percent } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
+import { listeningLine } from "./memory/PinnedTab";
 
 interface Props {
   projectId: string;
@@ -112,7 +113,9 @@ export function BudgetPanel({ projectId, changes }: Props): JSX.Element {
 
 export function ModelsPanel({ projectId, changes }: Props): JSX.Element {
   const models = useLoad(() => get("/v1/models/show", { project_id: projectId }), [projectId, changes]);
+  const roster = useLoad(() => get("/v1/roster/show", { project_id: projectId }), [projectId, changes]);
   const data = models.data;
+  const agentOf = (name: string): Seat | undefined => roster.data?.seats.find((seat) => seat.name === name);
   return (
     <>
       <ErrorNote error={models.error} />
@@ -128,6 +131,11 @@ export function ModelsPanel({ projectId, changes }: Props): JSX.Element {
                 <p>{seat.model ? t.models.runsOn(seat.model, seat.provider ?? "") : t.models.noModel}</p>
                 <p className="quiet">{t.models.asked(seat.asked_class, seat.effort)}</p>
                 {seat.paid_by ? <p className="quiet">{t.models.paidBy(seat.paid_by)}</p> : null}
+                {agentOf(seat.seat) ? (
+                  <p className="quiet" data-testid="listening-score" title={t.listening.scoreHint}>
+                    {t.models.listening(listeningLine(agentOf(seat.seat) ?? {}))}
+                  </p>
+                ) : null}
                 {seat.note ? (
                   <p className="note" data-testid="substitution">
                     {seat.note}

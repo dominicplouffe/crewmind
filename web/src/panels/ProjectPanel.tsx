@@ -4,6 +4,7 @@ import type { PanelState } from "../chat/panels";
 import { lastMessageId, type ChatState } from "../chat/state";
 import { t } from "../strings";
 import { FilesPanel } from "./FilesPanel";
+import { MemoryPanel } from "./memory/MemoryPanel";
 import { PanelFrame } from "./PanelFrame";
 import { RunsPanel } from "./RunsPanel";
 import { SearchPanel } from "./SearchPanel";
@@ -18,9 +19,11 @@ interface Props {
   handlers: MessageHandlers;
   onClose(): void;
   onPanel(panel: PanelState): void;
+  /** Tells the page that a panel changed something in the project. */
+  onChanged(): void;
 }
 
-export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPanel }: Props): JSX.Element {
+export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPanel, onChanged }: Props): JSX.Element {
   const changes = state.changes;
   let body: JSX.Element;
   switch (panel.id) {
@@ -58,6 +61,17 @@ export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPan
           changes={changes}
           runId={panel.runId}
           onSelect={(runId) => onPanel({ id: "runs", runId })}
+        />
+      );
+      break;
+    case "memory":
+      body = (
+        <MemoryPanel
+          projectId={projectId}
+          changes={changes}
+          onChanged={onChanged}
+          onJump={handlers.onJump}
+          onFile={(file) => onPanel({ id: "files", file })}
         />
       );
       break;

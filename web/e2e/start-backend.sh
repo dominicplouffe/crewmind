@@ -24,6 +24,8 @@ export CREWMIND_PORT="$PORT"
 export CREWMIND_API="http://127.0.0.1:$PORT"
 export CREWMIND_SANDBOX_MODE=unisolated
 export CREWMIND_MOCK_SCRIPT_DIR="$RUN_DIR/scripts"
+# Recall memory runs in the server process: no model files and no network.
+export CREWMIND_MEMORY_ENGINE=in-process
 
 cd "$REPO_DIR"
 uv run -q crewmind setup --slim --admin-email dom@example.com --json > "$RUN_DIR/setup.json"

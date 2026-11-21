@@ -1,5 +1,5 @@
 /** The project chat's client state and the reducer that updates it. No rules: it stores what arrives. */
-import type { Card, Header, Message } from "../api/client";
+import type { Card, Header, Message, Order, ReopenRequest } from "../api/client";
 import type { ReplyChunk } from "../api/sse";
 
 export interface PendingMessage {
@@ -34,6 +34,13 @@ export interface ChatState {
   notices: Notice[];
   header: Header | null;
   cards: Record<number, Card>;
+  /** Standing orders and reopen requests by id, for the buttons on their status lines. */
+  orders: Record<number, Order>;
+  requests: Record<number, ReopenRequest>;
+  /** Example marks set or removed on this page, by message id. */
+  examples: Record<number, boolean>;
+  /** The id to ask before for the previous page of history; null when the first message is loaded. */
+  earlier: number | null;
   delivered: number[];
   loaded: boolean;
   live: boolean;
@@ -47,6 +54,10 @@ export const initialState: ChatState = {
   notices: [],
   header: null,
   cards: {},
+  orders: {},
+  requests: {},
+  examples: {},
+  earlier: null,
   delivered: [],
   loaded: false,
   live: false,
@@ -56,6 +67,10 @@ export const initialState: ChatState = {
 export type ChatAction =
   | { type: "reset" }
   | { type: "messages"; items: Message[]; loaded?: boolean }
+  | { type: "history"; items: Message[]; earlier: number | null }
+  | { type: "listening"; orders: Order[]; requests: ReopenRequest[] }
+  | { type: "order"; order: Order }
+  | { type: "example"; messageId: number; marked: boolean }
   | { type: "pending"; pending: PendingMessage }
   | { type: "delivered"; key: string; message: Message }
   | { type: "sendFailed"; key: string; message: string; hint: string | null }
@@ -95,6 +110,24 @@ export function reduce(state: ChatState, action: ChatAction): ChatState {
       const typing = state.typing.filter((t) => !doneRuns.has(t.runId) && !doneSeats.has(t.seat));
       return { ...state, messages, typing, loaded: state.loaded || Boolean(action.loaded) };
     }
+    case "history":
+      // A page of older messages (or the first page): it also says where the page before it starts.
+      return {
+        ...state,
+        messages: mergeMessages(state.messages, action.items),
+        earlier: action.earlier,
+        loaded: true,
+      };
+    case "listening":
+      return {
+        ...state,
+        orders: Object.fromEntries(action.orders.map((order) => [order.id, order])),
+        requests: Object.fromEntries(action.requests.map((request) => [request.id, request])),
+      };
+    case "order":
+      return { ...state, orders: { ...state.orders, [action.order.id]: action.order } };
+    case "example":
+      return { ...state, examples: { ...state.examples, [action.messageId]: action.marked } };
     case "pending":
       return { ...state, pending: [...state.pending, action.pending] };
     case "delivered":

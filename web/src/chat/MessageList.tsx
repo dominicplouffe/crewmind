@@ -1,5 +1,5 @@
 /** The scrolling chat: stored messages, local notices, messages being sent, and replies being written. */
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Message } from "../api/client";
 import { Empty, Loading, Markdown, Pre } from "../components/common";
 import { formatValue } from "../lib/format";
@@ -14,6 +14,7 @@ interface Props {
   onDismissPending(key: string): void;
   onDismissNotice(key: string): void;
   onInterrupt(): void;
+  onEarlier(): Promise<void>;
 }
 
 const NEAR_BOTTOM_PX = 160;
@@ -96,10 +97,44 @@ function TypingItem({ typing, doing, onInterrupt }: { typing: Typing; doing: str
   );
 }
 
-export function MessageList({ state, handlers, onRetry, onDismissPending, onDismissNotice, onInterrupt }: Props): JSX.Element {
+export function MessageList({
+  state,
+  handlers,
+  onRetry,
+  onDismissPending,
+  onDismissNotice,
+  onInterrupt,
+  onEarlier,
+}: Props): JSX.Element {
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
+  /** How far the view was from the end of the list when an earlier page was asked for. */
+  const fromEnd = useRef<number | null>(null);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const { messages, notices, pending, typing, header, cards } = state;
+  const firstId = messages[0]?.id ?? 0;
+
+  // Older messages go in above: keep the message the person was reading where it was.
+  useLayoutEffect(() => {
+    const element = scroller.current;
+    if (element && fromEnd.current !== null) {
+      element.scrollTop = Math.max(0, element.scrollHeight - fromEnd.current);
+      fromEnd.current = null;
+    }
+  }, [firstId]);
+
+  const showEarlier = async (): Promise<void> => {
+    const element = scroller.current;
+    if (element) {
+      fromEnd.current = element.scrollHeight - element.scrollTop;
+      stick.current = false;
+    }
+    setLoadingEarlier(true);
+    await onEarlier();
+    setLoadingEarlier(false);
+    // The button goes away when the first message is loaded: keep keyboard focus in the list.
+    if (!element?.contains(document.activeElement)) element?.focus({ preventScroll: true });
+  };
 
   const byId = useMemo(() => new Map(messages.map((message) => [message.id, message])), [messages]);
   const replyCounts = useMemo(() => {
@@ -132,6 +167,17 @@ export function MessageList({ state, handlers, onRetry, onDismissPending, onDism
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
     <div className="messages" ref={scroller} onScroll={onScroll} tabIndex={0} role="log" aria-live="polite" aria-label={t.chat.logLabel}>
       {!state.loaded ? <Loading label={t.chat.loading} /> : null}
+      {state.earlier !== null ? (
+        <button
+          type="button"
+          className="button small earlier"
+          disabled={loadingEarlier}
+          onClick={() => void showEarlier()}
+          data-testid="earlier"
+        >
+          {loadingEarlier ? t.listening.earlierBusy : t.listening.earlier}
+        </button>
+      ) : null}
       {state.loaded && messages.length === 0 && pending.length === 0 ? (
         <Empty
           title={t.chat.emptyTitle}
@@ -153,6 +199,9 @@ export function MessageList({ state, handlers, onRetry, onDismissPending, onDism
             card={cardFor(message, cards)}
             replies={replyCounts.get(message.id) ?? 0}
             handlers={handlers}
+            order={subjectOf(message, "order", state.orders)}
+            request={subjectOf(message, "request", state.requests)}
+            example={state.examples[message.id]}
           />
           {noticesAfter(message.id, index === messages.length - 1).map((notice) => (
             <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
@@ -172,6 +221,11 @@ export function MessageList({ state, handlers, onRetry, onDismissPending, onDism
       ))}
     </div>
   );
+}
+
+function subjectOf<T>(message: Message, key: "order" | "request", known: Record<number, T>): T | undefined {
+  const id = (message.detail as Record<string, unknown> | null)?.[key];
+  return typeof id === "number" ? known[id] : undefined;
 }
 
 function cardFor(message: Message, cards: ChatState["cards"]): ChatState["cards"][number] | undefined {

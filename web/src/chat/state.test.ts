@@ -36,4 +36,25 @@ describe("chat state", () => {
     state = reduce(state, { type: "sendFailed", key: "k", message: "The project is stopped.", hint: "Start a new one." });
     expect(state.pending[0]?.error).toEqual({ message: "The project is stopped.", hint: "Start a new one." });
   });
+
+  it("puts an earlier page above what is shown and remembers where the page before it starts", () => {
+    let state = reduce(initialState, { type: "history", items: [message(51), message(52)], earlier: 51 });
+    expect(state.loaded).toBe(true);
+    expect(state.earlier).toBe(51);
+    state = reduce(state, { type: "messages", items: [message(53)] });
+    expect(state.earlier).toBe(51);
+    state = reduce(state, { type: "history", items: [message(49), message(50), message(51)], earlier: null });
+    expect(state.messages.map((m) => m.id)).toEqual([49, 50, 51, 52, 53]);
+    expect(state.earlier).toBeNull();
+  });
+
+  it("keeps orders, reopen requests and example marks by id", () => {
+    const order = { id: 2, text: "Use metric units.", state: "proposed", proposed_by: "CEO", being_shortened: false };
+    let state = reduce(initialState, { type: "listening", orders: [order], requests: [] });
+    state = reduce(state, { type: "order", order: { ...order, state: "active" } });
+    expect(state.orders[2]?.state).toBe("active");
+    state = reduce(state, { type: "example", messageId: 7, marked: true });
+    state = reduce(state, { type: "example", messageId: 7, marked: false });
+    expect(state.examples).toEqual({ 7: false });
+  });
 });

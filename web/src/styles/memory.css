@@ -1,0 +1,112 @@
+/* Message menu, markers, small dialogs and the Memory panel. */
+.menu-wrap { position: relative; display: inline-block; }
+.menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.25rem);
+  z-index: 5;
+  min-width: 13rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.95rem;
+}
+.menu [role="menuitem"] {
+  background: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  min-height: 2.25rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.menu [role="menuitem"]:hover,
+.menu [role="menuitem"]:focus-visible {
+  background: var(--surface-2);
+}
+
+.marker {
+  display: inline-block;
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: var(--bg);
+  white-space: nowrap;
+}
+.status-actions { margin: 0.3rem 0; color: var(--text); }
+.status-result { margin: 0.2rem 0; }
+.earlier { display: block; margin: 0 auto 0.75rem; }
+
+dialog.modal {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: 90vh;
+  padding: 1rem;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+dialog.modal::backdrop { background: rgb(0 0 0 / 45%); }
+dialog.modal h2 { margin-top: 0; }
+.modal-form { display: grid; gap: 0.4rem; margin-top: 0.5rem; }
+.modal-form label { margin: 0; }
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+.tabs [role="tab"] {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  min-height: 2rem;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.tabs [role="tab"]:hover { background: var(--surface); }
+.tabs [role="tab"][aria-selected="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.text-form { display: grid; gap: 0.3rem; margin: 0.5rem 0 0.75rem; }
+.text-form label { margin: 0; }
+.records li {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.records p { margin: 0.2rem 0; }
+.records .row { margin-top: 0.3rem; }
+.record-text { font-weight: 500; }
+.records li.is-past .record-text { color: var(--muted); font-weight: 400; }
+.records dl.pairs dt { flex-basis: 5.5rem; }
+.evidence { margin-right: 0.6rem; }
+.meter { margin: 0.5rem 0; }
+.meter p { margin: 0 0 0.15rem; font-variant-numeric: tabular-nums; }
+.meter progress { width: 100%; }
+.pinned-text {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.6rem 0.8rem;
+  overflow-wrap: anywhere;
+}
+.pinned-text h1 { font-size: 1.15rem; }
+.pinned-text h2 { font-size: 1rem; }
