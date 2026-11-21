@@ -38,10 +38,6 @@ uv run python -m crewmind.domain.memory.fetch_model
 Set up a slim install (one process, SQLite) and start it. `unisolated` runs agents as plain processes, which is fine for a first look on your own machine; the default, `container`, needs Docker.
 
 ```bash
-uv sync
-```
-
-```bash
 uv run crewmind setup --slim --admin-email you@example.com
 ```
 
