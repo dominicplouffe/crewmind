@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
 from crewmind.domain.budget import service as budget
+from crewmind.domain.conversation import directives
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.conversation.service import Author, MessageKind
 from crewmind.domain.execution import notices, runs
@@ -146,6 +147,7 @@ async def dispatch(
     session: AsyncSession, settings: SettingsService, project: Project, now: datetime
 ) -> None:
     """One pass for one project: queue work runs, queue chat runs, post overdue statuses."""
+    await directives.release_waiting(session, project, now)
     allowed = await runs.allowed_kinds(session, project)
     seats = list(await session.scalars(select(Seat).where(Seat.project_id == project.id)))
     by_id = {seat.id: seat for seat in seats}

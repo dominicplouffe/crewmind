@@ -203,6 +203,15 @@ async def post_message(context: Context, payload: PostInput) -> MessageItem:
                 rule=MSG_1.id,
                 hint="Post in leadership or reply in the project chat.",
             )
+    from crewmind.domain.conversation.extras import check_pair
+
+    thread_id = 0
+    if reply_to is not None:
+        parent = await context.session.get(Message, reply_to)
+        thread_id = (parent.thread_id or parent.id) if parent is not None else 0
+    await check_pair(
+        context.session, services_of(context).settings, view.project, target, thread_id, context.now
+    )
     message = await conversation.post(
         context.session,
         target,

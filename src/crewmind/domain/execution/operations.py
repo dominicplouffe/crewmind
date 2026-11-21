@@ -300,7 +300,6 @@ async def trace(context: Context, payload: RunRef) -> RunTrace:
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
-    slash_command="/budget",
 )
 async def show_budget(context: Context, payload: ProjectRef) -> BudgetView:
     """GOV-2: used, remaining and the wall. Only non-cached tokens count."""

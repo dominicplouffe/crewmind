@@ -21,7 +21,6 @@ class Surface(StrEnum):
 # Surfaces not yet built, each with the phase that builds it. They are exempt as a whole
 # (IF-1.3). Remove an entry when its phase starts.
 UNBUILT_SURFACES: dict[Surface, str] = {
-    Surface.SLASH: "phase 2 (CHAT-5)",
     Surface.SLACK: "phase 8 (INT-5)",
 }
 

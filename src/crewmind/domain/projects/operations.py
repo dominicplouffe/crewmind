@@ -238,6 +238,7 @@ async def list_projects(context: Context, payload: PageRequest) -> ProjectList:
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
+    slash_command="/status",
 )
 async def status(context: Context, payload: ProjectRef) -> ProjectStatus:
     return await _status(context)

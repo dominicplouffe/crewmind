@@ -30,6 +30,7 @@ from crewmind.runtime import Runtime
 from crewmind.storage.migrate import alembic_config
 from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
+from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.mcp.server import CALLER_STATE, build_mcp
 
 MCP_PATH = "/mcp"
@@ -107,6 +108,7 @@ def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKE
         sandbox,
         api_url=runtime.config.agent_api,
         workspaces=runtime.config.data_dir / "workspaces",
+        blobs=runtime.services.blobs,
         workers=workers,
     )
 
@@ -153,6 +155,7 @@ def create_app(
     add_agent_api(
         app, catalog, runtime.executor, runtime.run_authenticator, runtime.gateway, runtime.settings
     )
+    add_file_routes(app, runtime.executor, runtime.authenticator, runtime.services)
 
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}

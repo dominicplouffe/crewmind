@@ -54,6 +54,7 @@ class Context:
     sessions: async_sessionmaker[AsyncSession]
     services: Any = None
     project: Any = None
+    executor: Any = None
     events: list[Event] = field(default_factory=list[Event])
 
     def record(
@@ -179,6 +180,7 @@ class Executor:
                 operation=operation,
                 sessions=self.sessions,
                 services=self.services,
+                executor=self,
             )
             if operation.authority.names_a_project:
                 context.project = await self._access.resolve(
@@ -208,6 +210,29 @@ class Executor:
                     )
                 )
             return result
+
+    async def call(self, context: Context, operation: Operation, payload: BaseModel) -> BaseModel:
+        """Carry out another operation inside the current call and its transaction, as the
+        same caller, with that operation's own authority check. This is how a chat slash
+        command runs the operation it names (IF-1.2)."""
+        authorize(operation, context.caller)
+        nested = Context(
+            caller=context.caller,
+            session=context.session,
+            now=context.now,
+            operation=operation,
+            sessions=context.sessions,
+            services=context.services,
+            executor=self,
+        )
+        if operation.authority.names_a_project:
+            nested.project = await self._access.resolve(
+                context.session,
+                context.caller,
+                getattr(payload, PROJECT_FIELD),
+                operation.authority,
+            )
+        return await operation.handler(nested, payload)
 
     async def _stored_result(
         self, session: AsyncSession, caller: Caller, operation: Operation, key: str | None

@@ -521,7 +521,6 @@ async def _models(context: Context) -> ModelsView:
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
-    slash_command="/quality",
 )
 async def show_models(context: Context, payload: ProjectRef) -> ModelsView:
     """LLM-4, P12: a substitution is always shown, never hidden."""
