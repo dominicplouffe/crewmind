@@ -83,7 +83,7 @@
   - Reviews never block work.
 - **HUM-10 Desk.** One definition of "waiting on you" used everywhere: pending approvals, open questions, proposed scope, owed verdicts, an unaccepted commitment, a delivery awaiting sign-off, expired bets, frozen threads, budget checkpoints. Snoozing is per person and cannot outlast the item's deadline; an item with no deadline returns within 7 days.
 - **HUM-11 Daily brief.**
-  - Built from the record at 0 tokens and sent once per local day at `brief.time` \[08:00\] for running, held and paused projects. It is on by default.
+  - Built from the record at 0 tokens and sent once per local day at `brief.time` \[08:00\] in the person's `person.timezone` for running, held and paused projects. It is on by default.
   - Sections:
     - worth your eye;
     - what moved;

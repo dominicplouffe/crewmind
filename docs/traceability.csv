@@ -37,16 +37,16 @@ CHAT-17,Multi-person,05-chat.md,2,yes,not started,,
 CHAT-18,Always-visible header,05-chat.md,2,yes,not started,,
 CHAT-19,Activity feed,05-chat.md,2,yes,not started,,
 CHAT-20,Everywhere,05-chat.md,2,yes,not started,,
-PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,not started,,
-PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,not started,,
-PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,not started,,
+PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
+PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
+PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-8,Operate cycles,06-01-projects-PRJ.md,5,yes,not started,,
-PRJ-9,Clone and export,06-01-projects-PRJ.md,1,yes,not started,,
-PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,not started,,
+PRJ-9,Clone and export,06-01-projects-PRJ.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
+PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 SPD-1,No clock waits on ready work,06-02-speed-SPD.md,5,yes,not started,,
 SPD-2,Parallel by default,06-02-speed-SPD.md,5,yes,not started,,
 SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,not started,,
@@ -256,11 +256,11 @@ IF-4.2,"A small, explicitly marked set of host-local commands may touch storag",
 IF-4.3,"Every command supports `--help` and `--json`. With `--json`, or with n",09-interfaces-IF.md,1,yes,not started,,
 IF-4.4,"Exit codes distinguish success, refusal by a rule, authentication fail",09-interfaces-IF.md,1,yes,not started,,
 IF-4.5,"Secrets are read from a hidden prompt, stdin or a file. They are never",09-interfaces-IF.md,1,yes,not started,,
-IF-4.6,Drafting a project in the terminal follows the Founder rules (FND-3):,09-interfaces-IF.md,1,yes,not started,,
-IF-4.7,"After creating a project, the CLI asks for any missing credentials the",09-interfaces-IF.md,1,yes,not started,,
+IF-4.6,Drafting a project in the terminal follows the Founder rules (FND-3):,09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
+IF-4.7,"After creating a project, the CLI asks for any missing credentials the",09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.8,`crewmind chat [project]` opens a full-screen terminal chat with the same ,09-interfaces-IF.md,2,yes,not started,,
-IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,not started,,
-IF-5.2,Scopes,09-interfaces-IF.md,6,yes,not started,,
+IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,not started,,Phase 1: minted bearer tokens only; OAuth in phase 6 (spec review R-11)
+IF-5.2,Scopes,09-interfaces-IF.md,6,yes,not started,,Phase 1: read scope only; other scopes in phase 6 (spec review R-11)
 IF-5.3,Two-phase confirmation,09-interfaces-IF.md,6,yes,not started,,
 IF-5.4,Attribution,09-interfaces-IF.md,6,yes,not started,,
 IF-5.5,Untrusted content,09-interfaces-IF.md,6,yes,not started,,
@@ -277,10 +277,10 @@ BG-2,Database notifications SHOULD be used to cut wake latency to near zero,10-b
 BG-3,Every scheduled job is idempotent and safe to run twice.,10-background-BG.md,1,yes,not started,,
 BG-4,Every automatic state change a job makes writes an event naming the jo,10-background-BG.md,1,yes,not started,,
 NFR-1,"Self-hosted, open source, no telemetry to the vendor (OpenTelemetry ex",11-nfr-NFR.md,1,yes,not started,,
-NFR-2,One idempotent install command for a server. It:,11-nfr-NFR.md,1,yes,not started,,
+NFR-2,One idempotent install command for a server. It:,11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 NFR-3,"The update command refuses a dirty checkout, backs up first, updates, ",11-nfr-NFR.md,1,yes,not started,,
 NFR-4,"Backup is one owner-readable archive holding the database, the master ",11-nfr-NFR.md,1,yes,not started,,
-NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,not started,,
+NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 NFR-6,The server binds to 127.0.0.1 by default. Publishing it requires TLS a,11-nfr-NFR.md,1,yes,not started,,
 NFR-7,Configuration has two kinds. **Operational** settings are environment ,11-nfr-NFR.md,1,yes,not started,,
 NFR-8,"Two databases are supported: Postgres with pgvector for a full server,",11-nfr-NFR.md,1,yes,not started,,

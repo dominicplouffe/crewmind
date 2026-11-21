@@ -2,6 +2,35 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.1 (21 Nov 2026): phase 0 spec review answers
+
+Owner answers to the blocking items in `docs/spec-review.md`.
+
+- **P5, WRK-6, INV-3, 7.3:** a solo project with independent read off may self-report observable-test tasks only. The exemption is now written into P5; command tests always need the platform check (R-01).
+- **GOV-3, PRJ-2, EXE-9, 7.7, 9.2, section 13:** at the budget wall, in-flight runs finish within `run.max_tokens` and nothing new is leased. A hold, a kill, the refusal cap and every other pause still revoke at once (R-02).
+- **7.1, PRJ-2:** projects carry a set of hold reasons (`chairman`, `budget_wall`, `auth_failures`, `skipped_cycles`), each lifted by its own trigger. `/resume` is refused while the wall holds (R-03).
+- **Section 3, section 7, ACC-5:**
+  - "Chairman" in a Who column means the chairman or a co-chair, except for delete and hand-on.
+  - Instance roles are `admin` and `member`; any active person may create a project and becomes its chairman.
+  - On hand-over, the previous chairman becomes a co-chair (R-04).
+- **NFR-10:** current state lives in tables. Each change writes its event in the same transaction. Reports come from the log or from rebuildable read models, and frozen snapshots are events (R-05).
+- **IF-1.2, IF-1.3:** `agent_api` is a catalog surface. Operations declare their principals, and surfaces not yet built are exempt as a whole, with their phase named (R-06).
+- **IF-4.2:** install, `up`, update and `migrate --to postgres` join the host-local commands (R-07).
+- **Section 7:**
+  - New tables cover accounts, single-use links, sessions and tokens, MCP confirm tokens, membership, teams and seats, cycles, artifact locks, evidence, side effects and watches, directives, action cards, standing orders, closed decisions, corrections, threads, chat sessions, suggestions and notices, model credentials, circuit breakers, tool permissions, mailboxes, drafting conversations and skill versions.
+  - New rows: platform defaults for proposed scope and commitments, cycle-roll reopening, platform blocking and killing of tasks, the chairman moving a commitment date, leased runs that never start, and flag, heads-up and mistake-report states.
+  - A lifecycle missing from section 7 must not be implemented.
+  - New interpretations to confirm in the phase plans: a seat is paused when its seat check fails; the artifact status label is derived on read, not stored (R-08).
+- **7.1, EXE-5:** a matrix states which run kinds may lease in each project state (R-09).
+- **GOV-1, Appendix A, section 3, ACC-3, PRJ-8, HUM-11, GOV-2:**
+  - New settings: `authority.preset` (with `custom`) and the six `authority.*` verb settings; `project.timezone` and `person.timezone`; `cycle.period`, `cycle.roll_day` (0 = Monday) and `cycle.due_time`; `token.default_expiry`.
+  - GOV-1 rules now differ by scope.
+  - Appendix A gains a Constraints list and an Operational settings table. The port, data directory and sandbox ranges there are starting defaults (R-10).
+- **PLAN.md, traceability.csv:**
+  - PRJ-9, IF-4.6 and IF-4.7 move to phase 7.
+  - Phase 1 takes minted MCP bearer tokens and the `read` scope from IF-5.1 and IF-5.2.
+  - PRJ-1, PRJ-2, PRJ-3, PRJ-10, NFR-2 and NFR-5 are built as extension points (R-11).
+
 ## Revision 2 (21 Nov 2026)
 
 - **Renamed** the project from yaaf to crewmind: product, package, CLI, environment variables, Slack and mail prefixes (ADR-0008).

@@ -6,6 +6,7 @@ There are three kinds of actor: people, machines acting for people, and agents. 
 | --- | --- | --- | --- |
 | Instance admin | person | Run the install, connect Slack, mail servers and outbound mail once, manage accounts, read every project (stated openly), hand a chair on in an emergency (recorded as a break-glass action) | Decide anything on a project they do not chair |
 | Chairman | person, one per project | Own the project; talk to any agent; pin standing orders, close decisions, issue directives; set goal, budget and quality; decide approvals; grant credentials and tool permissions; start, hold, stop, delete; lock artifacts; add or cut any scope | Be bypassed: decisions reserved to the chairman cannot be taken by an agent or a model client |
+| Instance member | person | Create projects, becoming their chairman; act on projects where they hold a role | See or act on a project where they hold no role (INV-5) |
 | Co-chair | person | Act as the chairman, except handing on the chair and deleting the project | Act after removal (the next request is refused) |
 | Observer | person | Read the project, including the chat | Write anything |
 | MCP client | machine for a person | What its scopes allow, on its person's projects, recorded as machine-mediated | Human-only verbs (IF-5.6); irreversible writes in one call |
@@ -22,16 +23,18 @@ There are three kinds of actor: people, machines acting for people, and agents. 
 - **CEO + team:** flat; the CEO talks to individuals.
 - **CEO + leads + workers:** the full hierarchy. A team with a single member leads itself.
 
-**Authority dial.** Six per-project settings decide who holds each delegable verb:
+**Instance roles.** Every person is an instance `admin` or `member` (ACC-5). Admins also have every member right. In section 7, "Chairman" in a Who column means the chairman or a co-chair, except for deleting the project and handing on the chair.
 
-1. Accepting CEO-proposed scope into the plan.
-2. Changing CEO-proposed scope (cut, reword, re-estimate, restage).
-3. Adopting the platform's projected date as the commitment. Nobody but the chairman ever writes a date.
-4. Giving verdicts on observable tests.
-5. Re-scoping existing credentials across roles.
-6. Drawing the CEO reserve to finish nearly-done work (GOV-10).
+**Authority dial.** Six per-project settings decide who holds each delegable verb (Appendix A):
 
-There are two presets:
+1. `authority.accept_scope`: accepting CEO-proposed scope into the plan.
+2. `authority.change_scope`: changing CEO-proposed scope (cut, reword, re-estimate, restage).
+3. `authority.date`: adopting the platform's projected date as the commitment. Nobody but the chairman ever writes a date.
+4. `authority.verdict`: giving verdicts on observable tests.
+5. `authority.credential_rescope`: re-scoping existing credentials across roles.
+6. `authority.reserve_draw`: drawing the CEO reserve to finish nearly-done work (GOV-10).
+
+There are two presets, set with `authority.preset`. Choosing a preset writes all six verb settings in one change. Changing a verb setting on its own makes the preset `custom`:
 
 - **Autonomous** is the default. Verbs 1, 2, 3, 5 and 6 go to the CEO. Verdicts (verb 4) go to an independent reviewer seat, never the CEO (P5).
 - **Supervised** gives all six to the chairman.

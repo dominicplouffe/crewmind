@@ -11,8 +11,11 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
   - a reversibility class: `read`, `reversible` or `irreversible`;
   - the audit actor it records;
   - its chat slash command, if any.
-- **IF-1.2** HTTP routes, CLI commands, MCP tools, slash commands and Slack actions are thin adapters generated from, or registered against, that catalog. No surface contains business rules of its own.
-- **IF-1.3** A conformance test enumerates the catalog. It fails when an operation is missing from a surface it belongs on, unless the catalog carries a written exemption reason for that surface. The same test checks that every decision-item kind appears on every surface listed in HUM-1.
+- **IF-1.2** HTTP routes, CLI commands, MCP tools, slash commands, Slack actions and agent API tools are thin adapters generated from, or registered against, that catalog. No surface contains business rules of its own. The surfaces are `api`, `cli`, `mcp`, `slash`, `slack` and `agent_api`.
+- **IF-1.3** A conformance test enumerates the catalog.
+  - Each operation declares the principals it serves (section 9.2): person, MCP client, agent run. It belongs on every surface those principals reach: a person reaches `api`, `cli`, `slash` and `slack`; an MCP client reaches `mcp`; an agent run reaches `agent_api`.
+  - The test fails when an operation is missing from a surface it belongs on, unless the catalog carries a written exemption reason for that operation and surface.
+  - A surface not yet built is exempt as a whole, with the phase that builds it named. Once that phase starts, the exemption is removed. The same test checks that every decision-item kind appears on every surface listed in HUM-1.
 - **IF-1.4** Refusals are identical on every surface: the same machine code, the same rule id, the same plain sentence naming the rule and the legitimate path forward, and the arithmetic where numbers are involved (GOV-9).
 
 ### 9.2 Principals
@@ -22,7 +25,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 | Person | Password, then a browser session or a named, expiring, revocable personal token | App, human API, CLI | Rights come from instance role and per-project role |
 | Slack user linked to a person | The install's Slack app, plus the person's linked Slack identity | The project's Slack channel | Acts as the person; recorded as "person via slack" |
 | MCP client | Its own token or OAuth grant, never the person's credential | MCP server | Narrowed by scope; acts for one person; every write recorded as "person via mcp:\<client>" |
-| Agent run | Per-run token: one run, one agent, one project | Agent API and model gateway only | Valid only while the run is live; revoked at end, hold, pause, wall or refusal cap |
+| Agent run | Per-run token: one run, one agent, one project | Agent API and model gateway only | Valid only while the run is live; revoked at end, kill, hold, a pause other than the budget wall (GOV-3), or the refusal cap |
 | External system | Per-project signing secret | Webhook intake | Signature and replay window checked before anything is stored |
 
 ### 9.3 Human HTTP API
@@ -40,7 +43,16 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 ### 9.4 CLI (`crewmind`)
 
 - **IF-4.1** One command, `crewmind`, talking to the server over the HTTP API. It is configured by `CREWMIND_API` (the server address) and either `crewmind login` (stores a personal token) or `CREWMIND_TOKEN`.
-- **IF-4.2** A small, explicitly marked set of host-local commands may touch storage directly, because they must work when the server is down: bootstrap the first admin or issue a password-reset link, backup, restore, master-key rotation. Nothing else may bypass the API.
+- **IF-4.2** A small, explicitly marked set of host-local commands may touch storage directly, because they must work when the server is down:
+  - install (NFR-2);
+  - `up`, which starts the services and migrates on start (NFR-2, NFR-23);
+  - update (NFR-3);
+  - `migrate --to postgres` (NFR-23);
+  - bootstrap the first admin, or issue a password-reset link;
+  - backup and restore (NFR-4);
+  - master-key rotation (ACC-6).
+
+  Each is marked host-local in the catalog and exempt from the `api`, `mcp`, `slash` and `slack` surfaces. Nothing else may bypass the API.
 - **IF-4.3** Every command supports `--help` and `--json`. With `--json`, or with no TTY: never prompt, write only data to stdout and diagnostics to stderr.
 - **IF-4.4** Exit codes distinguish success, refusal by a rule, authentication failure, not found, and server unreachable.
 - **IF-4.5** Secrets are read from a hidden prompt, stdin or a file. They are never echoed and never required as a command-line argument.

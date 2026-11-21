@@ -38,7 +38,7 @@
   - Completion routes the task:
     - command test → checking;
     - observable test → review (WRK-9);
-    - in a solo project with independent read off → done, labelled "self-reported".
+    - observable test in a solo project with independent read off → done, labelled "self-reported" (P5). A command test always goes to checking.
 - **WRK-7 Platform checks.**
   - A command test runs in a fresh sandbox with the workspace mounted and the pinned test files restored.
   - The sandbox has no model, no credentials and no tokens: 1 CPU, 1 GB, and a timeout of the lesser of `run.timeout` and 300 seconds.

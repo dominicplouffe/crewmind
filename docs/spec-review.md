@@ -9,6 +9,26 @@ How to read this:
 - Every other item is tagged with the phase it must be settled before (**before phase N**). Those go to the phase plan that first touches them; nothing below is decided by this document alone.
 - Mechanical checks that came back clean: every requirement id appears in the spec, in `PLAN.md` and in `traceability.csv` exactly once; every setting in Appendix A is cited by at least one requirement, and every backticked setting in the requirements exists in Appendix A.
 
+## Owner answers (21 Nov 2026)
+
+All blocking items are decided and applied to `docs/spec/` (CHANGELOG revision 2.1), `docs/PLAN.md` and `docs/traceability.csv`.
+
+| Item | Answer |
+| --- | --- |
+| R-01 | As recommended: P5 carries the solo exemption, for observable tests only |
+| R-02 | **Not as recommended.** At the budget wall, in-flight runs finish within `run.max_tokens`; this applies to the wall only. Hold, kill, the refusal cap and every other pause still revoke |
+| R-03 | As recommended: a set of hold reasons, each lifted by its own trigger |
+| R-04 | As recommended |
+| R-05 | As recommended: state tables plus a transactional event log |
+| R-06 | As recommended |
+| R-07 | As recommended |
+| R-08 | **Broader than recommended:** every missing lifecycle is drafted in section 7 now. The R-53, R-57, R-58, R-59 and R-60 fixes are applied as part of that. R-54, R-61 and R-62 stay open |
+| R-09 | As recommended |
+| R-10 | As recommended (all three parts) |
+| R-11 | As recommended |
+
+The non-blocking items below stay open and go to the plan of the phase each one names.
+
 ## Summary
 
 | Category | Blocking | Non-blocking |

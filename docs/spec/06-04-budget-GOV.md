@@ -1,15 +1,17 @@
 ### 6.4 Budget and governance (GOV)
 
-- **GOV-1 Settings.**
-  - Only the chairman or a co-chair changes a setting: in chat (`/budget`, `/quality`), in the settings panel, or through any API surface.
-  - Each change needs a reason of at least 10 characters, takes effect immediately, is versioned and audited, and is disclosed in the CEO's next context.
-  - An unknown setting name is refused, naming the closest real one. A bundle of changes is validated as a whole; a refused bundle changes nothing.
+- **GOV-1 Settings.** Who changes a setting, and how, depends on its scope (Appendix A):
+  - **Project settings:** only the chairman or a co-chair changes them, in chat (`/budget`, `/quality`), in the settings panel, or through any API surface. Each change needs a reason of at least 10 characters. It takes effect immediately, is versioned and audited, and is disclosed in the CEO's next context.
+  - **Person settings:** each person changes their own, with no reason. Every change is audited.
+  - **Install settings:** only an admin changes them, with a reason of at least 10 characters. Every change is versioned and audited.
+  - An unknown setting name is refused, naming the closest real one. A bundle of changes is validated as a whole, including the constraints in Appendix A; a refused bundle changes nothing.
   - Agents change no setting.
-- **GOV-2 Token budget.** One number, `budget.tokens`: a total for Explore and Deliver, or per calendar month (project timezone) for Operate. Spend counts non-cached tokens only: input not served from a cache (cache writes included) plus output. Cache reads are recorded in the ledger and shown, but do not count against the budget. The chat shows used, remaining and the wall at all times.
+  - Operational settings (NFR-7) are environment variables, read at start. They are not changed through the operation catalog.
+- **GOV-2 Token budget.** One number, `budget.tokens`: a total for Explore and Deliver, or per calendar month (`project.timezone`) for Operate. Spend counts non-cached tokens only: input not served from a cache (cache writes included) plus output. Cache reads are recorded in the ledger and shown, but do not count against the budget. The chat shows used, remaining and the wall at all times.
 - **GOV-3 The budget is the wall.** The wall is `budget.tokens`, plus the CEO reserve once it is drawn (GOV-10).
   - At `budget.warn_at` \[80%\]: a notice to the CEO and a line in the chat.
   - At `budget.wrapup_at` \[90%\]: **wrap-up mode**. New requirements and bets are refused. New tasks are refused unless they serve a requirement already in progress. A budget decision item asks the chairman to raise the budget or let the project land. Its default is to land.
-  - At the wall: if the CEO reserve is eligible, undrawn and held by the CEO, the platform draws it instead of pausing (GOV-10). Otherwise nothing new is leased, including chat runs; the platform answers chat with a status card instead. In-flight runs finish, each bounded by its per-run cap. The project pauses. The chairman gets an alarm and a platform-built "where things stand" report listing every deliverable so far.
+  - At the wall: if the CEO reserve is eligible, undrawn and held by the CEO, the platform draws it instead of pausing (GOV-10). Otherwise nothing new is leased, including chat runs; the platform answers chat with a status card instead. In-flight runs finish, each bounded by its per-run cap; their tokens stay valid until they end. This is the only pause that lets live runs finish (PRJ-2). The project pauses. The chairman gets an alarm and a platform-built "where things stand" report listing every deliverable so far.
   - Operate budgets reset at month start. An Operate project paused at the wall resumes automatically into one new cycle.
 - **GOV-4 Budget advice.** The Founder proposes a budget as a range, from the plan's adjusted runs × median tokens per run on this install, or from the reference estimates shipped with each crew (LIB-2) when there is no history. During a project, the burn rate (median tokens per active hour over the last 24 active hours, shown once at least 10 runs exist) and the projected spend at completion are always visible.
 - **GOV-5 Raise requests.** Only the CEO may ask for a higher budget or concurrency. The request carries its arithmetic and what happens if it is declined. A budget raise is refused while less than half the budget is used and the projection fits within it. Approving applies the change; the chairman may grant a different number. A "yes" never lowers anything.

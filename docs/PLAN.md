@@ -36,7 +36,10 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** projects exist, are governed by versioned settings, and are reachable from API, CLI and MCP (read).
 - **Exit demo:** in slim mode (`crewmind up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
-- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-9, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-4, INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5, IF-4.6, IF-4.7; BG-1, BG-2, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
+- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-4, INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-2, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
+- **Partial ids** (spec review R-11):
+  - **MCP:** IF-5.1 is delivered here only as minted bearer tokens, and IF-5.2 only as the `read` scope, so the exit demo can use an MCP client. OAuth and the other scopes stay in phase 6.
+  - **Extension points:** PRJ-1 start checks, PRJ-2 pause causes, PRJ-3 and PRJ-10 stop and purge hooks, NFR-2 install steps and NFR-5 doctor checks are built as registries. Later phases add their checks (seat check, budget, email, Slack, libraries) without changing project code. Each missing piece is noted in `traceability.csv`.
 
 ## Phase 2: Chat and execution
 
@@ -79,7 +82,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 - **Goal:** start a project by talking. A pasted document is grilled before anything is drafted.
 - **Includes:** importing v1 content from `content/` (roles, crews, doctrine, goal grammar).
 - **Exit demo:** the Founder acceptance scenario passes, grilling included. The full v2.0 acceptance suite passes; the Standards item and the Slack column of surface parity are deferred.
-- **Ids:** FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
+- **Ids:** PRJ-9; IF-4.6, IF-4.7; FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
 
 ## Phase 8: Breadth (after v2.0)
 

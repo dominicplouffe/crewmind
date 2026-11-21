@@ -23,7 +23,11 @@
 
 - **NFR-8** Two databases are supported: Postgres with pgvector for a full server, and SQLite for slim installs (NFR-23). Every test and every migration runs against both in CI, and domain logic never depends on one database's features except behind a storage adapter. On Postgres, leasing uses row-level skip-locking. All timestamps are timezone-aware and stored in UTC; local times use each project's timezone.
 - **NFR-9** The dispatcher, scheduler, leasing, gateway and API all recover on their own after every pooled database connection drops.
-- **NFR-10** Schema changes are forward-only migrations applied at start. Reports are derived from the append-only event log when read; a computed summary is never stored as the truth.
+- **NFR-10** Schema changes are forward-only migrations applied at start. State and history are kept as follows:
+  - **Current state** lives in ordinary tables.
+  - Every state change writes its typed event (actor, time, before and after) in the **same transaction** (INV-21).
+  - **Reports and feeds** are derived from the append-only event log, directly or through read models. A read model can always be rebuilt from the log and is never edited by hand. A computed summary is never stored as the truth.
+  - **Frozen snapshots** (receipts, scorecards, status-review numbers) are recorded as events: point-in-time records, never the current state.
 
 **Security and privacy**
 

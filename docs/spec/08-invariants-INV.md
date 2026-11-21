@@ -16,7 +16,7 @@ These must hold at all times, under any sequence of API calls, crashes and retri
   - a change to a locked artifact;
   - a change to chairman-authored scope.
 - **INV-2** No task reaches done on a command test except by a platform-run check of the pinned command that exited 0 (WRK-5, WRK-7).
-- **INV-3** No agent completes, reviews or gives the verdict on work it did, and no agent claims a task whose success test it wrote while another active agent exists (P5, WRK-4, WRK-9). Solo projects are exempt and labelled.
+- **INV-3** No agent completes, reviews or gives the verdict on work it did, and no agent claims a task whose success test it wrote while another active agent exists (P5, WRK-4, WRK-9). Solo projects are exempt and labelled, for observable tests only (P5).
 - **INV-4** A run token works only for its own run, agent and project, and only while the run is live and not revoked.
 - **INV-5** A person or client that cannot see a project gets the same answer as for a project that does not exist.
 - **INV-6** No secret value, provider key included, appears in any sandbox, agent-facing response, export, clone, spec, rehearsal or log. The only exception is role credentials granted by name (EXE-13), plus the stated subscription-harness exception (LLM-8).
