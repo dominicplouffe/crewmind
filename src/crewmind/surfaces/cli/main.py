@@ -16,6 +16,7 @@ from collections.abc import Callable, Coroutine
 from enum import IntEnum
 from typing import Any, cast
 
+import httpx
 import typer
 from pydantic import BaseModel, ValidationError
 from typer.core import TyperGroup
@@ -240,13 +241,15 @@ def build_cli(source: Catalog, invoker: Invoker, local_invoker: Invoker) -> type
             continue
         group = groups.get(operation.group)
         if group is None:
-            group = typer.Typer(no_args_is_help=True)
+            group = typer.Typer(no_args_is_help=operation.group not in CLIENT_COMMANDS)
             groups[operation.group] = group
             app.add_typer(group, name=command_name(operation.group))
         group.command(name=command_name(operation.verb))(command)
     for alias, target in ALIASES.items():
         if target in commands:
             app.command(name=alias)(commands[target])
+    if "chat" in groups:
+        add_chat_command(groups["chat"])
     return app
 
 
@@ -256,19 +259,30 @@ terminal (IF-4.8): it calls `chat.*`, `runs.interrupt` and the live stream, and 
 operation of its own."""
 
 
-def add_chat_command(app: typer.Typer) -> None:
-    @app.command(name="chat", help="Open a project's chat in the terminal.")
+def add_chat_command(group: typer.Typer) -> None:
+    """`crewmind chat` with no subcommand opens the project chat in the terminal."""
+
+    @group.callback(invoke_without_command=True, help="Open a project's chat in the terminal.")
     def chat(  # pyright: ignore[reportUnusedFunction]
-        project: str = typer.Argument(
-            None, help="The project's id or name. Default: your only one."
+        context: typer.Context,
+        project: str = typer.Option(
+            None, "--project", help="The project's id or name. Default: your only one."
         ),
     ) -> None:
+        if context.invoked_subcommand is not None:
+            return
         from crewmind.surfaces.cli.chat.app import ChatApp
         from crewmind.surfaces.cli.chat.client import ChatClient, ChatError
 
         client = ChatClient(http_client_factory(api_address()), current_token())
         try:
             projects = asyncio.run(client.projects())
+        except httpx.TransportError as error:
+            typer.echo(
+                f"The server at {api_address()} did not answer. Start it with `crewmind up`.",
+                err=True,
+            )
+            raise typer.Exit(ExitCode.ERROR) from error
         except (ChatError, OSError) as error:
             typer.echo(str(error), err=True)
             raise typer.Exit(ExitCode.ERROR) from error
@@ -303,5 +317,4 @@ def main() -> None:
     load_domain_modules()
     invoker = HttpInvoker(http_client_factory(api_address()), current_token)
     app = build_cli(catalog, invoker, LocalInvoker(host_executor))
-    add_chat_command(app)
     app()

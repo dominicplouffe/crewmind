@@ -118,3 +118,32 @@ async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
     assert out.exit_code == 0
     assert not CliState.path().exists()
     assert (await app.call("auth.whoami", state.token)).status_code == 401
+
+
+def test_IF_4_8_crewmind_chat_opens_the_terminal_chat_and_keeps_its_subcommands(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """IF-4.8, CHAT-1: `crewmind chat` with no subcommand opens the project chat in the
+    terminal; `crewmind chat send` and the other chat commands still exist beside it."""
+    from crewmind.surfaces.cli.chat.app import ChatApp
+    from crewmind.surfaces.cli.chat.client import ChatClient
+
+    opened: list[str] = []
+
+    async def projects(self: ChatClient) -> list[dict[str, str]]:
+        return [{"project_id": "p1", "name": "Atlas"}, {"project_id": "p2", "name": "Borealis"}]
+
+    monkeypatch.setattr(ChatClient, "projects", projects)
+    monkeypatch.setattr(ChatApp, "run", lambda self: opened.append(self.title or ""))  # pyright: ignore[reportUnknownLambdaType, reportUnknownMemberType, reportUnknownArgumentType]
+    load_domain_modules()
+    invoker = invoker_for(None)  # type: ignore[arg-type]
+    cli = build_cli(catalog, invoker, invoker)
+    runner = CliRunner()
+
+    unclear = runner.invoke(cli, ["chat"])
+    assert unclear.exit_code == ExitCode.USAGE
+    assert "Atlas, Borealis" in unclear.output
+    assert runner.invoke(cli, ["chat", "--project", "Borealis"]).exit_code == 0
+    assert len(opened) == 1
+    assert "Send a message" in runner.invoke(cli, ["chat", "send", "--help"]).output
+    assert len(opened) == 1
