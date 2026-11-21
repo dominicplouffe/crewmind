@@ -4,7 +4,7 @@
   - The **project chat** holds the chairman, co-chairs, observers (read-only), the CEO and any agent addressed in it. There is also **leadership** (CEO and leads) and one room per team.
   - People can read every channel but post only in the project chat. Agents read and post only in their own channels.
   - Posting into a team room with no other members is refused.
-  - Messages are 1–20,000 characters and may be threaded.
+  - Messages are 1–20,000 characters and may be threaded. A chat reply that would be longer is posted cut at the limit with a note saying so, so the person always gets an answer.
 - **MSG-2 Who speaks in the project chat.** The CEO may post at any time, subject to MSG-8. Other agents post only when addressed, or when replying in a thread they were addressed in. Agents never address the chairman through other channels.
 - **MSG-3 Directives.**
   - A directive is created only by `/do <instruction>` or by the chairman pressing "Do it" on an action card (CHAT-7).

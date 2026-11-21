@@ -18,24 +18,24 @@ P16,The chairman says it once,02-principles.md,all,yes,not started,,
 P17,Never silent,02-principles.md,all,yes,not started,,
 P18,Plain words,02-principles.md,all,yes,not started,,
 CHAT-1,Front door,05-chat.md,2,yes,partial,test_IF_4_8_crewmind_chat_opens_the_terminal_chat_and_keeps_its_subcommands,"Opening a project opens its chat, in the app and the terminal. The Founder front door is phase 5; Slack is phase 6"
-CHAT-2,Talk to anyone,05-chat.md,2,yes,done,test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process,
-CHAT-3,Never silent,05-chat.md,2,yes,partial,test_IF_4_8_the_terminal_chat_sends_streams_and_runs_commands; test_CHAT_3_a_stopped_or_held_project_answers_honestly; test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds; test_IF_3_6_the_stream_carries_messages_changes_and_the_words_of_a_reply,"Delivered at once, live line, streaming and the 60 s status built. The 5 s warm-start target is not measured"
-CHAT-4,Composer,05-chat.md,2,yes,not started,,
+CHAT-2,Talk to anyone,05-chat.md,2,yes,done,test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process; test_CHAT_2_history_opens_at_the_newest_messages_and_pages_back,
+CHAT-3,Never silent,05-chat.md,2,yes,partial,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_IF_4_8_the_terminal_chat_sends_streams_and_runs_commands; test_CHAT_3_a_stopped_or_held_project_answers_honestly; test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds; test_IF_3_6_the_stream_carries_messages_changes_and_the_words_of_a_reply,"Delivered at once, live line, streaming and the 60 s status built. The 5 s warm-start target is not measured"
+CHAT-4,Composer,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""@ completes agents..."", ""attach by drag-and-drop..."", ""the reply bubble grows... Esc stops the run""; test_CHAT_4_a_reply_in_progress_can_be_interrupted; test_CHAT_4_a_stopped_reply_does_not_start_again_by_itself","Built: markdown box, slash and @ completion for agents and teams, attach three ways, history, resend, Esc, palette. Mentions of artifacts, requirements and tasks wait for those domains"
 CHAT-5,Slash commands,05-chat.md,2,yes,done,test_CHAT_5_a_slash_command_is_the_operation_it_names,
 CHAT-6,Conversation versus command,05-chat.md,2,yes,done,test_INV_23_a_chat_run_changes_no_state; test_MSG_3_chat_words_change_state_only_through_a_directive,
 CHAT-7,Action cards,05-chat.md,2,yes,done,test_CHAT_7_an_action_card_does_nothing_until_the_chairman_accepts_it,
 CHAT-8,"Pin, decide, fix, example",05-chat.md,3,yes,not started,,
-CHAT-9,Uploads,05-chat.md,2,yes,partial,test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,Uploads become artifacts. Describing images for agents without vision is not built
-CHAT-10,Rich rendering,05-chat.md,2,yes,not started,,
+CHAT-9,Uploads,05-chat.md,2,yes,partial,test_CHAT_9_an_upload_alone_starts_no_reply_and_costs_nothing; test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,Uploads become artifacts. Describing images for agents without vision is not built
+CHAT-10,Rich rendering,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""a sent message shows as delivered and the reply streams in""; web/src/lib/markdown.test.ts","Markdown, code, tables, images, previews, action cards, folding. Decision cards and plan or run progress cards arrive with phases 3 and 4"
 CHAT-11,Answer the question asked,05-chat.md,3,yes,not started,,
 CHAT-12,Listening score,05-chat.md,3,yes,not started,,
 CHAT-13,Brevity,05-chat.md,3,yes,not started,,
 CHAT-14,Threads and search,05-chat.md,2,yes,partial,test_CHAT_14_search_header_and_feed,Search over messages and file names. Memory search arrives in phase 3
 CHAT-15,Since you were away,05-chat.md,6,yes,not started,,
-CHAT-16,Artifact previews,05-chat.md,2,yes,not started,,
+CHAT-16,Artifact previews,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""upload files and preview them..."", ""attach by drag-and-drop and by paste...""; web/src/lib/csv.test.ts; web/src/panels/Compare.test.tsx","Markdown, text, code, images, CSV, sandboxed HTML and compare tested. PDF, audio and video use the browser players and are only checked for the right element. Spreadsheet (xlsx) preview not built"
 CHAT-17,Multi-person,05-chat.md,2,yes,done,test_CHAT_14_search_header_and_feed,
-CHAT-18,Always-visible header,05-chat.md,2,yes,not started,,
-CHAT-19,Activity feed,05-chat.md,2,yes,not started,,
+CHAT-18,Always-visible header,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""create and start a project"", ""/hold changes the header and /resume changes it back""; test_CHAT_14_search_header_and_feed","Now, budget, state and holds shown. Next and Waiting on you fill in with the agenda and the desk (phases 3 and 4)"
+CHAT-19,Activity feed,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""the command palette opens panels; ... activity ...""",Feed shows every state change in plain words. Links to requirements or bets arrive with planning
 CHAT-20,Everywhere,05-chat.md,2,yes,partial,test_CHAT_20_a_subscription_cannot_point_the_server_at_another_host; test_CHAT_20_a_subscription_the_push_service_dropped_is_removed; test_CHAT_20_alarm_reaches_only_the_projects_people_and_no_secret_leaves,"Responsive, installable, push alerts for platform pauses, terminal chat. Alert levels are phase 6; Slack is phase 6. Push is not tested against a real push service"
 PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py,"Start checks are a registry; phase 1 has none to add. Seat, budget and email checks arrive in phases 2 and 8"
 PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Chairman hold, resume time and the hold-reason set are built. The triggers for budget_wall, auth_failures and skipped_cycles arrive in phases 2 and 5"
@@ -112,14 +112,14 @@ WRK-16,Side effects,06-06-work-WRK.md,4,yes,not started,,
 WRK-17,Watches,06-06-work-WRK.md,4,yes,not started,,
 ART-1,Every file is an artifact,06-07-artifacts-ART.md,2,yes,done,test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,
 ART-2,The workspace is visible,06-07-artifacts-ART.md,2,yes,done,test_ART_6_files_and_project_storage_stay_within_their_limits,
-ART-3,One deliverables list,06-07-artifacts-ART.md,2,yes,not started,,
-ART-4,Preview and download,06-07-artifacts-ART.md,2,yes,not started,,
+ART-3,One deliverables list,06-07-artifacts-ART.md,2,yes,done,"web/e2e/app.spec.ts: ""lock a file, mark an upload as reference, and compare two versions""",
+ART-4,Preview and download,06-07-artifacts-ART.md,2,yes,done,"web/e2e/app.spec.ts: ""upload files and preview them..."", ""lock a file ... compare two versions""",
 ART-5,Chairman locks,06-07-artifacts-ART.md,2,yes,done,test_ART_5_agents_cannot_change_a_locked_artifact,
 ART-6,Limits,06-07-artifacts-ART.md,2,yes,done,test_ART_6_files_and_project_storage_stay_within_their_limits,
 ART-7,Reading,06-07-artifacts-ART.md,2,yes,done,test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,
 ART-8,Uploads,06-07-artifacts-ART.md,2,yes,done,test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,
 ART-9,Names,06-07-artifacts-ART.md,2,yes,done,test_ART_3_a_deliverable_has_a_plain_name_and_one_per_purpose,
-MSG-1,Channels,06-08-conversation-MSG.md,2,yes,done,test_MSG_2_only_the_ceo_speaks_unaddressed_in_the_project_chat,
+MSG-1,Channels,06-08-conversation-MSG.md,2,yes,done,test_MSG_2_only_the_ceo_speaks_unaddressed_in_the_project_chat; test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers,
 MSG-2,Who speaks in the project chat,06-08-conversation-MSG.md,2,yes,done,test_MSG_2_only_the_ceo_speaks_unaddressed_in_the_project_chat,
 MSG-3,Directives,06-08-conversation-MSG.md,2,yes,done,test_INV_20_a_directive_on_a_held_project_waits_until_it_resumes; test_MSG_3_chat_words_change_state_only_through_a_directive,Moved by the phase 2 plan
 MSG-4,Standing orders,06-08-conversation-MSG.md,3,yes,not started,,
@@ -148,7 +148,7 @@ EXE-1,Roster,06-10-execution-EXE.md,2,yes,done,test_EXE_1_the_roster_is_one_ceo_
 EXE-2,Wake triggers,06-10-execution-EXE.md,2,yes,done,test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,
 EXE-3,Run kinds and limits,06-10-execution-EXE.md,2,yes,done,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit,
 EXE-4,Explain every hold,06-10-execution-EXE.md,2,yes,partial,test_CHAT_14_search_header_and_feed,"Hold reasons show in the chat header, the feed and a chat status. The agenda arrives with planning"
-EXE-5,Leasing,06-10-execution-EXE.md,2,yes,done,test_INV_12_racing_runners_never_take_the_same_run,
+EXE-5,Leasing,06-10-execution-EXE.md,2,yes,done,test_EXE_5_a_task_cancelled_mid_query_does_not_keep_the_write_lock; test_INV_12_racing_runners_never_take_the_same_run,
 EXE-6,Pinning,06-10-execution-EXE.md,2,yes,done,test_EXE_6_a_run_keeps_what_it_was_leased_with,
 EXE-7,Liveness,06-10-execution-EXE.md,2,yes,done,test_EXE_7_a_killed_runner_is_reaped_and_its_late_result_changes_nothing,
 EXE-8,Retries and recovery,06-10-execution-EXE.md,2,yes,done,test_EXE_7_a_killed_runner_is_reaped_and_its_late_result_changes_nothing; test_EXE_8_a_run_is_retried_three_times_then_given_up_in_the_open,
@@ -223,7 +223,7 @@ INV-7,Agent-written text is always wrapped as untrusted when it reaches a pe,08-
 INV-8,"Every model call has a ledger line, whatever the run's ending (P9, LLM",08-invariants-INV.md,2,yes,done,test_INV_8_every_model_call_is_metered_whatever_the_runs_ending; test_runner_crash_mid_run_breaks_no_execution_invariant,
 INV-9,Token spend never exceeds the wall by more than the tokens of runs alr,08-invariants-INV.md,2,yes,done,test_GOV_3_at_the_wall_the_project_pauses_and_nothing_new_starts; test_INV_9_spend_past_the_wall_is_bounded_by_the_runs_in_flight,
 INV-10,"Real-world spend never exceeds `spend.monthly_cap`, counting committed",08-invariants-INV.md,6,yes,not started,,Moved by the phase 2 plan
-INV-11,A project with no wake trigger (EXE-2) and no message from a person sp,08-invariants-INV.md,2,yes,done,test_INV_11_an_idle_project_spends_nothing,
+INV-11,A project with no wake trigger (EXE-2) and no message from a person sp,08-invariants-INV.md,2,yes,done,test_CHAT_9_an_upload_alone_starts_no_reply_and_costs_nothing; test_INV_11_an_idle_project_spends_nothing,
 INV-12,"At most one runner holds a given run, and no run is both queued and ru",08-invariants-INV.md,2,yes,done,test_INV_12_racing_runners_never_take_the_same_run; test_runner_crash_mid_run_breaks_no_execution_invariant,
 INV-13,At most one queued or running work run per agent; work concurrency nev,08-invariants-INV.md,2,yes,done,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_runner_crash_mid_run_breaks_no_execution_invariant,
 INV-14,"A side effect recorded under an idempotency key fires at most once, ac",08-invariants-INV.md,4,yes,not started,,Moved by the phase 2 plan
@@ -236,7 +236,7 @@ INV-20,"A held, paused, stopped, ready or completed project changes no work st",
 INV-21,"Every state change appears in the event log with its actor (person, pe",08-invariants-INV.md,1,yes,done,tests/scenarios/test_phase_1_exit_demo.py; tests/unit/test_execute.py,
 INV-22,The agenda's next wake equals the dispatcher's next wake.,08-invariants-INV.md,6,yes,not started,,
 INV-23,"A chat run changes no state except posting, writing its own memory not",08-invariants-INV.md,3,yes,not started,,
-INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,done,test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds,
+INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,done,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds,
 INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,not started,,
 INV-26,"A closed decision is reopened only by the chairman, or by a reopen req",08-invariants-INV.md,3,yes,not started,,
 IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,done,tests/unit/test_catalog.py,
@@ -290,12 +290,12 @@ NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11
 NFR-11,"Every route declares its authorization, enforced before the handler ru",11-nfr-NFR.md,1,yes,done,tests/attack/test_access.py,
 NFR-12,Secrets are encrypted at rest under the master key. Tokens are stored ,11-nfr-NFR.md,1,yes,done,tests/attack/test_accounts.py; tests/attack/test_secrets.py,
 NFR-13,The OAuth server for MCP enforces:,11-nfr-NFR.md,6,yes,not started,,
-NFR-14,SECURITY.md states:,11-nfr-NFR.md,1,yes,partial,,"SECURITY.md written for phase 1; sections for agents, gateway, skills and browser are marked not built yet"
+NFR-14,SECURITY.md states:,11-nfr-NFR.md,1,yes,partial,,"SECURITY.md updated for phase 2: sandboxes, gateway, web app, push. Skills and browser sections come with those features"
 NFR-15,Retention,11-nfr-NFR.md,1,yes,partial,tests/unit/test_scheduler.py,Deleting a project purges everything. Trace and snapshot retention arrive in phase 2
 NFR-16,"Deciding whether an agent has work costs no tokens. Briefs, agendas, r",11-nfr-NFR.md,1,yes,partial,,Not yet exercised: nothing in phase 1 can spend tokens
 NFR-17,Latency targets:,11-nfr-NFR.md,all,yes,not started,,
-NFR-18,The app meets WCAG 2.2 AA:,11-nfr-NFR.md,all,yes,not started,,
-NFR-19,Test layers,11-nfr-NFR.md,all,yes,not started,,
+NFR-18,The app meets WCAG 2.2 AA:,11-nfr-NFR.md,all,yes,partial,"web/e2e/app.spec.ts: accessibility scans (axe, WCAG 2 A and AA) of sign-in, project list and project page in both themes; web/e2e/device.spec.ts","No violations found by the scans. Not checked with a screen reader by a person. Reduced motion is CSS only. One strings catalog, English only"
+NFR-19,Test layers,11-nfr-NFR.md,all,yes,partial,,"Unit, contract, attack, chaos, scenario and acceptance layers exist. The suite runs in parallel with a 10 s per-test limit"
 NFR-20,Every rule records how often it refuses and how often a refused call l,11-nfr-NFR.md,all,yes,not started,,
 NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,partial,,"Checked by review, not by a test"
 NFR-22,OpenTelemetry export,11-nfr-NFR.md,8,later,not started,,

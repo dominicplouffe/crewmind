@@ -34,7 +34,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 - **IF-3.2** Every route declares who may call it, enforced before the handler runs. A test walks all routes and fails on any without a declaration.
 - **IF-3.3** A project the caller cannot see answers exactly like a project that does not exist (404). A visible project with an insufficient role answers 403, naming the role required.
 - **IF-3.4** A stable error envelope: `code`, `message`, `rule` (when a governed rule refused), `hint` (the legitimate path).
-- **IF-3.5** Writes accept an idempotency key. Lists are cursor-paginated and filterable by time window.
+- **IF-3.5** Writes accept an idempotency key. Lists are cursor-paginated and filterable by time window. A chat's history, read with no cursor, is its newest messages, oldest of them first, with a cursor to page back.
 - **IF-3.6** A live event stream (server-sent events or WebSocket) publishes project changes and streams chat replies token by token. Polling must still work.
 - **IF-3.7** Browser sessions are protected against cross-origin writes. Signing out invalidates the session server-side, and a password change invalidates older sessions.
 - **IF-3.8** Every read view the app shows MUST be a documented API read, so a third-party client could rebuild the app. That covers chat, overview, plan, board, org, runs and traces, evidence, deliverables and artifacts, memory, ledger, brief, agenda and record.

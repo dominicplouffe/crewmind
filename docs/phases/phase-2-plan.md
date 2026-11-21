@@ -111,3 +111,43 @@ Two notes on these answers:
 - **Warn-only rules** (NFR-20): none in phase 2. Every rule it adds guards authority, budget, secrets or execution invariants, so all enforce.
 
 No open questions remain.
+
+## Outcome (21 Nov 2026)
+
+Phase 2 is built in its four parts. Of its 85 requirement ids, 61 are done, 20 are partial and 4 are not started; `docs/traceability.csv` has the tests and a note for each.
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| Talk to a CEO in the web app, on the mock harness | Done. 20 browser tests drive the built app on the real server, with the agent as a separate process |
+| Talk to a CEO in `crewmind chat` | Done on the mock harness |
+| The same on one real provider | **Not run.** `tests/acceptance/test_live_provider.py` does it with `--live` and `ANTHROPIC_API_KEY`. The build session could not see the key |
+| An upload becomes an artifact | Done, small and chunked uploads |
+| A run is metered by token kind; only non-cached tokens count | Done |
+| Hitting the wall pauses the project | Done, and sends a push alarm |
+| Killing a runner mid-run violates no execution invariant | Done. This test also found a SQLite lock that outlived a cancelled task; fixed |
+
+**Partial or not built.**
+
+- **Container sandboxes (EXE-12):** written, never run. The build environment has no Docker. `deploy/` is also untested.
+- **Warm chat sessions (MSG-11):** each reply is its own run in a new process. Reusing a warm process, and the restart rules, are not built.
+- **Spinning guard and stall watchdog (GOV-7, EXE-16):** need tasks. Asked to move to phase 4 (Q-005).
+- **Model health (LLM-10):** the smoke call only. No capability check, no daily model-list upkeep.
+- **LLM-13** (cost estimate, a MAY) and **LLM-14** (platform models for the Founder and memory): not built.
+- **Agent API as MCP tools inside the sandbox (IF-6.1):** HTTP only.
+- **Image description for seats without vision (CHAT-9):** not built.
+- **Database notifications (BG-2, a SHOULD):** polling only.
+- **Web app:** no channel switcher, no "waiting on you" panel, no spreadsheet preview; mentions complete agents and teams only; the chat opens at the newest 200 messages with no control to load earlier ones. PDF, audio and video previews use the browser's players and were not watched playing. Push alerts were never sent to a real push service. Accessibility was checked by automated scans, not by a person with a screen reader.
+- **Push alarms** are tried once per browser and not retried.
+
+**Found and fixed on the way.**
+
+- `crewmind chat` did not open the terminal chat: the `chat` command group hid it.
+- A reply longer than a message was refused and its run repeated.
+- A reply stopped with Esc started again by itself.
+- Every upload triggered a full reply.
+- Every command spent 2.7 seconds loading the model library. Start-up is now about 1.3 seconds.
+- On SQLite, a task cancelled mid-query kept the write lock for up to 30 seconds.
+
+**Tests.** 240 Python tests on SQLite in about 55 seconds and 241 on Postgres in about 85 seconds, in parallel; 52 web unit tests; 20 browser tests in about a minute.
