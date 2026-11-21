@@ -50,7 +50,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.
   - Killing a runner mid-run violates no execution invariant.
-- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-3, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-4, INV-8, INV-9, INV-11, INV-12, INV-13, INV-15, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; BG-2; INT-8
+- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-3, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15; INV-4, INV-8, INV-9, INV-11, INV-12, INV-13, INV-15, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; BG-2; INT-8
 - **Partial ids** (phase 2 plan):
   - **LLM-2, LLM-8:** phase 2 ships API-key credentials, the mock harness and the vendor-neutral harness loop. Subscription logins and the vendor agent SDK harness arrive in phase 8.
   - **EXE-12:** container sandboxes are written here but cannot be run in the build environment, which has no Docker daemon. Their tests skip without one and must pass in CI or on the owner's machine before phase 2 counts as done. The development-only unisolated mode is fully tested.
@@ -69,7 +69,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** "done" means checked by something other than the doer.
 - **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused. A Deliver run passes its final gap review, and a launch without a watch is refused.
-- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-11, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16
+- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-11, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
 
 ## Phase 5: Planning and speed
 

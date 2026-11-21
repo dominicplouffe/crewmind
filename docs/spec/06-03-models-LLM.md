@@ -46,7 +46,7 @@ A role may set a floor (`min_class`) and may require vision; the dial never goes
   - While it is open, seats move to the fallback credential if one is set; otherwise they wait, and the chat header says so.
   - Authentication failures do not trip the breaker, but 3 consecutive ones pause the project (PRJ-2).
   - The chairman is told when a breaker opens and when it closes.
-- **LLM-12 Provider ceilings.** An install-wide concurrency ceiling per provider keeps several projects sharing a key under its rate limits. Leasing looks past a saturated provider so one provider cannot block the others.
+- **LLM-12 Provider ceilings.** An install-wide concurrency ceiling per provider keeps several projects sharing a key under its rate limits. Leasing looks past a saturated provider so one provider cannot block the others. An admin sets each ceiling; a provider with none is not limited, and there is no default.
 - **LLM-13 Cost estimate (display only).** For API-key credentials the app MAY show an estimated money cost beside token figures, from a price catalog, labelled "estimate". Prices never gate hiring, never enforce anything and never appear as a budget.
 - **LLM-15 Output standard in every call.** Every model call is told to answer in clear, plain English and to keep it short (P18).
   - **One copy.** The output standard is product content, kept once beside the Founder doctrine and published with the communication standard (MSG-12, LIB-6).

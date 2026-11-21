@@ -67,7 +67,7 @@ LLM-8,Harness interface,06-03-models-LLM.md,2,yes,partial,test_EXE_12_a_chat_mes
 LLM-9,Metering,06-03-models-LLM.md,2,yes,done,test_GOV_6_the_gateway_refuses_calls_past_the_per_run_cap; test_LLM_9_anthropic_usage_is_split_into_fresh_input_cache_writes_and_cache_reads; test_LLM_9_openai_and_gemini_style_usage_subtracts_cached_tokens,
 LLM-10,Health,06-03-models-LLM.md,2,yes,partial,,Smoke check built. Capability check and the daily model-list upkeep not built
 LLM-11,Circuit breaker,06-03-models-LLM.md,2,yes,done,test_LLM_11_the_circuit_breaker_opens_cools_off_and_uses_the_fallback; test_LLM_11_three_authentication_failures_pause_the_project,
-LLM-12,Provider ceilings,06-03-models-LLM.md,2,yes,done,test_LLM_12_leasing_looks_past_a_provider_at_its_ceiling,
+LLM-12,Provider ceilings,06-03-models-LLM.md,2,yes,done,test_LLM_12_leasing_looks_past_a_provider_at_its_ceiling,"No default ceiling, by owner decision (Q-004)"
 LLM-13,Cost estimate (display only),06-03-models-LLM.md,2,yes,not started,,MAY. Not built
 LLM-14,Platform models,06-03-models-LLM.md,2,yes,not started,,Needs the Founder (phase 5) and memory (phase 3)
 LLM-15,Output standard in every call,06-03-models-LLM.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
@@ -77,7 +77,7 @@ GOV-3,The budget is the wall,06-04-budget-GOV.md,2,yes,done,test_GOV_3_at_the_wa
 GOV-4,Budget advice,06-04-budget-GOV.md,5,yes,not started,,
 GOV-5,Raise requests,06-04-budget-GOV.md,5,yes,not started,,
 GOV-6,Per-run cap,06-04-budget-GOV.md,2,yes,done,test_GOV_6_the_gateway_refuses_calls_past_the_per_run_cap,
-GOV-7,Runaway guards,06-04-budget-GOV.md,2,yes,partial,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,"Concurrency, wake limit, pair breaker and refusal cap built. Spinning needs tasks (Q-005)"
+GOV-7,Runaway guards,06-04-budget-GOV.md,2,yes,partial,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,"Concurrency, wake limit, pair breaker and refusal cap built in phase 2. The spinning guard moves to phase 4 (Q-005)"
 GOV-8,Real-world spend,06-04-budget-GOV.md,6,yes,not started,,
 GOV-9,Arithmetic in every refusal,06-04-budget-GOV.md,2,yes,done,test_PRJ_2_resume_is_refused_at_the_budget_wall_with_the_arithmetic,
 GOV-10,CEO reserve,06-04-budget-GOV.md,5,yes,not started,,
@@ -159,7 +159,7 @@ EXE-12,Sandboxes,06-10-execution-EXE.md,2,yes,partial,test_EXE_12_a_chat_message
 EXE-13,Secrets in sandboxes,06-10-execution-EXE.md,2,yes,done,test_P3_no_sandbox_holds_a_provider_key,
 EXE-14,Network,06-10-execution-EXE.md,2,yes,partial,,Egress open; SECURITY.md states what is contained. The SSRF guard arrives with WRK-12
 EXE-15,Context pack,06-10-execution-EXE.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
-EXE-16,Stall watchdog,06-10-execution-EXE.md,2,yes,not started,,Needs tasks and scope (Q-005)
+EXE-16,Stall watchdog,06-10-execution-EXE.md,4,yes,not started,,Moved from phase 2 (Q-005): needs tasks and scope
 EXE-17,Agent browser,06-10-execution-EXE.md,8,later,not started,,
 MEM-1,Pinned memory (exact),06-11-memory-MEM.md,3,yes,not started,,
 MEM-2,Recall memory on an established library,06-11-memory-MEM.md,3,yes,not started,,

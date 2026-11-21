@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.8 (21 Nov 2026): owner answers after phase 2
+
+- **LLM-12:** a provider ceiling is set per provider by an admin; there is no default and no registry setting (Q-004).
+- **PLAN.md, traceability.csv:** the spinning guard of GOV-7 and the stall watchdog EXE-16 move to phase 4, where tasks exist (Q-005).
+
 ## Revision 2.7 (21 Nov 2026): phase 2 build
 
 - **CHAT-20:** push subscriptions are accepted only for browser push services over https; the install signs pushes with one key pair whose private half is a secret; alarms are queued then sent once per browser and held up to 24 hours; platform pauses are alarms, the chairman's own hold is not.
