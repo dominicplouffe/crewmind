@@ -15,4 +15,13 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: specification revision 2 (21 Nov 2026); no code yet.
+Status: phase 0 (bootstrap) is built. See [docs/PLAN.md](docs/PLAN.md) for the phases.
+
+## Develop
+
+```bash
+uv sync
+uv run pytest                 # SQLite
+uv run pytest --db=postgres   # reads CREWMIND_TEST_POSTGRES_URL
+uv run ruff check && uv run ruff format --check && uv run pyright
+```

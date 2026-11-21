@@ -1,0 +1,48 @@
+# GitHub Actions workflow for crewmind. To turn CI on, copy this file to
+# .github/workflows/ci.yml. It is kept here because the coding session that wrote it
+# was not allowed to push workflow files.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run ruff check
+      - run: uv run ruff format --check
+      - run: uv run pyright
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db: [sqlite, postgres]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: crewmind
+          POSTGRES_PASSWORD: crewmind
+          POSTGRES_DB: crewmind_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crewmind"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CREWMIND_TEST_POSTGRES_URL: postgresql://crewmind:crewmind@localhost:5432/crewmind_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - run: uv run pytest --db=${{ matrix.db }}
