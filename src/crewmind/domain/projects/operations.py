@@ -173,6 +173,8 @@ async def create(context: Context, payload: CreateInput) -> ProjectItem:
         project_id=project.id,
         after={"role": ProjectRole.CHAIRMAN},
     )
+    for hook in lifecycle.created_hooks:
+        await hook(context.session, project, context.now, context.caller)
     await services.settings.change(
         context.session,
         Subject(Scope.PROJECT, project.id, project.type),
