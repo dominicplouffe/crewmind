@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import Select, select
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
@@ -48,11 +48,15 @@ class MessageItem(BaseModel):
 class HistoryInput(ProjectRef, PageRequest):
     channel: str = Field(service.PROJECT_CHAT, description="The channel to read.")
     thread_id: int | None = Field(None, description="Only this thread.")
+    before: int | None = Field(None, description="Only messages older than this message id.")
 
 
 class History(BaseModel):
     items: list[MessageItem]
     next: str | None = None
+    earlier: int | None = Field(
+        default=None, description="Pass as `before` to read older messages. Absent at the start."
+    )
 
 
 class ChannelList(BaseModel):
@@ -152,10 +156,35 @@ async def history(context: Context, payload: HistoryInput) -> History:
         statement = statement.where(
             (Message.thread_id == payload.thread_id) | (Message.id == payload.thread_id)
         )
-    rows, cursor = await fetch_page(
-        context.session, statement, payload, key=Message.id, at=Message.created_at
+    if payload.after is not None:
+        rows, cursor = await fetch_page(
+            context.session, statement, payload, key=Message.id, at=Message.created_at
+        )
+        return History(items=[item(row, target.name) for row in rows], next=cursor)
+    return await _newest(context, statement, payload, target.name)
+
+
+async def _newest(
+    context: Context, statement: Select[Message], payload: HistoryInput, channel: str
+) -> History:
+    """CHAT-2: without a cursor, a chat opens at its newest messages, oldest of them first.
+    `earlier` pages back through the rest."""
+    if payload.before is not None:
+        statement = statement.where(Message.id < payload.before)
+    if payload.since is not None:
+        statement = statement.where(Message.created_at >= payload.since)
+    if payload.until is not None:
+        statement = statement.where(Message.created_at < payload.until)
+    found = await context.session.scalars(
+        statement.order_by(Message.id.desc()).limit(payload.limit + 1)
     )
-    return History(items=[item(row, target.name) for row in rows], next=cursor)
+    rows = list(found)
+    more = len(rows) > payload.limit
+    rows = rows[: payload.limit][::-1]
+    return History(
+        items=[item(row, channel) for row in rows],
+        earlier=rows[0].id if more and rows else None,
+    )
 
 
 @operation(

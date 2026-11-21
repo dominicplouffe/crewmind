@@ -243,7 +243,8 @@ async def unread_for(
 
 async def unanswered_from_people(session: AsyncSession, seat: Seat) -> list[Message]:
     """Messages from people, addressed to this agent, that no agent has replied to yet,
-    newest first (CHAT-11, MSG-10)."""
+    newest first (CHAT-11, MSG-10). An upload's line in the chat is not a question, so it
+    starts no reply and costs nothing (P8); the agent sees the file when next addressed."""
     target = await channel(session, seat.project_id, PROJECT_CHAT)
     replied = select(Message.reply_to).where(
         Message.channel_id == target.id,
@@ -256,11 +257,46 @@ async def unanswered_from_people(session: AsyncSession, seat: Seat) -> list[Mess
         .where(
             Message.channel_id == target.id,
             Message.author_kind == Author.PERSON,
+            Message.kind == MessageKind.MESSAGE,
             Message.id.not_in(replied),
         )
         .order_by(Message.id.desc())
     )
-    return [row for row in rows if _wakes(seat, target, row)]
+    stopped = await _stopped_replies(session, target)
+    return [row for row in rows if row.id not in stopped and _wakes(seat, target, row)]
+
+
+REPLY_STOPPED = "reply stopped"
+
+
+async def _stopped_replies(session: AsyncSession, target: Channel) -> set[int]:
+    """Messages whose reply a person stopped. They are not answered again unasked."""
+    lines = await session.scalars(
+        select(Message).where(
+            Message.channel_id == target.id,
+            Message.author_kind == Author.PLATFORM,
+            Message.reply_to.is_not(None),
+        )
+    )
+    return {
+        line.reply_to
+        for line in lines
+        if line.reply_to is not None and (line.detail or {}).get("kind") == REPLY_STOPPED
+    }
+
+
+async def stop_reply(session: AsyncSession, seat: Seat, now: datetime) -> None:
+    """CHAT-4: when a person stops a reply, the messages it was answering are marked, so
+    the same reply does not start again by itself. A new message is answered as usual."""
+    for message in await unanswered_from_people(session, seat):
+        await platform_line(
+            session,
+            seat.project_id,
+            "This reply was stopped. Send a new message to ask again.",
+            now,
+            reply_to=message.id,
+            detail={"kind": REPLY_STOPPED},
+        )
 
 
 async def message_count(session: AsyncSession, project_id: str) -> int:

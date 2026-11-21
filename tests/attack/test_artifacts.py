@@ -275,3 +275,17 @@ async def test_IF_3_9_a_large_upload_resumes_where_it_stopped(app: App) -> None:
     assert got.headers["content-type"].startswith("text/plain")
     assert got.headers["x-content-type-options"] == "nosniff"
     assert (hidden.status_code, hidden.json()["code"]) == (404, "project_not_found")
+
+
+async def test_CHAT_9_an_upload_alone_starts_no_reply_and_costs_nothing(app: App) -> None:
+    """CHAT-9, P8, INV-11: an upload shows in the chat but is not a question, so no run
+    starts for it and no tokens are spent. The next message is answered as usual."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    await app.ok(
+        "artifacts.upload", owner, project_id=project, name="notes.txt", content_base64="aGk="
+    )
+    assert await app.work() == 0
+    assert (await app.ok("budget.show", owner, project_id=project))["spent"] == 0
+    await app.ok("chat.send", owner, project_id=project, body="Please read the notes.")
+    assert await app.work() == 1

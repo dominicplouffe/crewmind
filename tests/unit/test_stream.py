@@ -106,3 +106,25 @@ async def test_CHAT_4_a_reply_in_progress_can_be_interrupted(app: App) -> None:
     assert await run_state(app, run.run_id) == "killed"
     again = await app.call("runs.interrupt", owner, project_id=project, run_id=run.run_id)
     assert_refused(again, rule="7.7")
+
+
+async def test_CHAT_4_a_stopped_reply_does_not_start_again_by_itself(app: App) -> None:
+    """CHAT-4, P8: after a person stops a reply, no new run starts for the same message,
+    so no more tokens are spent on it. The chat says the reply was stopped, and the next
+    message is answered as usual."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    asked = await app.ok("chat.send", owner, project_id=project, body="Write a long plan.")
+    await app.dispatcher.tick()
+    (run,) = (await app.ok("runs.list", owner, project_id=project))["items"]
+    assert run["kind"] == "chat"
+    await app.ok("runs.interrupt", owner, project_id=project, run_id=run["run_id"])
+
+    assert await app.work() == 0
+    history = (await app.ok("chat.history", owner, project_id=project))["items"]
+    (note,) = [m for m in history if m["kind"] == "status"]
+    assert note["reply_to"] == asked["id"]
+    assert "stopped" in note["body"]
+
+    await app.ok("chat.send", owner, project_id=project, body="A short one, please.")
+    assert await app.work() == 1

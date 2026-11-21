@@ -211,6 +211,7 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("chat.quality", alice, project_id=paid, level="fast")
     await write("budget.command", alice, project_id=paid, tokens=5_000_000)
     await write("chat.brevity", alice, level="detailed")
+    await app.ok("chat.send", alice, project_id=paid, body="What do you propose?")
     live = await live_run(app, paid)
     proposal = {"what": "Draft the launch plan.", "estimated_tokens": 1000, "reversible": True}
     for decision in ("accept", "dismiss"):

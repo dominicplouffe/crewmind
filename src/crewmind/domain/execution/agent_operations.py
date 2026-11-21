@@ -48,6 +48,7 @@ class ContextPack(BaseModel):
     context_pack: str
     run_kind: str
     local_tools: list[str] = Field(description="Tools the role grants inside the sandbox.")
+    message_max: int = Field(description="The most characters one message may have (MSG-1).")
 
 
 class ReadInput(BaseModel):
@@ -143,6 +144,7 @@ async def context(context: Context, payload: Empty) -> ContextPack:
         context_pack=run.context_pack,
         run_kind=run.kind,
         local_tools=[] if run.kind == RunKind.CHAT else [str(tool) for tool in view.role.tools],
+        message_max=conversation.MESSAGE_MAX,
     )
 
 

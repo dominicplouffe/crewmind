@@ -369,3 +369,46 @@ async def test_MSG_13_every_surface_reads_and_writes_the_same_conversation(app: 
     )
     assert read.exit_code == 0, read.output
     assert (await app.ok("chat.header", owner, project_id=project))["unread"] == 0
+
+
+async def test_CHAT_2_history_opens_at_the_newest_messages_and_pages_back(app: App) -> None:
+    """CHAT-2, IF-3.5: with no cursor a chat's history is its newest messages, oldest of
+    them first; `earlier` pages back to the start and `after` reads forward from a message."""
+    owner = await app.person("owner@example.com")
+    project = await app.project(owner)
+    for number in range(1, 8):
+        await app.ok("chat.send", owner, project_id=project, body=f"Message {number}")
+
+    newest = await app.ok("chat.history", owner, project_id=project, limit=3)
+    assert [m["body"] for m in newest["items"]] == ["Message 5", "Message 6", "Message 7"]
+    older = await app.ok(
+        "chat.history", owner, project_id=project, limit=3, before=newest["earlier"]
+    )
+    assert [m["body"] for m in older["items"]] == ["Message 2", "Message 3", "Message 4"]
+    first = await app.ok(
+        "chat.history", owner, project_id=project, limit=3, before=older["earlier"]
+    )
+    assert [m["body"] for m in first["items"]] == ["Message 1"]
+    assert first["earlier"] is None
+
+    forward = await app.ok(
+        "chat.history", owner, project_id=project, limit=2, after=str(newest["items"][0]["id"])
+    )
+    assert [m["body"] for m in forward["items"]] == ["Message 6", "Message 7"]
+
+
+async def test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers(app: App) -> None:
+    """MSG-1, CHAT-3, INV-24: a chat reply over the message limit is posted cut, with a note,
+    as the answer to the question. The run does not loop."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    app.script("CEO/chat", {"text": "word " * 5000})
+    asked = await app.ok("chat.send", owner, project_id=project, body="Tell me everything.")
+    assert await app.work() == 1
+    assert await app.work() == 0
+
+    history = (await app.ok("chat.history", owner, project_id=project))["items"]
+    (reply,) = [m for m in history if m["author_kind"] == "agent"]
+    assert reply["reply_to"] == asked["id"]
+    assert len(reply["body"]) == 20_000
+    assert reply["body"].endswith("Ask for the rest.)")

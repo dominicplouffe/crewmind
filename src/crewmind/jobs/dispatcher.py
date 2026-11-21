@@ -175,6 +175,7 @@ async def dispatch(
         select(Message).where(
             Message.channel_id == target.id,
             Message.author_kind == Author.PERSON,
+            Message.kind == MessageKind.MESSAGE,
             Message.id.not_in(replied),
         )
     )

@@ -159,8 +159,17 @@ async def agent_loop(client: httpx.AsyncClient, workspace: Path) -> str:
         if answer.get("warning"):
             messages.append({"role": "user", "content": answer["warning"]})
     if pack["run_kind"] == "chat" and text.strip():
-        await _post(client, POST_PATH, {"body": text})
+        await _post(client, POST_PATH, {"body": fit_in_a_message(text, pack["message_max"])})
     return text
+
+
+CUT_NOTE = "\n\n(Cut here: the reply was too long for one message. Ask for the rest.)"
+
+
+def fit_in_a_message(text: str, most: int) -> str:
+    """MSG-1, CHAT-3: a reply longer than a message may be is cut and says so, so the
+    person always gets an answer instead of a refused post."""
+    return text if len(text) <= most else text[: most - len(CUT_NOTE)] + CUT_NOTE
 
 
 async def _main() -> int:
