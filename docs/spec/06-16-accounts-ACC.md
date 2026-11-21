@@ -8,6 +8,7 @@
   - Every person has one instance role: `admin` or `member`. Admins promote and demote. Any active person may create a project and becomes its chairman.
   - A project has exactly one chairman, and any number of co-chairs and observers. Removal takes effect on the member's next request.
   - Handing on the chair makes the previous chairman a co-chair, in the same change. An admin's emergency hand-on is recorded as break-glass (section 3).
+  - Deactivating a person who chairs a project is refused, naming the projects. An admin hands each chair on first.
   - Lifecycles: section 7.8 to 7.11.
 - **ACC-6 Secrets** are encrypted under an install master key. The server refuses to store or read secrets without that key. Rotating the key re-encrypts everything atomically: if one value fails, nothing changes.
 - **ACC-7 Second factor** (SHOULD for v2.0): TOTP. Single sign-on is a later release. Until a factor ships, SECURITY.md states the gap plainly.

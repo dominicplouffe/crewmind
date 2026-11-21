@@ -209,14 +209,14 @@ INT-11,A2A: agent-to-agent protocol,06-15-integrations-INT.md,8,later,not starte
 ACC-1,Passwords,06-16-accounts-ACC.md,1,yes,not started,,
 ACC-2,Browser sessions,06-16-accounts-ACC.md,1,yes,not started,,
 ACC-3,Personal tokens,06-16-accounts-ACC.md,1,yes,not started,,
-ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,not started,,
+ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,not started,,Phase 1: admin-issued links; self-service reset by email in phase 6
 ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,not started,,
 ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,not started,,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
 INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,not started,,
 INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,not started,,
 INV-3,"No agent completes, reviews or gives the verdict on work it did, and n",08-invariants-INV.md,4,yes,not started,,
-INV-4,"A run token works only for its own run, agent and project, and only wh",08-invariants-INV.md,1,yes,not started,,
+INV-4,"A run token works only for its own run, agent and project, and only wh",08-invariants-INV.md,2,yes,not started,,Moved from phase 1 (phase 1 plan): needs runs and the dispatcher
 INV-5,A person or client that cannot see a project gets the same answer as f,08-invariants-INV.md,1,yes,not started,,
 INV-6,"No secret value, provider key included, appears in any sandbox, agent-",08-invariants-INV.md,1,yes,not started,,
 INV-7,Agent-written text is always wrapped as untrusted when it reaches a pe,08-invariants-INV.md,1,yes,not started,,
@@ -274,12 +274,12 @@ IF-6.3,Capability groups the agent API MUST offer (the role decides which a g,09
 IF-7.1,Webhook intake verifies a per-project signature and a replay window be,09-interfaces-IF.md,8,later,not started,,
 IF-7.2,"Outbound notifications (push, Slack, email) are clients of the same op",09-interfaces-IF.md,8,later,not started,,
 BG-1,"Each project is processed in its own transaction on every tick, so one",10-background-BG.md,1,yes,not started,,
-BG-2,Database notifications SHOULD be used to cut wake latency to near zero,10-background-BG.md,1,yes,not started,,
+BG-2,Database notifications SHOULD be used to cut wake latency to near zero,10-background-BG.md,2,yes,not started,,Moved from phase 1 (phase 1 plan): needs runs and the dispatcher
 BG-3,Every scheduled job is idempotent and safe to run twice.,10-background-BG.md,1,yes,not started,,
 BG-4,Every automatic state change a job makes writes an event naming the jo,10-background-BG.md,1,yes,not started,,
 NFR-1,"Self-hosted, open source, no telemetry to the vendor (OpenTelemetry ex",11-nfr-NFR.md,1,yes,not started,,
 NFR-2,One idempotent install command for a server. It:,11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
-NFR-3,"The update command refuses a dirty checkout, backs up first, updates, ",11-nfr-NFR.md,1,yes,not started,,
+NFR-3,"The update command refuses a dirty checkout, backs up first, updates, ",11-nfr-NFR.md,1,yes,not started,,Phase 1: source checkouts only
 NFR-4,"Backup is one owner-readable archive holding the database, the master ",11-nfr-NFR.md,1,yes,not started,,
 NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 NFR-6,The server binds to 127.0.0.1 by default. Publishing it requires TLS a,11-nfr-NFR.md,1,yes,not started,,

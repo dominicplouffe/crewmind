@@ -166,7 +166,7 @@ An event flag closes at acknowledged. A state flag closes only at cleared, even 
 | (new) | active | Bootstrap the first admin (host-local, IF-4.2) | Host operator |
 | (new) | invited | Invite (ACC-4) | Admin |
 | invited | active | Setup link used and a password set (ACC-1) | The person |
-| active | deactivated | Deactivate; ends every session and revokes every token | Admin |
+| active | deactivated | Deactivate; ends every session and revokes every token. Refused while the person chairs a project (ACC-5) | Admin |
 | deactivated | active | Reactivate | Admin |
 
 The instance role (`admin` or `member`) is a field, changed by an admin through promote and demote. It is not a state. Login lockout (ACC-1) is kept per address, known or unknown, so it is not an account state either.

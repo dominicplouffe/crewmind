@@ -36,7 +36,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** projects exist, are governed by versioned settings, and are reachable from API, CLI and MCP (read).
 - **Exit demo:** in slim mode (`crewmind up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
-- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-4, INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-2, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
+- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
 - **Partial ids** (spec review R-11):
   - **MCP:** IF-5.1 is delivered here only as minted bearer tokens, and IF-5.2 only as the `read` scope, so the exit demo can use an MCP client. OAuth and the other scopes stay in phase 6.
   - **Extension points:** PRJ-1 start checks, PRJ-2 pause causes, PRJ-3 and PRJ-10 stop and purge hooks, NFR-2 install steps and NFR-5 doctor checks are built as registries. Later phases add their checks (seat check, budget, email, Slack, libraries) without changing project code. Each missing piece is noted in `traceability.csv`.
@@ -50,7 +50,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.
   - Killing a runner mid-run violates no execution invariant.
-- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-8, INV-9, INV-10, INV-11, INV-12, INV-13, INV-14, INV-15, INV-16, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; INT-8
+- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-4, INV-8, INV-9, INV-10, INV-11, INV-12, INV-13, INV-14, INV-15, INV-16, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; BG-2; INT-8
 
 ## Phase 3: Listening
 

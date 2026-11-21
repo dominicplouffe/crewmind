@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.4 (21 Nov 2026): phase 1 plan answers
+
+- **ACC-5, 7.8:** deactivating a person who chairs a project is refused, naming the projects. An admin hands each chair on first.
+- **PLAN.md, traceability.csv:** INV-4 and BG-2 move to phase 2, where runs and the dispatcher exist.
+
 ## Revision 2.3 (21 Nov 2026): phase 0 bootstrap
 
 - **IF-1.3:** an operation belongs on the `slash` surface only when it declares a slash command, and a host-local operation belongs on `cli` only. This matches IF-1.1 ("its chat slash command, if any") and IF-4.2.
