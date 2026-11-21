@@ -8,8 +8,8 @@ P6,Silence is never consent to act,02-principles.md,all,yes,not started,,
 P7,The chairman owns the goalposts,02-principles.md,all,yes,not started,,
 P8,Idle costs nothing,02-principles.md,all,yes,not started,,
 P9,Every token is metered,02-principles.md,all,yes,not started,,
-P10,Every rule ships with an attack,02-principles.md,all,yes,not started,,
-P11,"One concept, one implementation, every surface",02-principles.md,all,yes,not started,,
+P10,Every rule ships with an attack,02-principles.md,all,yes,in progress,tests/attack/test_P10_attack_coverage.py,Phase 0: harness and coverage check; attacks arrive with each rule
+P11,"One concept, one implementation, every surface",02-principles.md,all,yes,in progress,tests/contract/test_IF_1_3_conformance.py,
 P12,Honest about limits,02-principles.md,all,yes,not started,,
 P13,"Facts belong in fields, not prose",02-principles.md,all,yes,not started,,
 P14,Speed is a feature,02-principles.md,all,yes,not started,,
@@ -63,7 +63,7 @@ LLM-4,Classes and lineups,06-03-models-LLM.md,2,yes,not started,,
 LLM-5,Effort,06-03-models-LLM.md,2,yes,not started,,
 LLM-6,Seat check,06-03-models-LLM.md,2,yes,not started,,
 LLM-7,Who pays,06-03-models-LLM.md,2,yes,not started,,
-LLM-8,Harness interface,06-03-models-LLM.md,2,yes,not started,,
+LLM-8,Harness interface,06-03-models-LLM.md,2,yes,in progress,tests/unit/test_mock_harness.py,Phase 0: interface and mock stub only
 LLM-9,Metering,06-03-models-LLM.md,2,yes,not started,,
 LLM-10,Health,06-03-models-LLM.md,2,yes,not started,,
 LLM-11,Circuit breaker,06-03-models-LLM.md,2,yes,not started,,
@@ -239,23 +239,23 @@ INV-23,"A chat run changes no state except posting, writing its own memory not",
 INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,not started,,
 INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,not started,,
 INV-26,"A closed decision is reopened only by the chairman, or by a reopen req",08-invariants-INV.md,3,yes,not started,,
-IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,not started,,
-IF-1.2,"HTTP routes, CLI commands, MCP tools, slash commands and Slack actions",09-interfaces-IF.md,1,yes,not started,,
-IF-1.3,A conformance test enumerates the catalog. It fails when an operation ,09-interfaces-IF.md,1,yes,not started,,
-IF-1.4,"Refusals are identical on every surface: the same machine code, the sa",09-interfaces-IF.md,1,yes,not started,,
-IF-3.1,"JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schem",09-interfaces-IF.md,1,yes,not started,,
+IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,in progress,tests/unit/test_catalog.py,"Phase 0: catalog built, no product operations yet"
+IF-1.2,"HTTP routes, CLI commands, MCP tools, slash commands and Slack actions",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py,"Phase 0: api, cli and mcp adapters generated; other surfaces in their phases"
+IF-1.3,A conformance test enumerates the catalog. It fails when an operation ,09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_3_conformance.py,Phase 0: operations and surfaces; decision-item kinds in phase 6
+IF-1.4,"Refusals are identical on every surface: the same machine code, the sa",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_4_refusals.py,"Phase 0: shared envelope on api, cli and mcp"
+IF-3.1,"JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schem",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py,Phase 0: routes and OpenAPI generated from the catalog
 IF-3.2,"Every route declares who may call it, enforced before the handler runs",09-interfaces-IF.md,1,yes,not started,,
 IF-3.3,A project the caller cannot see answers exactly like a project that do,09-interfaces-IF.md,1,yes,not started,,
-IF-3.4,"A stable error envelope: `code`, `message`, `rule` (when a governed ru",09-interfaces-IF.md,1,yes,not started,,
+IF-3.4,"A stable error envelope: `code`, `message`, `rule` (when a governed ru",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_4_refusals.py,
 IF-3.5,Writes accept an idempotency key. Lists are cursor-paginated and filte,09-interfaces-IF.md,1,yes,not started,,
 IF-3.6,A live event stream (server-sent events or WebSocket) publishes projec,09-interfaces-IF.md,2,yes,not started,,
 IF-3.7,Browser sessions are protected against cross-origin writes. Signing ou,09-interfaces-IF.md,1,yes,not started,,
 IF-3.8,"Every read view the app shows MUST be a documented API read, so a thir",09-interfaces-IF.md,1,yes,not started,,
 IF-3.9,Uploads use resumable multipart transfer up to `upload.max_size`.,09-interfaces-IF.md,2,yes,not started,,
-IF-4.1,"One command, `crewmind`, talking to the server over the HTTP API. It is co",09-interfaces-IF.md,1,yes,not started,,
-IF-4.2,"A small, explicitly marked set of host-local commands may touch storag",09-interfaces-IF.md,1,yes,not started,,
-IF-4.3,"Every command supports `--help` and `--json`. With `--json`, or with n",09-interfaces-IF.md,1,yes,not started,,
-IF-4.4,"Exit codes distinguish success, refusal by a rule, authentication fail",09-interfaces-IF.md,1,yes,not started,,
+IF-4.1,"One command, `crewmind`, talking to the server over the HTTP API. It is co",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py,Phase 0: commands call the API; login in phase 1
+IF-4.2,"A small, explicitly marked set of host-local commands may touch storag",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py,Phase 0: host-local mechanism; the commands themselves in phase 1
+IF-4.3,"Every command supports `--help` and `--json`. With `--json`, or with n",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/unit/test_cli.py,Phase 0: --help and --json
+IF-4.4,"Exit codes distinguish success, refusal by a rule, authentication fail",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_4_refusals.py,Phase 0: exit codes defined
 IF-4.5,"Secrets are read from a hidden prompt, stdin or a file. They are never",09-interfaces-IF.md,1,yes,not started,,
 IF-4.6,Drafting a project in the terminal follows the Founder rules (FND-3):,09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.7,"After creating a project, the CLI asks for any missing credentials the",09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
@@ -284,9 +284,9 @@ NFR-4,"Backup is one owner-readable archive holding the database, the master ",1
 NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
 NFR-6,The server binds to 127.0.0.1 by default. Publishing it requires TLS a,11-nfr-NFR.md,1,yes,not started,,
 NFR-7,Configuration has two kinds. **Operational** settings are environment ,11-nfr-NFR.md,1,yes,not started,,
-NFR-8,"Two databases are supported: Postgres with pgvector for a full server,",11-nfr-NFR.md,1,yes,not started,,
+NFR-8,"Two databases are supported: Postgres with pgvector for a full server,",11-nfr-NFR.md,1,yes,in progress,tests/unit/test_storage.py,Phase 0: engine and CI on both databases
 NFR-9,"The dispatcher, scheduler, leasing, gateway and API all recover on the",11-nfr-NFR.md,1,yes,not started,,
-NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11-nfr-NFR.md,1,yes,not started,,
+NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11-nfr-NFR.md,1,yes,in progress,tests/unit/test_storage.py,Phase 0: migration runner and empty baseline
 NFR-11,"Every route declares its authorization, enforced before the handler ru",11-nfr-NFR.md,1,yes,not started,,
 NFR-12,Secrets are encrypted at rest under the master key. Tokens are stored ,11-nfr-NFR.md,1,yes,not started,,
 NFR-13,The OAuth server for MCP enforces:,11-nfr-NFR.md,6,yes,not started,,
@@ -300,4 +300,4 @@ NFR-20,Every rule records how often it refuses and how often a refused call l,11
 NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,not started,,
 NFR-22,OpenTelemetry export,11-nfr-NFR.md,8,later,not started,,
 NFR-23,Slim mode,11-nfr-NFR.md,1,yes,not started,,
-NFR-24,Technology,11-nfr-NFR.md,1,yes,not started,,
+NFR-24,Technology,11-nfr-NFR.md,1,yes,in progress,,Phase 0: toolchain in place
