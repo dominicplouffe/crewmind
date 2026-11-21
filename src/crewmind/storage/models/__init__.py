@@ -8,6 +8,14 @@ from crewmind.storage.models.accounts import (
     Person,
     Token,
 )
+from crewmind.storage.models.artifacts import (
+    ActionCard,
+    Artifact,
+    ArtifactVersion,
+    Directive,
+    FrozenThread,
+    UploadInProgress,
+)
 from crewmind.storage.models.base import Base, new_id
 from crewmind.storage.models.conversation import Channel, Message, ReadPosition
 from crewmind.storage.models.execution import (
@@ -31,10 +39,15 @@ from crewmind.storage.models.projects import HoldReason, Project
 from crewmind.storage.models.record import Event, IdempotencyKey, SettingValue, StoredSecret
 
 __all__ = [
+    "ActionCard",
+    "Artifact",
+    "ArtifactVersion",
     "Base",
     "BrowserSession",
     "Channel",
+    "Directive",
     "Event",
+    "FrozenThread",
     "HoldReason",
     "IdempotencyKey",
     "LedgerLine",
@@ -59,6 +72,7 @@ __all__ = [
     "StoredSecret",
     "Team",
     "Token",
+    "UploadInProgress",
     "Wake",
     "new_id",
 ]
