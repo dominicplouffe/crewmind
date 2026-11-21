@@ -2238,6 +2238,12 @@
       ],
       "title": "Detail"
      },
+     "example": {
+      "default": false,
+      "description": "Marked as an illustration, not data.",
+      "title": "Example",
+      "type": "boolean"
+     },
      "id": {
       "title": "Id",
       "type": "integer"

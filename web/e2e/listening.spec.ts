@@ -5,7 +5,16 @@
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { PLAN_SCRIPT, STATE_FILE, createProject, expectAccessible, sendMessage, setCeoScript } from "./helpers";
+import {
+  PLAN_SCRIPT,
+  STATE_FILE,
+  createProject,
+  expectAccessible,
+  expectNoViolations,
+  sendMessage,
+  setCeoScript,
+  setTheme,
+} from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -341,16 +350,20 @@ test("the Memory panel, the message menu and the dialogs are accessible in both 
   await expectAccessible(page, "memory panel, asking before forgetting");
   await page.getByRole("button", { name: "Close panel" }).click();
 
+  // Choosing the theme closes an open menu or dialog, so each theme is set first and then scanned.
   const message = personMessage("Make a list of fruit");
-  await message.getByRole("button", { name: /^More/ }).click();
-  await expect(message.getByRole("menu")).toBeVisible();
-  await expectAccessible(page, "message menu");
-  await message.getByRole("menuitem", { name: "Decide" }).click();
-  await expect(page.getByRole("dialog", { name: "Close a decision" })).toBeVisible();
-  await expectAccessible(page, "decision dialog");
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(message.getByRole("button", { name: /^More/ })).toBeFocused();
+  for (const theme of ["dark", "light"] as const) {
+    await setTheme(page, theme);
+    await message.getByRole("button", { name: /^More/ }).click();
+    await expect(message.getByRole("menu")).toBeVisible();
+    await expectNoViolations(page, `message menu, ${theme} theme`);
+    await message.getByRole("menuitem", { name: "Decide" }).click();
+    await expect(page.getByRole("dialog", { name: "Close a decision" })).toBeVisible();
+    await expectNoViolations(page, `decision dialog, ${theme} theme`);
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(message.getByRole("button", { name: /^More/ })).toBeFocused();
+  }
 });
 
 test("earlier messages load a page at a time and the view stays where it was", async () => {
@@ -363,7 +376,8 @@ test("earlier messages load a page at a time and the view stays where it was", a
     expect(sent.ok()).toBe(true);
   }
   await page.reload();
-  const line = (index: number): Locator => page.getByText(`History line ${index}.`, { exact: true });
+  const line = (index: number): Locator =>
+    page.getByTestId("message-person").getByText(`History line ${index}.`, { exact: true });
   await expect(line(120)).toBeVisible();
   await expect(line(1)).toHaveCount(0);
   const shown = page.locator("article.message[id^='message-']");

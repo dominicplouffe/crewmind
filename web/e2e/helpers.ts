@@ -38,17 +38,22 @@ export async function setTheme(page: Page, theme: "light" | "dark"): Promise<voi
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
 
+/** Fails on any WCAG 2 A or AA violation in the page as it is now. */
+export async function expectNoViolations(page: Page, label: string): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+    .analyze();
+  const summary = results.violations.map(
+    (violation) => `${violation.id}: ${violation.help} (${violation.nodes.map((node) => node.target.join(" ")).join(", ")})`,
+  );
+  expect(summary, label).toEqual([]);
+}
+
 /** Fails on any WCAG 2 A or AA violation, in the light theme and then the dark theme. */
 export async function expectAccessible(page: Page, label: string): Promise<void> {
   for (const theme of ["light", "dark"] as const) {
     await setTheme(page, theme);
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-      .analyze();
-    const summary = results.violations.map(
-      (violation) => `${violation.id}: ${violation.help} (${violation.nodes.map((node) => node.target.join(" ")).join(", ")})`,
-    );
-    expect(summary, `${label}, ${theme} theme`).toEqual([]);
+    await expectNoViolations(page, `${label}, ${theme} theme`);
   }
   await setTheme(page, "light");
 }

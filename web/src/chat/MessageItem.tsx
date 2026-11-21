@@ -70,7 +70,7 @@ function MessageItemInner({ message, parent, card, replies, handlers, compact, o
   const [open, setOpen] = useState(false);
   const isStatus = message.kind === "status";
   const threadId = message.thread_id ?? (replies > 0 ? message.id : null);
-  const isExample = example ?? detail.kind === "example";
+  const isExample = example ?? (message.example === true || detail.kind === "example");
 
   return (
     <article

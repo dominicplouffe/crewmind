@@ -3605,6 +3605,12 @@ export interface components {
             detail: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Example
+             * @description Marked as an illustration, not data.
+             * @default false
+             */
+            example?: boolean;
             /** Id */
             id: number;
             /**

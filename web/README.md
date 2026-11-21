@@ -49,8 +49,10 @@ npm run e2e          # Playwright against a real server with the mock model
 
 `npm run e2e` builds the app, starts a server on port 8455 with `e2e/start-backend.sh`
 (data in `e2e/.run`, removed on each start), runs the tests in Chromium, and stops the server.
-It includes axe-core scans (WCAG 2 A and AA) of the sign-in page, the project list and the
-project page in both themes, and a 390 px phone run. Set `CREWMIND_E2E_PORT` to change the port and
+It includes axe-core scans (WCAG 2 A and AA) of the sign-in page, the project list, the
+project page and the Memory panel in both themes, and a 390 px phone run. `e2e/listening.spec.ts`
+covers standing orders, decisions, corrections, examples, memory and history paging; the test
+server uses the in-process memory engine, whose search matches by shared words. Set `CREWMIND_E2E_PORT` to change the port and
 `CREWMIND_E2E_SKIP_BUILD=1` to reuse an existing `dist`. Playwright is pinned to the version
 whose Chromium is already installed; do not run `playwright install`.
 
@@ -58,12 +60,13 @@ whose Chromium is already installed; do not run `playwright install`.
 
 ```
 src/api/         generated schema, typed client, live stream (SSE), uploads
-src/chat/        chat state, header strip, messages, action cards, composer
+src/chat/        chat state, history paging, header strip, messages and their actions, action cards, composer
 src/panels/      files and previews, compare, budget, models, settings, runs, search, activity, thread
+src/panels/memory/  the Memory panel: pinned memory, standing orders, decisions, corrections, recall, preferences
 src/components/  shared pieces, command palette, theme and alerts controls
 src/lib/         markdown (sanitized), CSV, diff, autocomplete, file kinds, push
 src/pages/       sign in, accept a link, project list, project
-src/strings.ts   every user-facing string (English), ready for translation
+src/strings.ts   every user-facing string (English), ready for translation (strings.memory.ts is part of it)
 public/          manifest, icons (npm run gen:icons), service worker
 e2e/             Playwright tests and the scripts that start and stop the test server
 ```
