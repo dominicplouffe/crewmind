@@ -119,6 +119,32 @@
     "title": "Alerts",
     "type": "object"
    },
+   "AnswerInput": {
+    "properties": {
+     "approve": {
+      "description": "Whether to reopen the decision.",
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "request_id": {
+      "description": "The request's id, from `decisions requests`.",
+      "title": "Request Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "request_id",
+     "approve"
+    ],
+    "title": "AnswerInput",
+    "type": "object"
+   },
    "ArtifactItem": {
     "properties": {
      "audience": {
@@ -751,6 +777,132 @@
     "title": "ConfirmDeleteInput",
     "type": "object"
    },
+   "ConfirmInput": {
+    "properties": {
+     "order_id": {
+      "description": "The order's id, from `orders list`.",
+      "title": "Order Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "text": {
+      "anyOf": [
+       {
+        "maxLength": 400,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Your edited sentence, if any.",
+      "title": "Text"
+     }
+    },
+    "required": [
+     "project_id",
+     "order_id"
+    ],
+    "title": "ConfirmInput",
+    "type": "object"
+   },
+   "CorrectionItem": {
+    "properties": {
+     "agent": {
+      "title": "Agent",
+      "type": "string"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expires At"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     },
+     "question": {
+      "title": "Question",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "words": {
+      "title": "Words",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "agent",
+     "question",
+     "words",
+     "state",
+     "expires_at"
+    ],
+    "title": "CorrectionItem",
+    "type": "object"
+   },
+   "CorrectionList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/CorrectionItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "CorrectionList",
+    "type": "object"
+   },
+   "CorrectionRef": {
+    "properties": {
+     "correction_id": {
+      "description": "The correction's id, from `corrections list`.",
+      "title": "Correction Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "correction_id"
+    ],
+    "title": "CorrectionRef",
+    "type": "object"
+   },
    "CreateInput": {
     "properties": {
      "goal": {
@@ -866,6 +1018,109 @@
      "name"
     ],
     "title": "CredentialRef",
+    "type": "object"
+   },
+   "DecideInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "text": {
+      "description": "The topic, a colon, then your ruling: `Taxes: never include them`.",
+      "maxLength": 4000,
+      "minLength": 3,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "text"
+    ],
+    "title": "DecideInput",
+    "type": "object"
+   },
+   "DecisionItem": {
+    "properties": {
+     "decided_at": {
+      "format": "date-time",
+      "title": "Decided At",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     },
+     "ruling": {
+      "title": "Ruling",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "topic": {
+      "title": "Topic",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "topic",
+     "ruling",
+     "state",
+     "decided_at"
+    ],
+    "title": "DecisionItem",
+    "type": "object"
+   },
+   "DecisionList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/DecisionItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "DecisionList",
+    "type": "object"
+   },
+   "DecisionRef": {
+    "properties": {
+     "decision_id": {
+      "description": "The decision's id, from `decisions list`.",
+      "title": "Decision Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "decision_id"
+    ],
+    "title": "DecisionRef",
     "type": "object"
    },
    "Definition": {
@@ -1028,6 +1283,34 @@
     "title": "Done",
     "type": "object"
    },
+   "EditInput": {
+    "properties": {
+     "memory_id": {
+      "description": "The entry's id, from `memory list`.",
+      "title": "Memory Id",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "text": {
+      "description": "The corrected fact.",
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "memory_id",
+     "text"
+    ],
+    "title": "EditInput",
+    "type": "object"
+   },
    "Effort": {
     "enum": [
      "low",
@@ -1042,6 +1325,26 @@
     "description": "An operation with no input.",
     "properties": {},
     "title": "Empty",
+    "type": "object"
+   },
+   "EntryRef": {
+    "properties": {
+     "memory_id": {
+      "description": "The entry's id, from `memory list`.",
+      "title": "Memory Id",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "memory_id"
+    ],
+    "title": "EntryRef",
     "type": "object"
    },
    "EventItem": {
@@ -1134,6 +1437,70 @@
     "title": "EventItem",
     "type": "object"
    },
+   "Evidence": {
+    "properties": {
+     "kind": {
+      "description": "artifact or message.",
+      "enum": [
+       "artifact",
+       "message"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "ref": {
+      "description": "The artifact's name, or the message's id.",
+      "title": "Ref",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "ref"
+    ],
+    "title": "Evidence",
+    "type": "object"
+   },
+   "ExampleInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "what": {
+      "description": "The example text, or the id of a message of yours to mark.",
+      "maxLength": 20000,
+      "minLength": 1,
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "what"
+    ],
+    "title": "ExampleInput",
+    "type": "object"
+   },
+   "ExampleItem": {
+    "properties": {
+     "is_example": {
+      "title": "Is Example",
+      "type": "boolean"
+     },
+     "message_id": {
+      "title": "Message Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "message_id",
+     "is_example"
+    ],
+    "title": "ExampleItem",
+    "type": "object"
+   },
    "Feed": {
     "properties": {
      "items": {
@@ -1193,6 +1560,40 @@
      "type"
     ],
     "title": "FeedItem",
+    "type": "object"
+   },
+   "FixInput": {
+    "properties": {
+     "message_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The agent's message. Default: the newest one in the chat.",
+      "title": "Message Id"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "words": {
+      "description": "What was wrong, in your own words.",
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Words",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "words"
+    ],
+    "title": "FixInput",
     "type": "object"
    },
    "HTTPValidationError": {
@@ -1737,6 +2138,70 @@
     "title": "MemberRef",
     "type": "object"
    },
+   "MemoryItem": {
+    "properties": {
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "string"
+     },
+     "scope": {
+      "description": "project, team <name>, agent <name>, or your preferences.",
+      "title": "Scope",
+      "type": "string"
+     },
+     "source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     },
+     "untrusted": {
+      "description": "It came from outside the project (P4).",
+      "title": "Untrusted",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "scope",
+     "text",
+     "source",
+     "untrusted",
+     "at"
+    ],
+    "title": "MemoryItem",
+    "type": "object"
+   },
+   "MemoryList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/MemoryItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "MemoryList",
+    "type": "object"
+   },
    "MessageItem": {
     "properties": {
      "at": {
@@ -1830,6 +2295,26 @@
      "at"
     ],
     "title": "MessageItem",
+    "type": "object"
+   },
+   "MessageRef": {
+    "properties": {
+     "message_id": {
+      "description": "The message's id.",
+      "title": "Message Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "message_id"
+    ],
+    "title": "MessageRef",
     "type": "object"
    },
    "MintMcpInput": {
@@ -1960,6 +2445,88 @@
      "seats"
     ],
     "title": "ModelsView",
+    "type": "object"
+   },
+   "OrderItem": {
+    "properties": {
+     "being_shortened": {
+      "description": "A shorter sentence is being written for you.",
+      "title": "Being Shortened",
+      "type": "boolean"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Something for you to act on, if any.",
+      "title": "Note"
+     },
+     "proposed_by": {
+      "title": "Proposed By",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "text",
+     "state",
+     "proposed_by",
+     "being_shortened"
+    ],
+    "title": "OrderItem",
+    "type": "object"
+   },
+   "OrderList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/OrderItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "OrderList",
+    "type": "object"
+   },
+   "OrderRef": {
+    "properties": {
+     "order_id": {
+      "description": "The order's id, from `orders list`.",
+      "title": "Order Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "order_id"
+    ],
+    "title": "OrderRef",
     "type": "object"
    },
    "OverrideLineupInput": {
@@ -2175,6 +2742,97 @@
      "person_id"
     ],
     "title": "PersonRef",
+    "type": "object"
+   },
+   "PinInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "what": {
+      "description": "The order in one sentence, or the id of a message of yours to pin.",
+      "maxLength": 400,
+      "minLength": 1,
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "what"
+    ],
+    "title": "PinInput",
+    "type": "object"
+   },
+   "PinnedView": {
+    "properties": {
+     "agent_cap": {
+      "title": "Agent Cap",
+      "type": "integer"
+     },
+     "agent_tokens": {
+      "title": "Agent Tokens",
+      "type": "integer"
+     },
+     "project_cap": {
+      "title": "Project Cap",
+      "type": "integer"
+     },
+     "project_tokens": {
+      "title": "Project Tokens",
+      "type": "integer"
+     },
+     "seat": {
+      "title": "Seat",
+      "type": "string"
+     },
+     "text": {
+      "description": "Exactly what this agent is given at the start of every run.",
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "seat",
+     "text",
+     "project_tokens",
+     "project_cap",
+     "agent_tokens",
+     "agent_cap"
+    ],
+    "title": "PinnedView",
+    "type": "object"
+   },
+   "PreferenceInput": {
+    "properties": {
+     "text": {
+      "description": "A preference, such as \"plain English\".",
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "title": "PreferenceInput",
+    "type": "object"
+   },
+   "PreferenceRef": {
+    "properties": {
+     "memory_id": {
+      "description": "The preference's id, from `memory preferences`.",
+      "title": "Memory Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "memory_id"
+    ],
+    "title": "PreferenceRef",
     "type": "object"
    },
    "ProjectItem": {
@@ -2511,6 +3169,104 @@
     "title": "Registry",
     "type": "object"
    },
+   "RememberInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "scope": {
+      "default": "project",
+      "description": "project, team <name> or agent <name>.",
+      "title": "Scope",
+      "type": "string"
+     },
+     "text": {
+      "description": "The fact to remember.",
+      "maxLength": 2000,
+      "minLength": 3,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "text"
+    ],
+    "title": "RememberInput",
+    "type": "object"
+   },
+   "RequestItem": {
+    "properties": {
+     "approved": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Approved"
+     },
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "by": {
+      "title": "By",
+      "type": "string"
+     },
+     "decision_id": {
+      "title": "Decision Id",
+      "type": "integer"
+     },
+     "evidence": {
+      "items": {
+       "$ref": "#/components/schemas/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "reason": {
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "decision_id",
+     "by",
+     "reason",
+     "evidence",
+     "approved",
+     "at"
+    ],
+    "title": "RequestItem",
+    "type": "object"
+   },
+   "RequestList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/RequestItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "RequestList",
+    "type": "object"
+   },
    "RoleItem": {
     "properties": {
      "description": {
@@ -2585,6 +3341,34 @@
      "teams"
     ],
     "title": "Roster",
+    "type": "object"
+   },
+   "RuleInput": {
+    "properties": {
+     "decision_id": {
+      "description": "The decision's id, from `decisions list`.",
+      "title": "Decision Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "ruling": {
+      "description": "Your new ruling.",
+      "maxLength": 4000,
+      "minLength": 3,
+      "title": "Ruling",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "decision_id",
+     "ruling"
+    ],
+    "title": "RuleInput",
     "type": "object"
    },
    "RunItem": {
@@ -2895,6 +3679,18 @@
    },
    "SeatItem": {
     "properties": {
+     "corrections": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Times you said: not what I asked.",
+      "title": "Corrections"
+     },
      "kind": {
       "title": "Kind",
       "type": "string"
@@ -2902,6 +3698,18 @@
      "lead": {
       "title": "Lead",
       "type": "boolean"
+     },
+     "listening_score": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Corrections per 100 replies. Lower is better.",
+      "title": "Listening Score"
      },
      "name": {
       "title": "Name",
@@ -2917,6 +3725,18 @@
        }
       ],
       "title": "Pause Reason"
+     },
+     "replies": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Its replies in the project chat.",
+      "title": "Replies"
      },
      "role": {
       "title": "Role",
@@ -5361,6 +6181,135 @@
     ]
    }
   },
+  "/v1/corrections/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "corrections.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CorrectionList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List the corrections you have given agents.",
+    "tags": [
+     "corrections"
+    ]
+   }
+  },
+  "/v1/corrections/record": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "corrections.record",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FixInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CorrectionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Tell an agent its reply was not what you asked. It answers again and remembers.",
+    "tags": [
+     "corrections"
+    ]
+   }
+  },
+  "/v1/corrections/remove": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "corrections.remove",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CorrectionRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CorrectionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Remove a correction from an agent's pinned memory.",
+    "tags": [
+     "corrections"
+    ]
+   }
+  },
   "/v1/credentials/add": {
    "post": {
     "description": "Requires: person.",
@@ -5677,6 +6626,264 @@
     ]
    }
   },
+  "/v1/decisions/answer": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "decisions.answer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AnswerInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecisionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Approve or decline an agent's request to reopen a decision.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
+  "/v1/decisions/decide": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "decisions.decide",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DecideInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecisionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Close a topic with your ruling. Agents cannot raise it again without new evidence.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
+  "/v1/decisions/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "decisions.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecisionList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List a project's decisions and their rulings.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
+  "/v1/decisions/reopen": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "decisions.reopen",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DecisionRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecisionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Reopen a closed decision. You can do this at any time.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
+  "/v1/decisions/requests": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "decisions.requests",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RequestList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List agents' requests to reopen decisions.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
+  "/v1/decisions/rule": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "decisions.rule",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RuleInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DecisionItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give a new ruling on a reopened decision, which closes it again.",
+    "tags": [
+     "decisions"
+    ]
+   }
+  },
   "/v1/directives/issue": {
    "post": {
     "description": "Requires: project_chair.",
@@ -5761,6 +6968,90 @@
     "summary": "List a project's directives and what became of them.",
     "tags": [
      "directives"
+    ]
+   }
+  },
+  "/v1/examples/mark": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "examples.mark",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExampleInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ExampleItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Mark text as an example: an illustration agents must not use as data.",
+    "tags": [
+     "examples"
+    ]
+   }
+  },
+  "/v1/examples/unmark": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "examples.unmark",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MessageRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ExampleItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Remove the example mark from a message.",
+    "tags": [
+     "examples"
     ]
    }
   },
@@ -6207,6 +7498,464 @@
     ]
    }
   },
+  "/v1/memory/edit": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "memory.edit",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EditInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Correct a memory.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/forget": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "memory.forget",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EntryRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Forget a memory for good. It is deleted, not hidden.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/forget_preference": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "memory.forget_preference",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PreferenceRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Forget one of your own preferences.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "memory.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "project, team <name> or agent <name>. Default: all of them.",
+      "in": "query",
+      "name": "scope",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "project, team <name> or agent <name>. Default: all of them.",
+       "title": "Scope"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show what a project, a team or an agent remembers, newest first.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/pin": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "memory.pin",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/EntryRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PinnedView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Pin a memory so it is in front of the agents in every run.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/pinned": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "memory.pinned",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "An agent's name. Default: the CEO.",
+      "in": "query",
+      "name": "seat",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "An agent's name. Default: the CEO.",
+       "title": "Seat"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PinnedView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show exactly what an agent is given at the start of every run.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/prefer": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "memory.prefer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PreferenceInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a preference that agents recall in every project you chair.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/preferences": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "memory.preferences",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Show your own preferences, which agents recall in every project you chair.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/remember": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "memory.remember",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RememberInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a fact to a project's memory yourself.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
+  "/v1/memory/search": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "memory.search",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "What to look for.",
+      "in": "query",
+      "name": "query",
+      "required": true,
+      "schema": {
+       "description": "What to look for.",
+       "maxLength": 400,
+       "minLength": 2,
+       "title": "Query",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/MemoryList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Search what a project remembers.",
+    "tags": [
+     "memory"
+    ]
+   }
+  },
   "/v1/models/providers": {
    "get": {
     "description": "Requires: person.",
@@ -6397,6 +8146,219 @@
     "summary": "Show what each seat runs on: who pays, the model, and any substitution.",
     "tags": [
      "models"
+    ]
+   }
+  },
+  "/v1/orders/confirm": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "orders.confirm",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConfirmInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OrderItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Confirm a proposed standing order, with your edit if you have one.",
+    "tags": [
+     "orders"
+    ]
+   }
+  },
+  "/v1/orders/discard": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "orders.discard",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/OrderRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OrderItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Discard a proposed standing order.",
+    "tags": [
+     "orders"
+    ]
+   }
+  },
+  "/v1/orders/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "orders.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OrderList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List a project's standing orders: proposed, active and retired.",
+    "tags": [
+     "orders"
+    ]
+   }
+  },
+  "/v1/orders/pin": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "orders.pin",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PinInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OrderItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Pin a standing order: one sentence every agent follows in every run.",
+    "tags": [
+     "orders"
+    ]
+   }
+  },
+  "/v1/orders/retire": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "orders.retire",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/OrderRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/OrderItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Retire a standing order. Agents are told it is no longer in force.",
+    "tags": [
+     "orders"
     ]
    }
   },
