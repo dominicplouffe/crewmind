@@ -8,8 +8,8 @@ P6,Silence is never consent to act,02-principles.md,all,yes,not started,,
 P7,The chairman owns the goalposts,02-principles.md,all,yes,not started,,
 P8,Idle costs nothing,02-principles.md,all,yes,not started,,
 P9,Every token is metered,02-principles.md,all,yes,not started,,
-P10,Every rule ships with an attack,02-principles.md,all,yes,in progress,tests/attack/test_P10_attack_coverage.py,Phase 0: harness and coverage check; attacks arrive with each rule
-P11,"One concept, one implementation, every surface",02-principles.md,all,yes,in progress,tests/contract/test_IF_1_3_conformance.py,
+P10,Every rule ships with an attack,02-principles.md,all,yes,done,tests/attack/test_P10_attack_coverage.py,
+P11,"One concept, one implementation, every surface",02-principles.md,all,yes,done,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/unit/test_catalog.py,
 P12,Honest about limits,02-principles.md,all,yes,not started,,
 P13,"Facts belong in fields, not prose",02-principles.md,all,yes,not started,,
 P14,Speed is a feature,02-principles.md,all,yes,not started,,
@@ -37,16 +37,16 @@ CHAT-17,Multi-person,05-chat.md,2,yes,not started,,
 CHAT-18,Always-visible header,05-chat.md,2,yes,not started,,
 CHAT-19,Activity feed,05-chat.md,2,yes,not started,,
 CHAT-20,Everywhere,05-chat.md,2,yes,not started,,
-PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
-PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
-PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
+PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py,"Start checks are a registry; phase 1 has none to add. Seat, budget and email checks arrive in phases 2 and 8"
+PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Chairman hold, resume time and the hold-reason set are built. The triggers for budget_wall, auth_failures and skipped_cycles arrive in phases 2 and 5"
+PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,partial,tests/unit/test_state_machines.py,Stop is terminal and clears holds. Revoking runs and voiding decision items arrive in phases 2 and 6
 PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-8,Operate cycles,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-9,Clone and export,06-01-projects-PRJ.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
-PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
+PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Two-step delete, grace and purge are built. The export offer arrives in phase 7; mailbox purge in phase 8"
 SPD-1,No clock waits on ready work,06-02-speed-SPD.md,5,yes,not started,,
 SPD-2,Parallel by default,06-02-speed-SPD.md,5,yes,not started,,
 SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,not started,,
@@ -71,7 +71,7 @@ LLM-12,Provider ceilings,06-03-models-LLM.md,2,yes,not started,,
 LLM-13,Cost estimate (display only),06-03-models-LLM.md,2,yes,not started,,
 LLM-14,Platform models,06-03-models-LLM.md,2,yes,not started,,
 LLM-15,Output standard in every call,06-03-models-LLM.md,2,yes,not started,,
-GOV-1,Settings,06-04-budget-GOV.md,2,yes,not started,,
+GOV-1,Settings,06-04-budget-GOV.md,2,yes,partial,tests/attack/test_settings.py; tests/unit/test_settings_registry.py; tests/unit/test_settings_service.py,Built in phase 1 with the settings service. Disclosure to the CEO arrives in phase 2
 GOV-2,Token budget,06-04-budget-GOV.md,2,yes,not started,,
 GOV-3,The budget is the wall,06-04-budget-GOV.md,2,yes,not started,,
 GOV-4,Budget advice,06-04-budget-GOV.md,5,yes,not started,,
@@ -206,20 +206,20 @@ INT-8,Web search,06-15-integrations-INT.md,2,yes,not started,,moved to phase 2: 
 INT-9,Code repository,06-15-integrations-INT.md,8,later,not started,,
 INT-10,"Agents on email, and external agents",06-15-integrations-INT.md,8,later,not started,,
 INT-11,A2A: agent-to-agent protocol,06-15-integrations-INT.md,8,later,not started,,
-ACC-1,Passwords,06-16-accounts-ACC.md,1,yes,not started,,
-ACC-2,Browser sessions,06-16-accounts-ACC.md,1,yes,not started,,
-ACC-3,Personal tokens,06-16-accounts-ACC.md,1,yes,not started,,
-ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,not started,,Phase 1: admin-issued links; self-service reset by email in phase 6
-ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,not started,,
-ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,not started,,
+ACC-1,Passwords,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_accounts.py,
+ACC-2,Browser sessions,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_accounts.py,
+ACC-3,Personal tokens,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_accounts.py; tests/unit/test_cli.py,
+ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,partial,tests/attack/test_accounts.py,Admin-issued links. Self-service reset by email in phase 6
+ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_settings.py,
+ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_secrets.py,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
 INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,not started,,
 INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,not started,,
 INV-3,"No agent completes, reviews or gives the verdict on work it did, and n",08-invariants-INV.md,4,yes,not started,,
 INV-4,"A run token works only for its own run, agent and project, and only wh",08-invariants-INV.md,2,yes,not started,,Moved from phase 1 (phase 1 plan): needs runs and the dispatcher
-INV-5,A person or client that cannot see a project gets the same answer as f,08-invariants-INV.md,1,yes,not started,,
-INV-6,"No secret value, provider key included, appears in any sandbox, agent-",08-invariants-INV.md,1,yes,not started,,
-INV-7,Agent-written text is always wrapped as untrusted when it reaches a pe,08-invariants-INV.md,1,yes,not started,,
+INV-5,A person or client that cannot see a project gets the same answer as f,08-invariants-INV.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_mcp.py; tests/unit/test_catalog.py,
+INV-6,"No secret value, provider key included, appears in any sandbox, agent-",08-invariants-INV.md,1,yes,partial,tests/attack/test_secrets.py,"Checked for every operation output, the database, events and logs. Sandboxes, exports and rehearsals arrive later"
+INV-7,Agent-written text is always wrapped as untrusted when it reaches a pe,08-invariants-INV.md,1,yes,partial,tests/unit/test_untrusted.py,Envelope built and applied on MCP. No agent text exists until phase 2
 INV-8,"Every model call has a ledger line, whatever the run's ending (P9, LLM",08-invariants-INV.md,2,yes,not started,,
 INV-9,Token spend never exceeds the wall by more than the tokens of runs alr,08-invariants-INV.md,2,yes,not started,,
 INV-10,"Real-world spend never exceeds `spend.monthly_cap`, counting committed",08-invariants-INV.md,2,yes,not started,,
@@ -233,35 +233,35 @@ INV-17,A decision item reaching its deadline always resolves to its declared ,08
 INV-18,Proposed scope never has work against it; no task exists under a requi,08-invariants-INV.md,5,yes,not started,,
 INV-19,"The requirement graph is always acyclic, and where stages are used, wo",08-invariants-INV.md,5,yes,not started,,
 INV-20,"A held, paused, stopped, ready or completed project changes no work st",08-invariants-INV.md,2,yes,not started,,
-INV-21,"Every state change appears in the event log with its actor (person, pe",08-invariants-INV.md,1,yes,not started,,
+INV-21,"Every state change appears in the event log with its actor (person, pe",08-invariants-INV.md,1,yes,done,tests/scenarios/test_phase_1_exit_demo.py; tests/unit/test_execute.py,
 INV-22,The agenda's next wake equals the dispatcher's next wake.,08-invariants-INV.md,6,yes,not started,,
 INV-23,"A chat run changes no state except posting, writing its own memory not",08-invariants-INV.md,3,yes,not started,,
 INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,not started,,
 INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,not started,,
 INV-26,"A closed decision is reopened only by the chairman, or by a reopen req",08-invariants-INV.md,3,yes,not started,,
-IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,in progress,tests/unit/test_catalog.py,"Phase 0: catalog built, no product operations yet"
-IF-1.2,"HTTP routes, CLI commands, MCP tools, slash commands and Slack actions",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py,"Phase 0: api, cli and mcp adapters generated; other surfaces in their phases"
-IF-1.3,A conformance test enumerates the catalog. It fails when an operation ,09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_3_conformance.py,Phase 0: operations and surfaces; decision-item kinds in phase 6
-IF-1.4,"Refusals are identical on every surface: the same machine code, the sa",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_4_refusals.py,"Phase 0: shared envelope on api, cli and mcp"
-IF-3.1,"JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schem",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py,Phase 0: routes and OpenAPI generated from the catalog
-IF-3.2,"Every route declares who may call it, enforced before the handler runs",09-interfaces-IF.md,1,yes,not started,,
-IF-3.3,A project the caller cannot see answers exactly like a project that do,09-interfaces-IF.md,1,yes,not started,,
-IF-3.4,"A stable error envelope: `code`, `message`, `rule` (when a governed ru",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_4_refusals.py,
-IF-3.5,Writes accept an idempotency key. Lists are cursor-paginated and filte,09-interfaces-IF.md,1,yes,not started,,
+IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,done,tests/unit/test_catalog.py,
+IF-1.2,"HTTP routes, CLI commands, MCP tools, slash commands and Slack actions",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/scenarios/test_phase_1_exit_demo.py,
+IF-1.3,A conformance test enumerates the catalog. It fails when an operation ,09-interfaces-IF.md,1,yes,partial,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/contract/test_IF_1_4_refusals.py; tests/unit/test_catalog.py,Operations and surfaces are checked. Decision-item kinds arrive in phase 6
+IF-1.4,"Refusals are identical on every surface: the same machine code, the sa",09-interfaces-IF.md,1,yes,done,tests/attack/test_P10_attack_coverage.py; tests/contract/test_IF_1_4_refusals.py,
+IF-3.1,"JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schem",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_2_adapters.py,
+IF-3.2,"Every route declares who may call it, enforced before the handler runs",09-interfaces-IF.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_settings.py; tests/contract/test_IF_1_2_adapters.py; tests/unit/test_catalog.py,
+IF-3.3,A project the caller cannot see answers exactly like a project that do,09-interfaces-IF.md,1,yes,done,tests/attack/test_access.py,
+IF-3.4,"A stable error envelope: `code`, `message`, `rule` (when a governed ru",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_4_refusals.py,
+IF-3.5,Writes accept an idempotency key. Lists are cursor-paginated and filte,09-interfaces-IF.md,1,yes,done,tests/unit/test_execute.py,
 IF-3.6,A live event stream (server-sent events or WebSocket) publishes projec,09-interfaces-IF.md,2,yes,not started,,
-IF-3.7,Browser sessions are protected against cross-origin writes. Signing ou,09-interfaces-IF.md,1,yes,not started,,
-IF-3.8,"Every read view the app shows MUST be a documented API read, so a thir",09-interfaces-IF.md,1,yes,not started,,
+IF-3.7,Browser sessions are protected against cross-origin writes. Signing ou,09-interfaces-IF.md,1,yes,done,tests/attack/test_accounts.py,
+IF-3.8,"Every read view the app shows MUST be a documented API read, so a thir",09-interfaces-IF.md,1,yes,partial,tests/scenarios/test_phase_1_exit_demo.py,Every phase 1 read is an API read. Later views are added with their phases
 IF-3.9,Uploads use resumable multipart transfer up to `upload.max_size`.,09-interfaces-IF.md,2,yes,not started,,
-IF-4.1,"One command, `crewmind`, talking to the server over the HTTP API. It is co",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py,Phase 0: commands call the API; login in phase 1
-IF-4.2,"A small, explicitly marked set of host-local commands may touch storag",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py,Phase 0: host-local mechanism; the commands themselves in phase 1
-IF-4.3,"Every command supports `--help` and `--json`. With `--json`, or with n",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/unit/test_cli.py,Phase 0: --help and --json
-IF-4.4,"Exit codes distinguish success, refusal by a rule, authentication fail",09-interfaces-IF.md,1,yes,in progress,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_4_refusals.py,Phase 0: exit codes defined
-IF-4.5,"Secrets are read from a hidden prompt, stdin or a file. They are never",09-interfaces-IF.md,1,yes,not started,,
+IF-4.1,"One command, `crewmind`, talking to the server over the HTTP API. It is co",09-interfaces-IF.md,1,yes,done,tests/acceptance/test_slim.py; tests/contract/test_IF_1_2_adapters.py; tests/unit/test_cli.py,
+IF-4.2,"A small, explicitly marked set of host-local commands may touch storag",09-interfaces-IF.md,1,yes,done,tests/attack/test_access.py; tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/unit/test_catalog.py,All host-local commands exist and are unreachable from the network
+IF-4.3,"Every command supports `--help` and `--json`. With `--json`, or with n",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_4_refusals.py; tests/unit/test_cli.py,
+IF-4.4,"Exit codes distinguish success, refusal by a rule, authentication fail",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_4_refusals.py,
+IF-4.5,"Secrets are read from a hidden prompt, stdin or a file. They are never",09-interfaces-IF.md,1,yes,done,tests/acceptance/test_slim.py; tests/unit/test_cli.py,
 IF-4.6,Drafting a project in the terminal follows the Founder rules (FND-3):,09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.7,"After creating a project, the CLI asks for any missing credentials the",09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.8,`crewmind chat [project]` opens a full-screen terminal chat with the same ,09-interfaces-IF.md,2,yes,not started,,
-IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,not started,,Phase 1: minted bearer tokens only; OAuth in phase 6 (spec review R-11)
-IF-5.2,Scopes,09-interfaces-IF.md,6,yes,not started,,Phase 1: read scope only; other scopes in phase 6 (spec review R-11)
+IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,partial,tests/acceptance/test_slim.py; tests/attack/test_mcp.py,Phase 1: minted bearer tokens over streamable HTTP. OAuth in phase 6
+IF-5.2,Scopes,09-interfaces-IF.md,6,yes,partial,tests/attack/test_mcp.py; tests/contract/test_IF_1_4_refusals.py,Phase 1: the read scope only. Other scopes in phase 6
 IF-5.3,Two-phase confirmation,09-interfaces-IF.md,6,yes,not started,,
 IF-5.4,Attribution,09-interfaces-IF.md,6,yes,not started,,
 IF-5.5,Untrusted content,09-interfaces-IF.md,6,yes,not started,,
@@ -273,31 +273,31 @@ IF-6.2,No agent-facing response may contain a secret value. A test walks the ,09
 IF-6.3,Capability groups the agent API MUST offer (the role decides which a g,09-interfaces-IF.md,2,yes,not started,,
 IF-7.1,Webhook intake verifies a per-project signature and a replay window be,09-interfaces-IF.md,8,later,not started,,
 IF-7.2,"Outbound notifications (push, Slack, email) are clients of the same op",09-interfaces-IF.md,8,later,not started,,
-BG-1,"Each project is processed in its own transaction on every tick, so one",10-background-BG.md,1,yes,not started,,
+BG-1,"Each project is processed in its own transaction on every tick, so one",10-background-BG.md,1,yes,done,tests/unit/test_scheduler.py,
 BG-2,Database notifications SHOULD be used to cut wake latency to near zero,10-background-BG.md,2,yes,not started,,Moved from phase 1 (phase 1 plan): needs runs and the dispatcher
-BG-3,Every scheduled job is idempotent and safe to run twice.,10-background-BG.md,1,yes,not started,,
-BG-4,Every automatic state change a job makes writes an event naming the jo,10-background-BG.md,1,yes,not started,,
-NFR-1,"Self-hosted, open source, no telemetry to the vendor (OpenTelemetry ex",11-nfr-NFR.md,1,yes,not started,,
-NFR-2,One idempotent install command for a server. It:,11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
-NFR-3,"The update command refuses a dirty checkout, backs up first, updates, ",11-nfr-NFR.md,1,yes,not started,,Phase 1: source checkouts only
-NFR-4,"Backup is one owner-readable archive holding the database, the master ",11-nfr-NFR.md,1,yes,not started,,
-NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,not started,,Phase 1 builds the extension point; later phases add their checks (spec review R-11)
-NFR-6,The server binds to 127.0.0.1 by default. Publishing it requires TLS a,11-nfr-NFR.md,1,yes,not started,,
-NFR-7,Configuration has two kinds. **Operational** settings are environment ,11-nfr-NFR.md,1,yes,not started,,
-NFR-8,"Two databases are supported: Postgres with pgvector for a full server,",11-nfr-NFR.md,1,yes,in progress,tests/unit/test_storage.py,Phase 0: engine and CI on both databases
-NFR-9,"The dispatcher, scheduler, leasing, gateway and API all recover on the",11-nfr-NFR.md,1,yes,not started,,
-NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11-nfr-NFR.md,1,yes,in progress,tests/unit/test_storage.py,Phase 0: migration runner and empty baseline
-NFR-11,"Every route declares its authorization, enforced before the handler ru",11-nfr-NFR.md,1,yes,not started,,
-NFR-12,Secrets are encrypted at rest under the master key. Tokens are stored ,11-nfr-NFR.md,1,yes,not started,,
+BG-3,Every scheduled job is idempotent and safe to run twice.,10-background-BG.md,1,yes,done,tests/unit/test_scheduler.py,
+BG-4,Every automatic state change a job makes writes an event naming the jo,10-background-BG.md,1,yes,done,tests/unit/test_scheduler.py,
+NFR-1,"Self-hosted, open source, no telemetry to the vendor (OpenTelemetry ex",11-nfr-NFR.md,1,yes,partial,,Nothing in the code sends data anywhere; no test asserts it
+NFR-2,One idempotent install command for a server. It:,11-nfr-NFR.md,1,yes,partial,tests/acceptance/test_slim.py; tests/unit/test_install.py,"setup, key, migrate, first admin and link are built. A Compose bundle ships in deploy/ but is untested (no Docker daemon in the build environment) and setup does not start it. Libraries, Slack and email steps arrive in phases 7 and 8"
+NFR-3,"The update command refuses a dirty checkout, backs up first, updates, ",11-nfr-NFR.md,1,yes,partial,tests/attack/test_install.py,"Refusals and the dry run are tested. The pull, sync and restart path has not been run for real"
+NFR-4,"Backup is one owner-readable archive holding the database, the master ",11-nfr-NFR.md,1,yes,done,tests/attack/test_install.py; tests/unit/test_install.py,
+NFR-5,"Health endpoints: liveness, and readiness (database reachable and sche",11-nfr-NFR.md,1,yes,partial,tests/acceptance/test_slim.py; tests/unit/test_install.py,Health endpoints and doctor are built. The project health card is an empty list until checks exist
+NFR-6,The server binds to 127.0.0.1 by default. Publishing it requires TLS a,11-nfr-NFR.md,1,yes,done,tests/attack/test_install.py,
+NFR-7,Configuration has two kinds. **Operational** settings are environment ,11-nfr-NFR.md,1,yes,done,tests/unit/test_install.py; tests/unit/test_settings_registry.py,
+NFR-8,"Two databases are supported: Postgres with pgvector for a full server,",11-nfr-NFR.md,1,yes,done,tests/unit/test_storage.py,
+NFR-9,"The dispatcher, scheduler, leasing, gateway and API all recover on the",11-nfr-NFR.md,1,yes,done,tests/chaos/test_NFR_9_connections.py,
+NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11-nfr-NFR.md,1,yes,done,tests/unit/test_execute.py; tests/unit/test_storage.py,
+NFR-11,"Every route declares its authorization, enforced before the handler ru",11-nfr-NFR.md,1,yes,done,tests/attack/test_access.py,
+NFR-12,Secrets are encrypted at rest under the master key. Tokens are stored ,11-nfr-NFR.md,1,yes,done,tests/attack/test_accounts.py; tests/attack/test_secrets.py,
 NFR-13,The OAuth server for MCP enforces:,11-nfr-NFR.md,6,yes,not started,,
-NFR-14,SECURITY.md states:,11-nfr-NFR.md,1,yes,not started,,
-NFR-15,Retention,11-nfr-NFR.md,1,yes,not started,,
-NFR-16,"Deciding whether an agent has work costs no tokens. Briefs, agendas, r",11-nfr-NFR.md,1,yes,not started,,
+NFR-14,SECURITY.md states:,11-nfr-NFR.md,1,yes,partial,,"SECURITY.md written for phase 1; sections for agents, gateway, skills and browser are marked not built yet"
+NFR-15,Retention,11-nfr-NFR.md,1,yes,partial,tests/unit/test_scheduler.py,Deleting a project purges everything. Trace and snapshot retention arrive in phase 2
+NFR-16,"Deciding whether an agent has work costs no tokens. Briefs, agendas, r",11-nfr-NFR.md,1,yes,partial,,Not yet exercised: nothing in phase 1 can spend tokens
 NFR-17,Latency targets:,11-nfr-NFR.md,all,yes,not started,,
 NFR-18,The app meets WCAG 2.2 AA:,11-nfr-NFR.md,all,yes,not started,,
 NFR-19,Test layers,11-nfr-NFR.md,all,yes,not started,,
 NFR-20,Every rule records how often it refuses and how often a refused call l,11-nfr-NFR.md,all,yes,not started,,
-NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,not started,,
+NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,partial,,"Checked by review, not by a test"
 NFR-22,OpenTelemetry export,11-nfr-NFR.md,8,later,not started,,
-NFR-23,Slim mode,11-nfr-NFR.md,1,yes,not started,,
-NFR-24,Technology,11-nfr-NFR.md,1,yes,in progress,,Phase 0: toolchain in place
+NFR-23,Slim mode,11-nfr-NFR.md,1,yes,done,tests/acceptance/test_slim.py; tests/attack/test_install.py; tests/unit/test_install.py,
+NFR-24,Technology,11-nfr-NFR.md,1,yes,done,,

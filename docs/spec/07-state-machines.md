@@ -163,8 +163,7 @@ An event flag closes at acknowledged. A state flag closes only at cleared, even 
 
 | From | To | Trigger | Who |
 | --- | --- | --- | --- |
-| (new) | active | Bootstrap the first admin (host-local, IF-4.2) | Host operator |
-| (new) | invited | Invite (ACC-4) | Admin |
+| (new) | invited | Invite (ACC-4); or bootstrap the first admin from the host, which prints a setup link (IF-4.2, NFR-2) | Admin; host operator |
 | invited | active | Setup link used and a password set (ACC-1) | The person |
 | active | deactivated | Deactivate; ends every session and revokes every token. Refused while the person chairs a project (ACC-5) | Admin |
 | deactivated | active | Reactivate | Admin |
@@ -212,7 +211,7 @@ The instance role (`admin` or `member`) is a field, changed by an admin through 
 | (new) | chairman | Create a project; the creator becomes its chairman | Any active member |
 | co-chair, observer | co-chair, observer | Change role | Chairman |
 | co-chair, observer | removed | Remove; effective on the member's next request | Chairman |
-| chairman | co-chair | Hand on the chair; the new chairman takes the chairman role in the same transaction | Chairman only; admin as break-glass (section 3) |
+| chairman | co-chair | Hand on the chair; the new chairman takes the chairman role in the same transaction. In a break-glass hand-on, a person who is not yet a member joins as a co-chair first | Chairman only; admin as break-glass (section 3) |
 | co-chair, observer | chairman | Receive the chair | (same transaction) |
 
 A project always has exactly one chairman.

@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.5 (21 Nov 2026): phase 1 build
+
+- **7.8:** the first admin is created in the invited state with a setup link, like any invite, not directly as active. This matches NFR-2 ("creates the first admin and prints a setup link").
+- **7.11:** in a break-glass hand-on, a person who is not yet a member joins as a co-chair first, so an admin can replace a chairman who was the project's only member.
+
 ## Revision 2.4 (21 Nov 2026): phase 1 plan answers
 
 - **ACC-5, 7.8:** deactivating a person who chairs a project is refused, naming the projects. An admin hands each chair on first.

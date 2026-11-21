@@ -15,7 +15,32 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: phase 0 (bootstrap) is built. See [docs/PLAN.md](docs/PLAN.md) for the phases.
+Status: phase 1 (core) is built: accounts, projects with their lifecycle, versioned settings and the event log, reachable from the API, the CLI and MCP (read). See [docs/PLAN.md](docs/PLAN.md) for the phases and [SECURITY.md](SECURITY.md) for what is and is not protected.
+
+## Try it
+
+```bash
+uv sync
+uv run crewmind setup --slim --admin-email you@example.com
+```
+
+```bash
+uv run crewmind up --slim
+```
+
+In another terminal, use the setup link that `setup` printed:
+
+```bash
+uv run crewmind accept --link <link>
+```
+
+```bash
+uv run crewmind login --email you@example.com
+```
+
+```bash
+uv run crewmind projects create --name Atlas --type deliver --goal "Ship the atlas."
+```
 
 ## Develop
 

@@ -31,15 +31,18 @@ crewmind runs a team of AI agents like a company (chairman, CEO, teams) under ru
 
 ```
 src/crewmind/
-  catalog/            operation registry, schemas, authority, reversibility
-  domain/<module>/    one module per domain: rules, state machines, commands, read models, jobs
+  catalog/            operation registry, schemas, authority, reversibility, the one call path
+  domain/<module>/    one module per domain: rules, state machines, commands, read models
                       (projects, settings, budget, planning, work, artifacts, conversation,
-                       decisions, execution, memory, founder, library, integrations, accounts)
+                       decisions, execution, memory, founder, library, integrations, accounts,
+                       record = the event log, secrets, install = host-local commands)
+  jobs/               the scheduler and its periodic jobs
   surfaces/           api/, cli/, mcp/, agent_api/, slack/: adapters only
   gateway/            model gateway (LiteLLM), metering, per-run caps
   runner/             leasing, sandboxes, harnesses (mock first)
   storage/            SQLAlchemy models, Alembic migrations, the storage adapter
 web/                  TypeScript/React app
+deploy/               Dockerfile and Compose file for a full server
 tests/
   unit/  contract/  attack/  chaos/  scenarios/  acceptance/
 content/              imported v1 roles, crews, doctrine, goal grammar
