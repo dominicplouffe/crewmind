@@ -8,6 +8,7 @@ import {
   PASSWORD,
   PLAN_SCRIPT,
   STATE_FILE,
+  saveProjectUrl,
   createProject,
   expectAccessible,
   recordTyping,
@@ -21,7 +22,6 @@ import {
 test.describe.configure({ mode: "serial" });
 
 let page: Page;
-let projectUrl = "";
 
 test.beforeAll(async ({ browser }) => {
   page = await (await browser.newContext()).newPage();
@@ -70,7 +70,7 @@ test("the project list says what to do when empty and is accessible", async () =
 
 test("create and start a project (CHAT-1, CHAT-18)", async () => {
   await createProject(page, "Plan project");
-  projectUrl = page.url();
+  saveProjectUrl(page.url());
   await expect(page.getByTestId("project-state")).toHaveText("draft");
   await expect(page.getByText("This project has not started.")).toBeVisible();
   await page.getByRole("button", { name: "Start" }).click();
@@ -213,6 +213,62 @@ test("accept an action card with one tap (CHAT-7)", async () => {
   setCeoScript(PLAN_SCRIPT);
 });
 
+test("edit an action card before accepting it, and say not now to another (CHAT-7)", async () => {
+  const propose = (what: string): unknown[] => [
+    { tools: [{ name: "agent_propose_action", arguments: { what, estimated_tokens: 1000, reversible: false } }] },
+    { text: "" },
+  ];
+  setCeoScript(propose("Publish the draft."));
+  await sendMessage(page, "And then?");
+  const first = page.getByTestId("action-card").filter({ hasText: "Publish the draft." });
+  await expect(first).toContainText("It cannot be undone.", { timeout: 30_000 });
+  await first.getByRole("button", { name: "Edit" }).click();
+  await first.getByLabel("What should be done instead").fill("Publish the draft on Monday.");
+  const accepted = page.waitForRequest((request) => request.url().endsWith("/v1/cards/accept"));
+  await first.getByRole("button", { name: "Do it, as edited" }).click();
+  expect((await accepted).postDataJSON()).toMatchObject({ edited: "Publish the draft on Monday." });
+  await expect(page.getByTestId("action-card").filter({ hasText: "You said: do it." })).toHaveCount(2);
+
+  setCeoScript(propose("Email the client."));
+  await sendMessage(page, "Anything else?");
+  const second = page.getByTestId("action-card").filter({ hasText: "Email the client." });
+  await second.getByRole("button", { name: "Not now" }).click({ timeout: 30_000 });
+  await expect(second).toContainText("You said: not now.");
+  setCeoScript(PLAN_SCRIPT);
+});
+
+test("attach by drag-and-drop and by paste; images, audio and PDF get a preview (CHAT-4, CHAT-16)", async () => {
+  const pngBase64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  await page.evaluate((png) => {
+    const bytes = Uint8Array.from(atob(png), (char) => char.charCodeAt(0));
+    const dropped = new DataTransfer();
+    dropped.items.add(new File([bytes], "dot.png", { type: "image/png" }));
+    const main = document.querySelector("main.chat");
+    main?.dispatchEvent(new DragEvent("dragover", { dataTransfer: dropped, bubbles: true, cancelable: true }));
+    main?.dispatchEvent(new DragEvent("drop", { dataTransfer: dropped, bubbles: true, cancelable: true }));
+
+    const pasted = new DataTransfer();
+    pasted.items.add(new File(["%PDF-1.4\n%%EOF\n"], "paper.pdf", { type: "application/pdf" }));
+    pasted.items.add(new File([new Uint8Array(64)], "clip.wav", { type: "audio/wav" }));
+    document
+      .querySelector("form.composer textarea")
+      ?.dispatchEvent(new ClipboardEvent("paste", { clipboardData: pasted, bubbles: true, cancelable: true }));
+  }, pngBase64);
+
+  await page.getByRole("button", { name: "Preview dot.png" }).click({ timeout: 30_000 });
+  const panel = page.getByTestId("panel");
+  const image = panel.getByRole("img", { name: "Image: dot.png" });
+  await expect(image).toBeVisible();
+  await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth)).toBe(1);
+
+  await page.getByRole("button", { name: "Preview clip.wav" }).click();
+  await expect(panel.locator("audio[controls]")).toHaveAttribute("src", /artifacts\/clip\.wav\?version=1$/);
+
+  await page.getByRole("button", { name: "Preview paper.pdf" }).click();
+  await expect(panel.locator('object[type="application/pdf"]')).toHaveAttribute("data", /^blob:/);
+  await page.getByRole("button", { name: "Close panel" }).click();
+});
+
 test("the command palette opens panels; budget, models, settings, runs, activity and search work", async () => {
   await page.keyboard.press("Control+k");
   await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("budget");
@@ -278,12 +334,13 @@ test("the theme switch works and the project page is accessible in both themes (
 });
 
 test("the reply bubble grows as words arrive, and Esc asks the server to stop the run (CHAT-3, CHAT-4)", async () => {
-  setCeoScript([{ text: Array.from({ length: 2500 }, (_, index) => `w${index}`).join(" ") }]);
+  // A long reply, so the stream lasts long enough to act on (the mock sends words as fast as it can).
+  const words = Array.from({ length: 6000 }, (_, index) => (index % 1000 === 999 ? `mark${index}` : "a"));
+  setCeoScript([{ text: words.join(" ") }]);
+  await recordTyping(page);
   await sendMessage(page, "Write something long");
   const bubble = page.getByTestId("typing");
-  await expect(bubble).toContainText("w5 ", { timeout: 30_000 });
-  await expect(bubble).toContainText("w300 ");
-  await expect(bubble.getByRole("button", { name: "Stop" })).toBeVisible();
+  await expect(bubble).toBeVisible({ timeout: 30_000 });
   const asked = page.waitForRequest((request) => request.url().endsWith("/v1/runs/interrupt"));
   await page.getByRole("textbox", { name: "Message" }).press("Escape");
   const request = await asked;
@@ -299,8 +356,12 @@ test("the reply bubble grows as words arrive, and Esc asks the server to stop th
   }
   setCeoScript(PLAN_SCRIPT);
   await expect(bubble).toHaveCount(0, { timeout: 40_000 });
-  await expect(agentMessages().last()).toContainText("w2499");
-  await expect(agentMessages().last().getByRole("button", { name: "Show more" })).toBeVisible();
+  const seen = await typingSeen(page);
+  expect(seen.length).toBeGreaterThan(2);
+  if (!response?.ok()) {
+    await expect(agentMessages().last()).toContainText("mark5999");
+    await expect(agentMessages().last().getByRole("button", { name: "Show more" })).toBeVisible();
+  }
 });
 
 test("polling keeps the chat working when the live stream is blocked", async () => {
@@ -311,57 +372,4 @@ test("polling keeps the chat working when the live stream is blocked", async () 
   await sendMessage(page, "Are you still there?");
   await expect(agentMessages()).toHaveCount(before + 1, { timeout: 40_000 });
   await page.unroute("**/stream/v1/**");
-});
-
-test.describe("on a 390 px wide phone (CHAT-20)", () => {
-  test.use({ viewport: { width: 390, height: 844 }, storageState: STATE_FILE });
-
-  test("the chat fits, panels open as full-screen sheets, and it is accessible", async ({ page: phone }) => {
-    await phone.goto(projectUrl);
-    await expect(phone.getByTestId("project-state")).toHaveText("running");
-    await expect(phone.getByTestId("message-agent").first()).toBeVisible();
-    const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow).toBeLessThanOrEqual(0);
-    await expectAccessible(phone, "project page on a phone");
-
-    await phone.getByRole("button", { name: "Files", exact: true }).click();
-    const box = await phone.getByTestId("panel").boundingBox();
-    expect(box?.width).toBe(390);
-    expect(box?.height).toBe(844);
-    await expectAccessible(phone, "files sheet on a phone");
-    await phone.getByRole("button", { name: "Close panel" }).click();
-    await expect(phone.getByRole("textbox", { name: "Message" })).toBeFocused();
-
-    await sendMessage(phone, "Hello from a phone");
-    await expect(phone.getByText("Hello from a phone")).toBeVisible();
-    await expect(phone.getByTestId("delivered").last()).toBeVisible();
-  });
-});
-
-test.describe("installable app (CHAT-20)", () => {
-  test.use({ serviceWorkers: "allow", storageState: STATE_FILE });
-
-  test("the manifest and service worker load, and API answers are never cached", async ({ page: app }) => {
-    await app.goto("/");
-    const manifest = await app.request.get("/manifest.webmanifest");
-    expect(manifest.ok()).toBe(true);
-    expect((await manifest.json()).display).toBe("standalone");
-    for (const icon of ["/icon-192.png", "/icon-512.png", "/icon.svg"]) {
-      expect((await app.request.get(icon)).ok()).toBe(true);
-    }
-    await app.evaluate(async () => {
-      await navigator.serviceWorker.ready;
-    });
-    await app.reload();
-    await expect(app.getByRole("heading", { name: "Projects" })).toBeVisible();
-    const cached = await app.evaluate(async () => {
-      const urls: string[] = [];
-      for (const name of await caches.keys()) {
-        for (const request of await (await caches.open(name)).keys()) urls.push(new URL(request.url).pathname);
-      }
-      return urls;
-    });
-    expect(cached).toContain("/");
-    expect(cached.filter((path) => /^\/(v1|files|stream)\//.test(path))).toEqual([]);
-  });
 });

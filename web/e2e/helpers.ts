@@ -85,3 +85,13 @@ export async function recordTyping(page: Page): Promise<void> {
 export function typingSeen(page: Page): Promise<string[]> {
   return page.evaluate(() => (window as unknown as { typingSeen: string[] }).typingSeen);
 }
+
+const projectUrlFile = join(runDir, "project-url.txt");
+
+export function saveProjectUrl(url: string): void {
+  writeFileSync(projectUrlFile, url);
+}
+
+export function projectUrl(): string {
+  return readFileSync(projectUrlFile, "utf8");
+}

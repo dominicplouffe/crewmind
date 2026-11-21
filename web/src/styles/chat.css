@@ -238,9 +238,12 @@
 .upload progress { width: 8rem; }
 .upload.failed { color: var(--danger); }
 
+.appbar .button { min-height: 2rem; padding: 0.2rem 0.6rem; font-size: 0.9rem; }
+
 @media (max-width: 599px) {
   .composer-hint { display: none; }
-  .strip { grid-template-columns: 1fr 1fr; max-height: 34dvh; }
+  .strip { grid-template-columns: 1fr 1fr; max-height: 34dvh; font-size: 0.85rem; gap: 0.15rem 0.75rem; padding: 0.35rem 0.6rem; }
+  .appbar { padding: 0.35rem 0.6rem; gap: 0.35rem; }
   .project-title { max-width: 60vw; }
   .messages { padding: 0.5rem; }
 }

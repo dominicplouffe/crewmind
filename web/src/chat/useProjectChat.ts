@@ -104,6 +104,8 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
             onChange: () => refresh(),
             onReply: (chunk) => dispatch({ type: "reply", chunk, at: Date.now() }),
             onStatus: (live) => dispatch({ type: "live", live }),
+            // A 401 on the stream means the session ended: asking who is signed in routes to sign-in.
+            onSignedOut: () => void get("/v1/auth/whoami").catch(() => undefined),
           },
         );
       })

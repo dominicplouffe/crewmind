@@ -47,10 +47,18 @@ export function Project(): JSX.Element {
   }, [projectName]);
 
   const open = useCallback((id: PanelId) => setPanel({ id }), []);
+  const refocus = useRef(false);
   const closePanel = useCallback(() => {
+    refocus.current = true;
     setPanel(null);
-    composer.current?.focus();
   }, []);
+  // After a panel closes, focus returns to the message box (once it is visible again on a phone).
+  useEffect(() => {
+    if (panel === null && refocus.current) {
+      refocus.current = false;
+      composer.current?.focus();
+    }
+  }, [panel]);
 
   const jump = useCallback((messageId: number) => {
     if (window.matchMedia("(max-width: 899px)").matches) setPanel(null);

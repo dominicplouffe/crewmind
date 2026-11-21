@@ -149,7 +149,7 @@ export const t = {
   composer: {
     formLabel: "Write a message",
     label: "Message",
-    placeholder: "Message the CEO. Type / for commands, @ to name an agent.",
+    placeholder: "Message. / for commands, @ for agents",
     hint: "Enter sends. Shift+Enter starts a new line. Up arrow brings back your last message. Esc stops a reply.",
     send: "Send",
     attach: "Attach files",
