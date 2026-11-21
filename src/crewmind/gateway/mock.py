@@ -57,6 +57,10 @@ class MockProvider:
                     return [ScriptedTurn.model_validate(turn) for turn in turns]
         return DEFAULT_SCRIPT
 
+    def has_script(self, seat_name: str, run_kind: str) -> bool:
+        """Whether a script was written for this caller, rather than the default."""
+        return self.script_for(seat_name, run_kind) is not DEFAULT_SCRIPT
+
     async def complete(
         self,
         request: CompletionRequest,

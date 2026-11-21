@@ -114,8 +114,9 @@ class PlatformWorker:
                         await recall.keep_example_labels(session, self._memory, project, ids)
                     stored += len(ids)
                 except Refusal as refusal:
-                    # At the budget wall nothing is extracted now; the runs stay due.
-                    keep = False
+                    # At the budget wall nothing is extracted now and the runs stay due.
+                    # With no model to call, there is nothing to wait for.
+                    keep = refusal.envelope.code != "at_budget_wall"
                     logger.info("no extraction for %s: %s", project_id, refusal.envelope.code)
                 except Exception as error:
                     logger.warning(

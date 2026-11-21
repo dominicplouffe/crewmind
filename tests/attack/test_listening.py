@@ -412,3 +412,37 @@ async def test_MSG_4_a_long_pinned_message_is_shortened_by_a_metered_call(app: A
     assert (order["text"], order["being_shortened"]) == ("Keep every report to one page.", False)
     assert (await app.ok("budget.show", owner, project_id=project))["spent"] > 0
     assert "Keep every report" not in await pinned_text(app, owner, project)
+
+
+async def test_MSG_7_history_says_which_messages_are_examples(app: App) -> None:
+    """MSG-7, IF-3.8: an example mark is readable back, so every client shows it after a
+    reload, and it goes away when the mark is removed."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    sent = await app.ok("chat.send", owner, project_id=project, body="Say 12 offices.")
+    await app.ok("chat.send", owner, project_id=project, body="We have 3 offices.")
+    await app.ok("examples.mark", owner, project_id=project, what=str(sent["id"]))
+    history = (await app.ok("chat.history", owner, project_id=project))["items"]
+    assert [m["example"] for m in history] == [True, False]
+    await app.ok("examples.unmark", owner, project_id=project, message_id=sent["id"])
+    history = (await app.ok("chat.history", owner, project_id=project))["items"]
+    assert [m["example"] for m in history] == [False, False]
+
+
+async def test_LLM_14_with_no_model_the_platform_invents_nothing(app: App) -> None:
+    """LLM-14, MSG-4, MEM-4: on a project with no credential and no scripted platform model,
+    a long pinned message keeps its opening sentences as the proposal, nothing is extracted,
+    and no tokens are spent."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    long_body = "Keep every report to one page. " + "Detail follows here. " * 40
+    sent = await app.ok("chat.send", owner, project_id=project, body=long_body)
+    await app.ok("orders.pin", owner, project_id=project, what=str(sent["id"]))
+    assert await app.platform.shorten_orders() == 0
+    (order,) = (await app.ok("orders.list", owner, project_id=project))["items"]
+    assert order["being_shortened"] is False
+    assert order["text"].startswith("Keep every report to one page.")
+    app.script("CEO/chat", {"text": "Noted."})
+    await app.work()
+    assert await app.platform.extract_memories() == 0
+    assert await app.platform.extract_memories() == 0

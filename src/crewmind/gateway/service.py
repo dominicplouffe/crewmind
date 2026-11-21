@@ -235,6 +235,14 @@ class Gateway:
             messages=[Turn(role="user", content=prompt)],
         )
         if provider.name == MOCK:
+            if not self.mock.has_script("platform", purpose):
+                raise Refusal(
+                    "no_platform_model",
+                    "No model credential pays this project, so the platform makes no model "
+                    "calls for it.",
+                    rule=LLM_6.id,
+                    hint="Add a credential and set it as the project's primary.",
+                )
             response = await self.mock.complete(
                 request, seat_name="platform", run_kind=purpose, calls_so_far=0
             )

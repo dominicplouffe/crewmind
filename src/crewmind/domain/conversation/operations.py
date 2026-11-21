@@ -43,6 +43,7 @@ class MessageItem(BaseModel):
     run_id: str | None
     detail: dict[str, Any] | None
     at: datetime
+    example: bool = Field(default=False, description="Marked as an illustration, not data.")
 
 
 class HistoryInput(ProjectRef, PageRequest):
@@ -63,7 +64,7 @@ class ChannelList(BaseModel):
     items: list[str]
 
 
-def item(message: Message, channel_name: str) -> MessageItem:
+def item(message: Message, channel_name: str, example: bool = False) -> MessageItem:
     return MessageItem(
         id=message.id,
         channel=channel_name,
@@ -76,6 +77,7 @@ def item(message: Message, channel_name: str) -> MessageItem:
         run_id=message.run_id,
         detail=message.detail,
         at=message.created_at,
+        example=example,
     )
 
 
@@ -160,8 +162,17 @@ async def history(context: Context, payload: HistoryInput) -> History:
         rows, cursor = await fetch_page(
             context.session, statement, payload, key=Message.id, at=Message.created_at
         )
-        return History(items=[item(row, target.name) for row in rows], next=cursor)
+        marked = await _examples(context, payload.project_id)
+        return History(
+            items=[item(row, target.name, row.id in marked) for row in rows], next=cursor
+        )
     return await _newest(context, statement, payload, target.name)
+
+
+async def _examples(context: Context, project_id: str) -> set[int]:
+    from crewmind.domain.conversation import corrections
+
+    return await corrections.example_ids(context.session, project_id)
 
 
 async def _newest(
@@ -181,8 +192,9 @@ async def _newest(
     rows = list(found)
     more = len(rows) > payload.limit
     rows = rows[: payload.limit][::-1]
+    marked = await _examples(context, payload.project_id)
     return History(
-        items=[item(row, channel) for row in rows],
+        items=[item(row, channel, row.id in marked) for row in rows],
         earlier=rows[0].id if more and rows else None,
     )
 
