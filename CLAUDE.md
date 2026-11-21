@@ -62,6 +62,12 @@ Keep files small and focused. A file growing past about 600 lines is a sign it h
 - **State machines get table-driven tests plus Hypothesis property tests.**
 - **Name tests after the requirement they prove** (for example `test_GOV_3_wall_pauses_project`), and list requirement ids in the docstring.
 - Golden scenarios assert behaviour, never prompt wording.
+- **Tests must stay fast as they multiply.** The suite runs in parallel (`-n auto` is the default), so:
+  - Every test is independent: its own database (the `runtime` and `app` fixtures copy a migrated template; never migrate per test), its own temporary directory, no shared files, no fixed ports, no reliance on test order.
+  - No real waiting. Move the `FakeClock` instead of sleeping; drive jobs with `tick()` instead of waiting for them.
+  - Test a rule at the lowest layer that proves it. Start a real server process only in `tests/acceptance/`, and keep those few.
+  - One test longer than 10 seconds fails the suite unless it is in `tests/acceptance/` (marked `slow`). `uv run pytest -m "not slow"` is the quick loop while developing.
+  - Prefer one parametrized or table-driven test over many near-copies.
 - `uv run ruff check`, `uv run ruff format --check` and `uv run pyright` must be clean.
 
 ## Definition of done for a change

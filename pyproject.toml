@@ -33,6 +33,7 @@ dev = [
     "pyright>=1.1.380",
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.7",
 ]
 
@@ -48,8 +49,10 @@ testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+addopts = "-n auto"
 markers = [
     "attack(rule): an attack test for the named rule id (P10)",
+    "slow: a test that starts real processes and may take longer than the per-test limit",
 ]
 
 [tool.ruff]
