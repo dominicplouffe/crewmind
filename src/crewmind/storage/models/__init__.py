@@ -21,6 +21,12 @@ from crewmind.storage.models.execution import (
     Team,
     Wake,
 )
+from crewmind.storage.models.models import (
+    Lineup,
+    ModelCredential,
+    ProjectCredential,
+    ProviderCeiling,
+)
 from crewmind.storage.models.projects import HoldReason, Project
 from crewmind.storage.models.record import Event, IdempotencyKey, SettingValue, StoredSecret
 
@@ -32,13 +38,17 @@ __all__ = [
     "HoldReason",
     "IdempotencyKey",
     "LedgerLine",
+    "Lineup",
     "Link",
     "LoginAttempts",
     "Membership",
     "Message",
+    "ModelCredential",
     "Notice",
     "Person",
     "Project",
+    "ProjectCredential",
+    "ProviderCeiling",
     "ReadPosition",
     "Role",
     "Run",

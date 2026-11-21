@@ -80,6 +80,10 @@ class Seat(Base):
     is_lead: Mapped[bool] = mapped_column(default=False)
     state: Mapped[str] = mapped_column(String(16))
     pause_reason: Mapped[str | None] = mapped_column(Text)
+    override_class: Mapped[str | None] = mapped_column(String(16))
+    override_model: Mapped[str | None] = mapped_column(String(100))
+    override_effort: Mapped[str | None] = mapped_column(String(16))
+    substitution: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 
