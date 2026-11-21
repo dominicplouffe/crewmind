@@ -11,7 +11,7 @@ from sqlalchemy.engine import URL
 from crewmind.storage.engine import sync_url
 
 
-def _config(url: str | URL) -> Config:
+def alembic_config(url: str | URL) -> Config:
     config = Config()
     location = resources.files("crewmind.storage") / "migrations"
     config.set_main_option("script_location", str(location))
@@ -23,4 +23,4 @@ def _config(url: str | URL) -> Config:
 
 def migrate(url: str | URL) -> None:
     """Bring the database at `url` to the newest schema."""
-    command.upgrade(_config(url), "head")
+    command.upgrade(alembic_config(url), "head")

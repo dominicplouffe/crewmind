@@ -7,6 +7,8 @@ license = { file = "LICENSE" }
 requires-python = ">=3.12"
 dependencies = [
     "aiosqlite>=0.20",
+    "argon2-cffi>=23.1",
+    "cryptography>=43",
     "alembic>=1.13",
     "fastapi>=0.115",
     "httpx>=0.27",
@@ -57,11 +59,14 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "ASYNC", "PT"]
 ignore = [
     "N802",  # test names carry requirement ids, e.g. test_IF_1_3_...
     "N818",  # "Refusal" is the spec's name for a refused call
+    "B009",  # getattr with a constant reads a field of an output model typed as BaseModel
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "src/crewmind/storage/migrations/versions/*" = ["N999"]
-"tests/*" = ["N999"]  # test modules are named after requirement ids too
+"tests/*" = ["N999", "ASYNC"]  # test modules are named after requirement ids too
+# Host-local commands run alone in their own process, so blocking calls are fine there.
+"src/crewmind/domain/install/*" = ["ASYNC220", "ASYNC221", "ASYNC240"]
 
 [tool.pyright]
 include = ["src", "tests"]
