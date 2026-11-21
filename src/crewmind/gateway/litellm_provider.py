@@ -7,20 +7,11 @@ ledger records, so the budget counts non-cached tokens the same way everywhere (
 
 from __future__ import annotations
 
+import functools
 import importlib
 import json
 from collections.abc import Callable
 from typing import Any
-
-from litellm.exceptions import (
-    APIConnectionError,
-    AuthenticationError,
-    InternalServerError,
-    PermissionDeniedError,
-    RateLimitError,
-    ServiceUnavailableError,
-    Timeout,
-)
 
 from crewmind.gateway.protocol import (
     CompletionRequest,
@@ -30,19 +21,43 @@ from crewmind.gateway.protocol import (
 )
 from crewmind.gateway.registry import Effort, ProviderInfo
 
-# LiteLLM is loosely typed, so it is used through `Any` and its answers are read defensively.
-litellm: Any = importlib.import_module("litellm")
-litellm.telemetry = False
-litellm.drop_params = True
 
-AUTH_ERRORS = (AuthenticationError, PermissionDeniedError)
-TRANSIENT_ERRORS = (
-    RateLimitError,
-    Timeout,
-    APIConnectionError,
-    InternalServerError,
-    ServiceUnavailableError,
+@functools.cache
+def model_library() -> Any:
+    """LiteLLM, loaded on the first model call. Loading it takes seconds, so commands and
+    sandboxes that make no model call never pay for it. It is loosely typed, so it is used
+    through `Any` and its answers are read defensively."""
+    library: Any = importlib.import_module("litellm")
+    library.telemetry = False
+    library.drop_params = True
+    return library
+
+
+AUTH_ERRORS = frozenset({"AuthenticationError", "PermissionDeniedError"})
+TRANSIENT_ERRORS = frozenset(
+    {
+        "RateLimitError",
+        "Timeout",
+        "APIConnectionError",
+        "InternalServerError",
+        "ServiceUnavailableError",
+    }
 )
+
+
+def _is_one_of(error: BaseException, names: frozenset[str]) -> bool:
+    return any(base.__name__ in names for base in type(error).__mro__)
+
+
+def is_auth_error(error: BaseException) -> bool:
+    """LLM-11: the provider refused the credential itself."""
+    return _is_one_of(error, AUTH_ERRORS)
+
+
+def is_transient_error(error: BaseException) -> bool:
+    """LLM-11: a failure that may pass, such as a rate limit or a timeout."""
+    return _is_one_of(error, TRANSIENT_ERRORS) and not is_auth_error(error)
+
 
 # LLM-5: one effort scale. `max` is sent as the highest level a provider accepts; a model
 # without effort control ignores it (LiteLLM drops the parameter).
@@ -151,8 +166,8 @@ async def call_model(
     if effort:
         arguments["reasoning_effort"] = _EFFORT[Effort(effort)]
     if on_delta is None:
-        return from_response(await litellm.acompletion(**arguments))
-    stream = await litellm.acompletion(
+        return from_response(await model_library().acompletion(**arguments))
+    stream = await model_library().acompletion(
         **arguments, stream=True, stream_options={"include_usage": True}
     )
     chunks: list[Any] = []
@@ -162,4 +177,6 @@ async def call_model(
         text = getattr(getattr(choices[0], "delta", None), "content", None) if choices else None
         if text:
             on_delta(text)
-    return from_response(litellm.stream_chunk_builder(chunks, messages=arguments["messages"]))
+    return from_response(
+        model_library().stream_chunk_builder(chunks, messages=arguments["messages"])
+    )

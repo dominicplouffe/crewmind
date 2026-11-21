@@ -33,7 +33,7 @@ from crewmind.domain.projects.model import HOLDABLE, Hold
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway import outbound
-from crewmind.gateway.litellm_provider import AUTH_ERRORS, TRANSIENT_ERRORS
+from crewmind.gateway.litellm_provider import is_auth_error, is_transient_error
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.protocol import CompletionRequest, CompletionResponse
 from crewmind.gateway.registry import providers
@@ -203,7 +203,7 @@ class Gateway:
             assert run is not None
             project = await session.get(Project, run.project_id)
             assert project is not None
-            if isinstance(error, AUTH_ERRORS):
+            if is_auth_error(error):
                 if record_auth_failure(credential) and project.state in HOLDABLE:
                     await lifecycle.add_hold(
                         session,
@@ -221,7 +221,7 @@ class Gateway:
                         now,
                         detail={"kind": "credential dead", "alarm": True},
                     )
-            elif isinstance(error, TRANSIENT_ERRORS) and record_transient_failure(credential, now):
+            elif is_transient_error(error) and record_transient_failure(credential, now):
                 minutes = credential.breaker_cooloff_seconds // 60
                 await conversation.platform_line(
                     session,

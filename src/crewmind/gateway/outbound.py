@@ -14,7 +14,7 @@ from typing import Any
 import httpx
 
 from crewmind.gateway.litellm_provider import call_model as call_model
-from crewmind.gateway.litellm_provider import litellm
+from crewmind.gateway.litellm_provider import model_library
 from crewmind.gateway.registry import ProviderInfo
 
 BRAVE_URL = "https://api.search.brave.com/res/v1/web/search"
@@ -27,7 +27,7 @@ async def list_models(
     """The model ids a credential can reach, read from the provider (LLM-4)."""
 
     def read() -> list[str]:
-        found: list[Any] = litellm.get_valid_models(
+        found: list[Any] = model_library().get_valid_models(
             check_provider_endpoint=True,
             custom_llm_provider=provider.prefix,
             api_key=api_key,
