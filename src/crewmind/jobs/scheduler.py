@@ -28,8 +28,12 @@ from crewmind.domain.accounts.model import (
 )
 from crewmind.domain.accounts.people import LINK_EXPIRED
 from crewmind.domain.accounts.token_operations import TOKEN_EXPIRED
+from crewmind.domain.budget import service as budget
+from crewmind.domain.execution import runs
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import Hold, ProjectState
+from crewmind.domain.settings.registry import load_registry
+from crewmind.domain.settings.service import SettingsService
 from crewmind.storage.events import append_event, event_type
 from crewmind.storage.models import BrowserSession, Link, Project, Token
 
@@ -132,9 +136,15 @@ class Scheduler:
     project_jobs: tuple[ProjectJob, ...] = (lift_due_holds, purge_deleted)
     install_jobs: tuple[InstallJob, ...] = (expire_credentials,)
 
-    def __init__(self, sessions: async_sessionmaker[AsyncSession], clock: Clock) -> None:
+    def __init__(
+        self,
+        sessions: async_sessionmaker[AsyncSession],
+        clock: Clock,
+        settings: SettingsService | None = None,
+    ) -> None:
         self._sessions = sessions
         self._clock = clock
+        self._settings = settings or SettingsService(load_registry())
 
     async def tick(self) -> list[str]:
         """One pass. Returns the ids of projects whose jobs failed; the rest are done."""
@@ -152,9 +162,16 @@ class Scheduler:
                         await job(session, project, now)
                         if project.state == ProjectState.DELETED:
                             break
+                    else:
+                        await budget.follow_wall(session, self._settings, project, now)
             except Exception:
                 logger.exception("scheduler: project %s failed this tick", project_id)
                 failed.append(project_id)
+        try:
+            async with self._sessions() as session, session.begin():
+                await runs.reap(session, self._settings, now)
+        except Exception:
+            logger.exception("scheduler: reaping failed this tick")
         for job in self.install_jobs:
             try:
                 async with self._sessions() as session, session.begin():
