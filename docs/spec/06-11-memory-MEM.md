@@ -8,18 +8,18 @@ crewmind does not invent a memory system. It combines two well-established patte
 Governance facts live in the pinned layer, because they must never be fuzzy or missed.
 
 - **MEM-1 Pinned memory (exact).**
-  - Stored as governed records in Postgres, never summarised by a model:
+  - Stored as governed records in the project database, never summarised by a model:
     - the goal and active standing orders;
     - closed decisions;
     - corrections and lessons (from mistake reports);
     - each agent's charter;
     - each agent's own pinned notes.
   - Every run of every agent receives the pinned records that concern it, in full.
-  - Sizes are capped so they always fit: `memory.pinned_project_tokens` \[6,000\] for project-wide records and `memory.pinned_agent_tokens` \[2,000\] per agent. A write past a cap is refused, naming what to retire.
+  - Sizes are capped so they always fit: `memory.pinned_project_tokens` \[6,000\] for project-wide records and `memory.pinned_agent_tokens` \[2,000\] per agent. An agent's write past a cap is refused, naming what to retire. A chairman's write (a pin, a decision, a correction) is never refused by a cap: it succeeds and opens a flag asking the chairman to retire something. Lowering a cap below current use is refused, with the arithmetic.
 - **MEM-2 Recall memory on an established library.**
-  - The default engine is Mem0 (open source, Apache-2.0), used as a library inside the server, not as a separately exposed service. On Postgres it stores into the same database with pgvector; on SQLite (slim mode, NFR-23) it uses an embedded, file-based vector store that Mem0 supports. Neither needs an extra service. Mem0 handles fact extraction, de-duplication and updating.
+  - The default engine is Mem0 (open source, Apache-2.0), used as a library inside the server, not as a separately exposed service. On Postgres it stores into the same database with pgvector; on SQLite (slim mode, NFR-23) it uses Qdrant in embedded mode, which runs in the server process and stores to a folder in the data directory. Neither needs an extra service. Mem0 also keeps its change history in a SQLite file of its own in the data directory, on every install; the file is backed up with the install and purged on forget and on project delete. Mem0's telemetry is switched off (NFR-1). The library is loaded on first use, not at start (NFR-23). Mem0 handles fact extraction, de-duplication and updating.
   - Retrieval is hybrid: keyword (BM25) plus vector similarity.
-  - Embeddings default to a bundled open-source model running locally, so memory works without a key.
+  - Embeddings default to an open-source ONNX model running locally, so memory works without a key and without PyTorch. The model is shipped inside the crewmind package and the Docker image, so memory works offline from the first start. It is added when the package is built and is not kept in the source repository.
   - The engine sits behind a narrow interface (add, search, update, forget, history). Graphiti (a temporal knowledge graph; needs Neo4j or FalkorDB) or Letta can be swapped in as plug-ins without touching the rest of the product.
   - Home-grown memory algorithms are out of scope; only glue code is written.
 - **MEM-3 Scopes.**

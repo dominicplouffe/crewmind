@@ -63,7 +63,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** the chairman says it once. Pins, decisions, corrections, examples and directives work end to end, and memory recalls.
 - **Exit demo:** the frustration scenarios for theme 1 (doesn't listen) and theme 5 (chat is not command) pass. Pinned memory reaches every context pack verbatim (INV-25), and Mem0 recall works on both databases.
-- **Ids:** CHAT-8, CHAT-11, CHAT-12, CHAT-13; MSG-4, MSG-5, MSG-6, MSG-7, MSG-8, MSG-12; MEM-1, MEM-2, MEM-3, MEM-4, MEM-5, MEM-6, MEM-7, MEM-8; INV-23, INV-25, INV-26
+- **Ids:** CHAT-8, CHAT-11, CHAT-12, CHAT-13; MSG-4, MSG-5, MSG-6, MSG-7, MSG-8, MSG-12; MEM-1, MEM-2, MEM-3, MEM-4, MEM-5, MEM-6, MEM-7, MEM-8; INV-23, INV-25, INV-26; plus the rest of MSG-11 (warm chat sessions) and the extractor part of LLM-14, carried from phase 2
 
 ## Phase 4: Verification
 

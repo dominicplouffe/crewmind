@@ -13,7 +13,7 @@ Goal (PLAN.md): the chairman says it once. Pins, decisions, corrections, example
 - Pinned memory reaches every context pack verbatim (INV-25), checked mechanically.
 - Mem0 recall works on both databases.
 
-Status: **draft, waiting for the owner's answers.** The questions are at the end.
+Status: **agreed with the owner on 21 Nov 2026.** The answers are at the end.
 
 ## What phase 3 covers
 
@@ -145,12 +145,22 @@ None. INV-23, INV-25 and INV-26 are invariants, and the rest guard authority. MS
 - **Real recall quality cannot be measured here** until an embedding model is available. Until then only the plumbing is proven.
 - **Extraction costs tokens** on every work run. It uses the fast class and is metered; the scenario suite asserts an idle project still spends nothing (INV-11).
 
-## Questions for the owner
+## Owner answers (21 Nov 2026)
 
-1. **Review stops.** One stop at the full exit demo, as in phase 2, or one after each part?
-2. **The embedding model.** MEM-2 says "a bundled open-source model". The small ONNX model is about 130 MB. Should it be downloaded once by `crewmind setup` (needs the network once), or shipped inside the Docker image and fetched on first use elsewhere?
-3. **Who writes the one-sentence standing order (R-49)?** Use the chairman's own words when they fit in 400 characters and call a model only to shorten longer ones; or always propose with a model; or never call a model and ask the chairman to shorten.
-4. **Testing real recall in this environment.** The model hosts are blocked and Postgres here has no pgvector. May I ask to allow the model host for this environment and install pgvector locally, so recall is tested for real on both databases? Otherwise the real-model evals run only in CI.
-5. **Phase 2 leftovers.** Take any of these into phase 3: warm chat sessions (MSG-11), a "load earlier messages" control in the web app, the extractor part of LLM-14 (needed by MEM-4 anyway)?
-6. **The review items above** (R-26, R-28, R-23, R-50, R-52): accept all as recommended, or discuss some?
-7. **Mem0's own history file.** Accept that Mem0 keeps its change history in a SQLite file in the data directory, on Postgres installs too?
+| Question | Answer |
+| --- | --- |
+| Review stops | **One stop, at the full exit demo** |
+| The embedding model | **Shipped inside the package** and the Docker image, so memory works offline from the first start |
+| Who writes a standing order's sentence | The chairman's own words when they fit; a fast model call only to shorten a longer message |
+| Testing real recall here | Allow the model host for the `crewmind` environment and install pgvector locally, so recall is tested on both databases |
+| Phase 2 leftovers | Both taken in: **"load earlier messages"** in the web app and **warm chat sessions (MSG-11)**. The extractor part of LLM-14 comes with MEM-4 |
+| Review items R-26, R-28, R-23, R-50, R-52 | Accepted as recommended; applied in spec revision 2.9 |
+| Mem0's own history file | Accepted |
+
+Three notes on these answers:
+
+- **The model is not kept in the source repository.** It is about 130 MB, and GitHub refuses files over 100 MB. The package build and the Docker build add it. A source checkout fetches it once with a command; the tests that need it skip with a clear message when it is absent.
+- **Warm chat sessions add a fourth part, 3d.** It builds the chat session lifecycle of section 7.17 (the session, its keep-warm time, restarts on a changed credential, grants, brief or standing orders, and the hold after 3 involuntary restarts in 10 minutes). It comes after 3a because a changed standing order restarts a session.
+- **"Load earlier messages"** is a small change in the web app, done with the Memory panel.
+
+No open questions remain.

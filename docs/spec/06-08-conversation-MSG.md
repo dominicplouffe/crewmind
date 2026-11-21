@@ -10,11 +10,11 @@
   - A directive is created only by `/do <instruction>` or by the chairman pressing "Do it" on an action card (CHAT-7).
   - It records its text, addressee (the CEO by default), author and time, and is echoed in the chat.
   - An agent changes state from a chat run only while carrying out a directive it cites. Every op is checked against the directive's addressee and the agent's role.
-  - A directive cannot change anything P7 reserves except by applying a change the chairman has just written. For example, `/do set quality to best` applies the setting as the chairman's own change.
+  - A directive cannot change anything P7 reserves except by applying a change the chairman has just written. For example, `/do set quality to best` becomes an action card stating the change; when the chairman confirms it, the platform applies the setting with the chairman as actor. The agent never calls the setting operation (INV-1).
   - A directive to an agent other than the CEO is shown to the CEO.
   - On a held or paused project, a directive that changes work state waits until the project resumes (INV-20). `/resume` and settings changes apply at once.
 - **MSG-4 Standing orders.**
-  - The chairman pins a message (`/pin` or the pin button). The platform proposes a one-sentence order of 400 characters or fewer, which the chairman confirms or edits.
+  - The chairman pins a message (`/pin` or the pin button). The platform proposes a one-sentence order of 400 characters or fewer, which the chairman confirms or edits. A message that already fits is proposed in the chairman's own words at no cost; only a longer one is shortened by a fast-class model call, metered to the project.
   - At most 25 are active. `/unpin` retires one; retired orders stay listed as retired so agents know they are dead.
   - The CEO may propose an order; only the chairman confirms.
   - Active orders are in the pinned memory of every run (MEM-1).
@@ -26,7 +26,7 @@
   - "Not what I asked" (`/fix`) on an agent message records a correction: the message, the chairman's words, and the question that should have been answered.
   - It is pinned in that agent's memory, and in the CEO's if the agent is not the CEO, for `correction.ttl` \[30 days\] or until the chairman removes it.
   - It counts toward the agent's listening score (CHAT-12).
-- **MSG-7 Examples.** Text the chairman marks as an example (`/example`, or the toggle on an upload) is labelled ILLUSTRATION — NOT DATA in every context pack and every memory record derived from it. A reviewer check flags any figure in a plan or deliverable that matches a number appearing only in an example.
+- **MSG-7 Examples.** Text the chairman marks as an example (`/example`, or the toggle on an upload) is labelled ILLUSTRATION — NOT DATA in every context pack and every memory record derived from it. A mechanical platform lint, not a reviewer seat, flags any figure in a plan or deliverable that matches a number appearing only in an example.
 - **MSG-8 Reporting cadence** (`report.cadence` \[off\]). When set, unprompted CEO status posts between slots are held and delivered together at the next slot. They are queued, not refused, so no refusal loop can form (P1). These always go out at once:
   - replies to the chairman;
   - decision cards and flags;

@@ -2,6 +2,19 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.9 (21 Nov 2026): phase 3 plan answers
+
+- **MEM-1:** pinned memory lives in the project database, not only Postgres (R-26). A chairman's write is never refused by a size cap; it opens a flag instead. Agent writes are refused at the cap, and a cap cannot be lowered below current use (R-28).
+- **MEM-2:**
+  - On SQLite the vector store is Qdrant in embedded mode (Q-001).
+  - Mem0 keeps its own history file in the data directory; it is backed up and purged with the data.
+  - Mem0's telemetry is off, and the library loads on first use.
+  - The embedding model is an ONNX model shipped inside the package and the image (R-52).
+- **MSG-4:** a pinned message that fits is proposed in the chairman's words; only a longer one is shortened by a model (R-49).
+- **MSG-3:** a directive that changes a chairman-only setting becomes an action card the chairman confirms (R-23).
+- **MSG-7:** the example-figure check is a mechanical lint (R-50).
+- **PLAN.md, traceability.csv:** the rest of MSG-11 (warm chat sessions) and the extractor part of LLM-14 are taken into phase 3.
+
 ## Revision 2.8 (21 Nov 2026): owner answers after phase 2
 
 - **LLM-12:** a provider ceiling is set per provider by an admin; there is no default and no registry setting (Q-004).
