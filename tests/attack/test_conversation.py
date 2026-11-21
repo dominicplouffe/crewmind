@@ -338,3 +338,34 @@ async def test_CHAT_14_search_header_and_feed(app: App) -> None:
     assert "The project went from draft to running." in feed
     assert "A hold was added: chairman. It lifts by `/resume`, or its lift time." in feed
     assert any(text.startswith("owner saved version 1 of llama-prices.csv") for text in feed)
+
+
+async def test_MSG_13_every_surface_reads_and_writes_the_same_conversation(app: App) -> None:
+    """MSG-13, IF-1.1: a message sent through the API, the command line or a slash command
+    lands in the same channel, and a read position set on one surface holds on the others."""
+    from crewmind.catalog import catalog
+    from crewmind.surfaces.cli.main import build_cli
+    from tests.support import OnLoop, invoker_for, run_cli
+
+    owner = await app.person("owner@example.com")
+    project = await app.project(owner)
+    await app.ok("projects.start", owner, project_id=project)
+    await app.ok("chat.send", owner, project_id=project, body="From the app.")
+    invoker = OnLoop(invoker_for(app.api, owner.token))
+    cli = build_cli(catalog, invoker, invoker)
+    sent = await run_cli(
+        cli, ["chat", "send", "--project-id", project, "--body", "From the terminal.", "--json"]
+    )  # fmt: skip
+    assert sent.exit_code == 0, sent.output
+
+    history = (await app.ok("chat.history", owner, project_id=project))["items"]
+    bodies = [item["body"] for item in history if item["author_kind"] == "person"]
+    assert bodies == ["From the app.", "From the terminal."]
+    assert len({item["channel"] for item in history}) == 1
+
+    read = await run_cli(
+        cli,
+        ["chat", "mark-read", "--project-id", project, "--message-id", str(history[-1]["id"])],
+    )
+    assert read.exit_code == 0, read.output
+    assert (await app.ok("chat.header", owner, project_id=project))["unread"] == 0

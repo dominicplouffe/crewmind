@@ -423,3 +423,35 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
     lines = [line for line in await ledger(app, project) if line.kind == "search"]
     assert [(line.unit, line.counted) for line in lines] == [("count", 1), ("count", 1)]
     assert (await app.ok("budget.show", owner, project_id=project))["spent"] == 0
+
+
+async def test_EXE_6_a_run_keeps_what_it_was_leased_with(app: App, provider: FakeProvider) -> None:
+    """EXE-6: at lease a run pins its model, effort, provider, credential, harness and token
+    cap. Changing the seat afterwards changes later runs, not this one."""
+    from crewmind.storage.models import Run
+
+    owner = await app.person("owner@example.com")
+    project = await paid_project(app, owner)
+    run = await live_run(app, project)
+
+    async def pinned() -> tuple[Any, ...]:
+        async with app.runtime.sessions() as session:
+            row = await session.get_one(Run, run.run_id)
+            return (
+                row.model, row.effort, row.provider, row.credential_id, row.harness,
+                row.max_tokens,
+            )  # fmt: skip
+
+    before = await pinned()
+    assert all(value is not None for value in before), before
+    assert before[2] == "anthropic"
+
+    await app.ok("credentials.add", owner, name="small", provider="deepseek", key=KEY)
+    await app.ok(
+        "models.set_seat", owner, project_id=project, seat="CEO", credential="small", effort="low"
+    )
+    await app.ok(
+        "settings.change_project", owner, project_id=project,
+        changes={"run.max_tokens": 200_000}, reason="A smaller cap for later runs.",
+    )  # fmt: skip
+    assert await pinned() == before
