@@ -11,7 +11,7 @@ import json
 import socket
 from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -128,15 +128,15 @@ async def test_NFR_1_memory_makes_no_outbound_connection(
     connection to any host but the database. Mem0's telemetry is off."""
     if not any(shipped_model_directory().glob("models--*")):
         pytest.skip(f"the embedding model is not on disk: {FETCH}")
-    reached: list[Any] = []
+    reached: list[str] = []
     connect = socket.socket.connect
 
     def watched(self: socket.socket, address: Any) -> None:
-        host = address[0] if isinstance(address, tuple) else address
-        if host not in ("127.0.0.1", "::1", "localhost") and not str(host).startswith("/"):
-            reached.append(address)
-            raise OSError(f"blocked in test: {address}")
-        connect(self, address)
+        host = str(cast(tuple[Any, ...], address)[0] if isinstance(address, tuple) else address)
+        if host not in ("127.0.0.1", "::1", "localhost") and not host.startswith("/"):
+            reached.append(host)
+            raise OSError(f"blocked in test: {host}")
+        connect(self, address)  # pyright: ignore[reportUnknownArgumentType]
 
     monkeypatch.setattr(socket.socket, "connect", watched)
     built = Mem0Engine(tmp_path / "data", migrated_url)

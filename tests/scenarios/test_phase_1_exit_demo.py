@@ -245,6 +245,14 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("corrections.remove", alice, project_id=paid, correction_id=fixed["id"])
     marked = await write("examples.mark", alice, project_id=paid, what="Say 12 offices.")
     await write("examples.unmark", alice, project_id=paid, message_id=marked["message_id"])
+    kept = await write("memory.remember", alice, project_id=paid, text="The office is in Lyon.")
+    await write(
+        "memory.edit", alice, project_id=paid, memory_id=kept["id"], text="The office is in Nice."
+    )
+    await write("memory.pin", alice, project_id=paid, memory_id=kept["id"])
+    await write("memory.forget", alice, project_id=paid, memory_id=kept["id"])
+    liked = await write("memory.prefer", alice, text="Plain English, please.")
+    await write("memory.forget_preference", alice, memory_id=liked["id"])
     await write("runs.interrupt", alice, project_id=paid, run_id=live.run_id)
     await write("credentials.delete", alice, name="main")
     browser = "https://fcm.googleapis.com/fcm/send/abc"

@@ -13,6 +13,7 @@ Newest first. One line per change, citing the ids touched.
 - **MSG-4:** a pinned message that fits is proposed in the chairman's words; only a longer one is shortened by a model (R-49).
 - **MSG-3:** a directive that changes a chairman-only setting becomes an action card the chairman confirms (R-23).
 - **MSG-7:** the example-figure check is a mechanical lint (R-50).
+- **Appendix A (operational):** adds `CREWMIND_MEMORY_ENGINE` (MEM-2).
 - **MSG-12:** names the three parts the lint measures.
 - **MSG-7:** defines a figure and says the flag is feedback.
 - **MSG-8:** slots are evenly spaced from the chairman's `brief.time` in the project's time zone (R-66).

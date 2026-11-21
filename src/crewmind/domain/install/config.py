@@ -44,6 +44,7 @@ class Config:
     sandbox_memory: int = 2 * 1024**3
     agent_api_url: str | None = None
     mock_script_dir: Path | None = None
+    memory_engine: str = "mem0"
 
     @property
     def agent_api(self) -> str:
@@ -121,4 +122,5 @@ def load_config(env: Mapping[str, str] | None = None, *, slim: bool = False) -> 
         mock_script_dir=Path(scripts).expanduser()
         if (scripts := read("CREWMIND_MOCK_SCRIPT_DIR", env))
         else None,
+        memory_engine=read("CREWMIND_MEMORY_ENGINE", env),
     )

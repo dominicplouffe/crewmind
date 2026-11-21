@@ -134,6 +134,7 @@ class Run(Base):
     max_tokens: Mapped[int | None] = mapped_column(BigInteger)
     reached_model: Mapped[bool] = mapped_column(default=False)
     rewrite_asked: Mapped[bool] = mapped_column(default=False)
+    memory_extracted: Mapped[bool] = mapped_column(default=False)
     delivered: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     system_prompt: Mapped[str | None] = mapped_column(Text)
     context_pack: Mapped[str | None] = mapped_column(Text)

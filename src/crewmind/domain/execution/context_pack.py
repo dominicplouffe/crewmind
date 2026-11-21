@@ -14,7 +14,8 @@ from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.agent import AgentView
 from crewmind.domain.execution.model import SeatKind
-from crewmind.domain.memory import pinned
+from crewmind.domain.memory import pinned, recall
+from crewmind.domain.memory.engine import MemoryEngine
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
@@ -41,7 +42,11 @@ def system_prompt(view: AgentView) -> str:
 
 
 async def build(
-    session: AsyncSession, settings: SettingsService, view: AgentView, now: datetime
+    session: AsyncSession,
+    settings: SettingsService,
+    view: AgentView,
+    now: datetime,
+    memory: MemoryEngine | None = None,
 ) -> str:
     """Assemble the pack and mark what it delivers: notices are handed to the run, and the
     read position moves past the messages shown. Overflow stays unread (MSG-10)."""
@@ -112,6 +117,15 @@ async def build(
     if lines:
         sections.append("# Unread messages\n\n" + "\n".join(lines))
     run.delivered = delivered
+
+    if memory is not None:
+        about = "\n".join(
+            [unanswered[0].body if unanswered else "", *(n.body for n in handed), *lines]
+        )
+        limit = int(await settings.get(session, _subject(view), "memory.recall_k"))
+        recalled = await recall.recall_section(session, memory, seat, about, limit)
+        if recalled:
+            sections.append(recalled)
 
     if seat.kind == SeatKind.CEO:
         state = await budget.state(session, settings, project, now)

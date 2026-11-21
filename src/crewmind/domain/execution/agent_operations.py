@@ -152,7 +152,11 @@ async def context(context: Context, payload: Empty) -> ContextPack:
     if run.context_pack is None:
         run.system_prompt = context_pack.system_prompt(view)
         run.context_pack = await context_pack.build(
-            context.session, services_of(context).settings, view, context.now
+            context.session,
+            services_of(context).settings,
+            view,
+            context.now,
+            services_of(context).memory,
         )
     assert run.system_prompt is not None
     return ContextPack(

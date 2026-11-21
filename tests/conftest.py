@@ -171,6 +171,7 @@ async def runtime(migrated_url: str, tmp_path: Path, clock: FakeClock) -> AsyncI
         host="127.0.0.1",
         port=8420,
         public_url=None,
+        memory_engine="in-process",
     )
     built = build_runtime(config, clock, mock_default=True)
     yield built

@@ -966,6 +966,14 @@ used_by = ["LLM-8"]
 spec_default = "none"
 spec_range = "A directory of scripts for the mock provider (tests and rehearsal only)"
 
+[operational."CREWMIND_MEMORY_ENGINE"]
+type = "enum"
+default = "mem0"
+choices = ["mem0", "in-process"]
+used_by = ["MEM-2"]
+spec_default = "mem0"
+spec_range = "mem0, or in-process (kept in memory and lost at restart; tests and rehearsal only)"
+
 [operational."CREWMIND_API"]
 type = "url"
 default = "http://127.0.0.1:8420"

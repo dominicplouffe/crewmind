@@ -35,6 +35,7 @@ CONFIRMATION_WORD = "restore"
 _DATABASE = {Database.SQLITE: "database.sqlite", Database.POSTGRES: "database.pgdump"}
 _KEY = "master.key"
 _ARTIFACTS = "artifacts"
+_MEMORY = "memory"
 _MANIFEST = "manifest.json"
 
 
@@ -95,12 +96,23 @@ def _load_database(config: Config, source: Path) -> None:
             Path(path + suffix).unlink(missing_ok=True)
         shutil.copyfile(source, path)
     else:
+        # Extensions (pgvector, for memory) belong to the database, not to the backup: a
+        # database user who is not a superuser can neither drop nor create them. They are
+        # left out of the restore and stay as the database has them (MEM-2).
+        listing = subprocess.run(
+            ["pg_restore", "--list", str(source)], capture_output=True, text=True, check=False
+        )
+        keep = source.with_suffix(".list")
+        keep.write_text(
+            "\n".join(line for line in listing.stdout.splitlines() if " EXTENSION " not in line)
+        )
         _run(
             [
                 "pg_restore",
                 "--clean",
                 "--if-exists",
                 "--no-owner",
+                f"--use-list={keep}",
                 f"--dbname={_postgres_url(config)}",
                 str(source),
             ]
@@ -127,6 +139,10 @@ def write_backup(config: Config, archive: Path, now: datetime) -> int:
             artifacts = config.data_dir / _ARTIFACTS
             if artifacts.is_dir():
                 tar.add(artifacts, _ARTIFACTS)
+            # MEM-2: the memory engine's own files (its history, and on SQLite its index).
+            memory = config.data_dir / _MEMORY
+            if memory.is_dir():
+                tar.add(memory, _MEMORY)
     return archive.stat().st_size
 
 
@@ -203,4 +219,8 @@ async def restore(context: Context, payload: RestoreInput) -> RestoreDone:
         if artifacts.is_dir():
             shutil.rmtree(config.data_dir / _ARTIFACTS, ignore_errors=True)
             shutil.copytree(artifacts, config.data_dir / _ARTIFACTS)
+        memory = Path(scratch) / _MEMORY
+        if memory.is_dir():
+            shutil.rmtree(config.data_dir / _MEMORY, ignore_errors=True)
+            shutil.copytree(memory, config.data_dir / _MEMORY)
     return RestoreDone(restored_from=str(archive), previous_state_saved_to=str(saved))

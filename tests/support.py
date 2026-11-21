@@ -59,7 +59,13 @@ class App:
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
-        self.platform = PlatformWorker(runtime.sessions, runtime.clock, runtime.gateway)
+        self.platform = PlatformWorker(
+            runtime.sessions,
+            runtime.clock,
+            runtime.gateway,
+            runtime.settings,
+            runtime.services.memory,
+        )
 
     def runner(self, workers: int = 4, heartbeat_seconds: float = 0.05) -> Runner:
         """A runner whose sandboxes run in this process, against this app."""

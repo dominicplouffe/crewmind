@@ -16,14 +16,20 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.conversation.orders import MAX_CHARACTERS, OrderState, first_sentences
+from crewmind.domain.execution.model import RunKind, RunState
+from crewmind.domain.memory import recall
+from crewmind.domain.memory.engine import MemoryEngine
+from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.service import INSTALL_SUBJECT, SettingsService, Subject
 from crewmind.gateway.service import Gateway
-from crewmind.storage.models import Message, StandingOrder
+from crewmind.storage.models import Message, Project, Run, Seat, StandingOrder
 
 logger = logging.getLogger(__name__)
 
 TICK = timedelta(seconds=15)  # section 10: periodic jobs run every 15 s
 
 SHORTEN = "shorten"
+EXTRACT = "extract"
 SHORTEN_SYSTEM = (
     "You turn a person's message into one standing order for a team of AI agents. Write "
     f"one sentence of at most {MAX_CHARACTERS} characters, in the person's own words where "
@@ -34,14 +40,94 @@ SHORTEN_SYSTEM = (
 
 class PlatformWorker:
     def __init__(
-        self, sessions: async_sessionmaker[AsyncSession], clock: Clock, gateway: Gateway
+        self,
+        sessions: async_sessionmaker[AsyncSession],
+        clock: Clock,
+        gateway: Gateway,
+        settings: SettingsService,
+        memory: MemoryEngine,
     ) -> None:
         self._sessions = sessions
         self._clock = clock
         self._gateway = gateway
+        self._settings = settings
+        self._memory = memory
 
     async def tick(self) -> None:
         await self.shorten_orders()
+        await self.extract_memories()
+
+    async def _due_for_extraction(self) -> list[tuple[str, list[str]]]:
+        """MEM-4: every finished work run, and each project's finished chat runs once
+        `memory.chat_extract_every` of them have gathered. Returns projects and run ids."""
+        async with self._sessions() as session:
+            every = int(
+                await self._settings.get(
+                    session, Subject(Scope.INSTALL, INSTALL_SUBJECT), "memory.chat_extract_every"
+                )
+            )
+            rows = await session.execute(
+                select(Run.project_id, Run.id, Run.kind)
+                .where(Run.state == RunState.FINISHED, Run.memory_extracted.is_(False))
+                .order_by(Run.queued_at)
+            )
+            work: dict[str, list[str]] = {}
+            chat: dict[str, list[str]] = {}
+            for project_id, run_id, kind in rows.all():
+                (work if kind == RunKind.WORK else chat).setdefault(project_id, []).append(run_id)
+        due = [(project_id, [run_id]) for project_id, runs in work.items() for run_id in runs]
+        due += [(project_id, runs) for project_id, runs in chat.items() if len(runs) >= every]
+        return due
+
+    async def extract_memories(self) -> int:
+        """MEM-4, MEM-7, P9: durable facts are extracted from what finished runs said, with
+        a fast model call metered to the project. Returns how many facts were stored."""
+        stored = 0
+        for project_id, run_ids in await self._due_for_extraction():
+            async with self._sessions() as session:
+                project = await session.get(Project, project_id)
+                assert project is not None
+                messages: list[dict[str, str]] = []
+                untrusted, source = False, ""
+                for run_id in run_ids:
+                    run = await session.get(Run, run_id)
+                    assert run is not None
+                    seat = await session.get(Seat, run.seat_id)
+                    words = await recall.words_of(session, run)
+                    messages += words.messages
+                    untrusted = untrusted or words.untrusted
+                    source = recall.source_of(run, seat.name if seat else "an agent", self._clock())
+            keep = True
+            if messages:
+
+                async def model(system: str, prompt: str, project_id: str = project_id) -> str:
+                    return await self._gateway.platform_call(project_id, EXTRACT, system, prompt)
+
+                try:
+                    ids = await self._memory.extract(
+                        recall.project_scope(project_id),
+                        messages,
+                        recall.metadata(project_id, source, untrusted=untrusted),
+                        model,
+                    )
+                    async with self._sessions() as session:
+                        await recall.keep_example_labels(session, self._memory, project, ids)
+                    stored += len(ids)
+                except Refusal as refusal:
+                    # At the budget wall nothing is extracted now; the runs stay due.
+                    keep = False
+                    logger.info("no extraction for %s: %s", project_id, refusal.envelope.code)
+                except Exception as error:
+                    logger.warning(
+                        "extraction failed for %s (%s)", project_id, type(error).__name__
+                    )
+            if keep:
+                async with self._sessions() as session, session.begin():
+                    for run_id in run_ids:
+                        run = await session.get(Run, run_id)
+                        if run is not None:
+                            run.memory_extracted = True
+        return stored
 
     async def shorten_orders(self) -> int:
         """MSG-4: a pinned message too long for one order gets a proposed sentence from a

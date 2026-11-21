@@ -126,5 +126,6 @@ Environment variables, read at start (NFR-7). They are not governed settings: th
 | `CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED` | off | on, off | WRK-7 |
 | `CREWMIND_AGENT_API_URL` | The server's own address | The URL at which sandboxes reach the agent API and the model gateway; set it when sandboxes are containers | IF-6.1, EXE-12 |
 | `CREWMIND_MOCK_SCRIPT_DIR` | none | A directory of scripts for the mock provider (tests and rehearsal only) | LLM-8 |
+| `CREWMIND_MEMORY_ENGINE` | mem0 | mem0, or in-process (kept in memory and lost at restart; tests and rehearsal only) | MEM-2 |
 | `CREWMIND_API` | `http://127.0.0.1:8420` | A URL (CLI only) | IF-4.1 |
 | `CREWMIND_TOKEN` | none | A personal token (CLI only) | IF-4.1 |

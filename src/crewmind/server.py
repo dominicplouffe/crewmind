@@ -142,7 +142,13 @@ def create_app(
                 asyncio.create_task(dispatcher.run()),
                 asyncio.create_task(alarms.run()),
                 asyncio.create_task(
-                    PlatformWorker(runtime.sessions, runtime.clock, runtime.gateway).run()
+                    PlatformWorker(
+                        runtime.sessions,
+                        runtime.clock,
+                        runtime.gateway,
+                        runtime.settings,
+                        runtime.services.memory,
+                    ).run()
                 ),
             ]
         if run_runner:

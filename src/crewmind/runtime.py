@@ -12,6 +12,8 @@ from crewmind.domain.accounts.credentials import Authenticator
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.install.config import Config, load_config
+from crewmind.domain.memory import recall
+from crewmind.domain.memory.engine import InProcessEngine, Mem0Engine
 from crewmind.domain.models.service import SeatResolver, provider_is_saturated
 from crewmind.domain.projects.access import MembershipAccess
 from crewmind.domain.settings.service import SettingsService
@@ -50,7 +52,11 @@ def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool 
         data_dir=config.data_dir,
         master_key_file=config.master_key_file,
         database_url=config.database_url,
+        memory=Mem0Engine(config.data_dir, config.database_url)
+        if config.memory_engine == "mem0"
+        else InProcessEngine(clock),
     )
+    recall.purge_engine = services.memory
     mock = MockProvider(config.mock_script_dir)
     runs.seat_resolver = SeatResolver(
         services.settings, clock, mock_default=mock_default or config.mock_script_dir is not None
