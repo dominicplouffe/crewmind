@@ -105,6 +105,20 @@
     "title": "AddMemberInput",
     "type": "object"
    },
+   "Alerts": {
+    "properties": {
+     "browsers": {
+      "description": "How many of your browsers get alerts.",
+      "title": "Browsers",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "browsers"
+    ],
+    "title": "Alerts",
+    "type": "object"
+   },
    "ArtifactItem": {
     "properties": {
      "audience": {
@@ -2396,6 +2410,20 @@
     "title": "ProviderList",
     "type": "object"
    },
+   "PushIdentity": {
+    "properties": {
+     "server_identity": {
+      "description": "What a browser needs to subscribe to this install's alerts.",
+      "title": "Server Identity",
+      "type": "string"
+     }
+    },
+    "required": [
+     "server_identity"
+    ],
+    "title": "PushIdentity",
+    "type": "object"
+   },
    "QualityInput": {
     "properties": {
      "level": {
@@ -3224,6 +3252,35 @@
     "title": "SmokeResult",
     "type": "object"
    },
+   "SubscribeInput": {
+    "properties": {
+     "auth": {
+      "description": "The browser's shared value.",
+      "maxLength": 100,
+      "title": "Auth",
+      "type": "string"
+     },
+     "endpoint": {
+      "description": "The address the browser gave.",
+      "maxLength": 1000,
+      "title": "Endpoint",
+      "type": "string"
+     },
+     "p256dh": {
+      "description": "The browser's public value.",
+      "maxLength": 200,
+      "title": "P256Dh",
+      "type": "string"
+     }
+    },
+    "required": [
+     "endpoint",
+     "p256dh",
+     "auth"
+    ],
+    "title": "SubscribeInput",
+    "type": "object"
+   },
    "TeamRef": {
     "properties": {
      "project_id": {
@@ -3359,6 +3416,21 @@
      "token_id"
     ],
     "title": "TokenRef",
+    "type": "object"
+   },
+   "UnsubscribeInput": {
+    "properties": {
+     "endpoint": {
+      "description": "The address the browser gave.",
+      "maxLength": 1000,
+      "title": "Endpoint",
+      "type": "string"
+     }
+    },
+    "required": [
+     "endpoint"
+    ],
+    "title": "UnsubscribeInput",
     "type": "object"
    },
    "UploadInput": {
@@ -7082,6 +7154,112 @@
     "summary": "Stop a project for good. This cannot be undone.",
     "tags": [
      "projects"
+    ]
+   }
+  },
+  "/v1/push/public_key": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "push.public_key",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PushIdentity"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Show what a browser needs to subscribe to alerts.",
+    "tags": [
+     "push"
+    ]
+   }
+  },
+  "/v1/push/subscribe": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "push.subscribe",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SubscribeInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Alerts"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Turn on alerts in this browser.",
+    "tags": [
+     "push"
+    ]
+   }
+  },
+  "/v1/push/unsubscribe": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "push.unsubscribe",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/UnsubscribeInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Alerts"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Turn off alerts in this browser.",
+    "tags": [
+     "push"
     ]
    }
   },

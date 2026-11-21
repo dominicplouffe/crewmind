@@ -13,7 +13,7 @@ from crewmind.storage.engine import Database, create_engine, database_of, sync_u
 from crewmind.storage.migrate import alembic_config, migrate
 from crewmind.storage.models import Base
 
-HEAD = "0005"
+HEAD = "0006"
 
 
 async def test_NFR_10_migrations_apply_and_are_safe_to_repeat(database_url: str) -> None:

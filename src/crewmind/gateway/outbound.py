@@ -1,12 +1,14 @@
-"""Every call the platform makes to a model provider or the search service (P3, INT-8).
+"""Every call the platform makes to a model provider, the search service or a push service
+(P3, INT-8, CHAT-20).
 
-Provider keys and the search key are used only here, in the server. Tests replace these
-functions; nothing else in the code base reaches a provider.
+Provider keys, the search key and the push signing value are used only here, in the
+server. Tests replace these functions; nothing else in the code base reaches out.
 """
 
 from __future__ import annotations
 
 import asyncio
+import importlib
 from typing import Any
 
 import httpx
@@ -54,3 +56,28 @@ async def brave_search(api_key: str, query: str) -> list[dict[str, Any]]:
         }
         for item in results
     ]
+
+
+PUSH_HELD_SECONDS = 24 * 60 * 60  # CHAT-20: a push service holds an alarm for up to a day
+
+
+async def web_push(
+    subscription: dict[str, Any], payload: str, signing_value: str, sender: str
+) -> bool:
+    """Send one encrypted push to a browser's push service (CHAT-20). Returns False when
+    the service says the subscription no longer exists."""
+    pywebpush: Any = importlib.import_module("pywebpush")
+    try:
+        await pywebpush.webpush_async(
+            subscription,
+            data=payload,
+            vapid_private_key=signing_value,
+            vapid_claims={"sub": sender},
+            ttl=PUSH_HELD_SECONDS,
+        )
+    except pywebpush.WebPushException as error:
+        status = getattr(getattr(error, "response", None), "status", None)
+        if status in (404, 410):
+            return False
+        raise
+    return True

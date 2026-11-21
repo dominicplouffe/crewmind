@@ -37,13 +37,12 @@ PROJECT_PURGED = event_type("project.purged", "A deleted project was purged (PRJ
 ProjectHook = Callable[[AsyncSession, Project, datetime], Awaitable[None]]
 
 CreatedHook = Callable[[AsyncSession, Project, datetime, Caller], Awaitable[None]]
-HoldHook = Callable[[AsyncSession, Project, datetime, bool], Awaitable[None]]
+HoldHook = Callable[[AsyncSession, Project, datetime, Hold], Awaitable[None]]
 
 created_hooks: list[CreatedHook] = []
 """Steps run when a project is created: the execution domain adds the CEO seat and channels."""
 hold_hooks: list[HoldHook] = []
-"""Steps run when a hold reason is added. The flag says whether live runs may finish, which
-is true only at the budget wall (GOV-3); otherwise their tokens are revoked (EXE-9)."""
+"""Steps run when a hold reason is added, told which reason it was."""
 start_checks: list[ProjectHook] = []
 """Checks run before a project starts (PRJ-1). Each raises a Refusal to block the start."""
 stop_hooks: list[ProjectHook] = []
@@ -142,7 +141,7 @@ async def add_hold(
     )
     await _follow_holds(session, project, caller=caller, now=now)
     for hook in hold_hooks:
-        await hook(session, project, now, hold is Hold.BUDGET_WALL)
+        await hook(session, project, now, hold)
     return True
 
 

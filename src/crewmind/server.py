@@ -22,6 +22,7 @@ from crewmind.catalog.caller import CallerKind
 from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
+from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
@@ -32,6 +33,7 @@ from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
 from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.api.stream import add_stream_route
+from crewmind.surfaces.api.web import WebApp, web_directory
 from crewmind.surfaces.mcp.server import CALLER_STATE, build_mcp
 
 MCP_PATH = "/mcp"
@@ -133,7 +135,12 @@ def create_app(
         if run_scheduler:
             scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
             dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
-            tasks += [asyncio.create_task(scheduler.run()), asyncio.create_task(dispatcher.run())]
+            alarms = AlarmSender(runtime.sessions, runtime.clock, runtime.services)
+            tasks += [
+                asyncio.create_task(scheduler.run()),
+                asyncio.create_task(dispatcher.run()),
+                asyncio.create_task(alarms.run()),
+            ]
         if run_runner:
             try:
                 runner = build_runner(runtime, build_sandbox(runtime))
@@ -170,5 +177,6 @@ def create_app(
 
     app.add_api_route("/healthz", healthz, methods=["GET"], include_in_schema=False)
     app.add_api_route("/readyz", readyz, methods=["GET"], include_in_schema=False)
-    app.router.routes.append(Mount("", app=McpAuthentication(mcp_app, runtime)))
+    served = WebApp(McpAuthentication(mcp_app, runtime), web_directory())
+    app.router.routes.append(Mount("", app=served))
     return app

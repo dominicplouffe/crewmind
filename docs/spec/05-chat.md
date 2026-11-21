@@ -22,3 +22,7 @@ The chat is how a person gets into, runs and understands a project. It MUST meet
 - **CHAT-18 Always-visible header.** **Now** (what each active agent is doing), **Next** (the next wakes and deadlines, from the agenda), **Waiting on you** (the desk count), and the budget used against the wall. Each item opens its panel.
 - **CHAT-19 Activity feed.** A collapsible feed beside the chat shows every state change in plain words, each linked to the requirement or bet it serves. Holds show their reason and lift time (EXE-4).
 - **CHAT-20 Everywhere.** The chat works on phone browsers (responsive, installable as a web app with push notifications for alarms), in the terminal (IF-4.8) and in Slack (INT-5).
+  - A person turns push alerts on per browser. The server accepts a push subscription only when its address is an https address at a browser push service (Google, Mozilla, Apple, Microsoft); any other address is refused, so a subscription cannot make the server post elsewhere.
+  - The install signs its pushes with one key pair. The private half is a secret (INV-6); only the public half is shown.
+  - An alarm is queued in the change that causes it and sent afterwards, once per browser of each project member. The push service holds it for up to 24 hours. A subscription the push service reports as gone is deleted.
+  - A pause the platform makes (budget wall, credential failures, skipped cycles) is an alarm. A hold the chairman sets is not.

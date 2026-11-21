@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.7 (21 Nov 2026): phase 2 build
+
+- **CHAT-20:** push subscriptions are accepted only for browser push services over https; the install signs pushes with one key pair whose private half is a secret; alarms are queued then sent once per browser and held up to 24 hours; platform pauses are alarms, the chairman's own hold is not.
+- **Appendix A (operational):** adds `CREWMIND_AGENT_API_URL` (IF-6.1, EXE-12) and `CREWMIND_MOCK_SCRIPT_DIR` (LLM-8).
+
 ## Revision 2.6 (21 Nov 2026): phase 2 plan answers
 
 - **MSG-11:** a chat session holds many chat runs, one per reply; the session is not a run (review R-35).

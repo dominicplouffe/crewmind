@@ -219,6 +219,9 @@ async def test_INV_21_every_write_operation_records_an_event(
         await write(f"cards.{decision}", alice, project_id=paid, card_id=card)
     await write("runs.interrupt", alice, project_id=paid, run_id=live.run_id)
     await write("credentials.delete", alice, name="main")
+    browser = "https://fcm.googleapis.com/fcm/send/abc"
+    await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
+    await write("push.unsubscribe", alice, endpoint=browser)
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
     await write("auth.logout", alice)

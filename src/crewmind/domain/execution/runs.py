@@ -469,9 +469,9 @@ async def kill(session: AsyncSession, run: Run, now: datetime, *, caller: Any) -
     await notices.settle(session, run.id, failed=True)
 
 
-async def _on_hold(
-    session: AsyncSession, project: Project, now: datetime, live_may_finish: bool
-) -> None:
+async def _on_hold(session: AsyncSession, project: Project, now: datetime, hold: Hold) -> None:
+    """Live runs may finish only at the budget wall (GOV-3); otherwise their tokens are
+    revoked (EXE-9)."""
     kinds = frozenset(RunKind) - await allowed_kinds(session, project)
     await revoke(
         session,
@@ -479,7 +479,7 @@ async def _on_hold(
         now,
         kinds=kinds,
         cause=f"the project is {project.state}",
-        live_may_finish=live_may_finish,
+        live_may_finish=hold is Hold.BUDGET_WALL,
     )
 
 
