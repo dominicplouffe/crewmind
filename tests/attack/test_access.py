@@ -25,7 +25,11 @@ def project_operations() -> list[str]:
 
 
 def guarded_operations() -> list[str]:
-    return [o.name for o in catalog if o.authority is not Authority.ANYONE and not o.host_local]
+    return [
+        o.name
+        for o in catalog
+        if o.authority is not Authority.ANYONE and exposed_on(o, Surface.API)
+    ]
 
 
 @pytest.mark.attack("INV-5")
@@ -40,7 +44,7 @@ async def test_INV_5_a_project_you_cannot_see_answers_like_one_that_does_not_exi
     assert len(project_operations()) >= 15
     for name in project_operations():
         operation = catalog.get(name)
-        if operation.authority is Authority.ADMIN:
+        if operation.authority is Authority.ADMIN or not exposed_on(operation, Surface.API):
             continue
         answers: list[tuple[int, Any]] = []
         for project_id in (real, uuid.uuid4().hex):

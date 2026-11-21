@@ -28,7 +28,7 @@ SHOWN_ONCE = {
     ("install.setup", "setup_link"),
 }
 SECRET_WORDS = ("password", "secret", "token", "hash", "key", "credential", "session", "link")
-NOT_SECRET = {"token_id", "token_expires_at", "secrets_reencrypted"}
+NOT_SECRET = {"token_id", "token_expires_at", "secrets_reencrypted", "tokens_counted"}
 
 
 def _fields(model: type[BaseModel], prefix: str = "") -> list[str]:

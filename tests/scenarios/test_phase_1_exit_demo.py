@@ -11,10 +11,11 @@ from typing import Any
 
 from mcp import Client
 
-from crewmind.catalog import catalog
+from crewmind.catalog import Surface, catalog
 from crewmind.catalog.caller import Caller
 from crewmind.catalog.execute import Executor
 from crewmind.catalog.operation import Reversibility
+from crewmind.catalog.surfaces import exposed_on
 from crewmind.surfaces.cli.invoke import LocalInvoker
 from crewmind.surfaces.cli.main import build_cli
 from crewmind.surfaces.mcp.server import build_mcp
@@ -23,6 +24,7 @@ from tests.support import App, OnLoop, invoker_for, run_cli
 EXPECTED = [
     "project.created",
     "member.added",
+    "seat.created",
     "setting.changed",
     "setting.changed",
     "project.state_changed",
@@ -56,11 +58,13 @@ async def test_phase_1_exit_demo_every_change_is_in_the_event_log_on_every_surfa
     from_api = await app.events(chairman, project)
     assert [event["type"] for event in from_api] == EXPECTED
     for event in from_api:
+        if event["type"] == "seat.created":
+            continue
         assert event["actor"] == chairman.person_id
         assert event["actor_kind"] == "person"
         assert event["via"] == "direct"
         assert event["at"]
-    setting = from_api[3]
+    setting = from_api[4]
     assert setting["before"] == {"value": 4}
     assert setting["after"] == {"value": 6}
     assert setting["detail"]["reason"] == "More parallel work for the launch."
@@ -164,6 +168,10 @@ async def test_INV_21_every_write_operation_records_an_event(app: App) -> None:
         reason="Returning the chair.",
     )
     await write("members.remove", alice, project_id=project, person_id=bob.person_id)
+    await write("roster.hire_team", alice, project_id=project, team="research", role="Generalist")
+    await write("roster.stand_down_team", alice, project_id=project, team="research")
+    await write("roster.recall_team", alice, project_id=project, team="research")
+    await write("chat.send", alice, project_id=project, body="Hello, team.")
     await write("projects.start", alice, project_id=project)
     await write("projects.hold", alice, project_id=project)
     await write("projects.resume", alice, project_id=project)
@@ -180,6 +188,6 @@ async def test_INV_21_every_write_operation_records_an_event(app: App) -> None:
     writes = {
         operation.name
         for operation in catalog
-        if operation.reversibility is not Reversibility.READ and not operation.host_local
+        if operation.reversibility is not Reversibility.READ and exposed_on(operation, Surface.API)
     }
     assert recorded == writes

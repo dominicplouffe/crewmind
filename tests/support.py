@@ -14,7 +14,13 @@ from crewmind.catalog import Catalog, Principal, Refusal, Reversibility, Surface
 from crewmind.catalog.caller import HOST_OPERATOR, Authority
 from crewmind.catalog.define import operation as define
 from crewmind.catalog.execute import Context
+from crewmind.gateway.mock import ScriptedTurn
+from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.scheduler import Scheduler
+from crewmind.runner.sandbox import InProcessSandbox
+from crewmind.runner.supervisor import Runner
 from crewmind.runtime import Runtime
+from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import build_api, route_method, route_path
 from crewmind.surfaces.cli.invoke import HttpInvoker
 
@@ -39,7 +45,42 @@ class App:
         self.api = build_api(
             catalog, runtime.executor, runtime.authenticator, base_url=runtime.config.base_url
         )
+        add_agent_api(
+            self.api,
+            catalog,
+            runtime.executor,
+            runtime.run_authenticator,
+            runtime.gateway,
+            runtime.settings,
+        )
         self._admin: Actor | None = None
+        self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
+        self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+
+    def runner(self, workers: int = 4, heartbeat_seconds: float = 0.05) -> Runner:
+        """A runner whose sandboxes run in this process, against this app."""
+        return Runner(
+            self.runtime.sessions,
+            self.runtime.settings,
+            self.runtime.clock,
+            InProcessSandbox(httpx.ASGITransport(app=self.api)),
+            api_url=self.runtime.config.base_url,
+            workspaces=self.runtime.config.data_dir / "workspaces",
+            workers=workers,
+            heartbeat_seconds=heartbeat_seconds,
+        )
+
+    def script(self, key: str, *turns: dict[str, Any]) -> None:
+        """Give the mock provider a script: `key` is a seat name, `seat/kind` or `*`."""
+        self.runtime.mock.scripts[key] = [ScriptedTurn.model_validate(turn) for turn in turns]
+
+    async def work(self, runner: Runner | None = None) -> int:
+        """Dispatch, lease and run everything that is due, to the end. Returns runs started."""
+        runner = runner or self.runner()
+        await self.dispatcher.tick()
+        started = await runner.step()
+        await runner.idle()
+        return started
 
     def client(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(
@@ -264,3 +305,87 @@ async def run_cli(app: Any, arguments: list[str], **options: Any) -> Any:
     from typer.testing import CliRunner
 
     return await asyncio.to_thread(CliRunner().invoke, app, arguments, **options)
+
+
+@dataclass(frozen=True)
+class LiveRun:
+    """A leased, running run in a test, with its token, as a sandbox would hold it."""
+
+    run_id: str
+    token: str
+    runner_id: str
+    seat: str
+
+
+async def wake(app: App, project_id: str, seat: str = "CEO", kind: str = "test notice") -> None:
+    """Give an agent a reason to run: an urgent notice (EXE-2)."""
+    from sqlalchemy import select
+
+    from crewmind.domain.execution import notices
+    from crewmind.storage.models import Seat
+
+    async with app.runtime.sessions() as session, session.begin():
+        row = await session.scalar(
+            select(Seat).where(Seat.project_id == project_id, Seat.name == seat)
+        )
+        assert row is not None
+        notices.notify(
+            session,
+            project_id,
+            row.id,
+            kind,
+            "Something needs you.",
+            app.runtime.clock(),
+            urgent=True,
+        )
+
+
+async def live_run(
+    app: App, project_id: str, seat: str = "CEO", runner_id: str = "test-runner"
+) -> LiveRun:
+    """Wake an agent, then lease and start its work run by hand, without a sandbox."""
+    from crewmind.domain.execution import runs
+
+    await wake(app, project_id, seat)
+    await app.dispatcher.tick()
+    now = app.runtime.clock()
+    async with app.runtime.sessions() as session, session.begin():
+        leases = await runs.lease(session, app.runtime.settings, runner_id, 50, now)
+    for lease in leases:
+        async with app.runtime.sessions() as session, session.begin():
+            await runs.started(session, lease.run_id, runner_id, now)
+    mine = [lease for lease in leases if lease.project_id == project_id]
+    assert mine, "no run was leased"
+    return LiveRun(mine[-1].run_id, mine[-1].token, runner_id, seat)
+
+
+async def agent_call(app: App, token: str | None, name: str, /, **values: Any) -> httpx.Response:
+    """Call the agent API as a sandbox would, with a run token."""
+    from crewmind.surfaces.agent_api.app import route_path as agent_path
+
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    async with app.client() as client:
+        return await client.post(agent_path(name), json=values, headers=headers)
+
+
+async def run_state(app: App, run_id: str) -> str:
+    from crewmind.storage.models import Run
+
+    async with app.runtime.sessions() as session:
+        run = await session.get(Run, run_id)
+        assert run is not None
+        return run.state
+
+
+async def running_project(app: App, owner: Actor, **settings: Any) -> str:
+    project = await app.project(owner)
+    if settings:
+        await app.ok(
+            "settings.change_project",
+            owner,
+            project_id=project,
+            changes=settings,
+            reason="Set up for the test.",
+        )
+    await app.ok("projects.start", owner, project_id=project)
+    return project

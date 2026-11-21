@@ -11,8 +11,9 @@ import pytest
 from typer.main import get_command
 from typer.testing import CliRunner
 
-from crewmind.catalog import catalog
+from crewmind.catalog import Surface, catalog
 from crewmind.catalog.registry import load_domain_modules
+from crewmind.catalog.surfaces import exposed_on
 from crewmind.surfaces.cli.config import CliState
 from crewmind.surfaces.cli.main import ALIASES, ExitCode, build_cli
 from tests.support import PASSWORD, App, OnLoop, invoker_for, run_cli
@@ -36,7 +37,8 @@ def test_IF_4_3_every_command_has_help_and_json() -> None:
     commands = []
     for name, command in root.commands.items():  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType, reportUnknownVariableType]
         commands.extend(getattr(command, "commands", {name: command}).values())  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
-    assert len(commands) >= len(catalog)  # pyright: ignore[reportUnknownArgumentType]
+    on_cli = [o for o in catalog if exposed_on(o, Surface.CLI)]
+    assert len(commands) >= len(on_cli)  # pyright: ignore[reportUnknownArgumentType]
     for command in commands:  # pyright: ignore[reportUnknownVariableType]
         options = {option for parameter in command.params for option in parameter.opts}  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
         assert "--json" in options, command.name  # pyright: ignore[reportUnknownMemberType]

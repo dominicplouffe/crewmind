@@ -18,6 +18,8 @@ from crewmind.catalog import (
 from crewmind.catalog.caller import Caller, CallerKind
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.runtime import Runtime
+from crewmind.surfaces.agent_api import app as agent_api
+from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api import app as api
 from crewmind.surfaces.cli import main as cli
 from crewmind.surfaces.mcp import server as mcp
@@ -35,7 +37,16 @@ async def built_surfaces(source: Catalog, runtime: Runtime) -> dict[Surface, Set
     api_app = sample_api(runtime, source)
     invoker = invoker_for(api_app)
     server = mcp.build_mcp(source, runtime.executor, every_scope)
+    add_agent_api(
+        api_app,
+        source,
+        runtime.executor,
+        runtime.run_authenticator,
+        runtime.gateway,
+        runtime.settings,
+    )
     return {
+        Surface.AGENT_API: agent_api.exposed_operations(api_app),
         Surface.API: api.exposed_operations(api_app),
         Surface.CLI: cli.exposed_operations(cli.build_cli(source, invoker, invoker)),
         Surface.MCP: await mcp.exposed_operations(server, source),
@@ -90,17 +101,17 @@ async def test_IF_1_3_a_written_exemption_covers_one_operation_on_one_surface(
 
 
 async def test_IF_1_3_a_surface_not_yet_built_is_exempt_as_a_whole(runtime: Runtime) -> None:
-    """IF-1.3: slash, Slack and the agent API are exempt until their phases build them."""
+    """IF-1.3: slash and Slack are exempt until their phases build them."""
     greeter = Greeter()
     source = sample_catalog(greeter)
     operation(
         "sample.agent_step",
         greeter,
         source,
-        principals=frozenset({Principal.AGENT_RUN, Principal.PERSON}),
+        principals=frozenset({Principal.PERSON}),
         slash_command="/step",
     )
-    assert set(UNBUILT_SURFACES) == {Surface.SLASH, Surface.SLACK, Surface.AGENT_API}
+    assert set(UNBUILT_SURFACES) == {Surface.SLASH, Surface.SLACK}
     assert check_conformance(source, await built_surfaces(source, runtime)) == []
 
 
