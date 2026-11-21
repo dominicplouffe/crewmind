@@ -17,6 +17,7 @@ from crewmind.domain.projects.access import MembershipAccess
 from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.service import Gateway
+from crewmind.live import StreamHub
 from crewmind.services import Services
 from crewmind.storage.engine import create_engine
 
@@ -34,6 +35,7 @@ class Runtime:
     run_authenticator: RunAuthenticator
     mock: MockProvider
     gateway: Gateway
+    hub: StreamHub
 
     async def close(self) -> None:
         await self.engine.dispose()
@@ -54,11 +56,13 @@ def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool 
         services.settings, clock, mock_default=mock_default or config.mock_script_dir is not None
     )
     runs.provider_saturated = provider_is_saturated
+    hub = StreamHub()
     return Runtime(
+        hub=hub,
         settings=services.settings,
         run_authenticator=RunAuthenticator(sessions),
         mock=mock,
-        gateway=Gateway(sessions, services.settings, clock, mock, config.master_key_file),
+        gateway=Gateway(sessions, services.settings, clock, mock, config.master_key_file, hub),
         config=config,
         engine=engine,
         sessions=sessions,

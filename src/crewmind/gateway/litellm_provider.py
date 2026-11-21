@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib
 import json
+from collections.abc import Callable
 from typing import Any
 
 from litellm.exceptions import (
@@ -133,8 +134,10 @@ async def call_model(
     api_key: str | None,
     base_url: str | None,
     effort: str | None,
+    on_delta: Callable[[str], None] | None = None,
 ) -> CompletionResponse:
-    """One model call. The key is used here and nowhere else (P3)."""
+    """One model call. The key is used here and nowhere else (P3). With `on_delta`, the
+    reply is streamed and each piece of text is passed on as it arrives (IF-3.6)."""
     arguments: dict[str, Any] = {
         "model": f"{provider.prefix}/{model}",
         "messages": to_messages(request),
@@ -147,4 +150,16 @@ async def call_model(
         arguments["api_base"] = base_url
     if effort:
         arguments["reasoning_effort"] = _EFFORT[Effort(effort)]
-    return from_response(await litellm.acompletion(**arguments))
+    if on_delta is None:
+        return from_response(await litellm.acompletion(**arguments))
+    stream = await litellm.acompletion(
+        **arguments, stream=True, stream_options={"include_usage": True}
+    )
+    chunks: list[Any] = []
+    async for chunk in stream:
+        chunks.append(chunk)
+        choices: list[Any] = getattr(chunk, "choices", None) or []
+        text = getattr(getattr(choices[0], "delta", None), "content", None) if choices else None
+        if text:
+            on_delta(text)
+    return from_response(litellm.stream_chunk_builder(chunks, messages=arguments["messages"]))

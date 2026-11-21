@@ -460,6 +460,15 @@ async def revoke(
             await notices.settle(session, run.id, failed=True)
 
 
+async def kill(session: AsyncSession, run: Run, now: datetime, *, caller: Any) -> None:
+    """Kill one run on a person's request (7.7). Its notices are given back."""
+    if run.state == RunState.QUEUED:
+        _move(session, run, RunState.DROPPED, now, actor=caller, detail="interrupted")
+        return
+    _move(session, run, RunState.KILLED, now, actor=caller, detail="interrupted")
+    await notices.settle(session, run.id, failed=True)
+
+
 async def _on_hold(
     session: AsyncSession, project: Project, now: datetime, live_may_finish: bool
 ) -> None:

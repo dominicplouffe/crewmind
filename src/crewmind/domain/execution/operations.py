@@ -15,7 +15,7 @@ from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.pagination import PageRequest, fetch_page
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.budget import service as budget
-from crewmind.domain.execution import roster
+from crewmind.domain.execution import roster, runs
 from crewmind.domain.execution.model import TeamState
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
@@ -330,3 +330,24 @@ async def show_budget(context: Context, payload: ProjectRef) -> BudgetView:
             "cache_read": int(totals[3]),
         },
     )
+
+
+class Interrupted(BaseModel):
+    run_id: str
+    state: str
+
+
+@operation(
+    "runs.interrupt",
+    summary="Interrupt a run in progress, such as a reply you no longer want.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.IRREVERSIBLE,
+)
+async def interrupt(context: Context, payload: RunRef) -> Interrupted:
+    """CHAT-4, EXE-9: Esc interrupts a reply. The run is killed and its token revoked; the
+    runner stops the sandbox at its next heartbeat."""
+    run = await context.session.get(Run, payload.run_id)
+    if run is None or run.project_id != payload.project_id:
+        raise Refusal("run_not_found", "There is no run with that id.", kind=RefusalKind.NOT_FOUND)
+    await runs.kill(context.session, run, context.now, caller=context.caller)
+    return Interrupted(run_id=run.id, state=run.state)

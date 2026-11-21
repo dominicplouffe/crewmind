@@ -7,6 +7,7 @@ the per-run cap by refusing the next call past it.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from sqlalchemy import func, select
@@ -19,7 +20,7 @@ from crewmind.domain.budget import service as budget
 from crewmind.domain.budget.service import GOV_6, Usage
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import runs
-from crewmind.domain.execution.model import CAP_WARNING_SHARE
+from crewmind.domain.execution.model import CAP_WARNING_SHARE, RunKind
 from crewmind.domain.models.service import (
     MOCK,
     SECRET_OWNER,
@@ -36,6 +37,7 @@ from crewmind.gateway.litellm_provider import AUTH_ERRORS, TRANSIENT_ERRORS
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.protocol import CompletionRequest, CompletionResponse
 from crewmind.gateway.registry import providers
+from crewmind.live import StreamHub
 from crewmind.storage.models import LedgerLine, ModelCredential, Project, Run, RunStep, Seat
 
 MODEL_CALL = "model call"
@@ -52,7 +54,9 @@ class Gateway:
         clock: Clock,
         mock: MockProvider,
         key_file: Path,
+        hub: StreamHub | None = None,
     ) -> None:
+        self._hub = hub or StreamHub()
         self._sessions = sessions
         self._settings = settings
         self._clock = clock
@@ -93,6 +97,7 @@ class Gateway:
                 .where(RunStep.run_id == run.id, RunStep.kind == MODEL_CALL)
             )
             run_id, seat_name, run_kind = run.id, seat.name, run.kind
+            project_id = run.project_id
             model, effort, credential_id = run.model or "", run.effort, run.credential_id
             key: str | None = None
             base_url: str | None = None
@@ -102,14 +107,33 @@ class Gateway:
                 assert credential is not None
                 base_url = credential.base_url
                 key = await self._secrets.reveal(session, (SECRET_OWNER, credential.id), "key")
+        on_delta: Callable[[str], None] | None = None
+        if run_kind == RunKind.CHAT:
+            # A chat reply is streamed to the people watching, word by word (IF-3.6, CHAT-3).
+            def publish(text: str) -> None:
+                self._hub.publish(
+                    project_id, {"type": "reply", "run_id": run_id, "seat": seat_name, "text": text}
+                )
+
+            on_delta = publish
         try:
             if provider.name == MOCK:
                 response = await self.mock.complete(
-                    request, seat_name=seat_name, run_kind=run_kind, calls_so_far=calls or 0
+                    request,
+                    seat_name=seat_name,
+                    run_kind=run_kind,
+                    calls_so_far=calls or 0,
+                    on_delta=on_delta,
                 )
             else:
                 response = await outbound.call_model(
-                    provider, request, model=model, api_key=key, base_url=base_url, effort=effort
+                    provider,
+                    request,
+                    model=model,
+                    api_key=key,
+                    base_url=base_url,
+                    effort=effort,
+                    on_delta=on_delta,
                 )
         except Exception as error:
             await self._failed(run_id, credential_id, error)

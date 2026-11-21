@@ -8,6 +8,8 @@ exercised exactly as with a real provider.
 from __future__ import annotations
 
 import json
+import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -52,7 +54,13 @@ class MockProvider:
         return DEFAULT_SCRIPT
 
     async def complete(
-        self, request: CompletionRequest, *, seat_name: str, run_kind: str, calls_so_far: int
+        self,
+        request: CompletionRequest,
+        *,
+        seat_name: str,
+        run_kind: str,
+        calls_so_far: int,
+        on_delta: Callable[[str], None] | None = None,
     ) -> CompletionResponse:
         script = self.script_for(seat_name, run_kind)
         if calls_so_far >= len(script):
@@ -68,4 +76,7 @@ class MockProvider:
             )
             for index, tool in enumerate(turn.tools)
         ]
+        if on_delta is not None:
+            for word in re.findall(r"\S+\s*", turn.text):
+                on_delta(word)
         return CompletionResponse(text=turn.text, tool_calls=calls, usage=turn.usage)
