@@ -47,3 +47,4 @@ def load_domain_modules() -> None:
 
     for module in pkgutil.walk_packages(domain.__path__, prefix=f"{domain.__name__}."):
         importlib.import_module(module.name)
+    importlib.import_module("crewmind.surfaces.api.app")
