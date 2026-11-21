@@ -66,7 +66,22 @@ class Pinned:
     effort: str
 
 
+class Wait(Exception):
+    """A run cannot be leased yet, for a reason that lifts by itself: a credential cooling
+    off, or a provider at its ceiling. The run stays queued and the hold is shown (EXE-4)."""
+
+
 SeatResolver = Callable[[AsyncSession, Project, Seat], Awaitable[Pinned]]
+ProviderGate = Callable[[AsyncSession, str], Awaitable[bool]]
+
+
+async def _never_saturated(session: AsyncSession, provider: str) -> bool:
+    return False
+
+
+provider_saturated: ProviderGate = _never_saturated
+"""Whether a provider is at its install-wide ceiling (LLM-12). Leasing looks past a
+saturated provider, so one provider cannot block the others."""
 
 
 async def _mock_resolver(session: AsyncSession, project: Project, seat: Seat) -> Pinned:
@@ -237,6 +252,16 @@ async def lease(
             )
             if (live or 0) >= int(values["run.concurrency"]):
                 continue
+        refusal: Refusal | None = None
+        pinned: Pinned | None = None
+        try:
+            pinned = await seat_resolver(session, project, seat)
+            if await provider_saturated(session, pinned.provider):
+                continue
+        except Wait:
+            continue
+        except Refusal as refused:
+            refusal = refused
         plain, digest = mint_secret(RUN_PREFIX)
         run.leased_by = runner_id
         run.leased_at = now
@@ -244,9 +269,8 @@ async def lease(
         run.token_hash = digest
         run.max_tokens = int(values["run.max_tokens"]) or None
         _move(session, run, RunState.LEASED, now)
-        try:
-            pinned = await seat_resolver(session, project, seat)
-        except Refusal as refusal:
+        if refusal is not None or pinned is None:
+            assert refusal is not None
             _move(session, run, RunState.FAILED, now, detail=refusal.envelope.message)
             await conversation.platform_line(
                 session,

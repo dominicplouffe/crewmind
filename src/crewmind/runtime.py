@@ -9,8 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock, Executor, utc_now
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.domain.accounts.credentials import Authenticator
+from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.install.config import Config, load_config
+from crewmind.domain.models.service import SeatResolver, provider_is_saturated
 from crewmind.domain.projects.access import MembershipAccess
 from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway.mock import MockProvider
@@ -37,7 +39,7 @@ class Runtime:
         await self.engine.dispose()
 
 
-def build_runtime(config: Config, clock: Clock = utc_now) -> Runtime:
+def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool = False) -> Runtime:
     load_domain_modules()
     engine = create_engine(config.database_url)
     sessions = async_sessionmaker(engine, expire_on_commit=False)
@@ -48,11 +50,15 @@ def build_runtime(config: Config, clock: Clock = utc_now) -> Runtime:
         database_url=config.database_url,
     )
     mock = MockProvider(config.mock_script_dir)
+    runs.seat_resolver = SeatResolver(
+        services.settings, clock, mock_default=mock_default or config.mock_script_dir is not None
+    )
+    runs.provider_saturated = provider_is_saturated
     return Runtime(
         settings=services.settings,
         run_authenticator=RunAuthenticator(sessions),
         mock=mock,
-        gateway=Gateway(sessions, services.settings, clock, {"mock": mock}),
+        gateway=Gateway(sessions, services.settings, clock, mock, config.master_key_file),
         config=config,
         engine=engine,
         sessions=sessions,
