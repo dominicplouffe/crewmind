@@ -24,6 +24,7 @@ Status: phase 1. Agents, sandboxes, the model gateway and integrations are not b
 - **Provider keys never enter a sandbox.** Every model call and web search goes through the server's model gateway, which holds the key. A run carries only a short-lived run token that ends with the run (P3, LLM-8, INV-6).
 - **Token budgets are enforced by the server.** At the budget wall nothing new starts; each run also has its own cap (GOV-3, GOV-6).
 - **The web app** is served with a content security policy that allows no outside host, no inline script and no framing (NFR-14).
+- **Recall memory stays on your machine.** Facts are embedded by a local model that is read from disk; nothing is fetched at run time and the memory library's telemetry is switched off. An agent reads only its own, its team's and its project's memory and the chairman's preferences (MEM-2, MEM-3).
 - **Push alerts** are sent only to the push services of the major browsers, over https. The alert text is encrypted for the browser; the push service sees that an alert was sent, not what it says (CHAT-20).
 - **The server binds to 127.0.0.1.** Binding elsewhere is refused without an https public URL (NFR-6). crewmind does not terminate TLS itself: put a TLS proxy in front.
 - **No telemetry** leaves the install (NFR-1).
@@ -36,6 +37,7 @@ Status: phase 1. Agents, sandboxes, the model gateway and integrations are not b
 - **Password reset links are passed on by hand** until outbound mail ships (phase 6). Whoever holds an unused link can set that person's password for 72 hours.
 - **The CLI stores a personal token** in `cli.json` in the data directory, readable only by its owner. Anyone who can read that file can act as that person until the token expires or is revoked.
 - **SQLite files are not encrypted.** Only secret values are encrypted at rest; project names, goals, settings and the event log are plain in the database. Use disk encryption if that matters.
+- **Memory is not encrypted at rest.** Remembered facts, pinned orders and decisions are plain in the database and in the `memory` folder of the data directory. To build memories, the text of finished runs is sent to the model provider that pays the project, like any other model call. Forgetting an entry deletes it from the store, the index and the history file; it does not reach back into old backups.
 - **Rate limiting** exists only for sign-in. Other endpoints are not rate limited.
 - **What contains an agent run.** In `container` mode each run is a container with CPU and memory limits, the project's workspace mounted, and no install secret. Network egress is open by default: a run can reach the internet (EXE-14). The container mode has not yet been verified on a real Docker host; treat it as untested until the phase 2 notes in `docs/phases/phase-2-plan.md` say otherwise.
 - **`unisolated` mode contains nothing.** A run is a plain process of the server's user with a clean environment. It can read whatever that user can read, including the data directory and the master key. Use it for development on the mock provider only.

@@ -57,6 +57,7 @@ Keep files small and focused. A file growing past about 600 lines is a sign it h
 ## Tests
 
 - `uv run pytest`: default suite. It never calls a paid model or the network; use the mock harness.
+- Tests that use the real memory engine need the embedding model on disk: `uv run python -m crewmind.domain.memory.fetch_model` once. Without it they skip and say so. Every other test uses the in-process memory engine.
 - `uv run pytest --db=sqlite` and `uv run pytest --db=postgres`: both must pass. CI runs both.
 - **Every enforced rule gets an attack test** in `tests/attack/` that tries to break it through the public API the way an agent would (P10).
 - **State machines get table-driven tests plus Hypothesis property tests.**

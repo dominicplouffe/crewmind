@@ -27,9 +27,9 @@ CHAT-7,Action cards,05-chat.md,2,yes,done,test_CHAT_7_an_action_card_does_nothin
 CHAT-8,"Pin, decide, fix, example",05-chat.md,3,yes,not started,,
 CHAT-9,Uploads,05-chat.md,2,yes,partial,test_CHAT_9_an_upload_alone_starts_no_reply_and_costs_nothing; test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,Uploads become artifacts. Describing images for agents without vision is not built
 CHAT-10,Rich rendering,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""a sent message shows as delivered and the reply streams in""; web/src/lib/markdown.test.ts","Markdown, code, tables, images, previews, action cards, folding. Decision cards and plan or run progress cards arrive with phases 3 and 4"
-CHAT-11,Answer the question asked,05-chat.md,3,yes,not started,,
-CHAT-12,Listening score,05-chat.md,3,yes,not started,,
-CHAT-13,Brevity,05-chat.md,3,yes,not started,,
+CHAT-11,Answer the question asked,05-chat.md,3,yes,done,test_MSG_6_a_correction_is_pinned_for_the_agent_and_the_ceo; test_scenario_a_question_answered_sideways_is_asked_again; test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered; test_CHAT_11_the_question_is_quoted_once,
+CHAT-12,Listening score,05-chat.md,3,yes,partial,test_scenario_a_question_answered_sideways_is_asked_again,"Corrections per 100 replies on each seat card. The daily brief, the run health report and the rising-score flag arrive with HUM-6 and phase 6"
+CHAT-13,Brevity,05-chat.md,3,yes,done,test_scenario_a_wordy_reply_is_rewritten_once,
 CHAT-14,Threads and search,05-chat.md,2,yes,partial,test_CHAT_14_search_header_and_feed,Search over messages and file names. Memory search arrives in phase 3
 CHAT-15,Since you were away,05-chat.md,6,yes,not started,,
 CHAT-16,Artifact previews,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""upload files and preview them..."", ""attach by drag-and-drop and by paste...""; web/src/lib/csv.test.ts; web/src/panels/Compare.test.tsx","Markdown, text, code, images, CSV, sandboxed HTML and compare tested. PDF, audio and video use the browser players and are only checked for the right element. Spreadsheet (xlsx) preview not built"
@@ -69,7 +69,7 @@ LLM-10,Health,06-03-models-LLM.md,2,yes,partial,,Smoke check built. Capability c
 LLM-11,Circuit breaker,06-03-models-LLM.md,2,yes,done,test_LLM_11_the_circuit_breaker_opens_cools_off_and_uses_the_fallback; test_LLM_11_three_authentication_failures_pause_the_project,
 LLM-12,Provider ceilings,06-03-models-LLM.md,2,yes,done,test_LLM_12_leasing_looks_past_a_provider_at_its_ceiling,"No default ceiling, by owner decision (Q-004)"
 LLM-13,Cost estimate (display only),06-03-models-LLM.md,2,yes,not started,,MAY. Not built
-LLM-14,Platform models,06-03-models-LLM.md,2,yes,not started,,The extractor model is taken into phase 3 with MEM-4. The Founder model comes with the Founder
+LLM-14,Platform models,06-03-models-LLM.md,2,yes,partial,test_MSG_4_a_long_pinned_message_is_shortened_by_a_metered_call,The extractor runs on the fast class of the credential that pays the project. Platform-level model settings and the Founder model arrive with the Founder
 LLM-15,Output standard in every call,06-03-models-LLM.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
 GOV-1,Settings,06-04-budget-GOV.md,2,yes,partial,test_CHAT_5_a_slash_command_is_the_operation_it_names; test_GOV_1_a_bad_change_is_refused_and_changes_nothing; test_GOV_1_an_unknown_setting_names_the_closest_real_one; test_GOV_1_only_the_right_person_changes_each_scope; test_GOV_1_an_unknown_setting_names_the_closest_real_one; test_appendix_A_constraints_match_the_spec; test_GOV_1_changes_are_versioned_with_their_reason_and_author; test_GOV_1_person_and_install_scopes,Built in phase 1 with the settings service. Disclosure to the CEO arrives in phase 2
 GOV-2,Token budget,06-04-budget-GOV.md,2,yes,done,test_LLM_8_the_ceo_answers_on_a_real_provider_and_the_key_stays_in_the_server; test_GOV_3_at_the_wall_the_project_pauses_and_nothing_new_starts; test_LLM_9_anthropic_usage_is_split_into_fresh_input_cache_writes_and_cache_reads; test_appendix_A_defaults_follow_the_project_type,
@@ -122,15 +122,15 @@ ART-9,Names,06-07-artifacts-ART.md,2,yes,done,test_ART_3_a_deliverable_has_a_pla
 MSG-1,Channels,06-08-conversation-MSG.md,2,yes,done,test_MSG_2_only_the_ceo_speaks_unaddressed_in_the_project_chat; test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers,
 MSG-2,Who speaks in the project chat,06-08-conversation-MSG.md,2,yes,done,test_MSG_2_only_the_ceo_speaks_unaddressed_in_the_project_chat,
 MSG-3,Directives,06-08-conversation-MSG.md,2,yes,done,test_INV_20_a_directive_on_a_held_project_waits_until_it_resumes; test_MSG_3_chat_words_change_state_only_through_a_directive,Moved by the phase 2 plan
-MSG-4,Standing orders,06-08-conversation-MSG.md,3,yes,not started,,
-MSG-5,Closed decisions,06-08-conversation-MSG.md,3,yes,not started,,
-MSG-6,Corrections,06-08-conversation-MSG.md,3,yes,not started,,
-MSG-7,Examples,06-08-conversation-MSG.md,3,yes,not started,,
-MSG-8,Reporting cadence,06-08-conversation-MSG.md,3,yes,not started,,
+MSG-4,Standing orders,06-08-conversation-MSG.md,3,yes,done,test_MSG_4_a_long_pinned_message_is_shortened_by_a_metered_call; test_MSG_4_a_pinned_message_is_proposed_in_the_chairmans_words; test_MSG_4_only_the_chairman_makes_an_order_binding; test_scenario_a_standing_order_is_in_front_of_every_later_run,
+MSG-5,Closed decisions,06-08-conversation-MSG.md,3,yes,done,test_INV_26_a_closed_decision_is_reargued_only_with_newer_evidence; test_scenario_a_closed_decision_is_not_reargued,"Until evidence records exist, reopen evidence is a newer file version or person message (Q-007)"
+MSG-6,Corrections,06-08-conversation-MSG.md,3,yes,done,test_MSG_6_a_correction_is_pinned_for_the_agent_and_the_ceo; test_scenario_a_question_answered_sideways_is_asked_again,
+MSG-7,Examples,06-08-conversation-MSG.md,3,yes,done,test_MSG_7_an_example_never_reaches_an_agent_without_its_label; test_MEM_4_facts_are_extracted_from_finished_runs_and_recalled_later; test_scenario_an_example_used_as_data_is_flagged,The figure lint runs on deliverables. Plans arrive in phase 5
+MSG-8,Reporting cadence,06-08-conversation-MSG.md,3,yes,done,test_scenario_status_posts_wait_for_the_slot_but_replies_do_not; test_MSG_8_slots_are_evenly_spaced_from_the_first; test_MSG_8_slots_follow_the_projects_time_zone,
 MSG-9,Pair breaker,06-08-conversation-MSG.md,2,yes,done,test_MSG_9_two_agents_looping_in_a_thread_are_frozen,
 MSG-10,Unread delivery,06-08-conversation-MSG.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
-MSG-11,Chat runs,06-08-conversation-MSG.md,2,yes,partial,test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process,"One chat run per reply, metered, exempt from wake limits and concurrency. Warm sessions that reuse a process, and restart holds, not built. The rest is taken into phase 3 (phase 3 plan)"
-MSG-12,Communication standard,06-08-conversation-MSG.md,3,yes,not started,,
+MSG-11,Chat runs,06-08-conversation-MSG.md,2,yes,partial,test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process; test_MSG_11_a_failing_chat_is_held_and_stops_costing; test_MSG_11_a_session_holds_many_runs_and_closes_when_idle; test_MSG_11_a_session_restarts_when_what_the_agent_runs_on_changes,"Sessions, keep-warm, restart on change and the hold after 3 failures are built. A warm process is reused in the development sandbox only; the container sandbox starts one per run"
+MSG-12,Communication standard,06-08-conversation-MSG.md,3,yes,partial,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_scenario_a_wordy_reply_is_rewritten_once; test_MSG_12_feedback_says_what_to_change_and_that_it_is_not_a_refusal; test_MSG_12_the_lint_checks_the_measurable_parts,"The lint measures length, the ""Need from you:"" line and a number beside a likelihood, with one rewrite. The glossary check waits for a glossary; tone rules are in the output standard, not linted"
 MSG-13,One conversation model,06-08-conversation-MSG.md,2,yes,done,test_MSG_13_every_surface_reads_and_writes_the_same_conversation,
 HUM-1,One decision-item type,06-09-decisions-HUM.md,6,yes,not started,,
 HUM-2,Kinds,06-09-decisions-HUM.md,6,yes,not started,,
@@ -161,14 +161,14 @@ EXE-14,Network,06-10-execution-EXE.md,2,yes,partial,,Egress open; SECURITY.md st
 EXE-15,Context pack,06-10-execution-EXE.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
 EXE-16,Stall watchdog,06-10-execution-EXE.md,4,yes,not started,,Moved from phase 2 (Q-005): needs tasks and scope
 EXE-17,Agent browser,06-10-execution-EXE.md,8,later,not started,,
-MEM-1,Pinned memory (exact),06-11-memory-MEM.md,3,yes,not started,,
-MEM-2,Recall memory on an established library,06-11-memory-MEM.md,3,yes,not started,,
-MEM-3,Scopes,06-11-memory-MEM.md,3,yes,not started,,
-MEM-4,Automatic extraction,06-11-memory-MEM.md,3,yes,not started,,
-MEM-5,Retrieval,06-11-memory-MEM.md,3,yes,not started,,
+MEM-1,Pinned memory (exact),06-11-memory-MEM.md,3,yes,done,test_INV_25_every_pinned_record_is_in_the_pack_word_for_word; test_MEM_1_an_agents_notes_are_its_own_and_stay_within_the_cap; test_MEM_6_pinning_moves_a_memory_into_exact_memory,Lessons from mistake reports join pinned memory with HUM-8
+MEM-2,Recall memory on an established library,06-11-memory-MEM.md,3,yes,done,test_MEM_2_without_the_model_memory_refuses_plainly_and_fetches_nothing; test_MEM_2_add_search_update_forget_and_history; test_NFR_1_memory_makes_no_outbound_connection; test_MEM_8_recall_accuracy_meets_the_recorded_baseline,Mem0 2.2.1 with embedded Qdrant or pgvector and a local ONNX model. Graphiti and Letta are not built; the interface allows them
+MEM-3,Scopes,06-11-memory-MEM.md,3,yes,done,test_MEM_3_an_agent_reads_and_writes_only_its_own_scopes; test_MEM_3_a_search_reads_only_the_scopes_it_names,
+MEM-4,Automatic extraction,06-11-memory-MEM.md,3,yes,partial,test_MEM_4_facts_are_extracted_from_finished_runs_and_recalled_later; test_MEM_4_a_bad_extractor_answer_stores_nothing; test_MEM_4_extraction_goes_through_the_platforms_model_call,"Extraction after work runs and every N chat runs, metered, into the project scope. Superseding of contradicted facts is left to Mem0 and its validity dates are not shown. File contents are not fed to extraction"
+MEM-5,Retrieval,06-11-memory-MEM.md,3,yes,done,test_MEM_4_facts_are_extracted_from_finished_runs_and_recalled_later; test_MEM_5_recall_can_be_turned_off_and_an_idle_project_spends_nothing; test_MEM_8_recall_accuracy_meets_the_recorded_baseline,
 MEM-6,Visible and editable,06-11-memory-MEM.md,3,yes,not started,,
-MEM-7,Nothing lives only in a session,06-11-memory-MEM.md,3,yes,not started,,
-MEM-8,"Measured, not assumed",06-11-memory-MEM.md,3,yes,not started,,
+MEM-7,Nothing lives only in a session,06-11-memory-MEM.md,3,yes,partial,test_MEM_4_facts_are_extracted_from_finished_runs_and_recalled_later,"Notes, memories and pinned records are written through the agent API as they are made, and chat runs are extracted every N turns. The CEO plan as stored state arrives with planning"
+MEM-8,"Measured, not assumed",06-11-memory-MEM.md,3,yes,done,test_MEM_8_recall_accuracy_meets_the_recorded_baseline,"Recall in the top 3: 24 of 24 on SQLite, 23 of 24 on Postgres. Needs the model on disk; skips otherwise"
 FND-1,Chat,06-12-founder-FND.md,7,yes,not started,,
 FND-2,Tools,06-12-founder-FND.md,7,yes,not started,,
 FND-3,"Draft first, then interview",06-12-founder-FND.md,7,yes,not started,,
@@ -235,10 +235,10 @@ INV-19,"The requirement graph is always acyclic, and where stages are used, wo",
 INV-20,"A held, paused, stopped, ready or completed project changes no work st",08-invariants-INV.md,2,yes,done,test_INV_4_a_hold_revokes_work_run_tokens_at_once; test_INV_20_a_directive_on_a_held_project_waits_until_it_resumes; test_CHAT_3_a_stopped_or_held_project_answers_honestly,
 INV-21,"Every state change appears in the event log with its actor (person, pe",08-invariants-INV.md,1,yes,done,tests/scenarios/test_phase_1_exit_demo.py; tests/unit/test_execute.py,
 INV-22,The agenda's next wake equals the dispatcher's next wake.,08-invariants-INV.md,6,yes,not started,,
-INV-23,"A chat run changes no state except posting, writing its own memory not",08-invariants-INV.md,3,yes,not started,,
+INV-23,"A chat run changes no state except posting, writing its own memory not",08-invariants-INV.md,3,yes,done,test_INV_23_a_chat_run_changes_no_state; test_CHAT_7_an_action_card_does_nothing_until_the_chairman_accepts_it; test_MEM_1_an_agents_notes_are_its_own_and_stay_within_the_cap; test_MEM_3_an_agent_reads_and_writes_only_its_own_scopes; test_scenario_chat_words_change_nothing_without_a_directive,
 INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,done,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds,
-INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,not started,,
-INV-26,"A closed decision is reopened only by the chairman, or by a reopen req",08-invariants-INV.md,3,yes,not started,,
+INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,done,test_INV_25_every_pinned_record_is_in_the_pack_word_for_word; test_MSG_4_only_the_chairman_makes_an_order_binding; test_MSG_6_a_correction_is_pinned_for_the_agent_and_the_ceo; test_scenario_a_standing_order_is_in_front_of_every_later_run,
+INV-26,"A closed decision is reopened only by the chairman, or by a reopen req",08-invariants-INV.md,3,yes,done,test_INV_26_a_closed_decision_is_reargued_only_with_newer_evidence; test_scenario_a_closed_decision_is_not_reargued,
 IF-1.1,Every domain action is defined once as an operation:,09-interfaces-IF.md,1,yes,done,tests/unit/test_catalog.py,
 IF-1.2,"HTTP routes, CLI commands, MCP tools, slash commands and Slack actions",09-interfaces-IF.md,1,yes,done,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/scenarios/test_phase_1_exit_demo.py,
 IF-1.3,A conformance test enumerates the catalog. It fails when an operation ,09-interfaces-IF.md,1,yes,partial,tests/contract/test_IF_1_2_adapters.py; tests/contract/test_IF_1_3_conformance.py; tests/contract/test_IF_1_4_refusals.py; tests/unit/test_catalog.py,Operations and surfaces are checked. Decision-item kinds arrive in phase 6

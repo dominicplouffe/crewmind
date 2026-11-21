@@ -15,7 +15,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: phase 2 (chat and execution) is built. You can talk to a CEO agent in the web app or the terminal; it runs in a sandbox through the model gateway, is metered in tokens and stops at the budget wall. Planning, tasks, memory and teams of specialists come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/phase-2-plan.md](docs/phases/phase-2-plan.md) for what phase 2 did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
+Status: phase 3 (listening) is built on top of phase 2 (chat and execution). You can talk to a CEO agent in the web app or the terminal. What you say once sticks: standing orders, decisions and corrections reach every run word for word, and agents recall facts from earlier work. Tasks, verification and planning come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
 ## Try it
 
@@ -23,6 +23,16 @@ Build the web app once (needs Node 22):
 
 ```bash
 cd web && npm ci && npm run build && cd ..
+```
+
+Fetch the local embedding model once (about 70 MB; memory works offline after that):
+
+```bash
+uv sync
+```
+
+```bash
+uv run python -m crewmind.domain.memory.fetch_model
 ```
 
 Set up a slim install (one process, SQLite) and start it. `unisolated` runs agents as plain processes, which is fine for a first look on your own machine; the default, `container`, needs Docker.
