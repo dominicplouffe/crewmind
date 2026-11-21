@@ -18,6 +18,9 @@ from crewmind.domain.accounts.model import (
     SESSION_MACHINE,
     TOKEN_MACHINE,
 )
+from crewmind.domain.conversation.directives import CARD_MACHINE, DIRECTIVE_MACHINE
+from crewmind.domain.execution.model import RUN_MACHINE, SEAT_MACHINE, TEAM_MACHINE
+from crewmind.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
 from crewmind.domain.projects.model import (
     HOLDABLE,
     PLATFORM_HOLDS,
@@ -77,6 +80,13 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.10:Browser session", SESSION_MACHINE, NOTHING),
         ("7.10:Personal token and MCP client token", TOKEN_MACHINE, NOTHING),
         ("7.11", MEMBERSHIP_MACHINE, NOTHING),
+        ("7.7", RUN_MACHINE, NOTHING),
+        ("7.12:Team:", TEAM_MACHINE, NOTHING),
+        ("7.12:Seat:", SEAT_MACHINE, NOTHING),
+        ("7.17:Directive", DIRECTIVE_MACHINE, NOTHING),
+        ("7.17:Action card", CARD_MACHINE, NOTHING),
+        ("7.18:Model credential", CREDENTIAL_MACHINE, NOTHING),
+        ("7.18:Circuit breaker", BREAKER_MACHINE, NOTHING),
     ],
 )
 def test_section_7_the_declared_transitions_equal_the_spec(
