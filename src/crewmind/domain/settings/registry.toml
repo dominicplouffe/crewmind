@@ -953,6 +953,19 @@ used_by = ["WRK-7"]
 spec_default = "off"
 spec_range = "on, off"
 
+[operational."CREWMIND_AGENT_API_URL"]
+type = "url"
+default_from = "the server's own address"
+used_by = ["IF-6.1", "EXE-12"]
+spec_default = "The server's own address"
+spec_range = "The URL at which sandboxes reach the agent API and the model gateway; set it when sandboxes are containers"
+
+[operational."CREWMIND_MOCK_SCRIPT_DIR"]
+type = "path"
+used_by = ["LLM-8"]
+spec_default = "none"
+spec_range = "A directory of scripts for the mock provider (tests and rehearsal only)"
+
 [operational."CREWMIND_API"]
 type = "url"
 default = "http://127.0.0.1:8420"

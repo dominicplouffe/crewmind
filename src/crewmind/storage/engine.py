@@ -41,11 +41,26 @@ def sync_url(url: str | URL) -> URL:
     return make_url(url).set(drivername=_SYNC_DRIVER[database_of(url)])
 
 
+SQLITE_BUSY_TIMEOUT_MS = 30_000
+"""How long a SQLite transaction waits for the write lock before it fails."""
+
+
 def _configure_sqlite(connection: Any, _: Any) -> None:
+    # The driver's own transaction handling starts a transaction only at the first write,
+    # which lets two transactions read the same rows and both write. Transactions are
+    # begun explicitly instead (see `_begin_sqlite`).
+    connection.isolation_level = None
     cursor = connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute(f"PRAGMA busy_timeout={SQLITE_BUSY_TIMEOUT_MS}")
     cursor.close()
+
+
+def _begin_sqlite(connection: Any) -> None:
+    """Every SQLite transaction takes the write lock when it begins, so transactions run
+    one at a time. This is the write lock under which a slim install leases runs (EXE-5)."""
+    connection.exec_driver_sql("BEGIN IMMEDIATE")
 
 
 def create_engine(url: str | URL) -> AsyncEngine:
@@ -53,4 +68,5 @@ def create_engine(url: str | URL) -> AsyncEngine:
     engine = create_async_engine(async_url(url), pool_pre_ping=True)
     if database_of(url) is Database.SQLITE:
         event.listen(engine.sync_engine, "connect", _configure_sqlite)
+        event.listen(engine.sync_engine, "begin", _begin_sqlite)
     return engine
