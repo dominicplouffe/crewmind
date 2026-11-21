@@ -164,3 +164,45 @@ Three notes on these answers:
 - **"Load earlier messages"** is a small change in the web app, done with the Memory panel.
 
 No open questions remain.
+
+## Outcome (21 Nov 2026)
+
+Phase 3 is built in its four parts. Of its 21 requirement ids, 17 are done and 4 are partial; `docs/traceability.csv` has the tests and a note for each. The two phase 2 leftovers taken in (warm chat sessions, "load earlier messages") are built.
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| A standing order ignored | Passes: once pinned, the order is in every later run's pack, word for word |
+| An example used as data | Passes: an example never reaches an agent without its label, and a deliverable that uses an example-only figure is flagged |
+| A closed decision re-argued | Passes: a reopen request with nothing newer than the decision is refused; the ruling stands until the chairman approves |
+| A question answered sideways | Passes: after `/fix` the agent is asked again, and its reply quotes the question |
+| Chat acted on without a directive | Passes: a chat run that tries to change state is refused; the same words as `/do` are carried out |
+| Pinned memory reaches every context pack verbatim (INV-25) | Passes: a property test over any mix of orders, decisions, corrections and notes |
+| Mem0 recall works on both databases | Passes with the real library and the local model: 24 of 24 questions answered from the top 3 on SQLite (embedded Qdrant), 23 of 24 on Postgres (pgvector) |
+
+**Partial.**
+
+- **MSG-12:** the lint measures length, the "Need from you:" line and a number beside a likelihood. There is no glossary yet, so unexplained terms are not checked.
+- **CHAT-12:** the listening score is on each seat card. The daily brief, the run health report and the rising-score flag come with phase 6.
+- **MEM-4:** extraction runs after work runs and every 10 chat runs. Replacing a contradicted fact is left to Mem0, and its validity dates are not shown. File contents are not fed to extraction.
+- **MEM-7:** the CEO's plan as stored state comes with planning.
+- **MSG-11 (carried from phase 2):** a warm process is reused in the development sandbox only. The container sandbox starts one process per run, and is still unverified.
+- **LLM-14:** the extractor runs on the fast class of the credential that pays the project; platform-level model settings come with the Founder.
+
+**Not proven here.**
+
+- **A real model has still not been called.** Extraction, the one rewrite and the shortening of a long pin were tested with the scripted mock. The recall tests use the real memory library and embedder, with no model call.
+- **Memory use:** a slim install idles at about 120 MB and sits at about 420 MB once recall has been used, over NFR-23's 400 MB (Q-008).
+- **Web:** the lint and held-report markers, the over-size note, declining a reopen request and the Memory panel at phone width were not driven in a browser. The thread panel has no message menu. One browser test (scroll position after loading earlier messages) failed once in three full runs.
+- **Mock installs:** with no credential, a project makes no platform model calls, so nothing is extracted and a long pin keeps its opening sentences.
+
+**Found and fixed on the way.**
+
+- A restore failed on Postgres once the `vector` extension was present; extensions are now left out of a restore.
+- The mock provider answered platform calls with its default text, which would have replaced a pinned order's wording.
+- Without the model files, memory would have tried to download them at run time; it now refuses plainly and runs go on with pinned memory.
+
+**Tests.** 307 Python tests on SQLite in about 80 seconds and 308 on Postgres in about 115 seconds; 71 web unit tests; 33 browser tests in about 2 minutes.
+
+**Open questions for the owner:** Q-006 (how to run the real-provider demo), Q-007 (what counts as reopen evidence before phase 4) and Q-008 (the slim memory target).
