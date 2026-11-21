@@ -34,13 +34,16 @@ src/crewmind/
   catalog/            operation registry, schemas, authority, reversibility, the one call path
   domain/<module>/    one module per domain: rules, state machines, commands, read models
                       (projects, settings, budget, planning, work, artifacts, conversation,
-                       decisions, execution, memory, founder, library, integrations, accounts,
-                       record = the event log, secrets, install = host-local commands)
+                       decisions, execution, models = credentials and lineups, memory, founder,
+                       library, integrations, accounts, record = the event log, secrets,
+                       install = host-local commands)
   jobs/               the scheduler and its periodic jobs
-  surfaces/           api/, cli/, mcp/, agent_api/, slack/: adapters only
+  surfaces/           api/, cli/, mcp/, slash/, agent_api/, slack/: adapters only
   gateway/            model gateway (LiteLLM), metering, per-run caps
   runner/             leasing, sandboxes, harnesses (mock first)
   storage/            SQLAlchemy models, Alembic migrations, the storage adapter
+  content/            packaged copies of content the server reads at run time
+  live.py             the in-process hub that feeds the live event stream
 web/                  TypeScript/React app
 deploy/               Dockerfile and Compose file for a full server
 tests/

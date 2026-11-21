@@ -20,7 +20,11 @@ Status: phase 1. Agents, sandboxes, the model gateway and integrations are not b
 - **Browser sessions** use an `HttpOnly`, `SameSite=Strict` cookie, and a write from another origin is refused (IF-3.7).
 - **Secrets** are encrypted with AES-256-GCM under the install master key. Without the key the server stores and reads no secret. Rotation is all or nothing (ACC-6).
 - **The event log** records every state change with its actor, including actions taken through an MCP client, which are marked as such (INV-21, IF-5.4).
-- **Agent-written text** sent to an AI client is wrapped in a labelled envelope and cannot close it (INV-7). No agent text exists yet; the envelope is in place for when it does.
+- **Agent-written text** sent to an AI client is wrapped in a labelled envelope and cannot close it (INV-7). In the web app it is rendered as sanitised markdown, and an HTML file an agent wrote is previewed only in a sandboxed frame with no scripts and no network (ART-4).
+- **Provider keys never enter a sandbox.** Every model call and web search goes through the server's model gateway, which holds the key. A run carries only a short-lived run token that ends with the run (P3, LLM-8, INV-6).
+- **Token budgets are enforced by the server.** At the budget wall nothing new starts; each run also has its own cap (GOV-3, GOV-6).
+- **The web app** is served with a content security policy that allows no outside host, no inline script and no framing (NFR-14).
+- **Push alerts** are sent only to the push services of the major browsers, over https. The alert text is encrypted for the browser; the push service sees that an alert was sent, not what it says (CHAT-20).
 - **The server binds to 127.0.0.1.** Binding elsewhere is refused without an https public URL (NFR-6). crewmind does not terminate TLS itself: put a TLS proxy in front.
 - **No telemetry** leaves the install (NFR-1).
 
@@ -33,13 +37,14 @@ Status: phase 1. Agents, sandboxes, the model gateway and integrations are not b
 - **The CLI stores a personal token** in `cli.json` in the data directory, readable only by its owner. Anyone who can read that file can act as that person until the token expires or is revoked.
 - **SQLite files are not encrypted.** Only secret values are encrypted at rest; project names, goals, settings and the event log are plain in the database. Use disk encryption if that matters.
 - **Rate limiting** exists only for sign-in. Other endpoints are not rate limited.
+- **What contains an agent run.** In `container` mode each run is a container with CPU and memory limits, the project's workspace mounted, and no install secret. Network egress is open by default: a run can reach the internet (EXE-14). The container mode has not yet been verified on a real Docker host; treat it as untested until the phase 2 notes in `docs/phases/phase-2-plan.md` say otherwise.
+- **`unisolated` mode contains nothing.** A run is a plain process of the server's user with a clean environment. It can read whatever that user can read, including the data directory and the master key. Use it for development on the mock provider only.
+- **Subscription logins** (phase 8) will be the one exception to "no provider credential in a sandbox", because those harnesses need a local login (LLM-8). They are not built.
 
 ## Not built yet
 
 Each of these is specified and will be documented here when it ships.
 
-- **What contains an agent run, and what does not.** Runs will be sandboxed in containers with a network per project. Network egress will be open by default: a run can reach the internet (EXE-14).
-- **Where the model gateway does not apply.** Model calls will go through the platform gateway, so no sandbox holds a provider key. The one exception will be subscription harnesses that need a local login (LLM-8).
 - **What skill scripts and the agent browser can reach** (LIB-6, EXE-17).
 - **OAuth for MCP clients** (phase 6). Today MCP clients use minted bearer tokens only.
 
