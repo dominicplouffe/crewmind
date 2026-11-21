@@ -39,6 +39,16 @@ class Config:
     host: str
     port: int
     public_url: str | None
+    sandbox_mode: str = "container"
+    sandbox_cpus: int = 2
+    sandbox_memory: int = 2 * 1024**3
+    agent_api_url: str | None = None
+    mock_script_dir: Path | None = None
+
+    @property
+    def agent_api(self) -> str:
+        """Where a sandbox reaches the agent API and the model gateway."""
+        return self.agent_api_url or f"http://{self.host}:{self.port}"
 
     @property
     def base_url(self) -> str:
@@ -104,4 +114,11 @@ def load_config(env: Mapping[str, str] | None = None, *, slim: bool = False) -> 
         host=host,
         port=read("CREWMIND_PORT", env),
         public_url=public_url,
+        sandbox_mode=read("CREWMIND_SANDBOX_MODE", env),
+        sandbox_cpus=read("CREWMIND_SANDBOX_CPUS", env),
+        sandbox_memory=read("CREWMIND_SANDBOX_MEMORY", env),
+        agent_api_url=read("CREWMIND_AGENT_API_URL", env),
+        mock_script_dir=Path(scripts).expanduser()
+        if (scripts := read("CREWMIND_MOCK_SCRIPT_DIR", env))
+        else None,
     )

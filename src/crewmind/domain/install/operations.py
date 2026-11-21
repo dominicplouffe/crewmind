@@ -161,7 +161,7 @@ async def up(context: Context, payload: UpInput) -> Stopped:
             hint="Stop it first, or use another CREWMIND_DATA_DIR.",
         )
     prepare(config)
-    app = create_app(build_runtime(config))
+    app = create_app(build_runtime(config), run_runner=True)
     server = uvicorn.Server(
         uvicorn.Config(app, host=config.host, port=config.port, log_level="warning")
     )

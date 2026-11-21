@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import hashlib
+import logging
 from collections.abc import AsyncGenerator
 
 from alembic.runtime.migration import MigrationContext
@@ -20,13 +22,21 @@ from crewmind.catalog.caller import CallerKind
 from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
+from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.scheduler import Scheduler
+from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
+from crewmind.runner.supervisor import Runner
 from crewmind.runtime import Runtime
 from crewmind.storage.migrate import alembic_config
+from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
 from crewmind.surfaces.mcp.server import CALLER_STATE, build_mcp
 
 MCP_PATH = "/mcp"
+RUNNER_WORKERS = 4
+"""Runs one runner executes at once. A project's own limit is `run.concurrency`."""
+
+logger = logging.getLogger(__name__)
 
 
 def _schema_is_current(connection: Connection) -> bool:
@@ -74,8 +84,38 @@ class McpAuthentication:
         await self._app(scope, receive, send)
 
 
-def create_app(runtime: Runtime, *, run_scheduler: bool = True) -> FastAPI:
-    """The whole server as one ASGI app."""
+def build_sandbox(runtime: Runtime) -> Sandbox:
+    """The sandbox mode the install is configured for (EXE-12)."""
+    config = runtime.config
+    if config.sandbox_mode == "unisolated":
+        return UnisolatedSandbox()
+    if config.sandbox_mode == "container":
+        return ContainerSandbox(
+            image="crewmind-agent",
+            install_id=hashlib.sha256(str(config.data_dir).encode()).hexdigest()[:12],
+            cpus=config.sandbox_cpus,
+            memory_bytes=config.sandbox_memory,
+        )
+    raise ValueError(f"sandbox mode {config.sandbox_mode} is not available yet")
+
+
+def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKERS) -> Runner:
+    return Runner(
+        runtime.sessions,
+        runtime.settings,
+        runtime.clock,
+        sandbox,
+        api_url=runtime.config.agent_api,
+        workspaces=runtime.config.data_dir / "workspaces",
+        workers=workers,
+    )
+
+
+def create_app(
+    runtime: Runtime, *, run_scheduler: bool = True, run_runner: bool = False
+) -> FastAPI:
+    """The whole server as one ASGI app. With `run_runner`, one runner works in this
+    process, as slim mode needs (NFR-23)."""
     mcp_server = build_mcp(catalog, runtime.executor)
     mcp_app = mcp_server.streamable_http_app(
         streamable_http_path=MCP_PATH,
@@ -86,11 +126,21 @@ def create_app(runtime: Runtime, *, run_scheduler: bool = True) -> FastAPI:
 
     @contextlib.asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
-        scheduler = Scheduler(runtime.sessions, runtime.clock)
-        task = asyncio.create_task(scheduler.run()) if run_scheduler else None
+        tasks: list[asyncio.Task[None]] = []
+        if run_scheduler:
+            scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+            dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
+            tasks += [asyncio.create_task(scheduler.run()), asyncio.create_task(dispatcher.run())]
+        if run_runner:
+            try:
+                runner = build_runner(runtime, build_sandbox(runtime))
+            except Exception as error:
+                logger.error("no runner started: the sandbox is unavailable (%s)", error)
+            else:
+                tasks.append(asyncio.create_task(runner.run()))
         async with mcp_server.session_manager.run():
             yield
-        if task is not None:
+        for task in tasks:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
@@ -100,6 +150,9 @@ def create_app(runtime: Runtime, *, run_scheduler: bool = True) -> FastAPI:
         catalog, runtime.executor, runtime.authenticator, base_url=runtime.config.base_url
     )
     app.router.lifespan_context = lifespan
+    add_agent_api(
+        app, catalog, runtime.executor, runtime.run_authenticator, runtime.gateway, runtime.settings
+    )
 
     async def healthz() -> dict[str, str]:
         return {"status": "ok"}

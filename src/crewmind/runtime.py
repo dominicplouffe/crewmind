@@ -9,8 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock, Executor, utc_now
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.domain.accounts.credentials import Authenticator
+from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.install.config import Config, load_config
 from crewmind.domain.projects.access import MembershipAccess
+from crewmind.domain.settings.service import SettingsService
+from crewmind.gateway.mock import MockProvider
+from crewmind.gateway.service import Gateway
 from crewmind.services import Services
 from crewmind.storage.engine import create_engine
 
@@ -24,6 +28,10 @@ class Runtime:
     executor: Executor
     authenticator: Authenticator
     clock: Clock
+    settings: SettingsService
+    run_authenticator: RunAuthenticator
+    mock: MockProvider
+    gateway: Gateway
 
     async def close(self) -> None:
         await self.engine.dispose()
@@ -39,7 +47,12 @@ def build_runtime(config: Config, clock: Clock = utc_now) -> Runtime:
         master_key_file=config.master_key_file,
         database_url=config.database_url,
     )
+    mock = MockProvider(config.mock_script_dir)
     return Runtime(
+        settings=services.settings,
+        run_authenticator=RunAuthenticator(sessions),
+        mock=mock,
+        gateway=Gateway(sessions, services.settings, clock, {"mock": mock}),
         config=config,
         engine=engine,
         sessions=sessions,
