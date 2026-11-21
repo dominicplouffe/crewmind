@@ -2,6 +2,23 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.6 (21 Nov 2026): phase 2 plan answers
+
+- **MSG-11:** a chat session holds many chat runs, one per reply; the session is not a run (review R-35).
+- **EXE-8:** each retry is a new run linked to the same wake (R-36).
+- **INV-13:** nothing new is leased at or above `run.concurrency`; lowering it kills no live run (R-37).
+- **ART-5:** locked files are mounted read-only into sandboxes (R-38).
+- **ART-6:** at the storage quota, publishing is refused and snapshots are skipped, with a flag (R-39).
+- **NFR-20:** each phase plan lists its warn-only rules; a rule an invariant cites always enforces (R-29).
+- **INT-8:** the Brave Search API is the first search service.
+- **Section 13:**
+  - The build order now matches PLAN.md and ADR-0007 (R-25).
+  - The multi-provider acceptance item tests API-key providers in v2.0; a subscription credential joins it in phase 8.
+- **ACC-7, section 14:** second factor is after v2.0, in phase 8.
+- **PLAN.md, traceability.csv:**
+  - INV-10 moves to phase 6; INV-14 and INV-16 to phase 4; MSG-3 into phase 2.
+  - Subscription logins and the vendor agent SDK harness (parts of LLM-2 and LLM-8) move to phase 8.
+
 ## Revision 2.5 (21 Nov 2026): phase 1 build
 
 - **7.8:** the first admin is created in the invited state with a setup link, like any invite, not directly as active. This matches NFR-2 ("creates the first admin and prints a setup link").

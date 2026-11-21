@@ -39,7 +39,7 @@
   - Reaping revokes the token and books the tokens the gateway already metered. It charges the failure to the run's requirement and releases claims, except a lead's task with open subtasks. It tells the agent to check the side-effect ledger before redoing anything.
   - A late finish from a reaped ("zombie") worker changes nothing.
 - **EXE-8 Retries and recovery.**
-  - A failed run gives back the notices and suggestions it consumed, and is retried up to 3 attempts with a backoff of 30 seconds × attempt. A wake counts once against the wake limit however many retries it took.
+  - A failed run gives back the notices and suggestions it consumed, and is retried up to 3 attempts with a backoff of 30 seconds × attempt. Each attempt is a new run linked to the same wake; a failed run stays failed. A wake counts once against the wake limit however many retries it took.
   - If no attempt ever reached a model, messages are marked unread again.
   - A crashed run's saved notes and partial plan (MEM-7) are placed in the retry's context.
 - **EXE-9 Revocation.** Kill, hold, a pause (except the budget wall, where in-flight runs finish: GOV-3) and the refusal cap revoke the run token. The heartbeat notices revocation and stops the sandbox itself. The run ends as killed, or as terminated if refusals caused it.

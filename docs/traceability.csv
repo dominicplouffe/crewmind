@@ -57,13 +57,13 @@ SPD-7,Explore is time-boxed,06-02-speed-SPD.md,5,yes,not started,,
 SPD-8,Speed is measured,06-02-speed-SPD.md,5,yes,not started,,
 SPD-9,No idle crew,06-02-speed-SPD.md,5,yes,not started,,
 LLM-1,Providers through one gateway,06-03-models-LLM.md,2,yes,not started,,
-LLM-2,Model credentials,06-03-models-LLM.md,2,yes,not started,,
+LLM-2,Model credentials,06-03-models-LLM.md,2,yes,not started,,Phase 2: API-key credentials. Subscription logins in phase 8
 LLM-3,The quality dial,06-03-models-LLM.md,2,yes,not started,,
 LLM-4,Classes and lineups,06-03-models-LLM.md,2,yes,not started,,
 LLM-5,Effort,06-03-models-LLM.md,2,yes,not started,,
 LLM-6,Seat check,06-03-models-LLM.md,2,yes,not started,,
 LLM-7,Who pays,06-03-models-LLM.md,2,yes,not started,,
-LLM-8,Harness interface,06-03-models-LLM.md,2,yes,in progress,tests/unit/test_mock_harness.py,Phase 0: interface and mock stub only
+LLM-8,Harness interface,06-03-models-LLM.md,2,yes,in progress,tests/unit/test_mock_harness.py,Phase 0: interface and mock stub only; Phase 2: mock harness and the vendor-neutral loop. Vendor agent SDK harness in phase 8
 LLM-9,Metering,06-03-models-LLM.md,2,yes,not started,,
 LLM-10,Health,06-03-models-LLM.md,2,yes,not started,,
 LLM-11,Circuit breaker,06-03-models-LLM.md,2,yes,not started,,
@@ -121,7 +121,7 @@ ART-8,Uploads,06-07-artifacts-ART.md,2,yes,not started,,
 ART-9,Names,06-07-artifacts-ART.md,2,yes,not started,,
 MSG-1,Channels,06-08-conversation-MSG.md,2,yes,not started,,
 MSG-2,Who speaks in the project chat,06-08-conversation-MSG.md,2,yes,not started,,
-MSG-3,Directives,06-08-conversation-MSG.md,3,yes,not started,,
+MSG-3,Directives,06-08-conversation-MSG.md,2,yes,not started,,Moved by the phase 2 plan
 MSG-4,Standing orders,06-08-conversation-MSG.md,3,yes,not started,,
 MSG-5,Closed decisions,06-08-conversation-MSG.md,3,yes,not started,,
 MSG-6,Corrections,06-08-conversation-MSG.md,3,yes,not started,,
@@ -155,7 +155,7 @@ EXE-8,Retries and recovery,06-10-execution-EXE.md,2,yes,not started,,
 EXE-9,Revocation,06-10-execution-EXE.md,2,yes,not started,,
 EXE-10,Refusal cap,06-10-execution-EXE.md,2,yes,not started,,
 EXE-11,Records,06-10-execution-EXE.md,2,yes,not started,,
-EXE-12,Sandboxes,06-10-execution-EXE.md,2,yes,not started,,
+EXE-12,Sandboxes,06-10-execution-EXE.md,2,yes,not started,,Container mode cannot be run in the build environment (no Docker daemon); verify in CI or on the owner machine
 EXE-13,Secrets in sandboxes,06-10-execution-EXE.md,2,yes,not started,,
 EXE-14,Network,06-10-execution-EXE.md,2,yes,not started,,
 EXE-15,Context pack,06-10-execution-EXE.md,2,yes,not started,,
@@ -202,7 +202,7 @@ INT-4,Data sources,06-15-integrations-INT.md,8,later,not started,,
 INT-5,Slack: one channel per project,06-15-integrations-INT.md,8,later,not started,,
 INT-6,Email: a mailbox per project,06-15-integrations-INT.md,8,later,not started,,
 INT-7,Alerts,06-15-integrations-INT.md,6,yes,not started,,
-INT-8,Web search,06-15-integrations-INT.md,2,yes,not started,,moved to phase 2: agents need web search early
+INT-8,Web search,06-15-integrations-INT.md,2,yes,not started,,moved to phase 2: agents need web search early; Brave Search API first
 INT-9,Code repository,06-15-integrations-INT.md,8,later,not started,,
 INT-10,"Agents on email, and external agents",06-15-integrations-INT.md,8,later,not started,,
 INT-11,A2A: agent-to-agent protocol,06-15-integrations-INT.md,8,later,not started,,
@@ -222,13 +222,13 @@ INV-6,"No secret value, provider key included, appears in any sandbox, agent-",0
 INV-7,Agent-written text is always wrapped as untrusted when it reaches a pe,08-invariants-INV.md,1,yes,partial,tests/unit/test_untrusted.py,Envelope built and applied on MCP. No agent text exists until phase 2
 INV-8,"Every model call has a ledger line, whatever the run's ending (P9, LLM",08-invariants-INV.md,2,yes,not started,,
 INV-9,Token spend never exceeds the wall by more than the tokens of runs alr,08-invariants-INV.md,2,yes,not started,,
-INV-10,"Real-world spend never exceeds `spend.monthly_cap`, counting committed",08-invariants-INV.md,2,yes,not started,,
+INV-10,"Real-world spend never exceeds `spend.monthly_cap`, counting committed",08-invariants-INV.md,6,yes,not started,,Moved by the phase 2 plan
 INV-11,A project with no wake trigger (EXE-2) and no message from a person sp,08-invariants-INV.md,2,yes,not started,,
 INV-12,"At most one runner holds a given run, and no run is both queued and ru",08-invariants-INV.md,2,yes,not started,,
 INV-13,At most one queued or running work run per agent; work concurrency nev,08-invariants-INV.md,2,yes,not started,,
-INV-14,"A side effect recorded under an idempotency key fires at most once, ac",08-invariants-INV.md,2,yes,not started,,
+INV-14,"A side effect recorded under an idempotency key fires at most once, ac",08-invariants-INV.md,4,yes,not started,,Moved by the phase 2 plan
 INV-15,A late result from a reaped worker changes nothing.,08-invariants-INV.md,2,yes,not started,,
-INV-16,A claimed task always has a live run behind it or a path back to ready,08-invariants-INV.md,2,yes,not started,,
+INV-16,A claimed task always has a live run behind it or a path back to ready,08-invariants-INV.md,4,yes,not started,,Moved by the phase 2 plan
 INV-17,A decision item reaching its deadline always resolves to its declared ,08-invariants-INV.md,6,yes,not started,,
 INV-18,Proposed scope never has work against it; no task exists under a requi,08-invariants-INV.md,5,yes,not started,,
 INV-19,"The requirement graph is always acyclic, and where stages are used, wo",08-invariants-INV.md,5,yes,not started,,

@@ -35,7 +35,7 @@
 - **MSG-9 Pair breaker.** When a thread's last `thread.freeze_after` \[10\] messages come from the same two agents with no human, and no task changed state anywhere in the project during that span, the thread freezes. Further posts are refused, the CEO is told, and only the chairman can unfreeze it.
 - **MSG-10 Unread delivery.** At most 10 unread messages per channel go into a run's context, oldest first, except that the chairman's newest unanswered message always comes first. Overflow is marked queued and is never marked read without being shown.
 - **MSG-11 Chat runs.**
-  - A message addressed to an agent starts or reuses a chat session for that agent. The session stays warm for `chat.keep_warm` \[10 min\] after the last message, then closes, so an idle chat costs nothing (P8).
+  - A message addressed to an agent starts or reuses a chat session for that agent. A session holds many chat runs, one per reply. Each run is metered and capped on its own; the session itself is not a run and is never reaped. The session stays warm for `chat.keep_warm` \[10 min\] after the last message, then closes, so an idle chat costs nothing (P8).
   - Chat runs are exempt from wake limits and do not use work concurrency.
   - They are metered against the budget, and use the same credentials and grants as the agent's work runs (LLM-7).
   - They see the workspace read-only and change state only through directives (CHAT-6).

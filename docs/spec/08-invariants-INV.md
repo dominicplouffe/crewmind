@@ -32,7 +32,7 @@ These must hold at all times, under any sequence of API calls, crashes and retri
 **Execution**
 
 - **INV-12** At most one runner holds a given run, and no run is both queued and running.
-- **INV-13** At most one queued or running work run per agent; work concurrency never exceeds `run.concurrency`.
+- **INV-13** At most one queued or running work run per agent; nothing new is leased while the number of work runs is at or above `run.concurrency`. Lowering the limit never kills a live run.
 - **INV-14** A side effect recorded under an idempotency key fires at most once, across any number of retries.
 - **INV-15** A late result from a reaped worker changes nothing.
 - **INV-16** A claimed task always has a live run behind it or a path back to ready (WRK-4).

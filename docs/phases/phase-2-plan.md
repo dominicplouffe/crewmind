@@ -1,0 +1,113 @@
+# Phase 2 plan: chat and execution
+
+Goal (PLAN.md): talk to a CEO in the chat. It runs real work in a sandbox through the model gateway, metered in tokens, and stops at the wall.
+
+**Exit demo.**
+
+- In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness and on one real provider.
+- An upload becomes an artifact.
+- A run is metered by token kind, and only non-cached tokens count.
+- Hitting the wall pauses the project.
+- Killing a runner mid-run violates no execution invariant.
+
+Status: **agreed with the owner on 21 Nov 2026.** The answers are at the end.
+
+## Size, and a proposed split
+
+Phase 2 carries about 95 requirement ids: more than phases 0 and 1 together, plus the first web code and the first terminal UI. I propose four parts, each ending with the suite green on both databases and its own small demo.
+
+| Part | Builds | Demo |
+| --- | --- | --- |
+| **2a Execution core** | Roles (minimal), roster, runs, wake triggers, dispatcher, leasing, heartbeats, reaping, retries, sandboxes, the agent API (context, messages, notes, team), the ledger, the budget wall, runaway guards. Mock harness and mock provider only | A scripted CEO wakes on a message, runs in a sandbox, is metered, and the project pauses at the wall. Killing the runner mid-run breaks no invariant |
+| **2b Models** | Model gateway on LiteLLM, model credentials, lineups, the quality dial, seat check, effort, circuit breaker, provider ceilings, health checks, web search, the vendor-neutral harness loop, the output standard (LLM-15) | The same run on one real provider, through the gateway, with no key in the sandbox |
+| **2c Conversation** | Channels, messages, threads, chat runs and warm sessions, never-silent statuses, slash commands, action cards and directives, artifacts, uploads, workspace snapshots, the live event stream, `crewmind chat` in the terminal | The chairman chats with the CEO in the terminal, streaming; an upload becomes an artifact |
+| **2d Web app** | `web/`: the chat, composer, header, activity feed, artifact previews, sign-in and setup-link pages. API client generated from the OpenAPI schema | The exit demo in a browser |
+
+## Modules
+
+```
+src/crewmind/
+  domain/execution/     roles, teams, seats; runs and their lifecycle; wake triggers; dispatcher;
+                        leasing; liveness; retries; context pack (EXE-1 to EXE-11, EXE-15, EXE-16)
+  domain/budget/        ledger, token budget, thresholds, the wall, runaway guards (GOV-2, 3, 6, 7, 9)
+  domain/conversation/  channels, messages, threads, read positions, notices, chat sessions,
+                        directives, action cards, pair breaker (MSG-1, 2, 9, 10, 11, 13; CHAT)
+  domain/artifacts/     artifacts, versions, content-addressed storage, locks, quota (ART-1 to ART-9)
+  gateway/              provider registry (data), LiteLLM calls, usage normalisation, metering,
+                        per-run cap, credentials resolver, lineups, breaker, ceilings, health, search
+  runner/               runner supervisor, sandbox interface, container and unisolated modes,
+                        harness loop (vendor-neutral), mock harness
+  surfaces/agent_api/   the agent API over HTTP and as MCP tools inside the sandbox (IF-6.1 to 6.3)
+  surfaces/api/stream.py  server-sent events (IF-3.6); resumable uploads (IF-3.9)
+  surfaces/cli/chat/    `crewmind chat` in Textual (IF-4.8)
+web/                    the React app
+content/output-standard.md   the one copy of the output standard (LLM-15)
+```
+
+## Tables
+
+| Table | Holds |
+| --- | --- |
+| `roles`, `teams`, `seats` | A minimal role (name, kind, tools, credential names, charter, `min_class`, vision), teams pinned to a role version, seats with state (7.12) |
+| `model_credentials`, `lineups` | Named credentials (value in `secrets`), kind, provider, state and breaker state (7.18); class-to-model lineup per credential |
+| `runs`, `run_wakes` | Runs with kind, state (7.7), pinned model, effort, provider, credential, harness and caps (EXE-6); wake reasons per run (EXE-4) |
+| `ledger_lines` | One line per model call: tokens by kind, run, seat, credential; counts for searches (LLM-9, INT-8) |
+| `channels`, `messages`, `read_positions` | The one conversation model (MSG-13); threads by parent message |
+| `notices`, `chat_sessions` | Notices consumed on read; warm sessions (7.17) |
+| `directives`, `action_cards` | 7.17 |
+| `artifacts`, `artifact_versions` | Name, kind, audience, lock; versions with content hash and author. Bytes live in a content-addressed directory under the data directory (ART-2) |
+| `uploads_in_progress` | Resumable upload state (IF-3.9) |
+
+## Rules and their attack tests (the main ones)
+
+| Rule | Attack |
+| --- | --- |
+| P3, INV-4 run tokens | A run token used for another run, another project, after the run ends, after a hold, after the refusal cap, on the human API: all refused |
+| INV-6 no keys in sandboxes | A scripted agent dumps its environment, files and every agent API answer: no provider key, and no secret outside the role's named credentials |
+| INV-8, P9 every token metered | Kill, fail and reap runs mid-call: every call the gateway accepted has a ledger line |
+| INV-9, GOV-3 the wall | Race many runs at the wall: spend exceeds it by no more than the in-flight runs; nothing new leases; `/resume` refused |
+| GOV-6 per-run cap | A run that keeps calling past `run.max_tokens` is refused at the gateway, across retries |
+| INV-11, P8 idle costs nothing | A project with no trigger and no message makes no model call over many dispatcher ticks |
+| INV-12, INV-13, INV-15 leasing | Two runners racing for one run; a reaped worker reporting late; concurrency lowered while runs are live |
+| EXE-10 refusal cap | Five refusals revoke the token; rephrasing does not help |
+| INV-20 held and paused | A held project leases no work run; chat still works; at the wall chat gets a status card |
+| INV-24, CHAT-3 never silent | Provider down, budget at the wall, project held, crash mid-reply: a reply or a platform status within 60 seconds |
+| MSG-2, MSG-9 who speaks | An agent posting in the project chat unaddressed; two agents looping in a thread |
+| ART-5, ART-9 artifacts | An agent writing a locked artifact, or publishing a name with a path |
+| LLM-6 seat check | A seat with no paying credential fails before any sandbox starts or token is spent |
+
+Chaos tests kill runners, drop database connections and race runners against INV-8 to INV-15.
+
+## Decisions this plan makes
+
+| Topic | Choice |
+| --- | --- |
+| Live stream | Server-sent events (IF-3.6). Polling keeps working |
+| Chat sessions and runs | One warm session holds many chat runs, one per reply; each run is metered and capped on its own (review R-35) |
+| Retries | Each attempt is a new run linked to the same wake; a wake counts once (review R-36) |
+| Lowered concurrency | Nothing new is leased while the count is at or above `run.concurrency`; live runs are not killed (review R-37) |
+| Sandbox network | Open egress as EXE-14 specifies, stated in SECURITY.md. The stricter rule in review R-22 concerns the agent browser and is settled with it in phase 8 |
+| Model classes | A data file maps known model families to frontier, balanced or fast. Lineups pick the newest reachable model per class daily; an admin can override (LLM-4). Unknown models are left unclassified, and shown |
+| Usage normalisation | Per-provider tests from recorded responses for Anthropic, OpenAI and Gemini, covering cache writes and cache reads (ADR-0003) |
+| Web stack | Vite, React, TypeScript; API types generated from the OpenAPI schema; Vitest and Playwright; built files served by the server |
+| No tasks yet | Tasks belong to phase 4. In phase 2 the CEO wakes on messages, notices, the planning triggers that exist, and the heartbeat |
+
+## Owner answers (21 Nov 2026)
+
+| Question | Answer |
+| --- | --- |
+| Split and review | Built in the four parts above, in order, each with the suite green on both databases. **One review stop, at the full exit demo** |
+| Sandboxes with no Docker daemon here | Both modes behind one interface. The unisolated development mode is built and fully tested here. Container mode is written against the Docker SDK; its tests skip without a daemon and must pass in CI or on the owner's machine. Until then it is reported as unverified |
+| First real provider | Anthropic. The suite uses recorded responses; the live half of the exit demo needs an API key, requested through a secure form when part 2b is ready |
+| Subscription logins and the vendor agent SDK harness | Both move to phase 8. Phase 2 ships API-key credentials, the mock harness and the vendor-neutral loop |
+| Web search service | The Brave Search API first, behind a small interface |
+| Id moves | INV-10 to phase 6; INV-14 and INV-16 to phase 4; MSG-3 into phase 2 |
+| Review items R-25, R-29, R-35 to R-39, R-67 | Accepted as recommended; applied in spec revision 2.6 |
+| Web app scope | **Everything in phase 2:** the core chat plus audio and video previews, the installable phone app with push alerts, the command palette, side-by-side version compare and full-text search |
+
+Two notes on these answers:
+
+- **Push alerts** need the alert rules of INT-7, which are phase 6. Phase 2 builds the installable app and the push channel, and sends the alarms that exist by then (paused, budget wall). The per-person alert levels and caps arrive in phase 6.
+- **Warn-only rules** (NFR-20): none in phase 2. Every rule it adds guards authority, budget, secrets or execution invariants, so all enforce.
+
+No open questions remain.

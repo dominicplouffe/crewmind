@@ -14,8 +14,8 @@
   - Publishing a new deliverable for a requirement that already has one must name the deliverable it supersedes, or state why both are needed; otherwise it is refused.
   - Every publication for the chairman or outside is announced in the chat with its opening lines.
 - **ART-4 Preview and download** in the chat and the app (CHAT-16). Text versions show a diff against the previous one.
-- **ART-5 Chairman locks.** The chairman can lock an artifact (`/lock`). Agent writes to a locked artifact are refused, and the agent is told to ask instead. Only the chairman unlocks.
-- **ART-6 Limits.** Up to `artifact.max_size` \[100 MB\] per file. Project storage up to `storage.quota` \[20 GB\], with a flag at 80%.
+- **ART-5 Chairman locks.** The chairman can lock an artifact (`/lock`). Agent writes to a locked artifact are refused, and the agent is told to ask instead. A locked file is mounted read-only into every sandbox, so a write through the shell fails as well. Only the chairman unlocks.
+- **ART-6 Limits.** Up to `artifact.max_size` \[100 MB\] per file. Project storage up to `storage.quota` \[20 GB\], with a flag at 80%. At the quota, publishing a new version is refused and the end-of-run workspace snapshot is skipped, with a flag.
 - **ART-7 Reading.** Any agent in the project can read any artifact's bytes, in 64 KB pages. A missing file returns "exists: false", not a refusal.
 - **ART-8 Uploads** come from the chairman through the chat, CLI, Slack or MCP (CHAT-9). They are never executed by the platform.
 - **ART-9 Names.** Agents publish plain filenames only, with no paths. The platform versions each name.
