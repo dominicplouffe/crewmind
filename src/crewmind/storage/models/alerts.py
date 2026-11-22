@@ -34,5 +34,9 @@ class Alarm(Base):
     )
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text)
+    level: Mapped[str] = mapped_column(String(16), default="alarm")
+    """alarm, decision or other: who receives it follows each person's `alerts.level`."""
+    person_id: Mapped[str | None] = mapped_column(String(32))
+    """Set when the alert is for one person only, such as their daily brief."""
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     sent_at: Mapped[datetime | None] = mapped_column(UtcDateTime, index=True)

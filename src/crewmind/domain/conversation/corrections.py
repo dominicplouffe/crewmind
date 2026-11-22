@@ -21,6 +21,7 @@ from crewmind.catalog.state_machine import NEW, StateMachine
 from crewmind.domain.accounts.people import person_or_refuse
 from crewmind.domain.conversation import service
 from crewmind.domain.conversation.service import Author, MessageKind
+from crewmind.domain.decisions import mistakes
 from crewmind.domain.memory import pinned
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
@@ -59,6 +60,9 @@ class FixInput(ProjectRef):
     )
     message_id: int | None = Field(
         default=None, description="The agent's message. Default: the newest one in the chat."
+    )
+    cost_us: bool = Field(
+        default=False, description="This mistake cost us: the CEO owes a mistake report."
     )
 
 
@@ -185,6 +189,19 @@ async def fix(context: Context, payload: FixInput) -> CorrectionItem:
         project_id=project.id,
         after={"state": C.ACTIVE, "agent": seat.name, "message": reply.id},
     )
+    if payload.cost_us:
+        cost = await mistakes.tokens_of_runs(
+            context.session, [reply.run_id] if reply.run_id else []
+        )
+        await mistakes.open_report(
+            context.session,
+            settings,
+            project,
+            because=f"the chairman marked correction {row.id} as costly",
+            subject=("correction", str(row.id)),
+            cost_tokens=cost,
+            now=context.now,
+        )
     await service.post(
         context.session,
         target,

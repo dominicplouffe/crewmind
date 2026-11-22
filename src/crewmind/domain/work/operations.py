@@ -16,12 +16,14 @@ from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
-from crewmind.domain.decisions import items
+from crewmind.domain.decisions import items, mistakes
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
+from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.domain.work import reviews, tasks
 from crewmind.domain.work.agent_operations import TaskItem, item
+from crewmind.services import services_of
 from crewmind.storage.events import append_event, event_type
 from crewmind.storage.models import AuditSample, Project, Seat, Task, TaskAttempt
 
@@ -232,6 +234,16 @@ async def settle_audit(context: Context, payload: AuditVerdictInput) -> AuditIte
         after={"verdict": payload.verdict, "task": task.id},
     )
     if payload.verdict == FAILED:
+        project = view_of(context).project
+        await mistakes.open_report(
+            context.session,
+            services_of(context).settings,
+            project,
+            because=f"the chairman failed the audit of task {task.id}",
+            subject=("audit_sample", str(sample.id)),
+            cost_tokens=await mistakes.tokens_of_task(context.session, project.id, task.id),
+            now=context.now,
+        )
         ceo = await ceo_of(context.session, payload.project_id)
         notices.notify(
             context.session,

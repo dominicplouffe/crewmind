@@ -8,7 +8,7 @@ for word, so an order, a decision or a correction said once is never missed.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 
 from sqlalchemy import select
@@ -21,6 +21,7 @@ from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.storage.models import (
     ClosedDecision,
     Correction,
+    DecisionItem,
     PinnedNote,
     Project,
     Seat,
@@ -50,6 +51,7 @@ class Pinned:
     decisions: list[ClosedDecision]
     corrections: list[tuple[Correction, str]]
     notes: list[PinnedNote]
+    lessons: list[tuple[int, str]] = field(default_factory=list[tuple[int, str]])
 
     @property
     def project_tokens(self) -> int:
@@ -87,6 +89,11 @@ class Pinned:
                 "## Closed decisions (settled; raise one again only with a reopen request "
                 "that links newer evidence)\n\n"
                 + "\n".join(f"- [decision {d.id}] {d.topic}: {d.ruling}" for d in self.decisions)
+            )
+        if self.lessons:
+            parts.append(
+                "## Lessons (from mistakes this project made; do not repeat them)\n\n"
+                + "\n".join(f"- [lesson {number}] {text}" for number, text in self.lessons)
             )
         if self.corrections:
             parts.append(
@@ -142,7 +149,17 @@ async def pinned_for(session: AsyncSession, project: Project, seat: Seat) -> Pin
             select(PinnedNote).where(PinnedNote.seat_id == seat.id).order_by(PinnedNote.id)
         )
     )
+    lessons = await session.scalars(
+        select(DecisionItem)
+        .where(
+            DecisionItem.project_id == project.id,
+            DecisionItem.kind == "mistake report",
+            DecisionItem.state == "filed",
+        )
+        .order_by(DecisionItem.id)
+    )
     return Pinned(
+        lessons=[(row.id, str(row.fields.get("prevention", ""))) for row in lessons],
         goal=project.goal,
         orders=[o for o in orders if o.state == ORDER_ACTIVE],
         retired=[o for o in orders if o.state == ORDER_RETIRED],

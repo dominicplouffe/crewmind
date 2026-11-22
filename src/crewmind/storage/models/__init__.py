@@ -19,7 +19,13 @@ from crewmind.storage.models.artifacts import (
 )
 from crewmind.storage.models.base import Base, new_id
 from crewmind.storage.models.conversation import Channel, Message, ReadPosition
-from crewmind.storage.models.decisions import DecisionItem, Purchase, Snooze
+from crewmind.storage.models.decisions import (
+    BriefRun,
+    DecisionItem,
+    Presence,
+    Purchase,
+    Snooze,
+)
 from crewmind.storage.models.execution import (
     LedgerLine,
     Notice,
@@ -83,6 +89,7 @@ __all__ = [
     "AuditSample",
     "Base",
     "Bet",
+    "BriefRun",
     "BrowserSession",
     "Channel",
     "ChatSession",
@@ -112,6 +119,7 @@ __all__ = [
     "Notice",
     "Person",
     "PinnedNote",
+    "Presence",
     "Project",
     "ProjectCredential",
     "ProjectGuard",

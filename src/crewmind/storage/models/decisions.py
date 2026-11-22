@@ -38,6 +38,7 @@ class DecisionItem(Base):
     chairman_note: Mapped[str | None] = mapped_column(Text)
     extensions: Mapped[int] = mapped_column(Integer, default=0)
     reminded: Mapped[bool] = mapped_column(default=False)
+    chased_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     opened_at: Mapped[datetime] = mapped_column(UtcDateTime)
     closed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
 
@@ -71,3 +72,28 @@ class Purchase(Base):
     approval_item_id: Mapped[int | None] = mapped_column(SequenceId)
     declared_at: Mapped[datetime] = mapped_column(UtcDateTime)
     settled_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+
+
+class BriefRun(Base):
+    """One daily brief, built once per person per local day (HUM-11)."""
+
+    __tablename__ = "brief_runs"
+    __table_args__ = (UniqueConstraint("person_id", "local_date"),)
+
+    id: Mapped[int] = mapped_column(SequenceId, primary_key=True, autoincrement=True)
+    person_id: Mapped[str] = mapped_column(ForeignKey("persons.id", ondelete="CASCADE"))
+    local_date: Mapped[str] = mapped_column(String(10))
+    body: Mapped[dict[str, Any]] = mapped_column(JSON)
+    built_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class Presence(Base):
+    """When a person last opened a project's chat (CHAT-15)."""
+
+    __tablename__ = "presences"
+    __table_args__ = (UniqueConstraint("person_id", "project_id"),)
+
+    id: Mapped[int] = mapped_column(SequenceId, primary_key=True, autoincrement=True)
+    person_id: Mapped[str] = mapped_column(ForeignKey("persons.id", ondelete="CASCADE"))
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id", ondelete="CASCADE"))
+    seen_at: Mapped[datetime] = mapped_column(UtcDateTime)

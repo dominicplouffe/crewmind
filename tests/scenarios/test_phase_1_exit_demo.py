@@ -315,6 +315,7 @@ NO_EVENT = {
     "projects.complete": "asserted in test_scenario_operate_meets_a_recurring_requirement",
     "items.decide": "asserted in test_INV_17_an_unanswered_item_resolves_to_its_declared_default",
     "items.extend": "asserted in test_HUM_3_only_an_open_approval_is_extended",
+    "reviews.lever": "asserted in test_HUM_9_a_status_review_is_frozen",
     "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",

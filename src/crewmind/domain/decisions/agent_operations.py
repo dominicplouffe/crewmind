@@ -13,7 +13,7 @@ from crewmind.catalog.define import Empty, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Principal, Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
-from crewmind.domain.decisions import asks, items, spend
+from crewmind.domain.decisions import asks, flags, items, mistakes, reviews, spend
 from crewmind.domain.decisions.model import LIVE
 from crewmind.domain.decisions.operations import ItemList, ItemView, view
 from crewmind.domain.execution.agent import agent_of
@@ -327,3 +327,80 @@ async def finish_purchase(context: Context, payload: PurchaseRef) -> PurchaseVie
         context.now,
     )
     return await _purchase(context, view_.project, row)
+
+
+class RaiseInput(ItemRef):
+    proposal: str = Field(max_length=2000, description="What you propose to do about it.")
+
+
+class MistakeInput(ItemRef):
+    what_was_wrong: str = Field(max_length=2000)
+    cause: str = Field(max_length=2000)
+    fix: str = Field(max_length=2000)
+    prevention: str = Field(max_length=500, description="Kept as a pinned lesson.")
+
+
+class NarrativeInput(ItemRef):
+    text: str = Field(max_length=10_000, description="Answer each item of the last plan.")
+
+
+@operation(
+    "agent.raise_flag",
+    summary="Raise a flag in the chat with what you propose to do about it.",
+    authority=Authority.AGENT_CEO,
+    reversibility=Reversibility.REVERSIBLE,
+    principals=AGENT,
+)
+async def raise_flag(context: Context, payload: RaiseInput) -> ItemView:
+    """HUM-6: raising does not close a state flag; only its condition clearing does."""
+    view_ = await agent_of(context)
+    work_run_only(view_)
+    item = await items.get(context.session, view_.project.id, payload.item_id)
+    await flags.raise_flag(
+        context.session, view_.project, item, view_.seat, context.caller, payload.proposal,
+        context.now,
+    )  # fmt: skip
+    return view(item)
+
+
+@operation(
+    "agent.file_mistake_report",
+    summary="File a mistake report you owe: what was wrong, the cause, the fix, the prevention.",
+    authority=Authority.AGENT_CEO,
+    reversibility=Reversibility.IRREVERSIBLE,
+    principals=AGENT,
+)
+async def file_mistake_report(context: Context, payload: MistakeInput) -> ItemView:
+    """HUM-8: filed once; the cost is the platform's number; the prevention is pinned."""
+    view_ = await agent_of(context)
+    work_run_only(view_)
+    item = await items.get(context.session, view_.project.id, payload.item_id)
+    await mistakes.file_report(
+        context.session,
+        item,
+        context.caller,
+        {
+            "what_was_wrong": payload.what_was_wrong,
+            "cause": payload.cause,
+            "fix": payload.fix,
+            "prevention": payload.prevention,
+        },
+        context.now,
+    )
+    return view(item)
+
+
+@operation(
+    "agent.write_review_narrative",
+    summary="Add your narrative to an open status review.",
+    authority=Authority.AGENT_CEO,
+    reversibility=Reversibility.REVERSIBLE,
+    principals=AGENT,
+)
+async def write_review_narrative(context: Context, payload: NarrativeInput) -> ItemView:
+    """HUM-9: the numbers are the platform's; the narrative is the CEO's."""
+    view_ = await agent_of(context)
+    work_run_only(view_)
+    item = await items.get(context.session, view_.project.id, payload.item_id)
+    await reviews.write_narrative(context.session, item, context.caller, payload.text, context.now)
+    return view(item)

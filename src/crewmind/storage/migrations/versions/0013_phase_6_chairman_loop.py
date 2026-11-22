@@ -15,6 +15,22 @@ down_revision: str | None = "0012"
 
 def upgrade() -> None:
     op.create_table(
+        "brief_runs",
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            autoincrement=True,
+            nullable=False,
+        ),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("local_date", sa.String(length=10), nullable=False),
+        sa.Column("body", sa.JSON(), nullable=False),
+        sa.Column("built_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["person_id"], ["persons.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("person_id", "local_date"),
+    )
+    op.create_table(
         "decision_items",
         sa.Column(
             "id",
@@ -40,6 +56,7 @@ def upgrade() -> None:
         sa.Column("chairman_note", sa.Text(), nullable=True),
         sa.Column("extensions", sa.Integer(), nullable=False),
         sa.Column("reminded", sa.Boolean(), nullable=False),
+        sa.Column("chased_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("opened_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("closed_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
@@ -56,6 +73,22 @@ def upgrade() -> None:
             batch_op.f("ix_decision_items_subject_id"), ["subject_id"], unique=False
         )
 
+    op.create_table(
+        "presences",
+        sa.Column(
+            "id",
+            sa.BigInteger().with_variant(sa.Integer(), "sqlite"),
+            autoincrement=True,
+            nullable=False,
+        ),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("project_id", sa.String(length=32), nullable=False),
+        sa.Column("seen_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["person_id"], ["persons.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("person_id", "project_id"),
+    )
     op.create_table(
         "purchases",
         sa.Column(
@@ -96,3 +129,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("person_id", "item_id"),
     )
+    with op.batch_alter_table("alarms", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("level", sa.String(length=16), nullable=False))
+        batch_op.add_column(sa.Column("person_id", sa.String(length=32), nullable=True))

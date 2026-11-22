@@ -14,7 +14,7 @@ from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.registry import catalog
-from crewmind.domain.decisions import items, spend
+from crewmind.domain.decisions import items, reviews, spend
 from crewmind.domain.decisions.model import LIVE
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
@@ -98,7 +98,7 @@ def view(item: DecisionItem) -> ItemView:
         recommendation=item.recommendation,
         if_declined=item.if_declined,
         basis=item.basis,
-        actions=list(kind.actions) if item.state == "open" else [],
+        actions=list(kind.actions) if item.state == kind.decide_from else [],
         deadline=item.deadline,
         default_outcome=item.default_outcome,
         outcome=item.outcome,
@@ -274,3 +274,26 @@ async def show_spend(context: Context, payload: ProjectRef) -> SpendView:
             for row in rows
         ],
     )
+
+
+class LeverInput(ItemRef):
+    lever: str = Field(
+        description="cut, add, reword, move the date, raise the budget, or accept the slip."
+    )
+    reason: str = Field(max_length=2000, description="Why.")
+
+
+@operation(
+    "reviews.lever",
+    summary="Record a lever you are using on a status review, with your reason.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def use_lever(context: Context, payload: LeverInput) -> ItemView:
+    """HUM-9: six levers, each recorded with a reason. A review with a lever used no
+    longer closes by itself."""
+    item = await items.get(context.session, payload.project_id, payload.item_id)
+    await reviews.use_lever(
+        context.session, item, context.caller, payload.lever, payload.reason, context.now
+    )
+    return view(item)

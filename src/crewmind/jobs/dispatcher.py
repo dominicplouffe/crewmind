@@ -33,6 +33,27 @@ STATUS_AFTER = timedelta(seconds=45)
 WAKE_WINDOW = timedelta(hours=1)
 
 
+async def next_heartbeat(
+    session: AsyncSession, settings: SettingsService, project: Project, seat: Seat
+) -> tuple[datetime, bool]:
+    """EXE-2, HUM-12: when the CEO's safety-net heartbeat is next due, and whether it will
+    fire: it skips when the event log shows no change since the last CEO run."""
+    every = timedelta(
+        seconds=int(await settings.get(session, runs.subject(project), "heartbeat.every"))
+    )
+    last = await session.scalar(
+        select(func.max(Run.queued_at)).where(Run.seat_id == seat.id, Run.kind == RunKind.WORK)
+    )
+    changed = (
+        select(func.count())
+        .select_from(Event)
+        .where(Event.project_id == project.id, Event.type.not_like("run.%"))
+    )
+    if last is not None:
+        changed = changed.where(Event.at > last)
+    return (last or project.created_at) + every, bool(await session.scalar(changed))
+
+
 async def _work_reasons(
     session: AsyncSession, settings: SettingsService, project: Project, seat: Seat, now: datetime
 ) -> list[str]:
@@ -45,24 +66,9 @@ async def _work_reasons(
         if notice.urgent
     )
     if not reasons and seat.kind == SeatKind.CEO:
-        every = timedelta(
-            seconds=int(await settings.get(session, runs.subject(project), "heartbeat.every"))
-        )
-        last = await session.scalar(
-            select(func.max(Run.queued_at)).where(Run.seat_id == seat.id, Run.kind == RunKind.WORK)
-        )
-        since = last or project.created_at
-        if now - since >= every:
-            changed = (
-                select(func.count())
-                .select_from(Event)
-                .where(Event.project_id == project.id, Event.type.not_like("run.%"))
-            )
-            if last is not None:
-                changed = changed.where(Event.at > last)
-            changes = await session.scalar(changed)
-            if changes:
-                reasons.append("heartbeat")
+        due, fires = await next_heartbeat(session, settings, project, seat)
+        if now >= due and fires:
+            reasons.append("heartbeat")
     return reasons
 
 

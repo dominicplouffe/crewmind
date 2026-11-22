@@ -13,6 +13,7 @@ from crewmind.catalog.caller import Caller
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import flags, reviews
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.model import RunKind
 from crewmind.domain.execution.roster import ceo_of
@@ -222,10 +223,17 @@ async def _was_stopped(
     return inside < (now - cycle.opened_at).total_seconds()
 
 
-async def close(session: AsyncSession, project: Project, cycle: Cycle, now: datetime) -> Cycle:
+async def close(
+    session: AsyncSession,
+    settings: SettingsService,
+    project: Project,
+    cycle: Cycle,
+    now: datetime,
+) -> Cycle:
     """PRJ-8: close a cycle as completed, missed or skipped; write its scorecard, and a
     stub narrative if the CEO wrote none; reopen recurring requirements."""
     card, all_met, work_runs = await _scorecard(session, project, cycle, now)
+    period = (await _calendar(session, settings, project))[1]
     if work_runs == 0 and await _was_stopped(session, project, cycle, now):
         state = S.SKIPPED
     elif all_met:
@@ -240,6 +248,15 @@ async def close(session: AsyncSession, project: Project, cycle: Cycle, now: date
             f"were met on time, in {work_runs} work runs."
         )
     _record(session, cycle, S.OPEN, now)
+    if state == S.MISSED:
+        await flags.event(
+            session, settings, project, "cycle missed",
+            f"Cycle {cycle.number} closed as missed: {card['recurring_met']} of "
+            f"{card['recurring_total']} recurring requirements were met on time.",
+            now, key=str(cycle.number),
+        )  # fmt: skip
+    if period in reviews.CYCLE_PERIODS:
+        await reviews.build(session, settings, project, now)
     reopened = 0
     for requirement in await session.scalars(
         select(Requirement).where(
@@ -276,7 +293,7 @@ async def roll(
         return
     current = await open_cycle(session, project.id)
     if current is not None and now >= current.ends_at:
-        await close(session, project, current, now)
+        await close(session, settings, project, current, now)
         current = None
         last_two = await recent(session, project.id, SKIPPED_BEFORE_PAUSE)
         if len(last_two) == SKIPPED_BEFORE_PAUSE and all(c.state == S.SKIPPED for c in last_two):
@@ -298,8 +315,30 @@ async def roll(
                     now,
                     detail={"kind": "skipped cycles", "alarm": True},
                 )
+    if current is not None and now >= current.due_at:
+        await _flag_late_requirements(session, settings, project, current, now)
     if current is None and project.state == ProjectState.RUNNING:
         await _open(session, settings, project, now)
+
+
+async def _flag_late_requirements(
+    session: AsyncSession, settings: SettingsService, project: Project, cycle: Cycle, now: datetime
+) -> None:
+    """HUM-6: a recurring requirement still open at its cycle's due time is flagged."""
+    late = await session.scalars(
+        select(Requirement).where(
+            Requirement.project_id == project.id,
+            Requirement.recurring,
+            Requirement.state.in_(OPEN_SCOPE),
+        )
+    )
+    for requirement in late:
+        await flags.event(
+            session, settings, project, "recurring requirement missed",
+            f"Recurring requirement {requirement.id} was still open at the due time of "
+            f"cycle {cycle.number}.",
+            now, key=f"{cycle.number}:{requirement.id}",
+        )  # fmt: skip
 
 
 async def write_narrative(
@@ -373,7 +412,7 @@ async def complete_operation(
         raise Refusal("not_running", f"The project is {project.state}; it cannot be completed now.")
     current = await open_cycle(session, project.id)
     if current is not None:
-        await close(session, project, current, now)
+        await close(session, settings, project, current, now)
     return await completion.complete(
         session, settings, project, actor.caller, now, why="completed by the chairman"
     )

@@ -14,7 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.decisions import asks, items
+from crewmind.domain.decisions import asks, flags, items, reviews
 from crewmind.domain.planning import (
     acceptance,
     bets,
@@ -103,6 +103,8 @@ class PlanningJobs:
                         continue
                     await cycles.roll(session, settings, project, now)
                     if project.state != ProjectState.RUNNING:
+                        await flags.sync(session, settings, project, now)
+                        await reviews.build_if_due(session, settings, project, now)
                         continue
                     await bets.expire(session, project, now)
                     await bets.close_time_box(session, settings, self._services.blobs, project, now)
@@ -111,6 +113,8 @@ class PlanningJobs:
                     await commitments.reproject(session, settings, project, now)
                     await completion.become_ready(session, settings, project, now)
                     await speed.watch(session, settings, project, now)
+                    await flags.sync(session, settings, project, now)
+                    await reviews.build_if_due(session, settings, project, now)
             except Exception:
                 logger.exception("planning jobs: project %s failed this tick", project_id)
 

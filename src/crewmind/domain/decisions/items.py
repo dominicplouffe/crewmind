@@ -91,6 +91,9 @@ class Kind:
     """The authority verb this kind asks about, when the CEO might hold it (HUM-4)."""
     figures: tuple[str, ...] = ()
     """Numeric fields that must link their basis (WRK-10)."""
+    decide_from: ItemState = ItemState.OPEN
+    """The state an item must be in for a typed action. A flag is acknowledged only once
+    the CEO has raised it."""
     decided_state: ItemState = ItemState.DECIDED
     """Where a typed action takes the item. A heads-up is acknowledged, not decided."""
     positive: tuple[str, ...] = field(default_factory=tuple)
@@ -334,8 +337,13 @@ async def decide(
             f'"{action}" is not an action of this item. You can: {", ".join(kind.actions)}.',
             rule=HUM_1.id,
         )
-    if item.state != S.OPEN:
+    if item.state != kind.decide_from:
         ITEM_MACHINE.check(item.state, kind.decided_state)
+        raise Refusal(
+            "not_yet",
+            f"This item is {item.state}; that action is taken once it is {kind.decide_from}.",
+            rule=HUM_1.id,
+        )
     item.outcome, item.chairman_note = action, (note or "").strip() or item.chairman_note
     item.outcome_detail = {**(item.outcome_detail or {}), **(values or {})} or None
     _move(session, item, kind.decided_state, caller, now, {"note": note})

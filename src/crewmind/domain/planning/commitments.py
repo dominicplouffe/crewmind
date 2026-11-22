@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.conversation import service as conversation
-from crewmind.domain.decisions import items
+from crewmind.domain.decisions import items, mistakes
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.integrations import push
@@ -333,6 +333,17 @@ async def reproject(
     elif target == C.BREACHED:
         text = f"The commitment is breached: the date passed with scope still open ({where})."
         await push.raise_alarm(session, project, text, now)
+        await mistakes.open_report(
+            session,
+            settings,
+            project,
+            because="the commitment was breached",
+            subject=("commitment", str(commitment.id)),
+            cost_tokens=await mistakes.tokens_since(
+                session, project.id, commitment.settled_at or commitment.proposed_at
+            ),
+            now=now,
+        )
     elif target == C.AT_RISK:
         text = (
             f"The commitment is at risk: {where}. New CEO scope is frozen. Move the date, "

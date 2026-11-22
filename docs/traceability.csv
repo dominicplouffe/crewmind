@@ -133,14 +133,14 @@ MSG-11,Chat runs,06-08-conversation-MSG.md,2,yes,partial,test_EXE_12_a_chat_mess
 MSG-12,Communication standard,06-08-conversation-MSG.md,3,yes,partial,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_scenario_a_wordy_reply_is_rewritten_once; test_MSG_12_feedback_says_what_to_change_and_that_it_is_not_a_refusal; test_MSG_12_the_lint_checks_the_measurable_parts,"The lint measures length, the ""Need from you:"" line and a number beside a likelihood, with one rewrite. The glossary check waits for a glossary; tone rules are in the output standard, not linted"
 MSG-13,One conversation model,06-08-conversation-MSG.md,2,yes,done,test_MSG_13_every_surface_reads_and_writes_the_same_conversation,
 HUM-1,One decision-item type,06-09-decisions-HUM.md,6,yes,partial,test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item; test_INV_17_an_unanswered_item_resolves_to_its_declared_default,"Built for the API, the CLI, MCP and the chat. The desk, brief and agenda read the same registry in part 6d; Slack arrives in phase 8"
-HUM-2,Kinds,06-09-decisions-HUM.md,6,yes,partial,test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item; test_HUM_7_an_assist_holds_one_task_and_nothing_else; test_INV_17_an_unanswered_item_resolves_to_its_declared_default,"Sixteen kinds are registered. Flags, mistake reports and status reviews arrive with part 6c"
+HUM-2,Kinds,06-09-decisions-HUM.md,6,yes,partial,test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item; test_HUM_7_an_assist_holds_one_task_and_nothing_else; test_INV_17_an_unanswered_item_resolves_to_its_declared_default,Every kind is registered. Tool-permission approvals have nothing to apply until data sources exist (phase 8)
 HUM-3,Defaults and silence,06-09-decisions-HUM.md,6,yes,done,test_GOV_8_real_world_spend_stays_under_its_cap_and_threshold; test_HUM_3_only_an_open_approval_is_extended,
 HUM-4,Don't ask about what you hold,06-09-decisions-HUM.md,6,yes,done,test_HUM_5_a_question_never_blocks_and_never_asks_what_the_ceo_holds,
 HUM-5,Questions,06-09-decisions-HUM.md,6,yes,done,test_HUM_5_a_question_never_blocks_and_never_asks_what_the_ceo_holds,
-HUM-6,Flags,06-09-decisions-HUM.md,6,yes,not started,,
+HUM-6,Flags,06-09-decisions-HUM.md,6,yes,partial,test_HUM_6_a_state_flag_closes_only_when_its_condition_clears; test_HUM_6_an_event_flag_closes_when_raised_and_acknowledged; test_HUM_8_the_ceo_owes_a_mistake_report_and_files_it_once,All fifteen flag kinds open from arithmetic. The phase 4 and 5 guards are mirrored as flags rather than folded into them
 HUM-7,Assists,06-09-decisions-HUM.md,6,yes,done,test_HUM_7_an_assist_holds_one_task_and_nothing_else,
-HUM-8,Mistake reports,06-09-decisions-HUM.md,6,yes,not started,,
-HUM-9,Status reviews,06-09-decisions-HUM.md,6,yes,not started,,
+HUM-8,Mistake reports,06-09-decisions-HUM.md,6,yes,done,test_HUM_8_the_ceo_owes_a_mistake_report_and_files_it_once,
+HUM-9,Status reviews,06-09-decisions-HUM.md,6,yes,partial,test_HUM_9_a_status_review_is_frozen,Built. A lever records the decision with its reason; the change itself is made with its own operation
 HUM-10,Desk,06-09-decisions-HUM.md,6,yes,not started,,
 HUM-11,Daily brief,06-09-decisions-HUM.md,6,yes,not started,,
 HUM-12,Agenda,06-09-decisions-HUM.md,6,yes,not started,,
