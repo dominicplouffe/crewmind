@@ -1,10 +1,11 @@
-/** Routes: sign in, accept a link, the project list, the Desk, a project, approving an AI client. */
+/** Routes: sign in, accept a link, the project list, the Desk, drafting a project, a project, approving an AI client. */
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth";
 import { Loading } from "./components/common";
 import { ThemeProvider } from "./components/ThemeButton";
 import { DeskPage } from "./desk/DeskPage";
+import { DraftPage } from "./founder/DraftPage";
 import { isApprovalLink } from "./lib/oauth";
 import { AcceptLink } from "./pages/AcceptLink";
 import { OAuthApprove } from "./pages/OAuthApprove";
@@ -61,6 +62,17 @@ export function App(): JSX.Element {
                 </SignedIn>
               }
             />
+            {["/draft", "/draft/:draftingId"].map((path) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <SignedIn>
+                    <DraftPage />
+                  </SignedIn>
+                }
+              />
+            ))}
             <Route
               path="/projects/:projectId"
               element={

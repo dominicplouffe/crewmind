@@ -1,4 +1,7 @@
-/** Settings: each with its current value and allowed range; change one, with a reason for project settings. */
+/**
+ * Settings: each with its current value and allowed range; change one, with a reason for project
+ * settings. Exporting and cloning the project sit at the top.
+ */
 import { useState, type FormEvent } from "react";
 import { get, post, type Schemas } from "../api/client";
 import { ErrorNote, Loading } from "../components/common";
@@ -6,6 +9,7 @@ import { formatValue } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
 import { ApprovedClients } from "./ApprovedClients";
+import { ProjectCopies } from "./ProjectCopies";
 
 type Setting = Schemas["SettingItem"];
 type View = Schemas["SettingsView"];
@@ -134,6 +138,7 @@ export function SettingsPanel({ projectId, changes }: { projectId: string; chang
   const mine = useLoad(() => get("/v1/settings/show_mine"), []);
   return (
     <>
+      <ProjectCopies projectId={projectId} />
       <ErrorNote error={project.error} />
       <ErrorNote error={mine.error} />
       {(project.loading && !project.data) || (mine.loading && !mine.data) ? <Loading /> : null}

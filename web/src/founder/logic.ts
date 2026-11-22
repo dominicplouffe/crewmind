@@ -1,0 +1,227 @@
+/**
+ * Display helpers for drafting a project with the Founder (FND-3, FND-5, FND-12). No rules live
+ * here: whether a draft is ready, what a question recommends and what an answer means are the
+ * server's. These only turn a choice on the page into the text the server expects, and lay the
+ * server's answers out.
+ */
+import type { Schemas } from "../api/client";
+import { t } from "../strings";
+
+export type Drafting = Schemas["DraftingView"];
+export type Line = Schemas["Line"];
+export type Question = Schemas["QuestionView"];
+export type LedgerLine = Schemas["LedgerLine"];
+export type Grade = Schemas["Grade"];
+export type ElementGrade = Schemas["ElementGrade"];
+export type DraftingItem = Schemas["DraftingItem"];
+
+/** The server reads one letter as "that option". A question offers at most four. */
+const LETTERS = "abcd";
+/** The server reads these as "use the recommendation", so they cannot be sent as a person's own words. */
+const MEANS_YES = ["", "y", "yes", "ok", "okay"];
+
+export function letterOf(index: number): string {
+  return LETTERS[index] ?? "";
+}
+
+export type Choice = { kind: "recommended" } | { kind: "option"; index: number } | { kind: "own"; text: string };
+
+/**
+ * The `answer` to send for a choice on a question card, or null when there is nothing to send.
+ * Empty text accepts the recommendation, a letter picks an option, anything else is the person's words.
+ */
+export function answerFor(question: Question, choice: Choice): string | null {
+  if (choice.kind === "recommended") return question.recommended === null ? null : "";
+  if (choice.kind === "option") {
+    return choice.index >= 0 && choice.index < question.options.length ? letterOf(choice.index) || null : null;
+  }
+  const text = choice.text.trim();
+  if (MEANS_YES.includes(text.toLowerCase())) return question.recommended === null ? null : "";
+  return text;
+}
+
+/** The plain tag for where a ledger line came from. */
+export function sourceTag(source: string): string {
+  return t.founder.side.source[source] ?? source;
+}
+
+/** The plain name of what a ledger line settles: a decision of the tree, or a passage of the document. */
+export function decisionName(settles: string): string {
+  const known = t.founder.side.decisions[settles];
+  if (known) return known;
+  const passage = /^item:(\d+)$/.exec(settles);
+  if (passage?.[1]) return t.founder.side.passageItem(passage[1]);
+  return settles.replace(/_/g, " ");
+}
+
+export function elementName(element: string): string {
+  return t.founder.side.elements[element] ?? element.replace(/_/g, " ");
+}
+
+/** The stored lines to show: a question that is still open is shown as its card, not as a line too. */
+export function visibleLines(lines: Line[], open: Question[]): Line[] {
+  const waiting = new Set(open.map((question) => question.id));
+  return lines.filter((line) => {
+    const detail = line.detail as { kind?: unknown; id?: unknown } | null;
+    return !(detail?.kind === "question" && typeof detail.id === "number" && waiting.has(detail.id));
+  });
+}
+
+export type Stage =
+  /** Quick mode is running: nothing to answer. */
+  | "quick"
+  /** It ended failed, with nothing created. */
+  | "failed"
+  /** A project exists. */
+  | "done"
+  /** The person may create the project. */
+  | "ready"
+  /** The Founder owes the next turn. */
+  | "founder"
+  /** The person owes an answer or a message. */
+  | "you";
+
+export function stageOf(view: Drafting): Stage {
+  if (view.state === "failed") return "failed";
+  if (view.state === "created" || view.state === "started") return "done";
+  if (view.quick) return "quick";
+  if (view.ready) return "ready";
+  return view.waiting_for === "the Founder" ? "founder" : "you";
+}
+
+export interface Reason {
+  text: string;
+  /** The parts of a reason that lists several things. */
+  parts: string[];
+}
+
+/**
+ * The server's reasons a draft is not ready, laid out for reading: a count of open questions in
+ * plain words, and a reason that lists several things ("Not yet decided: a; b.") as a list.
+ */
+export function readinessReasons(reasons: string[]): Reason[] {
+  return reasons.map((reason) => {
+    const waiting = /^(\d+) question\(s\) are waiting for an answer\.$/.exec(reason);
+    if (waiting) {
+      const count = Number(waiting[1]);
+      return { text: count === 1 ? t.founder.ready.oneQuestion : t.founder.ready.questions(count), parts: [] };
+    }
+    const listed = /^([^:]{1,40}):\s(.+;.+)$/.exec(reason);
+    if (listed?.[1] && listed[2]) {
+      const parts = listed[2]
+        .replace(/\.$/, "")
+        .split(";")
+        .map((part) => part.trim())
+        .filter(Boolean);
+      return { text: `${listed[1]}:`, parts };
+    }
+    return { text: reason, parts: [] };
+  });
+}
+
+export const QUICK_STEPS = ["drafting", "creating", "starting", "started"] as const;
+export type StepStatus = "done" | "now" | "todo";
+
+/** Where quick mode stands (FND-12): each step done, in progress or not yet. A failure leaves every step as it was. */
+export function quickSteps(state: string): { step: string; status: StepStatus }[] {
+  const at = QUICK_STEPS.indexOf(state as (typeof QUICK_STEPS)[number]);
+  return QUICK_STEPS.map((step, index) => {
+    if (at === -1) return { step, status: "todo" as const };
+    if (index < at || state === "started") return { step, status: "done" as const };
+    return { step, status: index === at ? ("now" as const) : ("todo" as const) };
+  });
+}
+
+/** The credential names in the server's hint when quick mode asks who pays ("Name one: main, spare."). */
+export function credentialsInHint(hint: string | null | undefined): string[] {
+  const listed = /:\s*(.+?)\.?\s*$/.exec(hint ?? "");
+  if (!listed?.[1]) return [];
+  return listed[1]
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+export interface DraftTeam {
+  name: string;
+  role: string;
+  members: string[];
+}
+
+export interface DraftSummary {
+  name: string;
+  type: string;
+  goal: string;
+  quality: string | null;
+  budgetTokens: number | null;
+  deadline: { date: string; source: string } | null;
+  payingCredential: string | null;
+  teams: DraftTeam[];
+  settings: [name: string, value: unknown][];
+}
+
+const text = (value: unknown): string => (typeof value === "string" ? value : "");
+
+/** The parts of a proposed spec the side panel shows. The draft arrives as loose JSON, so every part is checked. */
+export function draftSummary(draft: Drafting["draft"]): DraftSummary | null {
+  if (!draft) return null;
+  const teams = Array.isArray(draft.teams) ? (draft.teams as Record<string, unknown>[]) : [];
+  const settings = draft.settings && typeof draft.settings === "object" ? (draft.settings as Record<string, unknown>) : {};
+  const deadline = draft.deadline as { date?: unknown; source?: unknown } | null | undefined;
+  return {
+    name: text(draft.name),
+    type: text(draft.type),
+    goal: text(draft.goal),
+    quality: text(draft.quality) || null,
+    budgetTokens: typeof draft.budget_tokens === "number" ? draft.budget_tokens : null,
+    deadline: deadline && text(deadline.date) ? { date: text(deadline.date), source: text(deadline.source) } : null,
+    payingCredential: text(draft.paying_credential) || null,
+    teams: teams
+      .filter((team) => team && typeof team === "object")
+      .map((team) => ({
+        name: text(team.name),
+        role: text(team.role),
+        members: Array.isArray(team.members) ? team.members.map(text).filter(Boolean) : [],
+      })),
+    settings: Object.entries(settings),
+  };
+}
+
+/** The grade as the side panel shows it, or null when there is none yet. */
+export function gradeOf(grade: Drafting["grade"]): Grade | null {
+  if (!grade || !Array.isArray(grade.elements)) return null;
+  return {
+    ready: grade.ready === true,
+    summary: text(grade.summary),
+    missing: Array.isArray(grade.missing) ? grade.missing.map(text) : [],
+    weak: Array.isArray(grade.weak) ? grade.weak.map(text) : [],
+    elements: (grade.elements as Record<string, unknown>[]).map((element) => ({
+      element: text(element.element),
+      grade: element.grade === "present" || element.grade === "weak" ? element.grade : "missing",
+      quote: text(element.quote),
+      reason: text(element.reason),
+      fix: text(element.fix),
+    })),
+  };
+}
+
+/** The most text a document may hold; the server refuses more. */
+export const DOCUMENT_MOST = 200_000;
+const TEXT_FILE = /\.(txt|md|markdown)$/i;
+
+/** Why a chosen file cannot be attached as the document, or null when it can. */
+export function documentProblem(name: string, content: string): string | null {
+  if (!TEXT_FILE.test(name)) return t.founder.start.notText;
+  if (content.trim() === "") return t.founder.start.emptyFile;
+  if (content.length > DOCUMENT_MOST) return t.founder.start.tooLong(DOCUMENT_MOST.toLocaleString());
+  return null;
+}
+
+/** A file name for an exported spec: the project's name in lower case, with anything unsafe taken out. */
+export function specFileName(projectName: string): string {
+  const safe = projectName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${safe || "project"}.spec.json`;
+}

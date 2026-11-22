@@ -5,6 +5,7 @@
 
 import { board } from "./strings.board";
 import { decisions } from "./strings.decisions";
+import { founder } from "./strings.founder";
 import { oauth } from "./strings.oauth";
 import { plan } from "./strings.plan";
 import { listening, memory } from "./strings.memory";
@@ -54,7 +55,6 @@ export const t = {
   },
   projects: {
     title: "Projects",
-    new: "New project",
     newTitle: "New project",
     name: "Name",
     type: "Type",
@@ -69,7 +69,6 @@ export const t = {
     create: "Create project",
     creating: "Creating…",
     emptyTitle: "You have no projects yet.",
-    emptyNext: "Your projects will be listed here. Choose “New project” to start one.",
     line: (type: string, state: string): string => `${type} · ${state}`,
     created: (when: string): string => `Created ${when}`,
   },
@@ -243,6 +242,7 @@ export const t = {
   board,
   plan,
   decisions,
+  founder,
   oauth,
   settings: {
     project: "This project",

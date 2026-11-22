@@ -1,4 +1,4 @@
-/** The project list, with a form to create a project. */
+/** The project list: starting a project by talking with the Founder, unfinished drafts, and the form as the other way. */
 import { useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { get, post, type Schemas } from "../api/client";
@@ -7,6 +7,7 @@ import { AlertsButton } from "../components/AlertsButton";
 import { Empty, ErrorNote, Field, Loading } from "../components/common";
 import { ThemeButton } from "../components/ThemeButton";
 import { DeskLink } from "../desk/DeskLink";
+import { Unfinished } from "../founder/Unfinished";
 import { formatDateTime } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
@@ -99,20 +100,26 @@ export function Projects(): JSX.Element {
         </button>
       </header>
       <main className="page-main">
-        <div className="row spread">
+        <div className="row spread wrap">
           <h1>{t.projects.title}</h1>
           {creating ? null : (
-            <button type="button" className="button primary" ref={newButton} onClick={() => setCreating(true)}>
-              {t.projects.new}
-            </button>
+            <div className="row wrap">
+              <Link to="/draft" className="button primary">
+                {t.founder.way.start}
+              </Link>
+              <button type="button" className="button" ref={newButton} onClick={() => setCreating(true)}>
+                {t.founder.way.byForm}
+              </button>
+            </div>
           )}
         </div>
         {creating ? <NewProject onClose={() => setCreating(false)} /> : null}
         <ErrorNote error={projects.error} />
         {projects.loading && !projects.data ? <Loading /> : null}
         {projects.data && items.length === 0 && !creating ? (
-          <Empty title={t.projects.emptyTitle} next={t.projects.emptyNext} />
+          <Empty title={t.projects.emptyTitle} next={t.founder.way.emptyNext} />
         ) : null}
+        {creating ? null : <Unfinished />}
         <ul className="project-list">
           {items.map((project) => (
             <li key={project.project_id}>

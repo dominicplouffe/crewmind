@@ -42,6 +42,15 @@ export function setWorkRuns(seat: "CEO" | "Reviewer", runs: unknown[][], then: u
   writeFileSync(join(runDir, "scripts", `${seat}.work.json`), JSON.stringify({ runs, then }));
 }
 
+/**
+ * Scripts the mock Founder. `turns` is one list played through a whole drafting conversation, a turn
+ * per model call; `grades` is what its grader answers for every goal (the ten element grades).
+ */
+export function setFounderScript(turns: unknown[], grades: unknown[]): void {
+  writeFileSync(join(runDir, "scripts", "founder.draft.json"), JSON.stringify(turns));
+  writeFileSync(join(runDir, "scripts", "founder.grade.json"), JSON.stringify([{ text: JSON.stringify(grades) }]));
+}
+
 /** One scripted turn that calls these agent tools in order. */
 export function toolTurn(...tools: [name: string, args: Record<string, unknown>][]): unknown {
   return { text: "Working.", tools: tools.map(([name, args]) => ({ name, arguments: args })) };
@@ -85,7 +94,7 @@ export async function expectAccessible(page: Page, label: string): Promise<void>
 
 export async function createProject(page: Page, name: string): Promise<void> {
   await page.goto("/");
-  await page.getByRole("button", { name: "New project" }).click();
+  await page.getByRole("button", { name: "Fill in a form instead" }).click();
   await page.getByLabel("Name").fill(name);
   await page.getByLabel("Type").selectOption("deliver");
   await page.getByLabel("Goal").fill("Write a short plan.");

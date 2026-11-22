@@ -1131,6 +1131,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/crews/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the ready-made crews: each is a job with a team already on it.
+         * @description Requires: person.
+         */
+        get: operations["crews.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/crews/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a crew from a file, or replace one that exists.
+         * @description Requires: person.
+         */
+        post: operations["crews.save"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/crews/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one crew in full, as the file it can be saved to.
+         * @description Requires: person.
+         */
+        get: operations["crews.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/cycles/set_due": {
         parameters: {
             query?: never;
@@ -1391,6 +1451,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/founder/accept_rest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tell the Founder to use its own recommendations for everything still open.
+         * @description Requires: person.
+         */
+        post: operations["founder.accept_rest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Answer a question the Founder asked.
+         * @description Requires: person.
+         */
+        post: operations["founder.answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm the ledger and create the project from the draft.
+         * @description Requires: person.
+         */
+        post: operations["founder.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List your drafting conversations.
+         * @description Requires: person.
+         */
+        get: operations["founder.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/quick": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Quick mode: the Founder decides everything itself, then creates and starts.
+         * @description Requires: person.
+         */
+        post: operations["founder.quick"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/say": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say something to the Founder in a drafting conversation.
+         * @description Requires: person.
+         */
+        post: operations["founder.say"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show a drafting conversation: what was said, the ledger and the draft.
+         * @description Requires: person.
+         */
+        get: operations["founder.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/founder/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start drafting a project by describing what you want.
+         * @description Requires: person.
+         */
+        post: operations["founder.start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/gaps/waive": {
         parameters: {
             query?: never;
@@ -1405,6 +1625,126 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["gaps.waive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/goals/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Grade a goal against the ten elements of the goal grammar.
+         * @description Requires: person.
+         */
+        get: operations["goals.grade"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grill/accept_rest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tell the CEO to use its recommendations for every passage still open.
+         * @description Requires: project_chair.
+         */
+        post: operations["grill.accept_rest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grill/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Answer a question the CEO asked while grilling a document.
+         * @description Requires: project_chair.
+         */
+        post: operations["grill.answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grill/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm the ledger of a grilled document, so the CEO may propose it as scope.
+         * @description Requires: project_chair.
+         */
+        post: operations["grill.confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grill/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show the grilling in this project: the passages, the questions and the ledger.
+         * @description Requires: project_observer.
+         */
+        get: operations["grill.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/grill/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Have the CEO grill a document, or your last message, before it becomes work.
+         * @description Requires: project_chair.
+         */
+        post: operations["grill.start"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1585,6 +1925,46 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["launches.retire"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/reload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Load the roles and crews shipped with this version of crewmind again.
+         * @description Requires: admin.
+         */
+        post: operations["library.reload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/library/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find roles and crews that fit a piece of work.
+         * @description Requires: person.
+         */
+        get: operations["library.search"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2451,6 +2831,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/clone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new draft project set up like this one, with none of its history.
+         * @description Requires: project_chair.
+         */
+        post: operations["projects.clone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects/complete": {
         parameters: {
             query?: never;
@@ -2551,6 +2951,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export a project as a spec: its goal, settings, roster and standing orders.
+         * @description Requires: project_observer.
+         */
+        get: operations["projects.export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects/hold": {
         parameters: {
             query?: never;
@@ -2565,6 +2985,26 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["projects.hold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/import_spec": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a project in draft from a project spec. You become its chairman.
+         * @description Requires: person.
+         */
+        post: operations["projects.import_spec"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2601,7 +3041,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create a draft Deliver project from an Explore project's findings.
+         * Start drafting a Deliver project from an Explore project's findings.
          * @description Requires: project_chair.
          */
         post: operations["projects.promote"];
@@ -2623,6 +3063,26 @@ export interface paths {
          * @description Requires: project_observer.
          */
         get: operations["projects.receipt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/projects/rehearse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Rehearse this project as it is set up now, without spending tokens.
+         * @description Requires: project_observer.
+         */
+        get: operations["projects.rehearse"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3111,6 +3571,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/roles/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a role from a file, or a new version of one that exists.
+         * @description Requires: person.
+         */
+        post: operations["roles.save"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/roles/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one role in full, as the file it can be saved to.
+         * @description Requires: person.
+         */
+        get: operations["roles.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/roster/hire_team": {
         parameters: {
             query?: never;
@@ -3145,6 +3645,26 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["roster.recall_team"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/roster/repin_team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Move a team to the newest version of its role.
+         * @description Requires: project_chair.
+         */
+        post: operations["roster.repin_team"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3405,6 +3925,46 @@ export interface paths {
         get: operations["settings.show_project"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/specs/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check a project spec without creating anything.
+         * @description Requires: person.
+         */
+        post: operations["specs.check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/specs/rehearse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rehearse a project spec: a fire drill that spends no tokens.
+         * @description Requires: person.
+         */
+        post: operations["specs.rehearse"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4247,6 +4807,19 @@ export interface components {
             /** Items */
             items: string[];
         };
+        /** CloneInput */
+        CloneInput: {
+            /**
+             * Name
+             * @description The new project's name.
+             */
+            name: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
         /** CommandHelp */
         CommandHelp: {
             /** Commands */
@@ -4321,6 +4894,20 @@ export interface components {
              */
             project_id: string;
         };
+        /** ConfirmDraftInput */
+        ConfirmDraftInput: {
+            /**
+             * Drafting Id
+             * @description The conversation's id, from `founder list`.
+             */
+            drafting_id: string;
+            /**
+             * Start
+             * @description Start the project once it is created.
+             * @default false
+             */
+            start?: boolean;
+        };
         /** ConfirmInput */
         ConfirmInput: {
             /**
@@ -4394,6 +4981,58 @@ export interface components {
             /** @description explore, deliver or operate. It never changes. */
             type: components["schemas"]["ProjectType"];
         };
+        /** Created */
+        Created: {
+            /**
+             * Missing
+             * @description What is still needed before the project can start, in plain sentences.
+             */
+            missing: string[];
+            /**
+             * Missing Credentials
+             * @description Model credentials the spec names that you do not have yet.
+             */
+            missing_credentials?: string[];
+            /** Name */
+            name: string;
+            /** Project Id */
+            project_id: string;
+            /** State */
+            state: string;
+            /** Type */
+            type: string;
+        };
+        /** CreatedProject */
+        CreatedProject: {
+            /** Can Start */
+            can_start: boolean;
+            /**
+             * Missing
+             * @description What is still needed before it can start.
+             */
+            missing: string[];
+            /**
+             * Missing Credentials
+             * @description Model credentials the roster needs that you do not have yet.
+             */
+            missing_credentials: string[];
+            /** Name */
+            name: string;
+            /** Project Id */
+            project_id: string;
+            /** State */
+            state: string;
+        };
+        /**
+         * CredentialGrant
+         * @description A credential the project needs, by name, and the roles that receive it.
+         */
+        CredentialGrant: {
+            /** Name */
+            name: string;
+            /** Roles */
+            roles?: string[];
+        };
         /** CredentialItem */
         CredentialItem: {
             /** Breaker */
@@ -4425,6 +5064,67 @@ export interface components {
              * @description The credential's name.
              */
             name: string;
+        };
+        /**
+         * CrewDoc
+         * @description One crew, as a file (LIB-2).
+         */
+        CrewDoc: {
+            /** Ceo Role */
+            ceo_role: string;
+            /**
+             * Crewmind Crew
+             * @default 1
+             * @constant
+             */
+            crewmind_crew?: 1;
+            /** Domains */
+            domains?: string[];
+            /** @description Reference runs and tokens for the job, when known (GOV-4). */
+            estimate?: components["schemas"]["Estimate"] | null;
+            /** Name */
+            name: string;
+            /**
+             * Outcome
+             * @description What the crew delivers.
+             */
+            outcome: string;
+            /** Slug */
+            slug: string;
+            /** Teams */
+            teams: components["schemas"]["CrewTeam"][];
+        };
+        /** CrewItem */
+        CrewItem: {
+            /** Domains */
+            domains: string[];
+            /** Estimate Tokens */
+            estimate_tokens: number | null;
+            /** Name */
+            name: string;
+            /** Outcome */
+            outcome: string;
+            /**
+             * Seats
+             * @description Seats in its teams, not counting the CEO.
+             */
+            seats: number;
+            /** Slug */
+            slug: string;
+        };
+        /** CrewList */
+        CrewList: {
+            /** Items */
+            items: components["schemas"]["CrewItem"][];
+        };
+        /** CrewTeam */
+        CrewTeam: {
+            /** Members */
+            members: string[];
+            /** Name */
+            name: string;
+            /** Role */
+            role: string;
         };
         /** CycleView */
         CycleView: {
@@ -4472,6 +5172,19 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** Deadline */
+        Deadline: {
+            /**
+             * Date
+             * Format: date-time
+             */
+            date: string;
+            /**
+             * Source
+             * @description The outside fact, or whose wish it is.
+             */
+            source: string;
         };
         /** DecisionItem */
         DecisionItem: {
@@ -4604,6 +5317,110 @@ export interface components {
              * @default true
              */
             done?: boolean;
+        };
+        /** DraftAnswerInput */
+        DraftAnswerInput: {
+            /**
+             * Answer
+             * @description Empty or "yes" accepts the recommendation; a letter picks an option; anything else is your own answer.
+             * @default
+             */
+            answer?: string;
+            /**
+             * Drafting Id
+             * @description The conversation's id, from `founder list`.
+             */
+            drafting_id: string;
+            /**
+             * Question Id
+             * @description The question's id.
+             */
+            question_id: number;
+        };
+        /** DraftingItem */
+        DraftingItem: {
+            /** Drafting Id */
+            drafting_id: string;
+            /** Opening */
+            opening: string;
+            /** Project Id */
+            project_id: string | null;
+            /** Quick */
+            quick: boolean;
+            /** State */
+            state: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DraftingList */
+        DraftingList: {
+            /** Items */
+            items: components["schemas"]["DraftingItem"][];
+        };
+        /** DraftingRef */
+        DraftingRef: {
+            /**
+             * Drafting Id
+             * @description The conversation's id, from `founder list`.
+             */
+            drafting_id: string;
+        };
+        /** DraftingView */
+        DraftingView: {
+            /**
+             * Draft
+             * @description The proposed project spec.
+             */
+            draft: {
+                [key: string]: unknown;
+            } | null;
+            /** Drafting Id */
+            drafting_id: string;
+            /** Failure */
+            failure: string | null;
+            /** Grade */
+            grade: {
+                [key: string]: unknown;
+            } | null;
+            /** Ledger */
+            ledger: components["schemas"]["LedgerLine"][];
+            /** Lines */
+            lines: components["schemas"]["Line"][];
+            /** Not Ready Because */
+            not_ready_because: string[];
+            /** Project Id */
+            project_id: string | null;
+            /**
+             * Questions
+             * @description Questions waiting for your answer.
+             */
+            questions: components["schemas"]["QuestionView"][];
+            /** Quick */
+            quick: boolean;
+            /** Ready */
+            ready: boolean;
+            /**
+             * Rehearsal
+             * @description The verdict of the rehearsal of this draft.
+             */
+            rehearsal: string | null;
+            /**
+             * Rules Hit
+             * @description Tool calls of the Founder that a rule refused.
+             */
+            rules_hit: {
+                [key: string]: unknown;
+            }[];
+            /** State */
+            state: string;
+            /**
+             * Waiting For
+             * @description you, the Founder, or nobody.
+             */
+            waiting_for: string;
         };
         /** DrawAnswerInput */
         DrawAnswerInput: {
@@ -4740,6 +5557,34 @@ export interface components {
          * @enum {string}
          */
         Effort: "low" | "medium" | "high" | "max";
+        /** ElementGrade */
+        ElementGrade: {
+            /** Element */
+            element: string;
+            /**
+             * Fix
+             * @description The named fix, when weak or missing.
+             * @default
+             */
+            fix?: string;
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "present" | "weak" | "missing";
+            /**
+             * Quote
+             * @description The line of the goal the grade rests on.
+             * @default
+             */
+            quote?: string;
+            /**
+             * Reason
+             * @description Why it does not apply, when graded present unquoted.
+             * @default
+             */
+            reason?: string;
+        };
         /**
          * Empty
          * @description An operation with no input.
@@ -4757,6 +5602,13 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** Estimate */
+        Estimate: {
+            /** Runs */
+            runs: number;
+            /** Tokens */
+            tokens: number;
         };
         /** EventItem */
         EventItem: {
@@ -4924,6 +5776,22 @@ export interface components {
             /** Waived Reason */
             waived_reason: string | null;
         };
+        /** Grade */
+        Grade: {
+            /** Elements */
+            elements: components["schemas"]["ElementGrade"][];
+            /**
+             * Missing
+             * @description Elements graded missing.
+             */
+            missing: string[];
+            /** Ready */
+            ready: boolean;
+            /** Summary */
+            summary: string;
+            /** Weak */
+            weak: string[];
+        };
         /** GrantItem */
         GrantItem: {
             /** Client Name */
@@ -4950,6 +5818,63 @@ export interface components {
              * @description The grant's id, from `oauth clients`.
              */
             grant_id: string;
+        };
+        /** GrillAnswer */
+        GrillAnswer: {
+            /**
+             * Answer
+             * @description Empty or "yes" accepts the recommendation.
+             * @default
+             */
+            answer?: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Question Id
+             * @description The question's id.
+             */
+            question_id: number;
+        };
+        /** GrillInput */
+        GrillInput: {
+            /**
+             * Document
+             * @description The text to grill. Left out: your last message in the project chat.
+             */
+            document?: string | null;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
+        /** GrillView */
+        GrillView: {
+            /** Can Confirm */
+            can_confirm: boolean;
+            /** Characters */
+            characters: number;
+            /**
+             * Document
+             * @description The first page of the document.
+             */
+            document: string | null;
+            /**
+             * Grilling
+             * @description Whether a document is being grilled now.
+             */
+            grilling: boolean;
+            /** Items */
+            items: components["schemas"]["PassageView"][];
+            /** Ledger */
+            ledger: components["schemas"]["LedgerLine"][];
+            /** Questions */
+            questions: components["schemas"]["QuestionView"][];
+            /** State */
+            state: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -4993,6 +5918,11 @@ export interface components {
              * @default 1
              */
             members?: number;
+            /**
+             * Names
+             * @description A name for each member, instead of a count.
+             */
+            names?: string[] | null;
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -5258,6 +6188,20 @@ export interface components {
              */
             project_id: string;
         };
+        /** LedgerLine */
+        LedgerLine: {
+            /** Passage */
+            passage: string | null;
+            /** Settles */
+            settles: string;
+            /**
+             * Source
+             * @description words (yours), answer or assumption.
+             */
+            source: string;
+            /** Value */
+            value: string;
+        };
         /** LeverInput */
         LeverInput: {
             /**
@@ -5280,6 +6224,27 @@ export interface components {
              * @description Why.
              */
             reason: string;
+        };
+        /** Line */
+        Line: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * Author
+             * @description person, founder or platform.
+             */
+            author: string;
+            /** Body */
+            body: string;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            } | null;
+            /** Id */
+            id: number;
         };
         /** LinkOutput */
         LinkOutput: {
@@ -5703,6 +6668,21 @@ export interface components {
             /** Version */
             version?: number | null;
         };
+        /** PassageView */
+        PassageView: {
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Note */
+            note: string | null;
+            /** Passage */
+            passage: string;
+            /** Problem */
+            problem: string | null;
+            /** State */
+            state: string;
+        };
         /** PayerInput */
         PayerInput: {
             /**
@@ -5898,6 +6878,59 @@ export interface components {
              */
             project_id: string;
         };
+        /**
+         * ProjectSpec
+         * @description One project, as a file (LIB-4).
+         */
+        ProjectSpec: {
+            /**
+             * Budget Tokens
+             * @description Default: the type's budget.
+             */
+            budget_tokens?: number | null;
+            ceo?: components["schemas"]["SpecCeo"];
+            /** Controlled Domains */
+            controlled_domains?: string[];
+            /** Credentials */
+            credentials?: components["schemas"]["CredentialGrant"][];
+            /**
+             * Crewmind Spec
+             * @default 1
+             * @constant
+             */
+            crewmind_spec?: 1;
+            deadline?: components["schemas"]["Deadline"] | null;
+            /** Goal */
+            goal: string;
+            /** Integrations */
+            integrations?: string[];
+            /** Name */
+            name: string;
+            /**
+             * Paying Credential
+             * @description The credential that pays, by name.
+             */
+            paying_credential?: string | null;
+            /** Quality */
+            quality?: ("fast" | "balanced" | "best") | null;
+            /**
+             * Roles
+             * @description Custom roles the spec brings with it.
+             */
+            roles?: components["schemas"]["RoleDoc"][];
+            /**
+             * Settings
+             * @description Settings that differ from the defaults.
+             */
+            settings?: {
+                [key: string]: unknown;
+            };
+            /** Standing Orders */
+            standing_orders?: string[];
+            /** Teams */
+            teams?: components["schemas"]["SpecTeam"][];
+            type: components["schemas"]["ProjectType"];
+        };
         /** ProjectStatus */
         ProjectStatus: {
             /**
@@ -5945,6 +6978,16 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** Promoted */
+        Promoted: {
+            /**
+             * Drafting Id
+             * @description The drafting conversation that was opened.
+             */
+            drafting_id: string;
+            /** Next */
+            next: string;
         };
         /** ProviderItem */
         ProviderItem: {
@@ -6003,6 +7046,40 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** QuestionView */
+        QuestionView: {
+            /**
+             * Changes
+             * @description What your answer changes.
+             */
+            changes: string;
+            /** Id */
+            id: number;
+            /** Options */
+            options: string[];
+            /**
+             * Recommended
+             * @description The recommended option. Empty: you choose.
+             */
+            recommended: number | null;
+            /** Settles */
+            settles: string;
+            /** Text */
+            text: string;
+        };
+        /** QuickInput */
+        QuickInput: {
+            /**
+             * Brief
+             * @description What you want.
+             */
+            brief: string;
+            /**
+             * Credential
+             * @description The credential that pays. Needed when you have several.
+             */
+            credential?: string | null;
         };
         /** RaiseAnswerInput */
         RaiseAnswerInput: {
@@ -6093,6 +7170,51 @@ export interface components {
             settings: components["schemas"]["Definition"][];
             /** Version */
             version: string;
+        };
+        /** RehearsalReport */
+        RehearsalReport: {
+            /**
+             * Clock
+             * @description What the wall-clock rules do at their real numbers.
+             */
+            clock: string[];
+            estimate: components["schemas"]["RunEstimate"];
+            /** Longest Chain */
+            longest_chain: string;
+            /** Not Exercised */
+            not_exercised: string[];
+            /**
+             * Note
+             * @default A rehearsal checks that the project is set up to run under the rules. It does not predict how good the work will be.
+             */
+            note?: string;
+            /**
+             * Ok
+             * @description Whether the walk reached its first verified close.
+             */
+            ok: boolean;
+            /** Parallelism */
+            parallelism: string;
+            /** Projected Duration */
+            projected_duration: string;
+            /** Rules Hit */
+            rules_hit: components["schemas"]["RuleHit"][];
+            /** Setup Missing */
+            setup_missing: string[];
+            /** Staffing */
+            staffing: string[];
+            /**
+             * Text
+             * @description The report as plain text.
+             * @default
+             */
+            text?: string;
+            /** Verdict */
+            verdict: string;
+            /** Waited For The Chairman */
+            waited_for_the_chairman: components["schemas"]["Wait"][];
+            /** Walk */
+            walk: components["schemas"]["Step"][];
         };
         /** RememberInput */
         RememberInput: {
@@ -6219,14 +7341,83 @@ export interface components {
              */
             size: number;
         };
-        /** RoleItem */
-        RoleItem: {
+        /**
+         * RoleDoc
+         * @description One role, as a file (LIB-1).
+         */
+        RoleDoc: {
+            /** Category */
+            category: string;
+            /**
+             * Charter
+             * @description Its standing brief.
+             */
+            charter: string;
+            /**
+             * Credential Names
+             * @description The credentials it receives, by name only.
+             */
+            credential_names?: string[];
+            /**
+             * Crewmind Role
+             * @default 1
+             * @constant
+             */
+            crewmind_role?: 1;
             /** Description */
             description: string;
+            /** Domains */
+            domains?: string[];
+            /**
+             * Kind
+             * @description ceo: can be the CEO. reviewer: reads others' work. worker: does tasks.
+             * @enum {string}
+             */
+            kind: "ceo" | "worker" | "reviewer";
+            /** @description The lowest model class this role may run on, whatever the dial says. */
+            min_class?: components["schemas"]["ModelClass"] | null;
+            /** Name */
+            name: string;
+            /**
+             * Needs Vision
+             * @default false
+             */
+            needs_vision?: boolean;
+            /**
+             * Skills
+             * @description Skills it may use, each pinned by version.
+             */
+            skills?: string[];
+            /**
+             * Slug
+             * @description The role's short id, in lower case with hyphens.
+             */
+            slug: string;
+            /**
+             * Tools
+             * @description What the role may use inside its sandbox.
+             */
+            tools: ("files" | "shell" | "web" | "data" | "browser" | "a2a")[];
+        };
+        /** RoleItem */
+        RoleItem: {
+            /** Category */
+            category: string;
+            /** Description */
+            description: string;
+            /** Domains */
+            domains: string[];
+            /**
+             * Kind
+             * @description ceo, worker or reviewer.
+             */
+            kind: string;
             /** Name */
             name: string;
             /** Seat Kind */
             seat_kind: string;
+            /** Slug */
+            slug: string;
             /** Tools */
             tools: string[];
             /** Version */
@@ -6237,12 +7428,48 @@ export interface components {
             /** Items */
             items: components["schemas"]["RoleItem"][];
         };
+        /** RoleSaved */
+        RoleSaved: {
+            /**
+             * Changed
+             * @description False when the same content was already the newest.
+             */
+            changed: boolean;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Version */
+            version: number;
+        };
         /** Roster */
         Roster: {
             /** Seats */
             seats: components["schemas"]["SeatItem"][];
+            /** Team Roles */
+            team_roles?: components["schemas"]["TeamRole"][];
             /** Teams */
             teams: string[];
+        };
+        /** RuleHit */
+        RuleHit: {
+            /** Code */
+            code: string;
+            /** Message */
+            message: string;
+            /** Rule */
+            rule: string;
+            /** Times */
+            times: number;
+        };
+        /** RunEstimate */
+        RunEstimate: {
+            /** Basis */
+            basis: string;
+            /** Runs To First Close */
+            runs_to_first_close: number;
+            /** Tokens To First Close */
+            tokens_to_first_close: number | null;
         };
         /** RunItem */
         RunItem: {
@@ -6340,12 +7567,44 @@ export interface components {
             /** Tokens Counted */
             tokens_counted: number;
         };
+        /** SayInput */
+        SayInput: {
+            /**
+             * Body
+             * @description Your message.
+             */
+            body: string;
+            /**
+             * Drafting Id
+             * @description The conversation's id, from `founder list`.
+             */
+            drafting_id: string;
+        };
+        /** SearchHit */
+        SearchHit: {
+            /**
+             * Kind
+             * @description role or crew.
+             */
+            kind: string;
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Summary */
+            summary: string;
+        };
         /** SearchHits */
         SearchHits: {
             /** Artifacts */
             artifacts: string[];
             /** Messages */
             messages: components["schemas"]["MessageItem"][];
+        };
+        /** SearchResult */
+        SearchResult: {
+            /** Items */
+            items: components["schemas"]["SearchHit"][];
         };
         /** SeatItem */
         SeatItem: {
@@ -6544,6 +7803,40 @@ export interface components {
              */
             until: string;
         };
+        /** SpecCeo */
+        SpecCeo: {
+            /**
+             * Role
+             * @default ceo
+             */
+            role?: string;
+        };
+        /** SpecCheck */
+        SpecCheck: {
+            /** Ok */
+            ok: boolean;
+            /**
+             * Problems
+             * @description What stops the spec from becoming a project.
+             */
+            problems: string[];
+        };
+        /** SpecTeam */
+        SpecTeam: {
+            /** Members */
+            members: string[];
+            /** Name */
+            name: string;
+            /** Role */
+            role: string;
+            /** Stand Down When */
+            stand_down_when?: string | null;
+            /**
+             * Version
+             * @description The role version to pin. Default: newest.
+             */
+            version?: number | null;
+        };
         /** SpeedView */
         SpeedView: {
             /**
@@ -6582,6 +7875,31 @@ export interface components {
             monthly_cap: number;
             /** Purchases */
             purchases: components["schemas"]["PurchaseLine"][];
+        };
+        /** StartInput */
+        StartInput: {
+            /**
+             * Brief
+             * @description What you want, in your own words.
+             */
+            brief: string;
+            /**
+             * Document
+             * @description The text of a brief to grill first.
+             */
+            document?: string | null;
+        };
+        /** Step */
+        Step: {
+            /**
+             * After Seconds
+             * @description Drill time since the start. Empty when the step did not happen.
+             */
+            after_seconds: number | null;
+            /** Happened */
+            happened: boolean;
+            /** What */
+            what: string;
         };
         /** SubscribeInput */
         SubscribeInput: {
@@ -6750,6 +8068,26 @@ export interface components {
              * @description The team's name.
              */
             team: string;
+        };
+        /** TeamRole */
+        TeamRole: {
+            /**
+             * Newest
+             * @description The newest version of that role.
+             */
+            newest: number;
+            /**
+             * Role
+             * @description The role's slug.
+             */
+            role: string;
+            /** Team */
+            team: string;
+            /**
+             * Version
+             * @description The role version the team is pinned to.
+             */
+            version: number;
         };
         /** ThreadRef */
         ThreadRef: {
@@ -6979,6 +8317,13 @@ export interface components {
             items: components["schemas"]["VersionItem"][];
             /** Name */
             name: string;
+        };
+        /** Wait */
+        Wait: {
+            /** Kind */
+            kind: string;
+            /** Times */
+            times: number;
         };
         /** WaiveInput */
         WaiveInput: {
@@ -9041,6 +10386,91 @@ export interface operations {
             };
         };
     };
+    "crews.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewList"];
+                };
+            };
+        };
+    };
+    "crews.save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CrewDoc"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "crews.show": {
+        parameters: {
+            query: {
+                /** @description The crew's slug, from `crews list`. */
+                crew: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewDoc"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "cycles.set_due": {
         parameters: {
             query?: never;
@@ -9453,6 +10883,256 @@ export interface operations {
             };
         };
     };
+    "founder.accept_rest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftingRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftAnswerInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmDraftInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingList"];
+                };
+            };
+        };
+    };
+    "founder.quick": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuickInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.say": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SayInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.show": {
+        parameters: {
+            query: {
+                /** @description The conversation's id, from `founder list`. */
+                drafting_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "gaps.waive": {
         parameters: {
             query?: never;
@@ -9473,6 +11153,202 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "goals.grade": {
+        parameters: {
+            query: {
+                /** @description The goal, in prose. */
+                goal: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Grade"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "grill.accept_rest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrillView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "grill.answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrillAnswer"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrillView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "grill.confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrillView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "grill.show": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrillView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "grill.start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrillInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrillView"];
                 };
             };
             /** @description Validation Error */
@@ -9773,6 +11649,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EffectItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "library.reload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Empty"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CrewList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "library.search": {
+        parameters: {
+            query: {
+                /** @description Words describing the work. */
+                query: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResult"];
                 };
             };
             /** @description Validation Error */
@@ -11175,6 +13117,39 @@ export interface operations {
             };
         };
     };
+    "projects.clone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CloneInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "projects.complete": {
         parameters: {
             query?: never;
@@ -11340,6 +13315,38 @@ export interface operations {
             };
         };
     };
+    "projects.export": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectSpec"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "projects.hold": {
         parameters: {
             query?: never;
@@ -11360,6 +13367,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "projects.import_spec": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSpec"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Created"];
                 };
             };
             /** @description Validation Error */
@@ -11430,7 +13470,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProjectItem"];
+                    "application/json": components["schemas"]["Promoted"];
                 };
             };
             /** @description Validation Error */
@@ -11463,6 +13503,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Receipt"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "projects.rehearse": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RehearsalReport"];
                 };
             };
             /** @description Validation Error */
@@ -12260,6 +14332,71 @@ export interface operations {
             };
         };
     };
+    "roles.save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleDoc"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleSaved"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "roles.show": {
+        parameters: {
+            query: {
+                /** @description The role's slug or name, from `roles list`. */
+                role: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleDoc"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "roster.hire_team": {
         parameters: {
             query?: never;
@@ -12294,6 +14431,39 @@ export interface operations {
         };
     };
     "roster.recall_team": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Roster"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "roster.repin_team": {
         parameters: {
             query?: never;
             header?: never;
@@ -12716,6 +14886,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "specs.check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSpec"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpecCheck"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "specs.rehearse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectSpec"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RehearsalReport"];
                 };
             };
             /** @description Validation Error */

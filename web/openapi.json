@@ -294,6 +294,32 @@
     "title": "Alerts",
     "type": "object"
    },
+   "AnswerInput": {
+    "properties": {
+     "approve": {
+      "description": "Whether to reopen the decision.",
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "request_id": {
+      "description": "The request's id, from `decisions requests`.",
+      "title": "Request Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "request_id",
+     "approve"
+    ],
+    "title": "AnswerInput",
+    "type": "object"
+   },
    "ApproveInput": {
     "properties": {
      "client_id": {
@@ -1504,6 +1530,26 @@
     "title": "ConfirmDeleteInput",
     "type": "object"
    },
+   "ConfirmDraftInput": {
+    "properties": {
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "start": {
+      "default": false,
+      "description": "Start the project once it is created.",
+      "title": "Start",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "drafting_id"
+    ],
+    "title": "ConfirmDraftInput",
+    "type": "object"
+   },
    "ConfirmInput": {
     "properties": {
      "order_id": {
@@ -1630,6 +1676,47 @@
     "title": "CorrectionRef",
     "type": "object"
    },
+   "CreateInput": {
+    "properties": {
+     "goal": {
+      "description": "The goal, in prose.",
+      "maxLength": 6000,
+      "minLength": 1,
+      "title": "Goal",
+      "type": "string"
+     },
+     "name": {
+      "description": "The project's name.",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "timezone": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "IANA timezone. Default: your own.",
+      "title": "Timezone"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ProjectType",
+      "description": "explore, deliver or operate. It never changes."
+     }
+    },
+    "required": [
+     "name",
+     "type",
+     "goal"
+    ],
+    "title": "CreateInput",
+    "type": "object"
+   },
    "Created": {
     "properties": {
      "missing": {
@@ -1638,6 +1725,14 @@
        "type": "string"
       },
       "title": "Missing",
+      "type": "array"
+     },
+     "missing_credentials": {
+      "description": "Model credentials the spec names that you do not have yet.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Missing Credentials",
       "type": "array"
      },
      "name": {
@@ -1681,6 +1776,14 @@
       "title": "Missing",
       "type": "array"
      },
+     "missing_credentials": {
+      "description": "Model credentials the roster needs that you do not have yet.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Missing Credentials",
+      "type": "array"
+     },
      "name": {
       "title": "Name",
       "type": "string"
@@ -1699,6 +1802,7 @@
      "name",
      "state",
      "missing",
+     "missing_credentials",
      "can_start"
     ],
     "title": "CreatedProject",
@@ -1805,7 +1909,7 @@
     "title": "CredentialRef",
     "type": "object"
    },
-   "CrewDoc-Input": {
+   "CrewDoc": {
     "additionalProperties": false,
     "description": "One crew, as a file (LIB-2).",
     "properties": {
@@ -1830,76 +1934,7 @@
      "estimate": {
       "anyOf": [
        {
-        "$ref": "#/components/schemas/Estimate-Input"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "Reference runs and tokens for the job, when known (GOV-4)."
-     },
-     "name": {
-      "maxLength": 200,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "outcome": {
-      "description": "What the crew delivers.",
-      "maxLength": 2000,
-      "minLength": 1,
-      "title": "Outcome",
-      "type": "string"
-     },
-     "slug": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Slug",
-      "type": "string"
-     },
-     "teams": {
-      "items": {
-       "$ref": "#/components/schemas/CrewTeam"
-      },
-      "title": "Teams",
-      "type": "array"
-     }
-    },
-    "required": [
-     "slug",
-     "name",
-     "outcome",
-     "ceo_role",
-     "teams"
-    ],
-    "title": "CrewDoc",
-    "type": "object"
-   },
-   "CrewDoc-Output": {
-    "additionalProperties": false,
-    "description": "One crew, as a file (LIB-2).",
-    "properties": {
-     "ceo_role": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Ceo Role",
-      "type": "string"
-     },
-     "crewmind_crew": {
-      "const": 1,
-      "default": 1,
-      "title": "Crewmind Crew",
-      "type": "integer"
-     },
-     "domains": {
-      "items": {
-       "type": "string"
-      },
-      "title": "Domains",
-      "type": "array"
-     },
-     "estimate": {
-      "anyOf": [
-       {
-        "$ref": "#/components/schemas/crewmind__domain__library__documents__Estimate"
+        "$ref": "#/components/schemas/Estimate"
        },
        {
         "type": "null"
@@ -2331,7 +2366,7 @@
      "item": {
       "anyOf": [
        {
-        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+        "$ref": "#/components/schemas/ItemView"
        },
        {
         "type": "null"
@@ -2460,6 +2495,33 @@
      }
     },
     "title": "Done",
+    "type": "object"
+   },
+   "DraftAnswerInput": {
+    "properties": {
+     "answer": {
+      "default": "",
+      "description": "Empty or \"yes\" accepts the recommendation; a letter picks an option; anything else is your own answer.",
+      "maxLength": 4000,
+      "title": "Answer",
+      "type": "string"
+     },
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "question_id": {
+      "description": "The question's id.",
+      "title": "Question Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "question_id"
+    ],
+    "title": "DraftAnswerInput",
     "type": "object"
    },
    "DraftingItem": {
@@ -3014,7 +3076,7 @@
     "title": "EntryRef",
     "type": "object"
    },
-   "Estimate-Input": {
+   "Estimate": {
     "additionalProperties": false,
     "properties": {
      "runs": {
@@ -3610,7 +3672,7 @@
      },
      "items": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__founder__grill__ItemView"
+       "$ref": "#/components/schemas/PassageView"
       },
       "title": "Items",
       "type": "array"
@@ -4206,7 +4268,7 @@
     "properties": {
      "items": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+       "$ref": "#/components/schemas/ItemView"
       },
       "title": "Items",
       "type": "array"
@@ -4216,6 +4278,158 @@
      "items"
     ],
     "title": "ItemList",
+    "type": "object"
+   },
+   "ItemView": {
+    "properties": {
+     "actions": {
+      "description": "What you can do with it now.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Actions",
+      "type": "array"
+     },
+     "basis": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basis"
+     },
+     "chairman_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chairman Note"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "default_outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What happens if nobody answers.",
+      "title": "Default Outcome"
+     },
+     "fields": {
+      "additionalProperties": true,
+      "title": "Fields",
+      "type": "object"
+     },
+     "filed_by": {
+      "description": "agent or platform.",
+      "title": "Filed By",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "title": {
+      "description": "Built from the item's typed fields.",
+      "title": "Title",
+      "type": "string"
+     },
+     "waits_on_you": {
+      "title": "Waits On You",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "project_id",
+     "kind",
+     "title",
+     "state",
+     "filed_by",
+     "fields",
+     "recommendation",
+     "if_declined",
+     "basis",
+     "actions",
+     "deadline",
+     "default_outcome",
+     "outcome",
+     "chairman_note",
+     "waits_on_you",
+     "opened_at",
+     "closed_at"
+    ],
+    "title": "ItemView",
     "type": "object"
    },
    "Kind": {
@@ -5237,6 +5451,58 @@
     "title": "Page",
     "type": "object"
    },
+   "PassageView": {
+    "properties": {
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     },
+     "passage": {
+      "title": "Passage",
+      "type": "string"
+     },
+     "problem": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Problem"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "kind",
+     "passage",
+     "problem",
+     "note",
+     "state"
+    ],
+    "title": "PassageView",
+    "type": "object"
+   },
    "PayerInput": {
     "properties": {
      "credential": {
@@ -5971,6 +6237,25 @@
     "title": "PromoteInput",
     "type": "object"
    },
+   "Promoted": {
+    "properties": {
+     "drafting_id": {
+      "description": "The drafting conversation that was opened.",
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "next": {
+      "title": "Next",
+      "type": "string"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "next"
+    ],
+    "title": "Promoted",
+    "type": "object"
+   },
    "ProviderItem": {
     "properties": {
      "ceiling": {
@@ -6421,7 +6706,7 @@
       "type": "array"
      },
      "estimate": {
-      "$ref": "#/components/schemas/crewmind__domain__rehearsal__report__Estimate"
+      "$ref": "#/components/schemas/RunEstimate"
      },
      "longest_chain": {
       "title": "Longest Chain",
@@ -7119,6 +7404,36 @@
      "message"
     ],
     "title": "RuleHit",
+    "type": "object"
+   },
+   "RunEstimate": {
+    "properties": {
+     "basis": {
+      "title": "Basis",
+      "type": "string"
+     },
+     "runs_to_first_close": {
+      "title": "Runs To First Close",
+      "type": "integer"
+     },
+     "tokens_to_first_close": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tokens To First Close"
+     }
+    },
+    "required": [
+     "runs_to_first_close",
+     "tokens_to_first_close",
+     "basis"
+    ],
+    "title": "RunEstimate",
     "type": "object"
    },
    "RunItem": {
@@ -9371,32 +9686,6 @@
     "title": "Working",
     "type": "object"
    },
-   "crewmind__domain__conversation__decisions__AnswerInput": {
-    "properties": {
-     "approve": {
-      "description": "Whether to reopen the decision.",
-      "title": "Approve",
-      "type": "boolean"
-     },
-     "project_id": {
-      "description": "The project's id, from `projects list`.",
-      "title": "Project Id",
-      "type": "string"
-     },
-     "request_id": {
-      "description": "The request's id, from `decisions requests`.",
-      "title": "Request Id",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "project_id",
-     "request_id",
-     "approve"
-    ],
-    "title": "AnswerInput",
-    "type": "object"
-   },
    "crewmind__domain__conversation__decisions__DecideInput": {
     "properties": {
      "project_id": {
@@ -9629,278 +9918,6 @@
     "title": "ExtendInput",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ItemView": {
-    "properties": {
-     "actions": {
-      "description": "What you can do with it now.",
-      "items": {
-       "type": "string"
-      },
-      "title": "Actions",
-      "type": "array"
-     },
-     "basis": {
-      "anyOf": [
-       {
-        "additionalProperties": true,
-        "type": "object"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Basis"
-     },
-     "chairman_note": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Chairman Note"
-     },
-     "closed_at": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Closed At"
-     },
-     "deadline": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Deadline"
-     },
-     "default_outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "What happens if nobody answers.",
-      "title": "Default Outcome"
-     },
-     "fields": {
-      "additionalProperties": true,
-      "title": "Fields",
-      "type": "object"
-     },
-     "filed_by": {
-      "description": "agent or platform.",
-      "title": "Filed By",
-      "type": "string"
-     },
-     "id": {
-      "title": "Id",
-      "type": "integer"
-     },
-     "if_declined": {
-      "title": "If Declined",
-      "type": "string"
-     },
-     "kind": {
-      "title": "Kind",
-      "type": "string"
-     },
-     "opened_at": {
-      "format": "date-time",
-      "title": "Opened At",
-      "type": "string"
-     },
-     "outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Outcome"
-     },
-     "project_id": {
-      "title": "Project Id",
-      "type": "string"
-     },
-     "recommendation": {
-      "title": "Recommendation",
-      "type": "string"
-     },
-     "state": {
-      "title": "State",
-      "type": "string"
-     },
-     "title": {
-      "description": "Built from the item's typed fields.",
-      "title": "Title",
-      "type": "string"
-     },
-     "waits_on_you": {
-      "title": "Waits On You",
-      "type": "boolean"
-     }
-    },
-    "required": [
-     "id",
-     "project_id",
-     "kind",
-     "title",
-     "state",
-     "filed_by",
-     "fields",
-     "recommendation",
-     "if_declined",
-     "basis",
-     "actions",
-     "deadline",
-     "default_outcome",
-     "outcome",
-     "chairman_note",
-     "waits_on_you",
-     "opened_at",
-     "closed_at"
-    ],
-    "title": "ItemView",
-    "type": "object"
-   },
-   "crewmind__domain__founder__grill__ItemView": {
-    "properties": {
-     "id": {
-      "title": "Id",
-      "type": "integer"
-     },
-     "kind": {
-      "title": "Kind",
-      "type": "string"
-     },
-     "note": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Note"
-     },
-     "passage": {
-      "title": "Passage",
-      "type": "string"
-     },
-     "problem": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Problem"
-     },
-     "state": {
-      "title": "State",
-      "type": "string"
-     }
-    },
-    "required": [
-     "id",
-     "kind",
-     "passage",
-     "problem",
-     "note",
-     "state"
-    ],
-    "title": "ItemView",
-    "type": "object"
-   },
-   "crewmind__domain__founder__operations__AnswerInput": {
-    "properties": {
-     "answer": {
-      "default": "",
-      "description": "Empty or \"yes\" accepts the recommendation; a letter picks an option; anything else is your own answer.",
-      "maxLength": 4000,
-      "title": "Answer",
-      "type": "string"
-     },
-     "drafting_id": {
-      "description": "The conversation's id, from `founder list`.",
-      "title": "Drafting Id",
-      "type": "string"
-     },
-     "question_id": {
-      "description": "The question's id.",
-      "title": "Question Id",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "drafting_id",
-     "question_id"
-    ],
-    "title": "AnswerInput",
-    "type": "object"
-   },
-   "crewmind__domain__founder__operations__CreateInput": {
-    "properties": {
-     "drafting_id": {
-      "description": "The conversation's id, from `founder list`.",
-      "title": "Drafting Id",
-      "type": "string"
-     },
-     "start": {
-      "default": false,
-      "description": "Start the project once it is created.",
-      "title": "Start",
-      "type": "boolean"
-     }
-    },
-    "required": [
-     "drafting_id"
-    ],
-    "title": "CreateInput",
-    "type": "object"
-   },
-   "crewmind__domain__library__documents__Estimate": {
-    "additionalProperties": false,
-    "properties": {
-     "runs": {
-      "minimum": 1.0,
-      "title": "Runs",
-      "type": "integer"
-     },
-     "tokens": {
-      "minimum": 1.0,
-      "title": "Tokens",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "runs",
-     "tokens"
-    ],
-    "title": "Estimate",
-    "type": "object"
-   },
    "crewmind__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
@@ -10046,77 +10063,6 @@
      "passed"
     ],
     "title": "RuleInput",
-    "type": "object"
-   },
-   "crewmind__domain__projects__operations__CreateInput": {
-    "properties": {
-     "goal": {
-      "description": "The goal, in prose.",
-      "maxLength": 6000,
-      "minLength": 1,
-      "title": "Goal",
-      "type": "string"
-     },
-     "name": {
-      "description": "The project's name.",
-      "maxLength": 200,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "timezone": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "IANA timezone. Default: your own.",
-      "title": "Timezone"
-     },
-     "type": {
-      "$ref": "#/components/schemas/ProjectType",
-      "description": "explore, deliver or operate. It never changes."
-     }
-    },
-    "required": [
-     "name",
-     "type",
-     "goal"
-    ],
-    "title": "CreateInput",
-    "type": "object"
-   },
-   "crewmind__domain__rehearsal__report__Estimate": {
-    "properties": {
-     "basis": {
-      "title": "Basis",
-      "type": "string"
-     },
-     "runs_to_first_close": {
-      "title": "Runs To First Close",
-      "type": "integer"
-     },
-     "tokens_to_first_close": {
-      "anyOf": [
-       {
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Tokens To First Close"
-     }
-    },
-    "required": [
-     "runs_to_first_close",
-     "tokens_to_first_close",
-     "basis"
-    ],
-    "title": "Estimate",
     "type": "object"
    },
    "crewmind__domain__settings__operations__History": {
@@ -12695,7 +12641,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/CrewDoc-Input"
+        "$ref": "#/components/schemas/CrewDoc"
        }
       }
      },
@@ -12751,7 +12697,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CrewDoc-Output"
+         "$ref": "#/components/schemas/CrewDoc"
         }
        }
       },
@@ -12824,7 +12770,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__AnswerInput"
+        "$ref": "#/components/schemas/AnswerInput"
        }
       }
      },
@@ -13362,7 +13308,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__founder__operations__AnswerInput"
+        "$ref": "#/components/schemas/DraftAnswerInput"
        }
       }
      },
@@ -13404,7 +13350,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__founder__operations__CreateInput"
+        "$ref": "#/components/schemas/ConfirmDraftInput"
        }
       }
      },
@@ -13952,7 +13898,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+         "$ref": "#/components/schemas/ItemView"
         }
        }
       },
@@ -13994,7 +13940,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+         "$ref": "#/components/schemas/ItemView"
         }
        }
       },
@@ -14111,7 +14057,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+         "$ref": "#/components/schemas/ItemView"
         }
        }
       },
@@ -16536,7 +16482,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__projects__operations__CreateInput"
+        "$ref": "#/components/schemas/CreateInput"
        }
       }
      },
@@ -16906,7 +16852,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ProjectItem"
+         "$ref": "#/components/schemas/Promoted"
         }
        }
       },
@@ -16923,7 +16869,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Create a draft Deliver project from an Explore project's findings.",
+    "summary": "Start drafting a Deliver project from an Explore project's findings.",
     "tags": [
      "projects"
     ]
@@ -18151,7 +18097,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
+         "$ref": "#/components/schemas/ItemView"
         }
        }
       },
