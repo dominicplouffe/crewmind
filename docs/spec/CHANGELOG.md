@@ -2,6 +2,12 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.18 (22 Nov 2026): phase 7 plan answers
+
+- **FND-2:** Founder calls are metered against an install-level account and count against no project budget (R-31).
+- **FND-12:** one quick-mode target, under 2 minutes (R-32).
+- **RHS-1:** rehearsal always runs on a fresh in-memory SQLite database; the code refuses any other (R-51).
+
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 
 - **HUM-5:** a question's default stays within the CEO's authority and may not spend, grant or widen scope (R-27).

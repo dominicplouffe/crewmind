@@ -1,6 +1,6 @@
 ### 6.13 Rehearsal: the zero-token fire drill (RHS)
 
-- **RHS-1 Safe by construction.** Rehearsing a spec runs the real rule engine, dispatcher and scheduler against the mock harness with a scripted, competent crew. It spends 0 tokens, never contacts the network, never runs commands from the spec, never reads credentials, never notifies anyone, and refuses to run against a real database.
+- **RHS-1 Safe by construction.** Rehearsing a spec runs the real rule engine, dispatcher and scheduler against the mock harness with a scripted, competent crew. It spends 0 tokens, never contacts the network, never runs commands from the spec, never reads credentials, never notifies anyone, and always runs on a fresh in-memory SQLite database of its own: the code refuses any other.
 - **RHS-2 Clock rules.** Only wall-clock rules (heartbeats, windows, watch intervals) are compressed. The report states their real effect from the actual numbers. Every other rule is in force.
 - **RHS-3 Report contents:**
   - a verdict;

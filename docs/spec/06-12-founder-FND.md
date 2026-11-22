@@ -3,7 +3,7 @@
 The Founder is a platform assistant whose only deliverable is a **project spec** (LIB-4). Its doctrine and the goal grammar are product content, kept as one copy served to the Founder, to MCP clients and to human authors.
 
 - **FND-1 Chat.** Drafting happens in the chat (CHAT-1), and the conversation becomes the project chat after creation. It is stored on the server and can be resumed from any surface. Each turn streams. Failures are recorded on the conversation, never lost.
-- **FND-2 Tools.** The Founder runs on the platform's drafting model (LLM-14), is not billed to any project, and has exactly these tools:
+- **FND-2 Tools.** The Founder runs on the platform's drafting model (LLM-14), is metered like every model call but against the install's own account, so it counts against no project budget (INV-8), and has exactly these tools:
   - search roles and crews;
   - list credentials by name;
   - fetch a URL (as untrusted data);
@@ -42,7 +42,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - It drafts Deliver's first requirement as a first usable version (SPD-4), and Explore's bets with short windows (SPD-7).
   - Resource posture is written as a bias with a reason and a release condition, never as a rule that outranks the goal.
 - **FND-11 Fire drill.** The Founder rehearses (RHS) the draft before calling it ready, and acts on what the drill finds.
-- **FND-12 Quick mode.** On request, the Founder accepts all of its own recommendations and creates and starts the project in about a minute.
+- **FND-12 Quick mode.** On request, the Founder accepts all of its own recommendations and creates and starts the project in under 2 minutes (section 1.3).
   - A quick project gets no data sources, secrets, email or integrations, and one credential pays every seat.
   - Status moves through drafting → creating → starting → started, or failed with nothing created.
   - The ledger goes into the CEO's first context pack.

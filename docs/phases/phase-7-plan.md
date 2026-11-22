@@ -12,7 +12,7 @@ Goal (PLAN.md): start a project by talking. A pasted document is grilled before 
   - the same document grilled in a running project also surfaces its planted conflict with a standing order.
 - The full v2.0 acceptance suite passes. The Standards item and the Slack column of surface parity stay in phase 8.
 
-Status: **draft, waiting for the owner's answers.** The questions are at the end.
+Status: **answered by the owner on 22 Nov 2026, except which repository holds v1.** The answers are at the end.
 
 ## What phase 7 covers
 
@@ -106,11 +106,14 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 - **Size.** The largest phase so far in new surface: two new domains, a new web view and the full acceptance run.
 - **The phase 2 role stand-in is used everywhere.** Replacing it with pinned role versions touches hiring, context packs and lineups.
 
-## Questions for the owner
+## Owner answers (22 Nov 2026)
 
-1. **The v1 content.** `content/` has no roles, crews, doctrine or goal grammar, and I cannot reach the v1 repository from here.
-2. **Proving the grader.** FND-7 says the rubric's accuracy is tested against reference goals. With no real model in tests, that can only be run by you.
-3. **The reference documents.** Section 13 needs a reference goal with a hand-graded grammar, a raw brief, a seeded document and three reference specs. None exist.
-4. **Review items R-31, R-32 and R-51.**
+| Question | Answer |
+| --- | --- |
+| The v1 content | **The owner gives read access to the v1 repository,** and the build imports and converts its roles, crews, doctrine and goal grammar. Which repository is still to be named |
+| Proving the grader | **A command the owner runs:** `crewmind founder eval` grades the reference goals with the owner's own model key and prints agreement with the hand grades. Tests here prove the rules and the flow. FND-7's accuracy clause stays partial until it is run |
+| The reference documents | **The build writes them, the owner reviews:** the reference goal with its hand grades, the raw brief, the seeded document and the three reference specs, in `acceptance/` |
+| Review items R-31, R-32, R-51 | Accepted as recommended; applied in spec revision 2.18 |
+| Review stops | One, at the full exit demo |
 
-Review stops: one, at the full exit demo, as in phase 6, unless you say otherwise.
+Open: the name of the v1 repository.
