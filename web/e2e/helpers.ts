@@ -34,6 +34,14 @@ export function setWorkScript(seat: "CEO" | "Reviewer", turns: unknown[]): void 
   writeFileSync(join(runDir, "scripts", `${seat}.work.json`), JSON.stringify(turns));
 }
 
+/**
+ * Scripts a mock agent's work runs one by one: its next run plays `runs[0]`, the one after `runs[1]`,
+ * and every later run plays `then`. Nothing is repeated, so the script need not be set back.
+ */
+export function setWorkRuns(seat: "CEO" | "Reviewer", runs: unknown[][], then: unknown[] = IDLE_SCRIPT): void {
+  writeFileSync(join(runDir, "scripts", `${seat}.work.json`), JSON.stringify({ runs, then }));
+}
+
 /** One scripted turn that calls these agent tools in order. */
 export function toolTurn(...tools: [name: string, args: Record<string, unknown>][]): unknown {
   return { text: "Working.", tools: tools.map(([name, args]) => ({ name, arguments: args })) };

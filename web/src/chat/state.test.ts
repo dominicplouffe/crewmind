@@ -69,3 +69,13 @@ it("drops late words of a reply the person stopped (CHAT-4)", () => {
   state = reduce(state, { type: "reply", chunk: { ...chunk, run_id: "r2" }, at: 3 });
   expect(state.typing).toHaveLength(1);
 });
+
+it("says the stream dropped only once it reported a failure, not while it first connects", () => {
+  expect(initialState.dropped).toBe(false);
+  const connected = reduce(initialState, { type: "live", live: true });
+  expect([connected.live, connected.dropped]).toEqual([true, false]);
+  const lost = reduce(connected, { type: "live", live: false });
+  expect([lost.live, lost.dropped]).toEqual([false, true]);
+  // A stream that never connects reports a failure too.
+  expect(reduce(initialState, { type: "live", live: false }).dropped).toBe(true);
+});

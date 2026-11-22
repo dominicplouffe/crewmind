@@ -10,7 +10,7 @@ const runs = (count: number): string => plural(count, "run", "runs");
 
 export const plan = {
   tabsLabel: "Plan sections",
-  tabs: { scope: "Scope", dates: "Dates and budget", finish: "Finish" },
+  tabs: { scope: "Scope", dates: "Dates and budget", finish: "Finish", items: "Decision items", agenda: "Agenda" },
   refresh: "Refresh",
   stateOf: "State",
   duration: {

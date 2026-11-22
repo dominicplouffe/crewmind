@@ -1,9 +1,10 @@
-/** Dates and budget: the projection, the commitment and target beside it, the CEO's reserve and requests for more. */
+/** Dates and budget: the projection, the commitment and target beside it, the CEO's reserve, requests for more, and real-world spend. */
 import { formatDateTime, formatNumber } from "../../lib/format";
 import { t } from "../../strings";
 import { Commitment } from "./Commitment";
 import { Section, type PlanTabProps } from "./parts";
 import { Raises, Reserve } from "./Reserve";
+import { Spend } from "./Spend";
 import { Target } from "./Target";
 
 function Projection({ plan }: Pick<PlanTabProps, "plan">): JSX.Element {
@@ -65,6 +66,7 @@ export function DatesTab(props: PlanTabProps): JSX.Element {
       <Target {...props} />
       <Reserve {...props} />
       <Raises {...props} />
+      <Spend {...props} />
     </>
   );
 }

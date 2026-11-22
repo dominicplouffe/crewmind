@@ -5,6 +5,7 @@ import { ErrorNote, Loading } from "../components/common";
 import { formatValue } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
+import { ApprovedClients } from "./ApprovedClients";
 
 type Setting = Schemas["SettingItem"];
 type View = Schemas["SettingsView"];
@@ -158,6 +159,7 @@ export function SettingsPanel({ projectId, changes }: { projectId: string; chang
           }}
         />
       ) : null}
+      <ApprovedClients />
     </>
   );
 }

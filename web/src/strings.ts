@@ -4,6 +4,8 @@
  */
 
 import { board } from "./strings.board";
+import { decisions } from "./strings.decisions";
+import { oauth } from "./strings.oauth";
 import { plan } from "./strings.plan";
 import { listening, memory } from "./strings.memory";
 
@@ -240,6 +242,8 @@ export const t = {
   memory,
   board,
   plan,
+  decisions,
+  oauth,
   settings: {
     project: "This project",
     mine: "Only for you",

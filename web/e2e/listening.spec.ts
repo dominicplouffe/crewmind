@@ -374,12 +374,26 @@ test("the Memory panel, the message menu and the dialogs are accessible in both 
 test("earlier messages load a page at a time and the view stays where it was", async () => {
   await createProject(page, "History project");
   const projectId = page.url().split("/").pop() ?? "";
+  let lastSent = 0;
   for (let index = 1; index <= 120; index += 1) {
     const sent = await page.request.post("/v1/chat/send", {
       data: { project_id: projectId, body: `History line ${index}.`, reply_to: null },
     });
     expect(sent.ok()).toBe(true);
+    lastSent = ((await sent.json()) as { id: number }).id;
   }
+  // A job answers each message with a "No reply" status line, some time after it was sent. Wait for
+  // the last one, so no line arrives below while this test counts and pages.
+  await expect
+    .poll(
+      async () => {
+        const newest = await page.request.get(`/v1/chat/history?project_id=${projectId}&limit=50`);
+        const items = ((await newest.json()) as { items: { kind: string; reply_to: number | null }[] }).items;
+        return items.some((item) => item.kind === "status" && item.reply_to === lastSent);
+      },
+      { timeout: 60_000, intervals: [250] },
+    )
+    .toBe(true);
   await page.reload();
   const line = (index: number): Locator =>
     page.getByTestId("message-person").getByText(`History line ${index}.`, { exact: true });
@@ -389,20 +403,23 @@ test("earlier messages load a page at a time and the view stays where it was", a
   const firstShown = await shown.count();
   expect(firstShown).toBeLessThanOrEqual(50);
 
+  // The header above the chat fills in after the messages do, and moves the list down: wait for it.
+  await expect(page.getByTestId("project-state")).toBeVisible();
   const earlier = page.getByRole("button", { name: "Show earlier messages" });
   await earlier.scrollIntoViewIfNeeded();
   const anchor = shown.first();
   const anchorId = await anchor.getAttribute("id");
   const top = (await anchor.boundingBox())?.y ?? 0;
   await earlier.click();
-  await expect.poll(() => shown.count()).toBeGreaterThan(firstShown);
+  await expect(shown.first()).not.toHaveAttribute("id", anchorId ?? "");
+  expect(await shown.count()).toBeGreaterThan(firstShown);
   const after = (await page.locator(`#${anchorId}`).boundingBox())?.y ?? -1;
   expect(Math.abs(after - top)).toBeLessThanOrEqual(2);
 
   for (let pages = 0; pages < 10 && (await earlier.count()) > 0; pages += 1) {
-    const count = await shown.count();
+    const oldest = (await shown.first().getAttribute("id")) ?? "";
     await earlier.click();
-    await expect.poll(() => shown.count()).toBeGreaterThan(count);
+    await expect(shown.first()).not.toHaveAttribute("id", oldest);
   }
   await expect(earlier).toHaveCount(0);
   await expect(line(1)).toBeAttached();

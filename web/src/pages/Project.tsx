@@ -17,6 +17,9 @@ import { AlertsButton } from "../components/AlertsButton";
 import { CommandPalette, type PaletteItem } from "../components/CommandPalette";
 import { ErrorNote } from "../components/common";
 import { ThemeButton, useThemeContext } from "../components/ThemeButton";
+import { AwayNote } from "../desk/AwayNote";
+import { ItemsContext, type ItemsScope } from "../desk/context";
+import { DeskLink } from "../desk/DeskLink";
 import type { MentionTarget } from "../lib/autocomplete";
 import { useLoad } from "../lib/useLoad";
 import { ProjectPanel } from "../panels/ProjectPanel";
@@ -151,10 +154,16 @@ export function Project(): JSX.Element {
           run: () => navigate(`/projects/${project.project_id}`),
         })),
       { key: "projects", label: t.palette.allProjects, detail: t.palette.project, run: () => navigate("/") },
+      { key: "desk", label: t.decisions.desk.palette, detail: t.palette.project, run: () => navigate("/desk") },
       { key: "theme", label: t.palette.theme, detail: t.palette.setting, run: theme.toggle },
       { key: "signout", label: t.app.signOut, detail: t.palette.setting, run: () => void signOut() },
     ],
     [commands, navigate, open, projectId, projects.data, signOut, theme.toggle],
+  );
+
+  const items = useMemo<ItemsScope>(
+    () => ({ projectId, changes: state.changes, onChanged: actions.refresh }),
+    [projectId, state.changes, actions.refresh],
   );
 
   const send = (body: string): void => {
@@ -163,97 +172,101 @@ export function Project(): JSX.Element {
   };
 
   return (
-    <div className={panel ? "project has-panel" : "project"}>
-      <header className="appbar">
-        <Link to="/" className="brand">
-          {t.app.name}
-        </Link>
-        <h1 className="project-title">{projectName}</h1>
-        <span className="spacer" />
-        <nav aria-label={t.panels.navLabel} className="panel-nav">
-          {PANEL_ORDER.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className="button small"
-              aria-pressed={panel?.id === id}
-              onClick={() => (panel?.id === id ? closePanel() : open(id))}
-            >
-              {t.panels.names[id]}
-            </button>
-          ))}
-        </nav>
-        <button type="button" className="button small" onClick={() => setPalette(true)} aria-keyshortcuts="Control+K Meta+K">
-          {t.palette.open}
-        </button>
-        <AlertsButton />
-        <ThemeButton />
-      </header>
-      <HeaderStrip header={state.header} onOpen={open} onAction={(action) => void actions.projectAction(action)} />
-      <ErrorNote error={status.error} />
-      {state.loaded && !state.live ? (
-        <p className="offline" role="status">
-          {t.chat.reconnecting}
-        </p>
-      ) : null}
-      <div className="workspace">
-        <main
-          className={dragging ? "chat is-dragging" : "chat"}
-          aria-label={t.chat.mainLabel}
-          onDragOver={(event) => {
-            if (event.dataTransfer.types.includes("Files")) {
-              event.preventDefault();
-              setDragging(true);
-            }
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(event) => {
-            if (event.dataTransfer.files.length > 0) {
-              event.preventDefault();
-              uploads.add(Array.from(event.dataTransfer.files));
-            }
-            setDragging(false);
-          }}
-        >
-          <MessageList
-            state={state}
-            handlers={handlers}
-            onRetry={actions.retry}
-            onDismissPending={actions.dismissPending}
-            onDismissNotice={actions.dismissNotice}
-            onInterrupt={() => void actions.interrupt()}
-            onEarlier={actions.loadEarlier}
-          />
-          {dragging ? <p className="drop-hint">{t.composer.dropHint}</p> : null}
-          <Composer
-            ref={composer}
-            commands={commands}
-            mentions={mentions}
-            history={history}
-            replyTo={replyTo}
-            replying={state.typing.length > 0}
-            uploads={uploads.uploads}
-            onSend={send}
-            onCancelReply={() => setReplyTo(null)}
-            onInterrupt={() => void actions.interrupt()}
-            onFiles={uploads.add}
-            onDismissUpload={uploads.dismiss}
-          />
-        </main>
-        {panel ? (
-          <ProjectPanel
-            projectId={projectId}
-            panel={panel}
-            state={state}
-            handlers={handlers}
-            onClose={closePanel}
-            onPanel={setPanel}
-            onChanged={actions.refresh}
-          />
+    <ItemsContext.Provider value={items}>
+      <div className={panel ? "project has-panel" : "project"}>
+        <header className="appbar">
+          <Link to="/" className="brand">
+            {t.app.name}
+          </Link>
+          <h1 className="project-title">{projectName}</h1>
+          <span className="spacer" />
+          <DeskLink changes={state.changes} />
+          <nav aria-label={t.panels.navLabel} className="panel-nav">
+            {PANEL_ORDER.map((id) => (
+              <button
+                key={id}
+                type="button"
+                className="button small"
+                aria-pressed={panel?.id === id}
+                onClick={() => (panel?.id === id ? closePanel() : open(id))}
+              >
+                {t.panels.names[id]}
+              </button>
+            ))}
+          </nav>
+          <button type="button" className="button small" onClick={() => setPalette(true)} aria-keyshortcuts="Control+K Meta+K">
+            {t.palette.open}
+          </button>
+          <AlertsButton />
+          <ThemeButton />
+        </header>
+        <HeaderStrip header={state.header} onOpen={open} onAction={(action) => void actions.projectAction(action)} />
+        <ErrorNote error={status.error} />
+        {state.loaded && state.dropped && !state.live ? (
+          <p className="offline" role="status">
+            {t.chat.reconnecting}
+          </p>
         ) : null}
+        <div className="workspace">
+          <main
+            className={dragging ? "chat is-dragging" : "chat"}
+            aria-label={t.chat.mainLabel}
+            onDragOver={(event) => {
+              if (event.dataTransfer.types.includes("Files")) {
+                event.preventDefault();
+                setDragging(true);
+              }
+            }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(event) => {
+              if (event.dataTransfer.files.length > 0) {
+                event.preventDefault();
+                uploads.add(Array.from(event.dataTransfer.files));
+              }
+              setDragging(false);
+            }}
+          >
+            <AwayNote projectId={projectId} />
+            <MessageList
+              state={state}
+              handlers={handlers}
+              onRetry={actions.retry}
+              onDismissPending={actions.dismissPending}
+              onDismissNotice={actions.dismissNotice}
+              onInterrupt={() => void actions.interrupt()}
+              onEarlier={actions.loadEarlier}
+            />
+            {dragging ? <p className="drop-hint">{t.composer.dropHint}</p> : null}
+            <Composer
+              ref={composer}
+              commands={commands}
+              mentions={mentions}
+              history={history}
+              replyTo={replyTo}
+              replying={state.typing.length > 0}
+              uploads={uploads.uploads}
+              onSend={send}
+              onCancelReply={() => setReplyTo(null)}
+              onInterrupt={() => void actions.interrupt()}
+              onFiles={uploads.add}
+              onDismissUpload={uploads.dismiss}
+            />
+          </main>
+          {panel ? (
+            <ProjectPanel
+              projectId={projectId}
+              panel={panel}
+              state={state}
+              handlers={handlers}
+              onClose={closePanel}
+              onPanel={setPanel}
+              onChanged={actions.refresh}
+            />
+          ) : null}
+        </div>
+        <ListeningDialogs listening={listening} />
+        {palette ? <CommandPalette items={paletteItems} onClose={() => setPalette(false)} /> : null}
       </div>
-      <ListeningDialogs listening={listening} />
-      {palette ? <CommandPalette items={paletteItems} onClose={() => setPalette(false)} /> : null}
-    </div>
+    </ItemsContext.Provider>
   );
 }

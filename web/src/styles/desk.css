@@ -1,0 +1,30 @@
+/* The Desk, decision cards, the summary after time away, and the agenda. */
+a.button {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text);
+  text-decoration: none;
+}
+.item-card { color: var(--text); font-size: 1rem; margin: 0.3rem 0; }
+.item-card p { margin: 0.3rem 0; }
+.item-card ul, .item-card ol { margin: 0.3rem 0; padding-left: 1.25rem; }
+.item-card textarea, .item-card input:not([type="radio"]) { width: 100%; }
+.item-label { font-weight: 600; font-size: 1rem; margin: 0.4rem 0 0.1rem; }
+.item-fields { margin: 0.3rem 0; }
+.desk-group { margin: 1.25rem 0; }
+.desk-group h2 { margin: 0; }
+.desk-group li { list-style: none; }
+.desk-group ul ul li, .desk-group .item-card li { list-style: revert; }
+.away-note {
+  max-width: 52rem;
+  width: calc(100% - 1.5rem);
+  margin: 0.5rem auto 0;
+}
+.away-note ul { margin: 0.2rem 0 0.4rem; padding-left: 1.25rem; }
+.agenda-day { margin-bottom: 1rem; }
+.agenda-day li {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 0 0.75rem;
+}
+.agenda-day li p { margin: 0; }

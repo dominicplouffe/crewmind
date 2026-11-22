@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/.well-known/oauth-authorization-server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Metadata */
+        get: operations["metadata__well_known_oauth_authorization_server_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/.well-known/oauth-protected-resource": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resource */
+        get: operations["resource__well_known_oauth_protected_resource_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/files/v1/projects/{project_id}/artifacts/{name}": {
         parameters: {
             query?: never;
@@ -46,6 +80,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/oauth/authorize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Authorize
+         * @description Send the browser to the app, where the signed-in person approves or not.
+         */
+        get: operations["authorize_oauth_authorize_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register */
+        post: operations["register_oauth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/oauth/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Token */
+        post: operations["token_oauth_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/stream/v1/projects/{project_id}": {
         parameters: {
             query?: never;
@@ -55,6 +143,26 @@ export interface paths {
         };
         /** Stream */
         get: operations["stream_stream_v1_projects__project_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agenda/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show what will happen in a project in the next days.
+         * @description Requires: project_observer.
+         */
+        get: operations["agenda.show"];
         put?: never;
         post?: never;
         delete?: never;
@@ -363,6 +471,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/brief/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show your brief for the last day, built from the record now.
+         * @description Requires: person.
+         */
+        get: operations["brief.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/budget/command": {
         parameters: {
             query?: never;
@@ -597,6 +725,26 @@ export interface paths {
          * @description Requires: project_observer.
          */
         post: operations["chat.mark_read"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/chat/opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say you opened a project's chat. If you were away, you get what happened.
+         * @description Requires: project_observer.
+         */
+        post: operations["chat.opened"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1123,6 +1271,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/desk/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show everything that waits on you, across your projects.
+         * @description Requires: person.
+         */
+        get: operations["desk.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/directives/issue": {
         parameters: {
             query?: never;
@@ -1237,6 +1405,126 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["gaps.waive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decide an item with one of its actions.
+         * @description Requires: project_chair.
+         */
+        post: operations["items.decide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/extend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Give an open approval more time, with a reason.
+         * @description Requires: project_chair.
+         */
+        post: operations["items.extend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's decision items: what waits on you, and what was decided.
+         * @description Requires: project_observer.
+         */
+        get: operations["items.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/note": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write your note on an item.
+         * @description Requires: project_chair.
+         */
+        post: operations["items.note"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one decision item with its full history.
+         * @description Requires: project_observer.
+         */
+        get: operations["items.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/items/snooze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hide an item from your desk for a while. It returns by its deadline.
+         * @description Requires: project_observer.
+         */
+        post: operations["items.snooze"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1777,6 +2065,106 @@ export interface paths {
         get: operations["models.show"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve an MCP client for the scopes you choose. Returns where to send the browser.
+         * @description Requires: person.
+         */
+        post: operations["oauth.approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/clients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the MCP clients you approved through OAuth.
+         * @description Requires: person.
+         */
+        get: operations["oauth.clients"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register an MCP client so a person can approve it.
+         * @description Requires: anyone.
+         */
+        post: operations["oauth.register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke an MCP client you approved. Its tokens stop working at once.
+         * @description Requires: person.
+         */
+        post: operations["oauth.revoke"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/oauth/token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Exchange an authorization code or a refresh token for an access token.
+         * @description Requires: anyone.
+         */
+        post: operations["oauth.token"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2683,6 +3071,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/reviews/lever": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a lever you are using on a status review, with your reason.
+         * @description Requires: project_chair.
+         */
+        post: operations["reviews.lever"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/roles/list": {
         parameters: {
             query?: never;
@@ -3003,6 +3411,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/spend/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show real-world spend: the cap, what is committed this month, and each purchase.
+         * @description Requires: project_observer.
+         */
+        get: operations["spend.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tasks/list": {
         parameters: {
             query?: never;
@@ -3292,6 +3720,30 @@ export interface components {
              */
             role: "co-chair" | "observer";
         };
+        /** Agenda */
+        Agenda: {
+            /** Lines */
+            lines: components["schemas"]["AgendaLine"][];
+            /**
+             * Next Wake
+             * @description The next time the clock, not a message, wakes an agent.
+             */
+            next_wake: string | null;
+            /** Timezone */
+            timezone: string;
+        };
+        /** AgendaLine */
+        AgendaLine: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** Consequence */
+            consequence: string;
+            /** What */
+            what: string;
+        };
         /** Alerts */
         Alerts: {
             /**
@@ -3317,6 +3769,53 @@ export interface components {
              * @description The request's id, from `decisions requests`.
              */
             request_id: number;
+        };
+        /** ApproveInput */
+        ApproveInput: {
+            /** Client Id */
+            client_id: string;
+            /**
+             * Code Challenge
+             * @description The PKCE challenge.
+             * @default
+             */
+            code_challenge?: string;
+            /**
+             * Code Challenge Method
+             * @description Must be S256.
+             * @default
+             */
+            code_challenge_method?: string;
+            /**
+             * Redirect Uri
+             * @description One of the client's registered redirect addresses.
+             */
+            redirect_uri: string;
+            /**
+             * Resource
+             * @description The MCP server the token is for.
+             * @default
+             */
+            resource?: string;
+            /**
+             * Scopes
+             * @description read, steer, create, configure.
+             */
+            scopes: string[];
+            /**
+             * State
+             * @description Returned to the client as is.
+             * @default
+             */
+            state?: string;
+        };
+        /** Approved */
+        Approved: {
+            /**
+             * Redirect To
+             * @description Where to send the browser. It carries the one-time code.
+             */
+            redirect_to: string;
         };
         /** ArtifactItem */
         ArtifactItem: {
@@ -3449,6 +3948,18 @@ export interface components {
              */
             verdict: "passed" | "failed";
         };
+        /** Away */
+        Away: {
+            /**
+             * Away
+             * @description Whether you were away long enough for a summary.
+             */
+            away: boolean;
+            /** Summary */
+            summary: {
+                [key: string]: string[];
+            } | null;
+        };
         /** BaseModel */
         BaseModel: Record<string, never>;
         /** BeginUploadInput */
@@ -3528,6 +4039,26 @@ export interface components {
              * @enum {string}
              */
             level: "short" | "normal" | "detailed";
+        };
+        /** Brief */
+        Brief: {
+            /**
+             * Projects
+             * @description Per project: worth your eye, what moved, what the CEO handled itself, what decided itself, and what happens next.
+             */
+            projects: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Since
+             * Format: date-time
+             */
+            since: string;
+            /**
+             * Until
+             * Format: date-time
+             */
+            until: string;
         };
         /** BudgetInput */
         BudgetInput: {
@@ -3942,19 +4473,6 @@ export interface components {
              */
             project_id: string;
         };
-        /** DecideInput */
-        DecideInput: {
-            /**
-             * Project Id
-             * @description The project's id, from `projects list`.
-             */
-            project_id: string;
-            /**
-             * Text
-             * @description The topic, a colon, then your ruling: `Taxes: never include them`.
-             */
-            text: string;
-        };
         /** DecisionItem */
         DecisionItem: {
             /**
@@ -4017,6 +4535,31 @@ export interface components {
             project_id: string;
             /** Purged After Days */
             purged_after_days: number;
+        };
+        /** Desk */
+        Desk: {
+            /**
+             * Waiting
+             * @description Everything that waits on you.
+             */
+            waiting: components["schemas"]["DeskEntry"][];
+        };
+        /** DeskEntry */
+        DeskEntry: {
+            /** Deadline */
+            deadline: string | null;
+            item: components["schemas"]["ItemView"] | null;
+            /** Project Id */
+            project_id: string;
+            /** Project Name */
+            project_name: string;
+            /** Title */
+            title: string;
+            /**
+             * What
+             * @description The item's kind, or expired bet, or frozen thread.
+             */
+            what: string;
         };
         /** DirectiveItem */
         DirectiveItem: {
@@ -4314,30 +4857,6 @@ export interface components {
             /** Message Id */
             message_id: number;
         };
-        /** ExtendInput */
-        ExtendInput: {
-            /**
-             * Bet Id
-             * @description The bet's id, from `plan show`.
-             */
-            bet_id: number;
-            /**
-             * Project Id
-             * @description The project's id, from `projects list`.
-             */
-            project_id: string;
-            /**
-             * Reason
-             * @description Why it gets more time.
-             */
-            reason: string;
-            /**
-             * Until
-             * Format: date-time
-             * @description The new kill date.
-             */
-            until: string;
-        };
         /** Feed */
         Feed: {
             /** Items */
@@ -4363,6 +4882,12 @@ export interface components {
         };
         /** FixInput */
         FixInput: {
+            /**
+             * Cost Us
+             * @description This mistake cost us: the CEO owes a mistake report.
+             * @default false
+             */
+            cost_us?: boolean;
             /**
              * Message Id
              * @description The agent's message. Default: the newest one in the chat.
@@ -4398,6 +4923,33 @@ export interface components {
             text: string;
             /** Waived Reason */
             waived_reason: string | null;
+        };
+        /** GrantItem */
+        GrantItem: {
+            /** Client Name */
+            client_name: string;
+            /** Grant Id */
+            grant_id: string;
+            /** Scopes */
+            scopes: string[];
+            /**
+             * Since
+             * Format: date-time
+             */
+            since: string;
+        };
+        /** GrantList */
+        GrantList: {
+            /** Items */
+            items: components["schemas"]["GrantItem"][];
+        };
+        /** GrantRef */
+        GrantRef: {
+            /**
+             * Grant Id
+             * @description The grant's id, from `oauth clients`.
+             */
+            grant_id: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -4480,6 +5032,20 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** HistoryLine */
+        HistoryLine: {
+            /** Actor Kind */
+            actor_kind: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** State */
+            state: string | null;
+            /** What */
+            what: string;
+        };
         /** HoldInput */
         HoldInput: {
             /**
@@ -4551,6 +5117,129 @@ export interface components {
              */
             role?: components["schemas"]["InstanceRole"];
         };
+        /** ItemDetail */
+        ItemDetail: {
+            /**
+             * Actions
+             * @description What you can do with it now.
+             */
+            actions: string[];
+            /** Basis */
+            basis: {
+                [key: string]: unknown;
+            } | null;
+            /** Chairman Note */
+            chairman_note: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Deadline */
+            deadline: string | null;
+            /**
+             * Default Outcome
+             * @description What happens if nobody answers.
+             */
+            default_outcome: string | null;
+            /** Fields */
+            fields: {
+                [key: string]: unknown;
+            };
+            /**
+             * Filed By
+             * @description agent or platform.
+             */
+            filed_by: string;
+            /** History */
+            history: components["schemas"]["HistoryLine"][];
+            /** Id */
+            id: number;
+            /** If Declined */
+            if_declined: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Outcome */
+            outcome: string | null;
+            /** Project Id */
+            project_id: string;
+            /** Recommendation */
+            recommendation: string;
+            /** State */
+            state: string;
+            /**
+             * Title
+             * @description Built from the item's typed fields.
+             */
+            title: string;
+            /** Waits On You */
+            waits_on_you: boolean;
+        };
+        /** ItemList */
+        ItemList: {
+            /** Items */
+            items: components["schemas"]["ItemView"][];
+        };
+        /** ItemView */
+        ItemView: {
+            /**
+             * Actions
+             * @description What you can do with it now.
+             */
+            actions: string[];
+            /** Basis */
+            basis: {
+                [key: string]: unknown;
+            } | null;
+            /** Chairman Note */
+            chairman_note: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Deadline */
+            deadline: string | null;
+            /**
+             * Default Outcome
+             * @description What happens if nobody answers.
+             */
+            default_outcome: string | null;
+            /** Fields */
+            fields: {
+                [key: string]: unknown;
+            };
+            /**
+             * Filed By
+             * @description agent or platform.
+             */
+            filed_by: string;
+            /** Id */
+            id: number;
+            /** If Declined */
+            if_declined: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Outcome */
+            outcome: string | null;
+            /** Project Id */
+            project_id: string;
+            /** Recommendation */
+            recommendation: string;
+            /** State */
+            state: string;
+            /**
+             * Title
+             * @description Built from the item's typed fields.
+             */
+            title: string;
+            /** Waits On You */
+            waits_on_you: boolean;
+        };
         /**
          * Kind
          * @enum {string}
@@ -4568,6 +5257,29 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** LeverInput */
+        LeverInput: {
+            /**
+             * Item Id
+             * @description The item's id, from `items list`.
+             */
+            item_id: number;
+            /**
+             * Lever
+             * @description cut, add, reword, move the date, raise the budget, or accept the slip.
+             */
+            lever: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Reason
+             * @description Why.
+             */
+            reason: string;
         };
         /** LinkOutput */
         LinkOutput: {
@@ -4852,6 +5564,24 @@ export interface components {
             quality: string;
             /** Seats */
             seats: components["schemas"]["SeatModel"][];
+        };
+        /** NoteInput */
+        NoteInput: {
+            /**
+             * Item Id
+             * @description The item's id, from `items list`.
+             */
+            item_id: number;
+            /**
+             * Note
+             * @description Your note on the item.
+             */
+            note: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
         };
         /** OrderItem */
         OrderItem: {
@@ -5234,6 +5964,25 @@ export interface components {
             /** Items */
             items: components["schemas"]["ProviderItem"][];
         };
+        /** PurchaseLine */
+        PurchaseLine: {
+            /** Amount */
+            amount: number;
+            /**
+             * Declared At
+             * Format: date-time
+             */
+            declared_at: string;
+            /** Id */
+            id: number;
+            /**
+             * State
+             * @description committed, bought or cancelled.
+             */
+            state: string;
+            /** What */
+            what: string;
+        };
         /** PushIdentity */
         PushIdentity: {
             /**
@@ -5313,6 +6062,28 @@ export interface components {
             items: components["schemas"]["EventItem"][];
             /** Next */
             next?: string | null;
+        };
+        /** RegisterInput */
+        RegisterInput: {
+            /**
+             * Client Name
+             * @description The client's name.
+             */
+            client_name: string;
+            /**
+             * Redirect Uris
+             * @description Where codes go.
+             */
+            redirect_uris: string[];
+        };
+        /** RegisteredClient */
+        RegisteredClient: {
+            /** Client Id */
+            client_id: string;
+            /** Client Name */
+            client_name: string;
+            /** Redirect Uris */
+            redirect_uris: string[];
         };
         /** Registry */
         Registry: {
@@ -5744,6 +6515,35 @@ export interface components {
             /** Tokens */
             tokens: number;
         };
+        /** SnoozeInput */
+        SnoozeInput: {
+            /**
+             * Item Id
+             * @description The item's id, from `items list`.
+             */
+            item_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Until
+             * Format: date-time
+             * @description When it should come back to your desk.
+             */
+            until: string;
+        };
+        /** Snoozed */
+        Snoozed: {
+            /** Item Id */
+            item_id: number;
+            /**
+             * Until
+             * Format: date-time
+             */
+            until: string;
+        };
         /** SpeedView */
         SpeedView: {
             /**
@@ -5764,6 +6564,24 @@ export interface components {
             where: {
                 [key: string]: number;
             };
+        };
+        /** SpendView */
+        SpendView: {
+            /**
+             * Approval At
+             * @description A purchase at or above this needs your approval.
+             */
+            approval_at: number;
+            /** Committed This Month */
+            committed_this_month: number;
+            /** Currency */
+            currency: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Monthly Cap */
+            monthly_cap: number;
+            /** Purchases */
+            purchases: components["schemas"]["PurchaseLine"][];
         };
         /** SubscribeInput */
         SubscribeInput: {
@@ -5971,6 +6789,31 @@ export interface components {
              */
             started_at: string;
         };
+        /** TokenInput */
+        TokenInput: {
+            /** Client Id */
+            client_id: string;
+            /** Code */
+            code?: string | null;
+            /** Code Verifier */
+            code_verifier?: string | null;
+            /**
+             * Grant Type
+             * @enum {string}
+             */
+            grant_type: "authorization_code" | "refresh_token";
+            /** Redirect Uri */
+            redirect_uri?: string | null;
+            /** Refresh Token */
+            refresh_token?: string | null;
+            /** Resource */
+            resource?: string | null;
+            /**
+             * Scope
+             * @description May narrow the grant, never widen it.
+             */
+            scope?: string | null;
+        };
         /** TokenItem */
         TokenItem: {
             /**
@@ -6003,6 +6846,22 @@ export interface components {
              * @description The token's id, from the list.
              */
             token_id: string;
+        };
+        /** Tokens */
+        Tokens: {
+            /** Access Token */
+            access_token: string;
+            /** Expires In */
+            expires_in: number;
+            /** Refresh Token */
+            refresh_token: string;
+            /** Scope */
+            scope: string;
+            /**
+             * Token Type
+             * @default Bearer
+             */
+            token_type?: string;
         };
         /** UnsubscribeInput */
         UnsubscribeInput: {
@@ -6161,6 +7020,19 @@ export interface components {
             /** Seat */
             seat: string;
         };
+        /** DecideInput */
+        crewmind__domain__conversation__decisions__DecideInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Text
+             * @description The topic, a colon, then your ruling: `Taxes: never include them`.
+             */
+            text: string;
+        };
         /** RuleInput */
         crewmind__domain__conversation__decisions__RuleInput: {
             /**
@@ -6209,6 +7081,67 @@ export interface components {
             /** Next */
             next?: string | null;
         };
+        /** DecideInput */
+        crewmind__domain__decisions__operations__DecideInput: {
+            /**
+             * Action
+             * @description One of the item's actions.
+             */
+            action: string;
+            /**
+             * Amount
+             * @description A number to grant instead.
+             */
+            amount?: number | null;
+            /**
+             * Date
+             * @description A date of your own, where asked.
+             */
+            date?: string | null;
+            /**
+             * Item Id
+             * @description The item's id, from `items list`.
+             */
+            item_id: number;
+            /**
+             * Note
+             * @description Your note.
+             */
+            note?: string | null;
+            /**
+             * Option
+             * @description The option you pick.
+             */
+            option?: number | null;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
+        /** ExtendInput */
+        crewmind__domain__decisions__operations__ExtendInput: {
+            /**
+             * Days
+             * @description How many days more: 1 to 30.
+             */
+            days: number;
+            /**
+             * Item Id
+             * @description The item's id, from `items list`.
+             */
+            item_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Reason
+             * @description Why it needs more time.
+             */
+            reason: string;
+        };
         /** ReasonInput */
         crewmind__domain__planning__delivery_operations__ReasonInput: {
             /**
@@ -6221,6 +7154,30 @@ export interface components {
              * @description Why.
              */
             reason: string;
+        };
+        /** ExtendInput */
+        crewmind__domain__planning__explore_operations__ExtendInput: {
+            /**
+             * Bet Id
+             * @description The bet's id, from `plan show`.
+             */
+            bet_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Reason
+             * @description Why it gets more time.
+             */
+            reason: string;
+            /**
+             * Until
+             * Format: date-time
+             * @description The new kill date.
+             */
+            until: string;
         };
         /** AcceptInput */
         crewmind__domain__planning__operations__AcceptInput: {
@@ -6298,6 +7255,46 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    metadata__well_known_oauth_authorization_server_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    resource__well_known_oauth_protected_resource_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     download_files_v1_projects__project_id__artifacts__name__get: {
         parameters: {
             query?: {
@@ -6365,6 +7362,66 @@ export interface operations {
             };
         };
     };
+    authorize_oauth_authorize_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    register_oauth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    token_oauth_token_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     stream_stream_v1_projects__project_id__get: {
         parameters: {
             query?: {
@@ -6386,6 +7443,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "agenda.show": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description How far ahead. */
+                days?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Agenda"];
                 };
             };
             /** @description Validation Error */
@@ -6865,7 +7956,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ExtendInput"];
+                "application/json": components["schemas"]["crewmind__domain__planning__explore_operations__ExtendInput"];
             };
         };
         responses: {
@@ -6885,6 +7976,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "brief.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Brief"];
                 };
             };
         };
@@ -7268,6 +8379,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Done"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "chat.opened": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Away"];
                 };
             };
             /** @description Validation Error */
@@ -7972,7 +9116,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DecideInput"];
+                "application/json": components["schemas"]["crewmind__domain__conversation__decisions__DecideInput"];
             };
         };
         responses: {
@@ -8122,6 +9266,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "desk.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Desk"];
                 };
             };
         };
@@ -8309,6 +9473,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["crewmind__domain__decisions__operations__DecideInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.extend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["crewmind__domain__decisions__operations__ExtendInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description Leave out items that are closed. */
+                open_only?: boolean;
+                /** @description Only items of this kind. */
+                kind?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.note": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.show": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description The item's id, from `items list`. */
+                item_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "items.snooze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SnoozeInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Snoozed"];
                 };
             };
             /** @description Validation Error */
@@ -9179,6 +10545,158 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ModelsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "oauth.approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Approved"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "oauth.clients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrantList"];
+                };
+            };
+        };
+    };
+    "oauth.register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisteredClient"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "oauth.revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GrantList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "oauth.token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Tokens"];
                 };
             };
             /** @description Validation Error */
@@ -10689,6 +12207,39 @@ export interface operations {
             };
         };
     };
+    "reviews.lever": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeverInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "roles.list": {
         parameters: {
             query?: never;
@@ -11165,6 +12716,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "spend.show": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpendView"];
                 };
             };
             /** @description Validation Error */

@@ -46,6 +46,8 @@ export interface ChatState {
   stopped: string[];
   loaded: boolean;
   live: boolean;
+  /** The stream reported that it stopped or could not connect. Before that, it is only still connecting. */
+  dropped: boolean;
   changes: number;
 }
 
@@ -64,6 +66,7 @@ export const initialState: ChatState = {
   stopped: [],
   loaded: false,
   live: false,
+  dropped: false,
   changes: 0,
 };
 
@@ -182,8 +185,11 @@ export function reduce(state: ChatState, action: ChatAction): ChatState {
       return { ...state, notices: [...state.notices, action.notice] };
     case "dropNotice":
       return { ...state, notices: state.notices.filter((n) => n.key !== action.key) };
-    case "live":
-      return state.live === action.live ? state : { ...state, live: action.live };
+    case "live": {
+      const dropped = state.dropped || !action.live;
+      if (state.live === action.live && state.dropped === dropped) return state;
+      return { ...state, live: action.live, dropped };
+    }
     case "changed":
       return { ...state, changes: state.changes + 1 };
   }

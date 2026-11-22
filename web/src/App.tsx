@@ -1,10 +1,13 @@
-/** Routes: sign in, accept a link, the project list, a project. */
+/** Routes: sign in, accept a link, the project list, the Desk, a project, approving an AI client. */
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth";
 import { Loading } from "./components/common";
 import { ThemeProvider } from "./components/ThemeButton";
+import { DeskPage } from "./desk/DeskPage";
+import { isApprovalLink } from "./lib/oauth";
 import { AcceptLink } from "./pages/AcceptLink";
+import { OAuthApprove } from "./pages/OAuthApprove";
 import { Projects } from "./pages/Projects";
 import { SignIn } from "./pages/SignIn";
 
@@ -20,8 +23,18 @@ function SignedIn({ children }: { children: JSX.Element }): JSX.Element {
       </main>
     );
   }
-  if (person === null) return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
+  if (person === null) {
+    // The whole address is kept, so a link that carries its request after "#" still works after sign-in.
+    const from = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to="/signin" replace state={{ from }} />;
+  }
   return children;
+}
+
+/** The start page: the project list, or the approval page when the server sent the browser here to approve a client. */
+function Home(): JSX.Element {
+  const { hash } = useLocation();
+  return isApprovalLink(hash) ? <OAuthApprove hash={hash} /> : <Projects />;
 }
 
 export function App(): JSX.Element {
@@ -36,7 +49,15 @@ export function App(): JSX.Element {
               path="/"
               element={
                 <SignedIn>
-                  <Projects />
+                  <Home />
+                </SignedIn>
+              }
+            />
+            <Route
+              path="/desk"
+              element={
+                <SignedIn>
+                  <DeskPage />
                 </SignedIn>
               }
             />

@@ -1,11 +1,12 @@
-/** One stored chat message: author, reply quote, body, action card or upload link, and its actions. */
+/** One stored chat message: author, reply quote, body, action or decision card or upload link, and its actions. */
 import { memo, useState } from "react";
 import type { Card, Message, Order, ReopenRequest } from "../api/client";
 import { Markdown } from "../components/common";
+import { ChatItemCard } from "../desk/ItemCard";
 import { formatDateTime, formatTime } from "../lib/format";
 import { t } from "../strings";
 import { ActionCard } from "./ActionCard";
-import { Markers, StatusActions, detailOf } from "./MessageExtras";
+import { Markers, StatusActions, detailOf, isReopenLine } from "./MessageExtras";
 import { MessageMenu, type MenuAction } from "./MessageMenu";
 import type { ListeningHandlers } from "./useListening";
 
@@ -101,6 +102,8 @@ function MessageItemInner({ message, parent, card, replies, handlers, compact, o
       ) : null}
       {detail.kind === "action card" && detail.card !== undefined ? (
         <ActionCard card={card} onAccept={handlers.onAccept} onDismiss={handlers.onDismiss} />
+      ) : detail.kind === "decision item" && detail.item !== undefined && !isReopenLine(detail) ? (
+        <ChatItemCard itemId={detail.item} />
       ) : (
         <div className={foldable && !open ? "body folded" : "body"}>
           <Markdown source={message.body} />

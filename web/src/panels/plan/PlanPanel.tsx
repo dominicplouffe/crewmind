@@ -1,16 +1,21 @@
-/** The Plan panel: what is in scope, when it will be done and what it will cost, and how the project finishes. */
+/**
+ * The Plan panel: what is in scope, when it will be done and what it will cost, how the project
+ * finishes, the decision items filed for the chairman, and what the clock will do next.
+ */
 import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { get } from "../../api/client";
 import { ErrorNote, Loading } from "../../components/common";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, useAct } from "../memory/parts";
+import { AgendaTab } from "./AgendaTab";
 import { DatesTab } from "./DatesTab";
 import { FinishTab } from "./FinishTab";
+import { ItemsTab } from "./ItemsTab";
 import type { Change, PlanTabProps } from "./parts";
 import { ScopeTab } from "./ScopeTab";
 
-const TABS = ["scope", "dates", "finish"] as const;
+const TABS = ["scope", "dates", "finish", "items", "agenda"] as const;
 type TabId = (typeof TABS)[number];
 
 interface Props {
@@ -63,7 +68,10 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
   };
 
   let body: JSX.Element | null = null;
-  if (plan.data && status.data) {
+  // Decision items and the agenda are loaded by their own tabs; the others show the plan.
+  if (tab === "items") body = <ItemsTab projectId={projectId} changes={changes} onChanged={onChanged} />;
+  else if (tab === "agenda") body = <AgendaTab projectId={projectId} changes={changes} />;
+  else if (plan.data && status.data) {
     const shared: PlanTabProps = {
       projectId,
       plan: plan.data,
@@ -81,7 +89,7 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
       case "dates":
         body = <DatesTab {...shared} />;
         break;
-      case "finish":
+      default:
         body = (
           <FinishTab
             {...shared}

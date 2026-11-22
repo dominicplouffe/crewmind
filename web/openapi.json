@@ -221,6 +221,65 @@
     "title": "AddMemberInput",
     "type": "object"
    },
+   "Agenda": {
+    "properties": {
+     "lines": {
+      "items": {
+       "$ref": "#/components/schemas/AgendaLine"
+      },
+      "title": "Lines",
+      "type": "array"
+     },
+     "next_wake": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The next time the clock, not a message, wakes an agent.",
+      "title": "Next Wake"
+     },
+     "timezone": {
+      "title": "Timezone",
+      "type": "string"
+     }
+    },
+    "required": [
+     "timezone",
+     "next_wake",
+     "lines"
+    ],
+    "title": "Agenda",
+    "type": "object"
+   },
+   "AgendaLine": {
+    "properties": {
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "consequence": {
+      "title": "Consequence",
+      "type": "string"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "at",
+     "what",
+     "consequence"
+    ],
+    "title": "AgendaLine",
+    "type": "object"
+   },
    "Alerts": {
     "properties": {
      "browsers": {
@@ -259,6 +318,73 @@
      "approve"
     ],
     "title": "AnswerInput",
+    "type": "object"
+   },
+   "ApproveInput": {
+    "properties": {
+     "client_id": {
+      "title": "Client Id",
+      "type": "string"
+     },
+     "code_challenge": {
+      "default": "",
+      "description": "The PKCE challenge.",
+      "title": "Code Challenge",
+      "type": "string"
+     },
+     "code_challenge_method": {
+      "default": "",
+      "description": "Must be S256.",
+      "title": "Code Challenge Method",
+      "type": "string"
+     },
+     "redirect_uri": {
+      "description": "One of the client's registered redirect addresses.",
+      "title": "Redirect Uri",
+      "type": "string"
+     },
+     "resource": {
+      "default": "",
+      "description": "The MCP server the token is for.",
+      "title": "Resource",
+      "type": "string"
+     },
+     "scopes": {
+      "description": "read, steer, create, configure.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Scopes",
+      "type": "array"
+     },
+     "state": {
+      "default": "",
+      "description": "Returned to the client as is.",
+      "maxLength": 500,
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "client_id",
+     "redirect_uri",
+     "scopes"
+    ],
+    "title": "ApproveInput",
+    "type": "object"
+   },
+   "Approved": {
+    "properties": {
+     "redirect_to": {
+      "description": "Where to send the browser. It carries the one-time code.",
+      "title": "Redirect To",
+      "type": "string"
+     }
+    },
+    "required": [
+     "redirect_to"
+    ],
+    "title": "Approved",
     "type": "object"
    },
    "ArtifactItem": {
@@ -565,6 +691,38 @@
     "title": "AuditVerdictInput",
     "type": "object"
    },
+   "Away": {
+    "properties": {
+     "away": {
+      "description": "Whether you were away long enough for a summary.",
+      "title": "Away",
+      "type": "boolean"
+     },
+     "summary": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Summary"
+     }
+    },
+    "required": [
+     "away",
+     "summary"
+    ],
+    "title": "Away",
+    "type": "object"
+   },
    "BaseModel": {
     "properties": {},
     "title": "BaseModel",
@@ -718,6 +876,36 @@
      "level"
     ],
     "title": "BrevityInput",
+    "type": "object"
+   },
+   "Brief": {
+    "properties": {
+     "projects": {
+      "description": "Per project: worth your eye, what moved, what the CEO handled itself, what decided itself, and what happens next.",
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Projects",
+      "type": "array"
+     },
+     "since": {
+      "format": "date-time",
+      "title": "Since",
+      "type": "string"
+     },
+     "until": {
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+     }
+    },
+    "required": [
+     "since",
+     "until",
+     "projects"
+    ],
+    "title": "Brief",
     "type": "object"
    },
    "BudgetInput": {
@@ -1651,28 +1839,6 @@
     "title": "DateInput",
     "type": "object"
    },
-   "DecideInput": {
-    "properties": {
-     "project_id": {
-      "description": "The project's id, from `projects list`.",
-      "title": "Project Id",
-      "type": "string"
-     },
-     "text": {
-      "description": "The topic, a colon, then your ruling: `Taxes: never include them`.",
-      "maxLength": 4000,
-      "minLength": 3,
-      "title": "Text",
-      "type": "string"
-     }
-    },
-    "required": [
-     "project_id",
-     "text"
-    ],
-    "title": "DecideInput",
-    "type": "object"
-   },
    "DecisionItem": {
     "properties": {
      "decided_at": {
@@ -1817,6 +1983,76 @@
      "purged_after_days"
     ],
     "title": "DeleteRequested",
+    "type": "object"
+   },
+   "Desk": {
+    "properties": {
+     "waiting": {
+      "description": "Everything that waits on you.",
+      "items": {
+       "$ref": "#/components/schemas/DeskEntry"
+      },
+      "title": "Waiting",
+      "type": "array"
+     }
+    },
+    "required": [
+     "waiting"
+    ],
+    "title": "Desk",
+    "type": "object"
+   },
+   "DeskEntry": {
+    "properties": {
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "item": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ItemView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "project_name": {
+      "title": "Project Name",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     },
+     "what": {
+      "description": "The item's kind, or expired bet, or frozen thread.",
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "project_name",
+     "what",
+     "title",
+     "deadline",
+     "item"
+    ],
+    "title": "DeskEntry",
     "type": "object"
    },
    "DirectiveItem": {
@@ -2436,40 +2672,6 @@
     "title": "ExampleItem",
     "type": "object"
    },
-   "ExtendInput": {
-    "properties": {
-     "bet_id": {
-      "description": "The bet's id, from `plan show`.",
-      "title": "Bet Id",
-      "type": "integer"
-     },
-     "project_id": {
-      "description": "The project's id, from `projects list`.",
-      "title": "Project Id",
-      "type": "string"
-     },
-     "reason": {
-      "description": "Why it gets more time.",
-      "maxLength": 2000,
-      "title": "Reason",
-      "type": "string"
-     },
-     "until": {
-      "description": "The new kill date.",
-      "format": "date-time",
-      "title": "Until",
-      "type": "string"
-     }
-    },
-    "required": [
-     "project_id",
-     "bet_id",
-     "until",
-     "reason"
-    ],
-    "title": "ExtendInput",
-    "type": "object"
-   },
    "Feed": {
     "properties": {
      "items": {
@@ -2533,6 +2735,12 @@
    },
    "FixInput": {
     "properties": {
+     "cost_us": {
+      "default": false,
+      "description": "This mistake cost us: the CEO owes a mistake report.",
+      "title": "Cost Us",
+      "type": "boolean"
+     },
      "message_id": {
       "anyOf": [
        {
@@ -2621,6 +2829,68 @@
      "requirement_id"
     ],
     "title": "GapView",
+    "type": "object"
+   },
+   "GrantItem": {
+    "properties": {
+     "client_name": {
+      "title": "Client Name",
+      "type": "string"
+     },
+     "grant_id": {
+      "title": "Grant Id",
+      "type": "string"
+     },
+     "scopes": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Scopes",
+      "type": "array"
+     },
+     "since": {
+      "format": "date-time",
+      "title": "Since",
+      "type": "string"
+     }
+    },
+    "required": [
+     "grant_id",
+     "client_name",
+     "scopes",
+     "since"
+    ],
+    "title": "GrantItem",
+    "type": "object"
+   },
+   "GrantList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/GrantItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "GrantList",
+    "type": "object"
+   },
+   "GrantRef": {
+    "properties": {
+     "grant_id": {
+      "description": "The grant's id, from `oauth clients`.",
+      "title": "Grant Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "grant_id"
+    ],
+    "title": "GrantRef",
     "type": "object"
    },
    "HTTPValidationError": {
@@ -2800,6 +3070,42 @@
     "title": "HistoryItem",
     "type": "object"
    },
+   "HistoryLine": {
+    "properties": {
+     "actor_kind": {
+      "title": "Actor Kind",
+      "type": "string"
+     },
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "state": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "State"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "at",
+     "actor_kind",
+     "what",
+     "state"
+    ],
+    "title": "HistoryLine",
+    "type": "object"
+   },
    "HoldInput": {
     "properties": {
      "note": {
@@ -2960,6 +3266,334 @@
     "title": "InviteInput",
     "type": "object"
    },
+   "ItemDetail": {
+    "properties": {
+     "actions": {
+      "description": "What you can do with it now.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Actions",
+      "type": "array"
+     },
+     "basis": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basis"
+     },
+     "chairman_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chairman Note"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "default_outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What happens if nobody answers.",
+      "title": "Default Outcome"
+     },
+     "fields": {
+      "additionalProperties": true,
+      "title": "Fields",
+      "type": "object"
+     },
+     "filed_by": {
+      "description": "agent or platform.",
+      "title": "Filed By",
+      "type": "string"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/HistoryLine"
+      },
+      "title": "History",
+      "type": "array"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "title": {
+      "description": "Built from the item's typed fields.",
+      "title": "Title",
+      "type": "string"
+     },
+     "waits_on_you": {
+      "title": "Waits On You",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "project_id",
+     "kind",
+     "title",
+     "state",
+     "filed_by",
+     "fields",
+     "recommendation",
+     "if_declined",
+     "basis",
+     "actions",
+     "deadline",
+     "default_outcome",
+     "outcome",
+     "chairman_note",
+     "waits_on_you",
+     "opened_at",
+     "closed_at",
+     "history"
+    ],
+    "title": "ItemDetail",
+    "type": "object"
+   },
+   "ItemList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ItemView"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "ItemList",
+    "type": "object"
+   },
+   "ItemView": {
+    "properties": {
+     "actions": {
+      "description": "What you can do with it now.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Actions",
+      "type": "array"
+     },
+     "basis": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basis"
+     },
+     "chairman_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chairman Note"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "default_outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What happens if nobody answers.",
+      "title": "Default Outcome"
+     },
+     "fields": {
+      "additionalProperties": true,
+      "title": "Fields",
+      "type": "object"
+     },
+     "filed_by": {
+      "description": "agent or platform.",
+      "title": "Filed By",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "title": {
+      "description": "Built from the item's typed fields.",
+      "title": "Title",
+      "type": "string"
+     },
+     "waits_on_you": {
+      "title": "Waits On You",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "project_id",
+     "kind",
+     "title",
+     "state",
+     "filed_by",
+     "fields",
+     "recommendation",
+     "if_declined",
+     "basis",
+     "actions",
+     "deadline",
+     "default_outcome",
+     "outcome",
+     "chairman_note",
+     "waits_on_you",
+     "opened_at",
+     "closed_at"
+    ],
+    "title": "ItemView",
+    "type": "object"
+   },
    "Kind": {
     "enum": [
      "deliverable",
@@ -2988,6 +3622,39 @@
      "effect_id"
     ],
     "title": "LaunchRef",
+    "type": "object"
+   },
+   "LeverInput": {
+    "properties": {
+     "item_id": {
+      "description": "The item's id, from `items list`.",
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "lever": {
+      "description": "cut, add, reword, move the date, raise the budget, or accept the slip.",
+      "title": "Lever",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "item_id",
+     "lever",
+     "reason"
+    ],
+    "title": "LeverInput",
     "type": "object"
    },
    "LinkOutput": {
@@ -3578,6 +4245,34 @@
      "seats"
     ],
     "title": "ModelsView",
+    "type": "object"
+   },
+   "NoteInput": {
+    "properties": {
+     "item_id": {
+      "description": "The item's id, from `items list`.",
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "note": {
+      "description": "Your note on the item.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Note",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "item_id",
+     "note"
+    ],
+    "title": "NoteInput",
     "type": "object"
    },
    "OrderItem": {
@@ -4492,6 +5187,41 @@
     "title": "ProviderList",
     "type": "object"
    },
+   "PurchaseLine": {
+    "properties": {
+     "amount": {
+      "title": "Amount",
+      "type": "number"
+     },
+     "declared_at": {
+      "format": "date-time",
+      "title": "Declared At",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "state": {
+      "description": "committed, bought or cancelled.",
+      "title": "State",
+      "type": "string"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "what",
+     "amount",
+     "state",
+     "declared_at"
+    ],
+    "title": "PurchaseLine",
+    "type": "object"
+   },
    "PushIdentity": {
     "properties": {
      "server_identity": {
@@ -4678,6 +5408,59 @@
      "items"
     ],
     "title": "Record",
+    "type": "object"
+   },
+   "RegisterInput": {
+    "properties": {
+     "client_name": {
+      "description": "The client's name.",
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Client Name",
+      "type": "string"
+     },
+     "redirect_uris": {
+      "description": "Where codes go.",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 5,
+      "minItems": 1,
+      "title": "Redirect Uris",
+      "type": "array"
+     }
+    },
+    "required": [
+     "client_name",
+     "redirect_uris"
+    ],
+    "title": "RegisterInput",
+    "type": "object"
+   },
+   "RegisteredClient": {
+    "properties": {
+     "client_id": {
+      "title": "Client Id",
+      "type": "string"
+     },
+     "client_name": {
+      "title": "Client Name",
+      "type": "string"
+     },
+     "redirect_uris": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Redirect Uris",
+      "type": "array"
+     }
+    },
+    "required": [
+     "client_id",
+     "client_name",
+     "redirect_uris"
+    ],
+    "title": "RegisteredClient",
     "type": "object"
    },
    "Registry": {
@@ -5873,6 +6656,52 @@
     "title": "SmokeResult",
     "type": "object"
    },
+   "SnoozeInput": {
+    "properties": {
+     "item_id": {
+      "description": "The item's id, from `items list`.",
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "until": {
+      "description": "When it should come back to your desk.",
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "item_id",
+     "until"
+    ],
+    "title": "SnoozeInput",
+    "type": "object"
+   },
+   "Snoozed": {
+    "properties": {
+     "item_id": {
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "until": {
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+     }
+    },
+    "required": [
+     "item_id",
+     "until"
+    ],
+    "title": "Snoozed",
+    "type": "object"
+   },
    "SpeedView": {
     "properties": {
      "flags": {
@@ -5933,6 +6762,48 @@
      "flags"
     ],
     "title": "SpeedView",
+    "type": "object"
+   },
+   "SpendView": {
+    "properties": {
+     "approval_at": {
+      "description": "A purchase at or above this needs your approval.",
+      "title": "Approval At",
+      "type": "number"
+     },
+     "committed_this_month": {
+      "title": "Committed This Month",
+      "type": "number"
+     },
+     "currency": {
+      "title": "Currency",
+      "type": "string"
+     },
+     "enabled": {
+      "title": "Enabled",
+      "type": "boolean"
+     },
+     "monthly_cap": {
+      "title": "Monthly Cap",
+      "type": "number"
+     },
+     "purchases": {
+      "items": {
+       "$ref": "#/components/schemas/PurchaseLine"
+      },
+      "title": "Purchases",
+      "type": "array"
+     }
+    },
+    "required": [
+     "enabled",
+     "currency",
+     "monthly_cap",
+     "approval_at",
+     "committed_this_month",
+     "purchases"
+    ],
+    "title": "SpendView",
     "type": "object"
    },
    "SubscribeInput": {
@@ -6464,6 +7335,95 @@
     "title": "TimeBoxView",
     "type": "object"
    },
+   "TokenInput": {
+    "properties": {
+     "client_id": {
+      "title": "Client Id",
+      "type": "string"
+     },
+     "code": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Code"
+     },
+     "code_verifier": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Code Verifier"
+     },
+     "grant_type": {
+      "enum": [
+       "authorization_code",
+       "refresh_token"
+      ],
+      "title": "Grant Type",
+      "type": "string"
+     },
+     "redirect_uri": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Redirect Uri"
+     },
+     "refresh_token": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Refresh Token"
+     },
+     "resource": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Resource"
+     },
+     "scope": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "May narrow the grant, never widen it.",
+      "title": "Scope"
+     }
+    },
+    "required": [
+     "grant_type",
+     "client_id"
+    ],
+    "title": "TokenInput",
+    "type": "object"
+   },
    "TokenItem": {
     "properties": {
      "created_at": {
@@ -6553,6 +7513,39 @@
      "token_id"
     ],
     "title": "TokenRef",
+    "type": "object"
+   },
+   "Tokens": {
+    "properties": {
+     "access_token": {
+      "title": "Access Token",
+      "type": "string"
+     },
+     "expires_in": {
+      "title": "Expires In",
+      "type": "integer"
+     },
+     "refresh_token": {
+      "title": "Refresh Token",
+      "type": "string"
+     },
+     "scope": {
+      "title": "Scope",
+      "type": "string"
+     },
+     "token_type": {
+      "default": "Bearer",
+      "title": "Token Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "access_token",
+     "refresh_token",
+     "expires_in",
+     "scope"
+    ],
+    "title": "Tokens",
     "type": "object"
    },
    "UnsubscribeInput": {
@@ -6880,6 +7873,28 @@
     "title": "Working",
     "type": "object"
    },
+   "crewmind__domain__conversation__decisions__DecideInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "text": {
+      "description": "The topic, a colon, then your ruling: `Taxes: never include them`.",
+      "maxLength": 4000,
+      "minLength": 3,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "text"
+    ],
+    "title": "DecideInput",
+    "type": "object"
+   },
    "crewmind__domain__conversation__decisions__RuleInput": {
     "properties": {
      "decision_id": {
@@ -6979,6 +7994,117 @@
     "title": "History",
     "type": "object"
    },
+   "crewmind__domain__decisions__operations__DecideInput": {
+    "properties": {
+     "action": {
+      "description": "One of the item's actions.",
+      "title": "Action",
+      "type": "string"
+     },
+     "amount": {
+      "anyOf": [
+       {
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A number to grant instead.",
+      "title": "Amount"
+     },
+     "date": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A date of your own, where asked.",
+      "title": "Date"
+     },
+     "item_id": {
+      "description": "The item's id, from `items list`.",
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Your note.",
+      "title": "Note"
+     },
+     "option": {
+      "anyOf": [
+       {
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The option you pick.",
+      "title": "Option"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "item_id",
+     "action"
+    ],
+    "title": "DecideInput",
+    "type": "object"
+   },
+   "crewmind__domain__decisions__operations__ExtendInput": {
+    "properties": {
+     "days": {
+      "description": "How many days more: 1 to 30.",
+      "title": "Days",
+      "type": "integer"
+     },
+     "item_id": {
+      "description": "The item's id, from `items list`.",
+      "title": "Item Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why it needs more time.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "item_id",
+     "days",
+     "reason"
+    ],
+    "title": "ExtendInput",
+    "type": "object"
+   },
    "crewmind__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
@@ -6998,6 +8124,40 @@
      "reason"
     ],
     "title": "ReasonInput",
+    "type": "object"
+   },
+   "crewmind__domain__planning__explore_operations__ExtendInput": {
+    "properties": {
+     "bet_id": {
+      "description": "The bet's id, from `plan show`.",
+      "title": "Bet Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why it gets more time.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     },
+     "until": {
+      "description": "The new kill date.",
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "bet_id",
+     "until",
+     "reason"
+    ],
+    "title": "ExtendInput",
     "type": "object"
    },
    "crewmind__domain__planning__operations__AcceptInput": {
@@ -7127,6 +8287,38 @@
  },
  "openapi": "3.1.0",
  "paths": {
+  "/.well-known/oauth-authorization-server": {
+   "get": {
+    "operationId": "metadata__well_known_oauth_authorization_server_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Metadata"
+   }
+  },
+  "/.well-known/oauth-protected-resource": {
+   "get": {
+    "operationId": "resource__well_known_oauth_protected_resource_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Resource"
+   }
+  },
   "/files/v1/projects/{project_id}/artifacts/{name}": {
    "get": {
     "description": "Download one version of an artifact (ART-4). HTML is served as plain text so it\ncannot run in the app's origin; the app previews it in a sandboxed frame.",
@@ -7238,6 +8430,55 @@
     "summary": "Put Chunk"
    }
   },
+  "/oauth/authorize": {
+   "get": {
+    "description": "Send the browser to the app, where the signed-in person approves or not.",
+    "operationId": "authorize_oauth_authorize_get",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Authorize"
+   }
+  },
+  "/oauth/register": {
+   "post": {
+    "operationId": "register_oauth_register_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Register"
+   }
+  },
+  "/oauth/token": {
+   "post": {
+    "operationId": "token_oauth_token_post",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Token"
+   }
+  },
   "/stream/v1/projects/{project_id}": {
    "get": {
     "operationId": "stream_stream_v1_projects__project_id__get",
@@ -7293,6 +8534,71 @@
      }
     },
     "summary": "Stream"
+   }
+  },
+  "/v1/agenda/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "agenda.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "How far ahead.",
+      "in": "query",
+      "name": "days",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "maximum": 90,
+         "minimum": 1,
+         "type": "integer"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "How far ahead.",
+       "title": "Days"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Agenda"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show what will happen in a project in the next days.",
+    "tags": [
+     "agenda"
+    ]
    }
   },
   "/v1/artifacts/list": {
@@ -7966,7 +9272,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/ExtendInput"
+        "$ref": "#/components/schemas/crewmind__domain__planning__explore_operations__ExtendInput"
        }
       }
      },
@@ -7997,6 +9303,28 @@
     "summary": "Give an expired bet more time, once, with a reason.",
     "tags": [
      "bets"
+    ]
+   }
+  },
+  "/v1/brief/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "brief.show",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Brief"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Show your brief for the last day, built from the record now.",
+    "tags": [
+     "brief"
     ]
    }
   },
@@ -8612,6 +9940,48 @@
      }
     },
     "summary": "Record how far you have read. Your read position is your own.",
+    "tags": [
+     "chat"
+    ]
+   }
+  },
+  "/v1/chat/opened": {
+   "post": {
+    "description": "Requires: project_observer.",
+    "operationId": "chat.opened",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Away"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Say you opened a project's chat. If you were away, you get what happened.",
     "tags": [
      "chat"
     ]
@@ -9520,7 +10890,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/DecideInput"
+        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__DecideInput"
        }
       }
      },
@@ -9725,6 +11095,28 @@
     "summary": "Give a new ruling on a reopened decision, which closes it again.",
     "tags": [
      "decisions"
+    ]
+   }
+  },
+  "/v1/desk/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "desk.show",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Desk"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "Show everything that waits on you, across your projects.",
+    "tags": [
+     "desk"
     ]
    }
   },
@@ -9983,6 +11375,305 @@
     "summary": "Waive a gap from the final gap review, with a reason.",
     "tags": [
      "gaps"
+    ]
+   }
+  },
+  "/v1/items/decide": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "items.decide",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__DecideInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Decide an item with one of its actions.",
+    "tags": [
+     "items"
+    ]
+   }
+  },
+  "/v1/items/extend": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "items.extend",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ExtendInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give an open approval more time, with a reason.",
+    "tags": [
+     "items"
+    ]
+   }
+  },
+  "/v1/items/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "items.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Leave out items that are closed.",
+      "in": "query",
+      "name": "open_only",
+      "required": false,
+      "schema": {
+       "default": true,
+       "description": "Leave out items that are closed.",
+       "title": "Open Only",
+       "type": "boolean"
+      }
+     },
+     {
+      "description": "Only items of this kind.",
+      "in": "query",
+      "name": "kind",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Only items of this kind.",
+       "title": "Kind"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List a project's decision items: what waits on you, and what was decided.",
+    "tags": [
+     "items"
+    ]
+   }
+  },
+  "/v1/items/note": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "items.note",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NoteInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Write your note on an item.",
+    "tags": [
+     "items"
+    ]
+   }
+  },
+  "/v1/items/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "items.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "The item's id, from `items list`.",
+      "in": "query",
+      "name": "item_id",
+      "required": true,
+      "schema": {
+       "description": "The item's id, from `items list`.",
+       "title": "Item Id",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemDetail"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one decision item with its full history.",
+    "tags": [
+     "items"
+    ]
+   }
+  },
+  "/v1/items/snooze": {
+   "post": {
+    "description": "Requires: project_observer.",
+    "operationId": "items.snooze",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SnoozeInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Snoozed"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Hide an item from your desk for a while. It returns by its deadline.",
+    "tags": [
+     "items"
     ]
    }
   },
@@ -11206,6 +12897,196 @@
     "summary": "Show what each seat runs on: who pays, the model, and any substitution.",
     "tags": [
      "models"
+    ]
+   }
+  },
+  "/v1/oauth/approve": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "oauth.approve",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ApproveInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Approved"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Approve an MCP client for the scopes you choose. Returns where to send the browser.",
+    "tags": [
+     "oauth"
+    ]
+   }
+  },
+  "/v1/oauth/clients": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "oauth.clients",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrantList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List the MCP clients you approved through OAuth.",
+    "tags": [
+     "oauth"
+    ]
+   }
+  },
+  "/v1/oauth/register": {
+   "post": {
+    "description": "Requires: anyone.",
+    "operationId": "oauth.register",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RegisterInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RegisteredClient"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Register an MCP client so a person can approve it.",
+    "tags": [
+     "oauth"
+    ]
+   }
+  },
+  "/v1/oauth/revoke": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "oauth.revoke",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GrantRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrantList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Revoke an MCP client you approved. Its tokens stop working at once.",
+    "tags": [
+     "oauth"
+    ]
+   }
+  },
+  "/v1/oauth/token": {
+   "post": {
+    "description": "Requires: anyone.",
+    "operationId": "oauth.token",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TokenInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Tokens"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Exchange an authorization code or a refresh token for an access token.",
+    "tags": [
+     "oauth"
     ]
    }
   },
@@ -13421,6 +15302,48 @@
     ]
    }
   },
+  "/v1/reviews/lever": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "reviews.lever",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LeverInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ItemView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Record a lever you are using on a status review, with your reason.",
+    "tags": [
+     "reviews"
+    ]
+   }
+  },
   "/v1/roles/list": {
    "get": {
     "description": "Requires: person.",
@@ -14176,6 +16099,51 @@
     "summary": "Show a project's settings and their current values.",
     "tags": [
      "settings"
+    ]
+   }
+  },
+  "/v1/spend/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "spend.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SpendView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show real-world spend: the cap, what is committed this month, and each purchase.",
+    "tags": [
+     "spend"
     ]
    }
   },

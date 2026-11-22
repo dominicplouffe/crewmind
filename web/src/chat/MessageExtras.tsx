@@ -10,6 +10,18 @@ export interface MessageDetail {
   lint?: string;
   order?: number;
   request?: number;
+  /** The decision item a platform line is about. */
+  item?: number;
+  itemKind?: string;
+}
+
+/**
+ * Whether a line is an agent's request to reopen a decision. The server files it as a decision item
+ * too; in the chat it keeps its own line with Approve and Decline, the same as in the Memory panel.
+ */
+export function isReopenLine(detail: MessageDetail): boolean {
+  if (detail.kind === "reopen request") return true;
+  return detail.kind === "decision item" && detail.itemKind === "reopen request" && detail.request !== undefined;
 }
 
 export function detailOf(message: Message): MessageDetail {
@@ -23,6 +35,8 @@ export function detailOf(message: Message): MessageDetail {
     lint: text("lint"),
     order: count("order"),
     request: count("request"),
+    item: count("item"),
+    itemKind: text("item_kind"),
   };
 }
 
@@ -82,7 +96,7 @@ export function StatusActions({ detail, order, request, handlers }: StatusProps)
       </div>
     );
   }
-  if (detail.kind === "reopen request" && request) {
+  if (isReopenLine(detail) && request) {
     const name = <span className="visually-hidden"> {t.listening.requestOf(request.id)}</span>;
     if (request.approved !== null) {
       return <p className="quiet status-result">{t.listening.requestAnswered(request.approved)}</p>;

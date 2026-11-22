@@ -6,6 +6,7 @@ import { useAuth } from "../auth";
 import { AlertsButton } from "../components/AlertsButton";
 import { Empty, ErrorNote, Field, Loading } from "../components/common";
 import { ThemeButton } from "../components/ThemeButton";
+import { DeskLink } from "../desk/DeskLink";
 import { formatDateTime } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
@@ -88,6 +89,7 @@ export function Projects(): JSX.Element {
     <div className="page">
       <header className="appbar">
         <span className="brand">{t.app.name}</span>
+        <DeskLink />
         <span className="spacer" />
         <span className="quiet who">{person?.name}</span>
         <AlertsButton />

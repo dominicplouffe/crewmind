@@ -108,25 +108,29 @@ export function MessageList({
 }: Props): JSX.Element {
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
-  /** How far the view was from the end of the list when an earlier page was asked for. */
-  const fromEnd = useRef<number | null>(null);
+  /** The oldest message shown when an earlier page was asked for, and where it sat in the view. */
+  const held = useRef<{ id: string; top: number } | null>(null);
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const { messages, notices, pending, typing, header, cards } = state;
   const firstId = messages[0]?.id ?? 0;
 
-  // Older messages go in above: keep the message the person was reading where it was.
+  // Older messages go in above: put the message the person was reading back where it was. Measuring
+  // that message itself, not the distance from the end, stays right when a new message arrives below
+  // while the page loads.
   useLayoutEffect(() => {
     const element = scroller.current;
-    if (element && fromEnd.current !== null) {
-      element.scrollTop = Math.max(0, element.scrollHeight - fromEnd.current);
-      fromEnd.current = null;
-    }
+    const was = held.current;
+    if (!element || !was) return;
+    held.current = null;
+    const anchor = document.getElementById(was.id);
+    if (anchor) element.scrollTop += topIn(element, anchor) - was.top;
   }, [firstId]);
 
   const showEarlier = async (): Promise<void> => {
     const element = scroller.current;
-    if (element) {
-      fromEnd.current = element.scrollHeight - element.scrollTop;
+    const anchor = document.getElementById(`message-${firstId}`);
+    if (element && anchor) {
+      held.current = { id: anchor.id, top: topIn(element, anchor) };
       stick.current = false;
     }
     setLoadingEarlier(true);
@@ -221,6 +225,11 @@ export function MessageList({
       ))}
     </div>
   );
+}
+
+/** How far below the top edge of the scrolling list an element sits now. */
+function topIn(scroller: HTMLElement, element: HTMLElement): number {
+  return element.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
 }
 
 function subjectOf<T>(message: Message, key: "order" | "request", known: Record<number, T>): T | undefined {
