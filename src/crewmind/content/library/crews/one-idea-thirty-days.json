@@ -7,14 +7,6 @@
   "domains": [
     "general"
   ],
-  "teams": [
-    {
-      "name": "Desk",
-      "role": "gtm",
-      "members": [
-        "Desk"
-      ]
-    }
-  ],
+  "teams": [],
   "estimate": null
 }

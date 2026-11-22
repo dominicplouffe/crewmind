@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -150,3 +151,20 @@ async def test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing(app: App) -
     assert (
         await app.call("projects.clone", stranger, project_id=project, name="Mine now")
     ).status_code in (403, 404)
+
+
+EXAMPLES = Path(__file__).parents[2] / "content" / "examples"
+
+
+async def test_LIB_5_every_shipped_example_is_a_spec_that_creates_a_project(app: App) -> None:
+    """LIB-4, LIB-5: each example project in `content/examples` is in the one format,
+    names only roles the library has, and creates a draft project."""
+    owner = await app.person("owner@example.com")
+    files = sorted(EXAMPLES.glob("*.json"))
+    assert len(files) >= 12
+    for file in files:
+        spec = json.loads(file.read_text(encoding="utf-8"))
+        checked = await app.ok("specs.check", owner, **spec)
+        assert checked["ok"], f"{file.name}: {checked['problems']}"
+        created = await app.ok("projects.import_spec", owner, **spec)
+        assert (created["state"], created["type"]) == ("draft", spec["type"]), file.name
