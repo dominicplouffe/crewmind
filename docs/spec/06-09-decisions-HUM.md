@@ -85,7 +85,7 @@
   - A green review (nothing at risk, no failed audit, within budget) closes itself after 24 hours.
   - Reviews never block work.
   - A lever records the chairman's decision and reason on the review; the change itself is made with its own operation. A review on which a lever was used no longer closes itself. Green also means no flag is open.
-- **HUM-10 Desk.** One definition of "waiting on you" used everywhere: pending approvals, open questions, proposed scope, owed verdicts, an unaccepted commitment, a delivery awaiting sign-off, expired bets, frozen threads, budget checkpoints. Snoozing is per person and cannot outlast the item's deadline; an item with no deadline returns within 7 days. Flags, heads-ups, status reviews and mistake reports are not on the desk: they are in the brief.
+- **HUM-10 Desk.** One definition of "waiting on you" used everywhere: pending approvals, open questions, proposed scope, owed verdicts, an unaccepted commitment, a delivery awaiting sign-off, expired bets, frozen threads, budget checkpoints, open action cards (CHAT-7). The project header's count (CHAT-18), the Desk, every badge and the page title are this one list for that person, so no two surfaces can disagree. Snoozing is per person and cannot outlast the item's deadline; an item with no deadline returns within 7 days. Flags, heads-ups, status reviews and mistake reports are not on the desk: they are in the brief.
 - **HUM-11 Daily brief.**
   - Built from the record at 0 tokens and sent once per local day at `brief.time` \[08:00\] in the person's `person.timezone` for running, held and paused projects. It is on by default.
   - Sections:

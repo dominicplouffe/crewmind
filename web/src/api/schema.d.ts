@@ -5907,7 +5907,10 @@ export interface components {
             state: string;
             /** Unread */
             unread: number;
-            /** Waiting On You */
+            /**
+             * Waiting On You
+             * @description The desk count for this project (HUM-10).
+             */
             waiting_on_you: number;
         };
         /** HireInput */

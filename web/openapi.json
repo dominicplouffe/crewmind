@@ -3782,6 +3782,7 @@
       "type": "integer"
      },
      "waiting_on_you": {
+      "description": "The desk count for this project (HUM-10).",
       "title": "Waiting On You",
       "type": "integer"
      }

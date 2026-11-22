@@ -18,9 +18,9 @@ from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service
-from crewmind.domain.conversation.directives import CardState
 from crewmind.domain.conversation.operations import MessageItem, item
 from crewmind.domain.conversation.service import Author, MessageKind
+from crewmind.domain.decisions import desk
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.model import LIVE_STATES, SeatState
 from crewmind.domain.execution.roster import ceo_of
@@ -33,7 +33,6 @@ from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.services import services_of
 from crewmind.storage.events import event_type
 from crewmind.storage.models import (
-    ActionCard,
     Artifact,
     Channel,
     Event,
@@ -204,7 +203,7 @@ class Header(BaseModel):
     state: str
     now: list[Working]
     next: list[str]
-    waiting_on_you: int
+    waiting_on_you: int = Field(description="The desk count for this project (HUM-10).")
     budget: str
     budget_spent: int
     budget_wall: int
@@ -321,7 +320,8 @@ def _doing(step: RunStep | None, run: Run) -> str:
     mcp_scope="read",
 )
 async def header(context: Context, payload: ProjectRef) -> Header:
-    """CHAT-18, EXE-4, P17: every hold is shown with what lifts it."""
+    """CHAT-18, HUM-10, EXE-4, P17: every hold is shown with what lifts it, and "waiting
+    on you" is the caller's desk for this project, not a count of its own."""
     project = view_of(context).project
     session = context.session
     working: list[Working] = []
@@ -349,11 +349,7 @@ async def header(context: Context, payload: ProjectRef) -> Header:
     )
     if queued:
         coming.append(f"{queued} run(s) queued.")
-    cards = await session.scalar(
-        select(func.count())
-        .select_from(ActionCard)
-        .where(ActionCard.project_id == project.id, ActionCard.state == CardState.OPEN)
-    )
+    waiting = await desk.of_person_in(session, context.caller.actor_id, project.id, context.now)
     state = await budget.state(session, services_of(context).settings, project, context.now)
     seats = await session.scalars(select(Seat).where(Seat.project_id == project.id))
     notes: list[str] = []
@@ -377,7 +373,7 @@ async def header(context: Context, payload: ProjectRef) -> Header:
         state=project.state,
         now=working,
         next=coming,
-        waiting_on_you=int(cards or 0),
+        waiting_on_you=len(waiting),
         budget=budget.arithmetic(state),
         budget_spent=state.spent,
         budget_wall=state.wall,
