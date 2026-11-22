@@ -226,6 +226,11 @@ class Executor:
         same caller, with that operation's own authority check. This is how a chat slash
         command runs the operation it names (IF-1.2)."""
         authorize(operation, context.caller)
+        prepared = (
+            await operation.prepare(context.caller, payload, self.services)
+            if operation.prepare
+            else None
+        )
         nested = Context(
             caller=context.caller,
             session=context.session,
@@ -234,6 +239,7 @@ class Executor:
             sessions=context.sessions,
             services=context.services,
             executor=self,
+            prepared=prepared,
         )
         if operation.authority.names_a_project:
             nested.project = await self._access.resolve(

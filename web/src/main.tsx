@@ -10,6 +10,7 @@ import "./styles/memory.css";
 import "./styles/board.css";
 import "./styles/plan.css";
 import "./styles/desk.css";
+import "./styles/founder.css";
 
 applyTheme(currentTheme());
 registerServiceWorker();

@@ -387,11 +387,11 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
         assert role is not None
         role.tools = [*role.tools, "web"]
     await app.ok("roster.hire_team", owner, project_id=project, team="research", role="Generalist")
-    ceo = await live_run(app, project)
+    reviewer = await live_run(app, project, seat="Reviewer")
     researcher = await live_run(app, project, seat="research")
 
     assert_refused(
-        await agent_call(app, ceo.token, "agent.web_search", query="llamas"),
+        await agent_call(app, reviewer.token, "agent.web_search", query="llamas"),
         rule="INT-8",
         code="web_not_granted",
     )

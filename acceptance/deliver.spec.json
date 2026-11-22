@@ -1,0 +1,45 @@
+{
+  "crewmind_spec": 1,
+  "ceo": {
+    "role": "ceo"
+  },
+  "standing_orders": [],
+  "controlled_domains": [],
+  "integrations": [],
+  "roles": [],
+  "credentials": [],
+  "deadline": null,
+  "budget_tokens": null,
+  "quality": null,
+  "paying_credential": null,
+  "settings": {
+    "run.concurrency": 4
+  },
+  "name": "Reference: a four-page site",
+  "type": "deliver",
+  "goal": "Publish a four-page site for a small bakery that a customer can use to find the opening hours and place an order. The finish line is the four pages live at the bakery's address, as the hosting provider's own page list shows. The reader is a customer on a phone. It is judged against what a small shop's site contains; the four pages named here are a subset of that. Page views do not count; a customer finding the hours does. The quality bar is that no page shows a wrong hour or price, because one wrong price costs the baker a customer; the reviewer owns it. The chairman answers questions about the bakery and writes nothing. If the site cannot go live, what is owed is the four pages as files, with what blocked publishing.",
+  "teams": [
+    {
+      "name": "Pages",
+      "role": "writer",
+      "members": [
+        "Ada",
+        "Kit"
+      ]
+    },
+    {
+      "name": "Build",
+      "role": "engineer",
+      "members": [
+        "Mika"
+      ]
+    },
+    {
+      "name": "Plan review",
+      "role": "plan-adversary",
+      "members": [
+        "Noor"
+      ]
+    }
+  ]
+}

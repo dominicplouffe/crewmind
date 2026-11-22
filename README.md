@@ -13,9 +13,9 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [docs/spec-questions.md](docs/spec-questions.md) | Open questions raised while building |
 | [CLAUDE.md](CLAUDE.md) | Rules for coding agents |
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
-| [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
+| [content/](content/README.md) | The role and crew library, example specs, the Founder's doctrine and the goal grammar |
 
-Status: phases 2 to 6 are built: chat and execution, listening, verification, planning, and the chairman loop. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; every task serves scope you can see; and everything that waits on you is one kind of item, with a deadline and a stated outcome if you do nothing. The desk lists what waits on you, the daily brief and the agenda are built from the record at no cost, and an AI client of your own can steer a project over MCP within the scopes you grant. The Founder and integrations (Slack, mail, data sources) come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
+Status: phases 2 to 7 are built: chat and execution, listening, verification, planning, the chairman loop, and the Founder with rehearsal. This is the v2.0 release candidate. You can draft a project by talking to the Founder, and rehearse it at no cost before it starts. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; every task serves scope you can see; and everything that waits on you is one kind of item, with a deadline and a stated outcome if you do nothing. The desk lists what waits on you, the daily brief and the agenda are built from the record at no cost, and an AI client of your own can steer a project over MCP within the scopes you grant. The Founder and integrations (Slack, mail, data sources) come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
 ## Try it
 
@@ -84,6 +84,28 @@ uv run crewmind plan show --project-id <id>
 ```
 
 The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. `crewmind desk show` lists everything that waits on you across projects, `crewmind items decide` answers one, `crewmind brief show` gives the last day, and `crewmind agenda show` says what happens next. Add scope yourself with `crewmind requirements add`, and finish a ready Deliver project with `crewmind projects sign-off`.
+
+To draft a project by talking, an admin first names the credential the Founder itself runs on. Then start a conversation in the web app ("Start a project") or in the terminal:
+
+```bash
+uv run crewmind settings change-install --changes founder.credential=main --reason "The Founder's model."
+```
+
+```bash
+uv run crewmind draft
+```
+
+The Founder drafts first and then asks one decision at a time, each with its recommended answer: Enter accepts it. A pasted or attached brief is grilled before anything is drafted from it. `crewmind draft --quick` lets the Founder decide everything and start the project. To check how well your model grades goals against the hand-graded references:
+
+```bash
+uv run crewmind founder eval --goal acceptance/reference-goal.md --grades acceptance/reference-goal.grades.json --goal acceptance/raw-brief.md --grades acceptance/raw-brief.grades.json
+```
+
+A project is one portable file, a spec. `crewmind projects export` writes it, `projects import-spec` and `projects clone` create from it, and a rehearsal runs it through the real rules with a crew in code, spending nothing:
+
+```bash
+uv run crewmind projects rehearse --project-id <id>
+```
 
 ## Develop
 

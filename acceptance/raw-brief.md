@@ -1,0 +1,1 @@
+I want a field guide to the birds of the Hollin Valley. It should cover the forty commonest birds and be good enough for a beginner. The reader is someone out walking who has never used a guide before. Use drawings if you can, though photographs are fine where they are clearer. I will answer questions about the valley but I do not have time to write any of it.

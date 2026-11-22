@@ -114,27 +114,29 @@ export function dispatch(event: SseEvent, point: ResumePoint, handlers: StreamHa
   return advance(point, event.id);
 }
 
+export interface FollowHandlers {
+  /** Called for every whole event the server sends. */
+  onEvent(event: SseEvent): void;
+  /** Called with true when the stream connects and false when it drops. */
+  onStatus(live: boolean): void;
+  onSignedOut?(): void;
+}
+
 /**
- * Opens the project stream and keeps it open. On any error it reconnects with the last
- * message and event ids, so nothing is missed or repeated. Returns a function that closes it.
+ * Reads a server-sent event stream and keeps it open. On any error it asks `url` for the address
+ * again and reconnects, so the caller can resume from the last id it saw. Returns a function that closes it.
  */
-export function openStream(
-  projectId: string,
-  start: ResumePoint,
-  handlers: StreamHandlers,
-  options: StreamOptions = {},
-): { close(): void; setMessageFloor(id: number): void } {
+export function followEvents(url: () => string, handlers: FollowHandlers, options: StreamOptions = {}): { close(): void } {
   const fetchFn = options.fetchFn ?? fetch;
   const wait = options.wait ?? defaultWait;
   const controller = new AbortController();
-  let point = start;
   let closed = false;
 
   async function run(): Promise<void> {
     let attempt = 0;
     while (!closed) {
       try {
-        const response = await fetchFn(streamUrl(projectId, point), {
+        const response = await fetchFn(url(), {
           credentials: "same-origin",
           headers: { accept: "text/event-stream" },
           signal: controller.signal,
@@ -152,9 +154,7 @@ export function openStream(
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
-          for (const event of parser.feed(decoder.decode(value, { stream: true }))) {
-            point = dispatch(event, point, handlers);
-          }
+          for (const event of parser.feed(decoder.decode(value, { stream: true }))) handlers.onEvent(event);
         }
       } catch {
         // Fall through to reconnect; polling covers the gap meanwhile.
@@ -172,6 +172,33 @@ export function openStream(
       closed = true;
       controller.abort();
     },
+  };
+}
+
+/**
+ * Opens the project stream and keeps it open. On any error it reconnects with the last
+ * message and event ids, so nothing is missed or repeated. Returns a function that closes it.
+ */
+export function openStream(
+  projectId: string,
+  start: ResumePoint,
+  handlers: StreamHandlers,
+  options: StreamOptions = {},
+): { close(): void; setMessageFloor(id: number): void } {
+  let point = start;
+  const stream = followEvents(
+    () => streamUrl(projectId, point),
+    {
+      onEvent: (event) => {
+        point = dispatch(event, point, handlers);
+      },
+      onStatus: handlers.onStatus,
+      onSignedOut: handlers.onSignedOut ? () => handlers.onSignedOut?.() : undefined,
+    },
+    options,
+  );
+  return {
+    close: stream.close,
     setMessageFloor(id: number) {
       point = { ...point, message: Math.max(point.message ?? 0, id) };
     },

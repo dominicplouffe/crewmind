@@ -29,6 +29,11 @@ def test_IF_4_3_crewmind_help_runs() -> None:
         assert group in result.stdout
 
 
+HAND_WRITTEN = {"draft", "eval"}
+"""Interactive clients of catalog operations (IF-4.6): they print a conversation, not a
+result."""
+
+
 def test_IF_4_3_every_command_has_help_and_json() -> None:
     """IF-4.3: every generated command offers --help and --json."""
     load_domain_modules()
@@ -41,6 +46,8 @@ def test_IF_4_3_every_command_has_help_and_json() -> None:
     assert len(commands) >= len(on_cli)  # pyright: ignore[reportUnknownArgumentType]
     for command in commands:  # pyright: ignore[reportUnknownVariableType]
         options = {option for parameter in command.params for option in parameter.opts}  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+        if command.name in HAND_WRITTEN:  # pyright: ignore[reportUnknownMemberType]
+            continue
         assert "--json" in options, command.name  # pyright: ignore[reportUnknownMemberType]
     for alias, target in ALIASES.items():
         assert target in catalog, alias

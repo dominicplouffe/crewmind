@@ -28,6 +28,10 @@ from crewmind.storage.models import Task
 
 AGENT = frozenset({Principal.AGENT_RUN})
 
+new_scope_hooks: list[Any] = []
+"""Called as `(session, project)` before the CEO proposes a requirement or opens a bet.
+One that raises a refusal stops it (FND-16)."""
+
 
 class RequirementRef(BaseModel):
     requirement_id: int = Field(description="The requirement's id, from agent_plan.")
@@ -86,6 +90,8 @@ async def propose_requirement(context: Context, payload: RequirementInput) -> Pl
     """PLN-1, GOV-3: the CEO proposes; whoever holds plan authority accepts."""
     view = await agent_of(context)
     work_run_only(view)
+    for hook in new_scope_hooks:
+        await hook(context.session, view.project)
     if payload.estimate_runs is None:
         raise Refusal(
             "proposal_needs_an_estimate",

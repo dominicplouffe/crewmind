@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, get_args
+
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from crewmind.catalog.operation import Operation
@@ -51,3 +53,14 @@ def surfaces_for(operation: Operation) -> frozenset[Surface]:
 def exposed_on(operation: Operation, surface: Surface) -> bool:
     """Whether an adapter for `surface` must expose `operation`."""
     return surface in surfaces_for(operation) and surface not in operation.exemptions
+
+
+def takes_a_document(model: type[BaseModel]) -> bool:
+    """Whether an input holds another model, or a list of them: a whole document, such
+    as a project spec, which cannot be sent in a query string."""
+    for field in model.model_fields.values():
+        parts = [field.annotation, *get_args(field.annotation)]
+        parts += [inner for part in get_args(field.annotation) for inner in get_args(part)]
+        if any(isinstance(part, type) and issubclass(part, BaseModel) for part in parts):
+            return True
+    return False

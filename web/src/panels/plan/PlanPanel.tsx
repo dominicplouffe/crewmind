@@ -1,6 +1,6 @@
 /**
  * The Plan panel: what is in scope, when it will be done and what it will cost, how the project
- * finishes, the decision items filed for the chairman, and what the clock will do next.
+ * finishes, the decision items filed for the chairman, what the clock will do next, and a rehearsal.
  */
 import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { get } from "../../api/client";
@@ -13,9 +13,10 @@ import { DatesTab } from "./DatesTab";
 import { FinishTab } from "./FinishTab";
 import { ItemsTab } from "./ItemsTab";
 import type { Change, PlanTabProps } from "./parts";
+import { RehearsalTab } from "./RehearsalTab";
 import { ScopeTab } from "./ScopeTab";
 
-const TABS = ["scope", "dates", "finish", "items", "agenda"] as const;
+const TABS = ["scope", "dates", "finish", "items", "agenda", "rehearsal"] as const;
 type TabId = (typeof TABS)[number];
 
 interface Props {
@@ -68,9 +69,10 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
   };
 
   let body: JSX.Element | null = null;
-  // Decision items and the agenda are loaded by their own tabs; the others show the plan.
+  // Decision items, the agenda and the rehearsal are loaded by their own tabs; the others show the plan.
   if (tab === "items") body = <ItemsTab projectId={projectId} changes={changes} onChanged={onChanged} />;
   else if (tab === "agenda") body = <AgendaTab projectId={projectId} changes={changes} />;
+  else if (tab === "rehearsal") body = <RehearsalTab projectId={projectId} />;
   else if (plan.data && status.data) {
     const shared: PlanTabProps = {
       projectId,

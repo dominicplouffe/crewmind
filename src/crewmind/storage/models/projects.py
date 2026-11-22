@@ -25,6 +25,11 @@ class Project(Base):
     registry_version: Mapped[str] = mapped_column(String(16))
     created_by: Mapped[str] = mapped_column(ForeignKey("persons.id"))
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    extras: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, server_default="{}")
+    """What a project spec carries that no other table holds: controlled domains,
+    integrations needed, and credential names with their role scopes (LIB-4)."""
+    doctrine_fingerprint: Mapped[str | None] = mapped_column(String(64))
+    """The doctrine the project was drafted under (FND-14)."""
 
 
 class HoldReason(Base):

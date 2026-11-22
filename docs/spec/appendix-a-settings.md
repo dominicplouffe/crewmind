@@ -39,6 +39,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `review.independent` | on | on; off only when solo | project | WRK-9 |
 | `audit.sample_rate` | 20% | 0–100% | project | WRK-13 |
 | `audit.window` | 48 h | 12 h–14 days | project | WRK-13, HUM-2 |
+| `rehearsal.max_seconds` | 60 s | 10 s–10 min | install | RHS-1 |
 | `watch.min_interval` | 15 min | 5 min–24 h | install | WRK-17 |
 | `approval.window` | 7 days | 1–30 days | project | HUM-2 |
 | `question.window` | 24 h | 1–72 h | project | HUM-2, HUM-5 |
@@ -80,6 +81,9 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `email.agent_addresses` | off | on, off | project | INT-10 |
 | `budget.reserve_min_done` | 75% of accepted requirements met (Deliver) | 50–100% | project | GOV-10 |
 | `grill.pace` | one at a time | one at a time, batch | person | FND-4, FND-15, FND-16 |
+| `grill.min_characters` | 1,500 characters | 200–20,000 | install | FND-15 |
+| `founder.credential` | none | The name of a model credential | install | LLM-14, FND-2 |
+| `founder.model_class` | frontier | fast, balanced, frontier | install | LLM-14, FND-2 |
 | `browser.keep_sessions` | on | on, off | project | EXE-17 |
 | `a2a.enabled` | off | on, off | project | INT-11 |
 | `otel.endpoint` | none (export off) | an OTLP URL | install | NFR-22 |

@@ -31,7 +31,17 @@ SHOWN_ONCE = {
     ("oauth.token", "refresh_token"),
 }
 SECRET_WORDS = ("password", "secret", "token", "hash", "key", "credential", "session", "link")
-NOT_SECRET = {"token_id", "token_expires_at", "token_type", "secrets_reencrypted", "content_hash"}
+NOT_SECRET = {
+    "token_id",
+    "token_expires_at",
+    "token_type",
+    "secrets_reencrypted",
+    "content_hash",
+    "credential_names",
+    "paying_credential",
+    "missing_credentials",
+    "credentials",
+}
 
 
 def _fields(model: type[BaseModel], prefix: str = "") -> list[str]:

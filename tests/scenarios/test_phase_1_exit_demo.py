@@ -280,6 +280,23 @@ async def test_INV_21_every_write_operation_records_an_event(
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
     await write("push.unsubscribe", alice, endpoint=browser)
+    role = {
+        "slug": "fact-checker", "name": "Fact checker", "kind": "reviewer", "category": "review",
+        "description": "Checks every claim against its source.", "tools": ["files", "web"],
+        "charter": "Check each claim against its source and say which do not hold.",
+    }  # fmt: skip
+    await write("roles.save", alice, **role)
+    await write(
+        "crews.save", alice, slug="check-it", name="Check it", outcome="A checked document.",
+        ceo_role="ceo", teams=[{"name": "Checks", "role": "fact-checker", "members": ["Fay"]}],
+    )  # fmt: skip
+    await write("roster.hire_team", alice, project_id=project, team="checks", role="fact-checker")
+    await write("roles.save", admin, **{**role, "charter": "Check each claim twice."})
+    await write("roster.repin_team", alice, project_id=project, team="checks")
+    await write("library.reload", admin)
+    spec = {"name": "From a spec", "goal": "Publish one page.", "type": "deliver"}
+    imported = await write("projects.import_spec", alice, **spec)
+    await write("projects.clone", alice, project_id=imported["project_id"], name="A clone")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
     await write("auth.logout", alice)
@@ -295,6 +312,22 @@ async def test_INV_21_every_write_operation_records_an_event(
 # Writes that change no governed state, so they record no event (INV-21), and one covered
 # by its own test.
 NO_EVENT = {
+    "grill.start": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.answer": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.confirm": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.accept_rest": "the same change as founder.accept_rest, on a project's grilling",
+    "founder.start": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.say": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.answer": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.accept_rest": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.create": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.quick": "asserted in test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing",
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",

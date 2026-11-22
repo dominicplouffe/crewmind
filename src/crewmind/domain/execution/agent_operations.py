@@ -25,7 +25,7 @@ from crewmind.domain.conversation.service import MSG_1, MSG_2, Author, ChannelKi
 from crewmind.domain.execution import context_pack, roster
 from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.execution.model import RunKind, SeatKind, TeamState
-from crewmind.domain.execution.operations import RoleItem, RoleList, Roster
+from crewmind.domain.execution.operations import RoleList, Roster
 from crewmind.services import services_of
 from crewmind.storage.models import Channel, Message, Role, Seat, Team
 
@@ -336,19 +336,10 @@ async def _show(context: Context, view: AgentView) -> Roster:
     principals=AGENT,
 )
 async def list_roles(context: Context, payload: Empty) -> RoleList:
-    rows = await context.session.scalars(select(Role).order_by(Role.name, Role.version))
-    return RoleList(
-        items=[
-            RoleItem(
-                name=row.name,
-                version=row.version,
-                seat_kind=row.seat_kind,
-                description=row.description,
-                tools=[str(tool) for tool in row.tools],
-            )
-            for row in rows
-        ]
-    )
+    """LIB-3: the newest version of every role in the library."""
+    from crewmind.domain.execution.operations import list_roles as for_people
+
+    return await for_people(context, payload)
 
 
 @operation(

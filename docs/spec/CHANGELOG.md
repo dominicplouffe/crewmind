@@ -2,6 +2,37 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.18 (22 Nov 2026): phase 7 plan answers
+
+- **FND-2:** Founder calls are metered against an install-level account and count against no project budget (R-31).
+- **FND-12:** one quick-mode target, under 2 minutes (R-32).
+- **RHS-1:** rehearsal always runs on a fresh in-memory SQLite database; the code refuses any other (R-51).
+- **LIB-1:** a role states its seat kind (ceo, worker or reviewer); "can be the CEO" is the kind ceo. A role has a slug, and no two roles share a name. Web is a permission; a role that cannot run without web search says so separately.
+- **LIB-3:** anyone adds a role or a crew; only an admin changes one that exists, because every later project picks the change up. A shipped role whose text changes becomes its next version.
+- **LIB-2:** a crew's estimate may be empty; a team's first named member leads it.
+- **LIB-4:** the spec's fields are named; a spec with a problem creates nothing; a spec that carries a value where a credential name belongs is refused; what a spec asks for that the install lacks is listed as missing, not refused. A spec embeds only custom roles.
+- **PRJ-9:** a clone is an export imported under a new name by the same chairman.
+- **WRK-12:** domains a spec declares as controlled count as the project's own.
+- **IF-3.1:** a read that takes a whole document is sent as a POST body.
+- **RHS-1:** the drill's database is a fresh file in a folder of its own, not in memory: SQLite in memory cannot serve the dispatcher, the runner and the jobs at once. The drill is its own process, with a time limit (`rehearsal.max_seconds`), a crew in code, and one agent at a time.
+- **RHS-2, RHS-3:** where the walk ends for each project type; estimates are to the first close.
+- **EXE-5:** runs queued at the same instant are leased in the order their seats were created.
+- **Appendix A:** `rehearsal.max_seconds`.
+- **FND-1:** where the conversation is kept before the project exists; a document is attached as text; refused tool calls are kept.
+- **FND-4:** who pays is looked up when there is one credential or none.
+- **FND-5:** what "ready" means; creating is confirming; an assumption never replaces words or an answer.
+- **FND-7:** what the platform checks in a grade; the verdict is computed.
+- **FND-8:** a goal with a date in its prose is refused.
+- **FND-12:** a quick draft is rehearsed; create and start are one step.
+- **FND-15:** what a long paste is; items quote the document; examples reach the CEO labelled.
+- **LLM-14, Appendix A:** `founder.credential`, `founder.model_class`, `grill.min_characters`.
+- **IF-1.2:** an operation called from inside another runs its own preparation step.
+- **FND-16:** one grilling at a time; what the CEO may not do while it is open; a conflict names what it conflicts with.
+- **PRJ-7:** promote opens a Founder drafting with the findings report as its document; the Deliver project exists once that draft is confirmed.
+- **IF-5.8:** the design doctrine and the goal grammar are served as documents; the design prompt goes through the Founder.
+- **FND-14:** the finding is shown in the project's status, with its fix.
+- **IF-4.6, IF-4.7:** `crewmind draft` is the terminal's drafting command; `crewmind founder eval` compares the grader with hand grades.
+
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 
 - **HUM-5:** a question's default stays within the CEO's authority and may not spend, grant or widen scope (R-27).

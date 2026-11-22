@@ -1,0 +1,29 @@
+{
+  "crewmind_spec": 1,
+  "ceo": {
+    "role": "ceo"
+  },
+  "standing_orders": [],
+  "controlled_domains": [],
+  "integrations": [],
+  "roles": [],
+  "credentials": [],
+  "deadline": null,
+  "budget_tokens": null,
+  "quality": null,
+  "paying_credential": null,
+  "settings": {},
+  "name": "Reference: is there a market",
+  "type": "explore",
+  "goal": "Find out whether small bakeries would pay for a shared ordering page. The finish line is a findings report with each bet confirmed, killed or inconclusive on evidence from outside this project. The reader is the chairman deciding whether to build it. Interest, sign-ups and compliments do not count; a bakery saying what it would pay does. If nothing can be confirmed, what is owed is what was tried and why each bet ended.",
+  "teams": [
+    {
+      "name": "Research",
+      "role": "researcher",
+      "members": [
+        "Rey",
+        "Sol"
+      ]
+    }
+  ]
+}

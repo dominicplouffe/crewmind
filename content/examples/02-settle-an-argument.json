@@ -1,0 +1,38 @@
+{
+  "crewmind_spec": 1,
+  "name": "Settle An Argument",
+  "goal": "Answer one question I am stuck on, with enough evidence that I could defend the answer to someone who disagrees: SHOULD A SMALL TEAM START ON POSTGRES OR SQLITE? Replace that with my actual question first. Deliver a memo that states the recommendation in its first two sentences, then the case for it, then the strongest version of the opposite case — argued as well as a smart opponent would argue it, not as a straw man. Every factual claim carries a source URL a reader can open; a claim without one is an opinion and must be labelled as one. End with what would change the recommendation, stated as something observable. If the honest answer is that it does not matter much, say so plainly and say what does matter instead — that is a finding, not a failure.",
+  "type": "deliver",
+  "deadline": null,
+  "budget_tokens": null,
+  "quality": null,
+  "paying_credential": "anthropic-api-key",
+  "settings": {
+    "project.timezone": "America/New_York"
+  },
+  "ceo": {
+    "role": "ceo"
+  },
+  "teams": [
+    {
+      "name": "Research",
+      "role": "researcher",
+      "members": [
+        "Rey",
+        "Sol"
+      ]
+    },
+    {
+      "name": "Editorial",
+      "role": "writer",
+      "members": [
+        "Ada"
+      ]
+    }
+  ],
+  "standing_orders": [],
+  "controlled_domains": [],
+  "integrations": [],
+  "roles": [],
+  "credentials": []
+}

@@ -27,6 +27,7 @@
   - The reason shows in the activity feed, the agenda and the chat header, and is posted in the chat when it delays a reply to the chairman.
   - Every queued run records its wake reasons, its task, and the requirement or bet it spends against.
 - **EXE-5 Leasing.**
+  - Queued runs are leased oldest first; runs queued at the same instant are leased in the order their seats were created.
   - Runners lease queued runs with row-level skip-locking on Postgres; on SQLite, slim mode runs one in-process runner that leases under a write lock. Creating the run and removing the queue entry happen in one transaction, so two runners never take one job.
   - A runner leases only as many runs as it has free workers.
   - Runs of a kind the project's state does not allow (section 7.1) are dropped; their reasons will be re-derived.

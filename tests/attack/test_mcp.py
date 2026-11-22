@@ -232,6 +232,8 @@ async def test_IF_5_8_resources_and_prompts_show_only_what_the_person_may_see(ap
         assert listed == {
             "crewmind://desk",
             "crewmind://documents/output-standard",
+            "crewmind://documents/design-doctrine",
+            "crewmind://documents/goal-grammar",
             f"crewmind://projects/{mine}",
         }
         project = await client.read_resource(f"crewmind://projects/{mine}")
@@ -243,6 +245,15 @@ async def test_IF_5_8_resources_and_prompts_show_only_what_the_person_may_see(ap
         assert hidden["status"]["code"] == "project_not_found"
         standard = await client.read_resource("crewmind://documents/output-standard")
         assert "plain" in standard.contents[0].text.lower()  # type: ignore[union-attr]
+        from crewmind.domain.founder import drafting
+
+        served = ""
+        for name in ("design-doctrine", "goal-grammar"):
+            page = await client.read_resource(f"crewmind://documents/{name}")
+            served += page.contents[0].text  # type: ignore[union-attr]
+        for line in ("how a crewmind project is drafted", "`failure_deliverable`"):
+            assert line in served
+            assert line in drafting.doctrine_text()
         prompts = {prompt.name for prompt in (await client.list_prompts()).prompts}
         assert prompts == {
             "design_a_project",

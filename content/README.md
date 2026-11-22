@@ -1,6 +1,8 @@
-# v1 content to import
+# v1 content
 
-The spec (section 12) keeps v1's content, not its code. Copy these from v1 into this folder before phase 7:
+Imported on 22 Nov 2026 from `dominicplouffe/yaaf` at commit `b43bb78` (Apache-2.0): 38 roles, 17 crews, 12 example project specs, the design doctrine, the goal grammar and one Founder brief. The roles and crews are converted to the revision 2 formats, with three roles added (generalist, reviewer, gap-reviewer); what the conversion changed and left open is in `docs/spec-questions.md` (Q-012 to Q-015). The server ships a copy in `src/crewmind/content/library/`: run `scripts/sync_content.py` after editing.
+
+The spec (section 12) keeps v1's content, not its code. What each folder holds:
 
 | Folder | From v1 | Used by |
 | --- | --- | --- |
@@ -10,4 +12,4 @@ The spec (section 12) keeps v1's content, not its code. Copy these from v1 into 
 | `doctrine/` | The Founder's design doctrine | FND, LIB-6 |
 | `goal-grammar/` | The ten-element goal grammar and its examples | FND-7 |
 
-Imported roles must be converted to the revision 2 role fields (LIB-1): no model names or effort levels. They may set `min_class` and a vision requirement instead. Note conversion problems in `docs/spec-questions.md`.
+Roles follow LIB-1: no model names or effort levels. They may set `min_class` and a vision requirement instead.

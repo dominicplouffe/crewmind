@@ -17,6 +17,7 @@ from crewmind.catalog.define import operation as define
 from crewmind.catalog.execute import Context
 from crewmind.gateway.mock import ScriptedTurn
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.founder import FounderWorker
 from crewmind.jobs.planning import PlanningJobs
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
@@ -66,6 +67,14 @@ class App:
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
         self.work_jobs = WorkJobs(runtime.sessions, runtime.clock, runtime.services)
         self.planning = PlanningJobs(runtime.sessions, runtime.clock, runtime.services)
+        self.founder = FounderWorker(
+            runtime.sessions,
+            runtime.clock,
+            runtime.gateway,
+            runtime.services,
+            runtime.executor,
+            runtime.hub,
+        )
         self.platform = PlatformWorker(
             runtime.sessions,
             runtime.clock,
@@ -296,6 +305,8 @@ def sample_input(model: type[BaseModel], **known: Any) -> dict[str, Any]:
             values[name] = []
         elif "email" in name:
             values[name] = "someone@example.com"
+        elif any(getattr(part, "pattern", None) for part in field.metadata):
+            values[name] = "sample"
         else:
             values[name] = "a sample value, long enough"
     return values

@@ -25,6 +25,7 @@ from crewmind.domain.conversation.orders import ORDER_MACHINE
 from crewmind.domain.conversation.sessions import CHAT_SESSION_MACHINE
 from crewmind.domain.decisions.model import ITEM_MACHINE, KIND_SPECIFIC
 from crewmind.domain.execution.model import RUN_MACHINE, SEAT_MACHINE, TEAM_MACHINE
+from crewmind.domain.founder.model import DRAFTING_MACHINE
 from crewmind.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
 from crewmind.domain.planning.model import (
     BET_MACHINE,
@@ -113,6 +114,7 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.4", BET_MACHINE, NOTHING),
         ("7.13", CYCLE_MACHINE, NOTHING),
         ("7.10:MCP confirm token", CONFIRM_MACHINE, NOTHING),
+        ("7.19:Drafting conversation", DRAFTING_MACHINE, NOTHING),
         ("7.5", ITEM_MACHINE, {(str(a), str(b)) for a, b in KIND_SPECIFIC}),
         ("7.15", EVIDENCE_MACHINE, NOTHING),
         ("7.16:Side effect:", EFFECT_MACHINE, NOTHING),

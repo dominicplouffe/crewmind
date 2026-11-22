@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import re
-import tomllib
 from datetime import datetime
-from importlib import resources
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +19,7 @@ from crewmind.domain.execution.model import (
     SeatState,
     TeamState,
 )
+from crewmind.domain.library import service as library
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import SettingsService, Subject
@@ -33,40 +32,17 @@ TEAM_RECALLED = event_type("team.recalled", "A team was recalled (7.12).")
 SEAT_CREATED = event_type("seat.created", "A seat was created (7.12).")
 SEAT_STATE_CHANGED = event_type("seat.state_changed", "A seat changed state (7.12).")
 
-CEO_ROLE = "CEO"
+CEO_ROLE = "ceo"
 TEAM_MEMBERS_MAX = 12
 
 
 async def ensure_starter_roles(session: AsyncSession, now: datetime) -> None:
-    """Load the packaged starter roles once."""
-    if await session.scalar(select(func.count()).select_from(Role)):
-        return
-    text = resources.files(__package__).joinpath("starter_roles.toml").read_text(encoding="utf-8")
-    for entry in tomllib.loads(text)["roles"]:
-        session.add(
-            Role(
-                version=1,
-                credential_names=[],
-                min_class=None,
-                created_at=now,
-                **entry,
-            )
-        )
-    await session.flush()
+    """Load the library shipped with crewmind, once (LIB-3)."""
+    await library.load_starter(session, now)
 
 
 async def newest_role(session: AsyncSession, name: str) -> Role:
-    role = await session.scalar(
-        select(Role).where(Role.name == name).order_by(Role.version.desc()).limit(1)
-    )
-    if role is None:
-        raise Refusal(
-            "role_not_found",
-            f"There is no role named {name}.",
-            kind=RefusalKind.NOT_FOUND,
-            hint="List the roles with `crewmind roles list`.",
-        )
-    return role
+    return await library.role_named(session, name)
 
 
 async def ceo_of(session: AsyncSession, project_id: str) -> Seat:
@@ -128,7 +104,17 @@ async def create_ceo(
         await conversation.ensure_channel(session, project.id, name, kind, now)
 
 
-REVIEWER_ROLE = "Reviewer"
+async def set_ceo_role(session: AsyncSession, project: Project, role_name: str) -> None:
+    """LIB-4: a spec may name the role its CEO takes. Only a role that can be the CEO."""
+    role = await newest_role(session, role_name)
+    if role.seat_kind != SeatKind.CEO:
+        raise Refusal(
+            "not_a_ceo_role", f"{role.name} is not a role that can be the CEO.", rule=EXE_1.id
+        )
+    (await ceo_of(session, project.id)).role_id = role.id
+
+
+REVIEWER_ROLE = "reviewer"
 REVIEWER_SEAT = "Reviewer"
 STAFFING = platform_job("work: reviewer staffing")
 
@@ -242,10 +228,14 @@ async def hire_team(
     caller: Caller,
     now: datetime,
     stand_down_when: str | None = None,
+    names: list[str] | None = None,
+    role_version: int | None = None,
 ) -> Team:
     """EXE-1: a team is seats created from one pinned role version, within `teams.max`.
     Its first member leads it. A CEO hire takes the same path as a chairman's."""
     role = await newest_role(session, role_name)
+    if role_version is not None and role_version != role.version:
+        role = await library.role_version(session, role.slug, role_version)
     if role.seat_kind == SeatKind.CEO:
         raise Refusal(
             "second_ceo",
@@ -253,6 +243,21 @@ async def hire_team(
             rule=EXE_1.id,
             hint="Choose another role.",
         )
+    if names is not None:
+        members = len(names)
+        taken_seats = set(
+            await session.scalars(select(Seat.name).where(Seat.project_id == project.id))
+        )
+        clash = sorted(set(names) & taken_seats) or sorted(
+            {member for member in names if names.count(member) > 1}
+        )
+        if clash:
+            raise Refusal(
+                "seat_name_taken",
+                f"A seat named {clash[0]} already exists or is named twice.",
+                rule=EXE_1.id,
+                hint="Every agent in a project has its own name.",
+            )
     if not 1 <= members <= TEAM_MEMBERS_MAX:
         raise Refusal(
             "team_size",
@@ -293,7 +298,10 @@ async def hire_team(
     session.add(team)
     await session.flush()
     for index in range(members):
-        seat_name = name if members == 1 else f"{name}-{index + 1}"
+        if names is not None:
+            seat_name = names[index]
+        else:
+            seat_name = name if members == 1 else f"{name}-{index + 1}"
         _new_seat(
             session,
             project.id,
@@ -324,6 +332,40 @@ async def hire_team(
         f"Team {name} hired: {members} x {role.name}.",
         now,
         detail={"kind": "team hired", "team": name},
+    )
+    return team
+
+
+TEAM_REPINNED = event_type("team.repinned", "A team moved to a newer version of its role.")
+
+
+async def repin_team(
+    session: AsyncSession, project: Project, name: str, caller: Caller, now: datetime
+) -> Team:
+    """LIB-1: move a team, and its seats, to the newest version of the role it was hired
+    from."""
+    team = await team_named(session, project.id, name)
+    pinned = await session.get(Role, team.role_id)
+    assert pinned is not None
+    current = await library.role_named(session, pinned.slug)
+    if current.id == pinned.id:
+        raise Refusal(
+            "already_current",
+            f"Team {name} is already on version {pinned.version} of {pinned.name}, the newest.",
+            rule=library.LIB_1.id,
+        )
+    team.role_id = current.id
+    for seat in await session.scalars(select(Seat).where(Seat.team_id == team.id)):
+        seat.role_id = current.id
+    append_event(
+        session,
+        type=TEAM_REPINNED,
+        caller=caller,
+        at=now,
+        subject=("team", name),
+        project_id=project.id,
+        before={"version": pinned.version},
+        after={"version": current.version, "role": current.slug},
     )
     return team
 

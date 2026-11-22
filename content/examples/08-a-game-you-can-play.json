@@ -1,0 +1,44 @@
+{
+  "crewmind_spec": 1,
+  "name": "A Game You Can Play",
+  "goal": "Build me a small browser game I can open in a file and actually enjoy for five minutes: ONE SCREEN, ONE MECHANIC, NO BUILD STEP — a single HTML file with its JavaScript inline, playable by double-clicking it. Pick the mechanic yourselves and tell me what you chose and why before you build it. The bar is not 'it runs', it is 'it feels good': the input must be responsive, the difficulty must ramp, failing must be legible so I know what I did wrong, and there must be one moment that makes me want another go. Put every tuning value — gravity, speed, spawn rate, timings — in one named block at the top so they can be changed without hunting. It must work on a phone-sized screen with touch as well as a keyboard, run without a server or a network, and start in under a second. Ship a short note saying what you tuned and what it felt like before and after.",
+  "type": "deliver",
+  "deadline": null,
+  "budget_tokens": null,
+  "quality": null,
+  "paying_credential": "anthropic-api-key",
+  "settings": {
+    "project.timezone": "America/New_York"
+  },
+  "ceo": {
+    "role": "ceo"
+  },
+  "teams": [
+    {
+      "name": "Build",
+      "role": "game-developer",
+      "members": [
+        "Kit"
+      ]
+    },
+    {
+      "name": "Feel",
+      "role": "game-ux-designer",
+      "members": [
+        "Juno"
+      ]
+    },
+    {
+      "name": "Design",
+      "role": "game-analyst",
+      "members": [
+        "Wren"
+      ]
+    }
+  ],
+  "standing_orders": [],
+  "controlled_domains": [],
+  "integrations": [],
+  "roles": [],
+  "credentials": []
+}

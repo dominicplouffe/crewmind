@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime
 from importlib import resources
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.domain.budget import service as budget
@@ -13,7 +14,7 @@ from crewmind.domain.conversation import corrections, speaking
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.agent import AgentView
-from crewmind.domain.execution.model import SeatKind
+from crewmind.domain.execution.model import RunKind, RunState, SeatKind
 from crewmind.domain.memory import pinned, recall
 from crewmind.domain.memory.engine import MemoryEngine
 from crewmind.domain.planning import briefing
@@ -21,7 +22,7 @@ from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import board
-from crewmind.storage.models import Seat, Team, Wake
+from crewmind.storage.models import Run, Seat, Team, Wake
 
 
 def output_standard() -> str:
@@ -41,6 +42,43 @@ def system_prompt(view: AgentView) -> str:
             "# How to write\n\n" + output_standard(),
         ]
     )
+
+
+async def _from_the_founder(session: AsyncSession, view: AgentView) -> str | None:
+    """FND-12, FND-10: what the Founder settled with the chairman goes to the CEO until
+    its first work run has finished: the ledger, the first bets, and what was an example."""
+    drafted: dict[str, Any] = (view.project.extras or {}).get("founder") or {}
+    if not drafted or view.seat.kind != SeatKind.CEO:
+        return None
+    finished = await session.scalar(
+        select(func.count())
+        .select_from(Run)
+        .where(
+            Run.seat_id == view.seat.id,
+            Run.kind == RunKind.WORK,
+            Run.state == RunState.FINISHED,
+        )
+    )
+    if finished:
+        return None
+    lines = ["# From the Founder", "", "What was settled with the chairman before you began:"]
+    lines += [
+        f"- {entry['settles']}: {entry['value']} ({entry['source']})"
+        for entry in drafted.get("ledger", [])
+    ]
+    bets: list[dict[str, Any]] = drafted.get("first_bets") or []
+    if bets:
+        lines += ["", "Bets to open first, with short windows:"]
+        lines += [
+            f"- {bet['statement']} Kill it if: {bet['kill_condition']} "
+            f"Window: {bet['window_hours']} hours."
+            for bet in bets
+        ]
+    examples: list[str] = drafted.get("examples") or []
+    if examples:
+        lines += ["", "The chairman marked these passages of the brief as examples:"]
+        lines += [corrections.labelled(passage, True) for passage in examples]
+    return "\n".join(lines)
 
 
 async def build(
@@ -65,6 +103,10 @@ async def build(
             f"[message {newest.id}] {newest.author_name}: {body}\n\n"
             "Answer this message first, and answer the question it asks."
         )
+
+    founder = await _from_the_founder(session, view)
+    if founder:
+        sections.append(founder)
 
     wake = await session.get(Wake, run.wake_id)
     reasons = ", ".join(wake.reasons) if wake else "none"

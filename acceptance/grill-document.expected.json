@@ -1,0 +1,43 @@
+{
+  "about": "What grilling grill-document.md must surface, one question each, before any draft (FND-15). In a running project whose standing order is \"Every plate is a photograph.\", the same document also conflicts with that order (FND-16).",
+  "planted": [
+    {
+      "problem": "contradiction",
+      "passages": [
+        "The guide covers the forty commonest birds of the valley.",
+        "the guide covers the sixty commonest birds"
+      ],
+      "why": "Forty birds, then sixty."
+    },
+    {
+      "problem": "contradiction",
+      "passages": [
+        "Photographs are not used anywhere in the guide.",
+        "Where a photograph shows a bird better than a drawing can, use the photograph."
+      ],
+      "why": "No photographs, then photographs."
+    },
+    {
+      "problem": "example_or_real",
+      "passages": [
+        "a typical entry might run to about 250 words"
+      ],
+      "why": "250 words may be an illustration, not a limit."
+    },
+    {
+      "problem": "unverifiable",
+      "passages": [
+        "The guide should make walkers love the valley more than they did before."
+      ],
+      "why": "Nobody can check it."
+    }
+  ],
+  "standing_order": "Every plate is a photograph.",
+  "conflict": {
+    "problem": "conflict",
+    "passages": [
+      "Every plate is a drawing."
+    ],
+    "why": "The document says drawings; the standing order says photographs."
+  }
+}

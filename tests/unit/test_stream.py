@@ -131,3 +131,40 @@ async def test_CHAT_4_a_stopped_reply_does_not_start_again_by_itself(app: App) -
 
     await app.ok("chat.send", owner, project_id=project, body="A short one, please.")
     assert await app.work() == 1
+
+
+async def test_FND_1_a_drafting_turn_streams_its_words_and_then_its_line(app: App) -> None:
+    """FND-1, IF-3.6: while the Founder answers, its words arrive on the conversation's
+    stream as they are produced, and the finished line follows with an id to resume
+    from. The stream belongs to the person drafting."""
+    from crewmind.surfaces.api.drafting_stream import drafting_stream
+    from tests.founder_support import BRIEF, script
+
+    owner = await app.person("owner@example.com")
+    script(app, {"text": "What record shows the guide is finished?", "word_delay_ms": 5})
+    started = await app.ok("founder.start", owner, brief=BRIEF)
+    stop = asyncio.Event()
+    seen: list[tuple[str, dict[str, Any]]] = []
+
+    async def listen() -> None:
+        stream = drafting_stream(
+            app.runtime.executor, app.runtime.hub, started["drafting_id"], stop=stop
+        )
+        async for raw in stream:
+            if raw.startswith(":"):
+                continue
+            seen.append(parse(raw))
+            if seen[-1][0] == "line" and seen[-1][1]["author"] == "founder":
+                stop.set()
+
+    listening = asyncio.create_task(listen())
+    await asyncio.sleep(0)
+    await app.founder.tick()
+    await asyncio.wait_for(listening, timeout=5)
+    words = "".join(data["text"] for kind, data in seen if kind == "reply")
+    assert words == "What record shows the guide is finished?"
+    kinds = [kind for kind, _ in seen]
+    lines = [data for kind, data in seen if kind == "line"]
+    assert kinds.index("reply") < max(i for i, kind in enumerate(kinds) if kind == "line")
+    assert lines[-1]["body"] == words
+    assert [data["author"] for kind, data in seen if kind == "line"] == ["person", "founder"]

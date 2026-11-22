@@ -7,6 +7,7 @@ import type { Schemas } from "../api/client";
 import { toMoment, wholeNumber } from "../panels/plan/logic";
 import { t } from "../strings";
 
+/** Two server schemas are called ItemView (decision items, and passages of a grilled document), so the generated name is the long one. */
 export type Item = Schemas["ItemView"];
 export type DeskEntry = Schemas["DeskEntry"];
 export type AgendaLine = Schemas["AgendaLine"];

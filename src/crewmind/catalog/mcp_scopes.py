@@ -39,6 +39,7 @@ NOT_FOR_CLIENTS: dict[str, str] = {
     "people.list": "instance administration",
     "settings.change_install": "instance administration",
     "settings.show_install": "instance administration",
+    "library.reload": "instance administration",
     "record.list_install": "instance administration",
     "push.public_key": "a browser's own subscription",
     "push.subscribe": "a browser's own subscription",
@@ -62,8 +63,19 @@ _READ = (
     "settings.show_mine",
     "uploads.status",
 )
-_CREATE = ("projects.create", "projects.promote")
-_CONFIGURE_GROUPS = ("roster", "settings", "models", "credentials")
+_CREATE = (
+    "projects.create",
+    "projects.promote",
+    "projects.import_spec",
+    "projects.clone",
+    "founder.start",
+    "founder.quick",
+    "founder.say",
+    "founder.answer",
+    "founder.accept_rest",
+    "founder.create",
+)
+_CONFIGURE_GROUPS = ("roster", "settings", "models", "credentials", "roles", "crews")
 _STEER_GROUPS = (
     "artifacts",
     "audits",
@@ -78,6 +90,7 @@ _STEER_GROUPS = (
     "directives",
     "examples",
     "gaps",
+    "grill",
     "items",
     "launches",
     "memory",
