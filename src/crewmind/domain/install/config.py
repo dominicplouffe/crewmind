@@ -45,6 +45,7 @@ class Config:
     agent_api_url: str | None = None
     mock_script_dir: Path | None = None
     memory_engine: str = "mem0"
+    allow_agent_checks_unisolated: bool = False
 
     @property
     def agent_api(self) -> str:
@@ -123,4 +124,5 @@ def load_config(env: Mapping[str, str] | None = None, *, slim: bool = False) -> 
         if (scripts := read("CREWMIND_MOCK_SCRIPT_DIR", env))
         else None,
         memory_engine=read("CREWMIND_MEMORY_ENGINE", env),
+        allow_agent_checks_unisolated=read("CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED", env),
     )

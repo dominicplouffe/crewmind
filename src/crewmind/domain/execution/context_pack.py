@@ -19,6 +19,7 @@ from crewmind.domain.memory.engine import MemoryEngine
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
+from crewmind.domain.work import board
 from crewmind.storage.models import Seat, Team, Wake
 
 
@@ -117,6 +118,14 @@ async def build(
     if lines:
         sections.append("# Unread messages\n\n" + "\n".join(lines))
     run.delivered = delivered
+
+    board_section = await board.section(session, seat, run, now)
+    if board_section:
+        sections.append(board_section)
+
+    fired = await board.earlier_effects(session, run)
+    if fired:
+        sections.append(fired)
 
     if memory is not None:
         about = "\n".join(

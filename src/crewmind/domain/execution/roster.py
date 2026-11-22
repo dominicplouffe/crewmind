@@ -9,7 +9,7 @@ from importlib import resources
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from crewmind.catalog.caller import Caller
+from crewmind.catalog.caller import Caller, platform_job
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution.model import (
@@ -127,7 +127,45 @@ async def create_ceo(
         await conversation.ensure_channel(session, project.id, name, kind, now)
 
 
-lifecycle.created_hooks.append(create_ceo)
+REVIEWER_ROLE = "Reviewer"
+REVIEWER_SEAT = "Reviewer"
+STAFFING = platform_job("work: reviewer staffing")
+
+
+async def ensure_reviewer(session: AsyncSession, project: Project, now: datetime) -> bool:
+    """WRK-9: a project with independent read on must staff a reviewer seat. When it has
+    none, the platform staffs one. Returns whether a seat was added."""
+    have = await session.scalar(
+        select(Seat.id)
+        .where(
+            Seat.project_id == project.id,
+            Seat.kind == SeatKind.REVIEWER,
+            Seat.state == SeatState.ACTIVE,
+        )
+        .limit(1)
+    )
+    if have is not None:
+        return False
+    taken = set(await session.scalars(select(Seat.name).where(Seat.project_id == project.id)))
+    name, number = REVIEWER_SEAT, 1
+    while name in taken:
+        number += 1
+        name = f"{REVIEWER_SEAT}-{number}"
+    role = await newest_role(session, REVIEWER_ROLE)
+    _new_seat(session, project.id, role, name, SeatKind.REVIEWER, now, STAFFING)
+    return True
+
+
+async def create_first_seats(
+    session: AsyncSession, project: Project, now: datetime, caller: Caller
+) -> None:
+    """A project starts with its CEO and, because independent read is on by default, a
+    reviewer seat (EXE-1, WRK-9)."""
+    await create_ceo(session, project, now, caller)
+    await ensure_reviewer(session, project, now)
+
+
+lifecycle.created_hooks.append(create_first_seats)
 
 
 async def hire_team(

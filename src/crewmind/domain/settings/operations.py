@@ -18,7 +18,7 @@ from crewmind.domain.projects.operations import ProjectRef
 from crewmind.domain.settings.registry import Scope, SettingType
 from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
 from crewmind.services import services_of
-from crewmind.storage.models import SettingValue
+from crewmind.storage.models import Seat, SettingValue
 
 Changes = dict[str, int | float | bool | str]
 
@@ -90,9 +90,20 @@ class Registry(BaseModel):
     constraints: list[str]
 
 
-def _project_subject(context: Context) -> Subject:
+async def _project_subject(context: Context) -> Subject:
+    """The project as a settings subject. It is solo when no lead or worker seat is active,
+    which is the only case where independent read may be turned off (WRK-9)."""
     project = view_of(context).project
-    return Subject(Scope.PROJECT, project.id, project.type)
+    doing_work = await context.session.scalar(
+        select(Seat.id)
+        .where(
+            Seat.project_id == project.id,
+            Seat.state == "active",
+            Seat.kind.in_(["lead", "worker"]),
+        )
+        .limit(1)
+    )
+    return Subject(Scope.PROJECT, project.id, project.type, solo=doing_work is None)
 
 
 async def _view(context: Context, subject: Subject) -> SettingsView:
@@ -133,7 +144,7 @@ async def _change(
     mcp_scope="read",
 )
 async def show_project(context: Context, payload: ProjectRef) -> SettingsView:
-    return await _view(context, _project_subject(context))
+    return await _view(context, await _project_subject(context))
 
 
 @operation(
@@ -144,7 +155,7 @@ async def show_project(context: Context, payload: ProjectRef) -> SettingsView:
 )
 async def change_project(context: Context, payload: ChangeProjectInput) -> SettingsView:
     """GOV-1: only the chairman or a co-chair, with a reason of 10 or more characters."""
-    return await _change(context, _project_subject(context), payload.changes, payload.reason)
+    return await _change(context, await _project_subject(context), payload.changes, payload.reason)
 
 
 @operation(

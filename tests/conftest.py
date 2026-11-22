@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import os
 import sqlite3
+import time
 import uuid
 from collections.abc import AsyncIterator, Generator, Iterator
 from datetime import UTC, datetime, timedelta
@@ -32,6 +33,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
+DROP_TRIES = 5
+DROP_PAUSE_SECONDS = 0.5
+
+
 def _postgres_admin() -> tuple[sqlalchemy.URL, sqlalchemy.Engine]:
     base = make_url(os.environ.get("CREWMIND_TEST_POSTGRES_URL", DEFAULT_POSTGRES_URL))
     return base, sqlalchemy.create_engine(sync_url(base), isolation_level="AUTOCOMMIT")
@@ -48,8 +53,16 @@ def _postgres_database(template: str | None = None) -> Generator[str]:
     try:
         yield base.set(database=name).render_as_string(hide_password=False)
     finally:
-        with admin.connect() as connection:
-            connection.execute(sqlalchemy.text(f'DROP DATABASE "{name}" WITH (FORCE)'))
+        # A background worker of the database server may be in the database for a moment.
+        # The test user cannot end it, so the drop is tried again; a leftover test
+        # database is harmless.
+        for _ in range(DROP_TRIES):
+            try:
+                with admin.connect() as connection:
+                    connection.execute(sqlalchemy.text(f'DROP DATABASE "{name}" WITH (FORCE)'))
+                break
+            except sqlalchemy.exc.ProgrammingError:
+                time.sleep(DROP_PAUSE_SECONDS)
         admin.dispose()
 
 
@@ -167,6 +180,7 @@ async def runtime(migrated_url: str, tmp_path: Path, clock: FakeClock) -> AsyncI
         port=8420,
         public_url=None,
         memory_engine="in-process",
+        sandbox_mode="unisolated",
     )
     built = build_runtime(config, clock, mock_default=True)
     yield built

@@ -33,6 +33,12 @@ from crewmind.domain.projects.model import (
     ProjectState,
     state_under,
 )
+from crewmind.domain.work.model import (
+    EFFECT_MACHINE,
+    EVIDENCE_MACHINE,
+    TASK_MACHINE,
+    WATCH_MACHINE,
+)
 
 SECTION_7 = Path(__file__).parents[2] / "docs" / "spec" / "07-state-machines.md"
 PRIOR_STATES = ("draft", "stopped", "completed")
@@ -93,6 +99,10 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.17:Closed decision", DECISION_MACHINE, NOTHING),
         ("7.17:Correction", CORRECTION_MACHINE, NOTHING),
         ("7.17:Chat session", CHAT_SESSION_MACHINE, NOTHING),
+        ("7.3", TASK_MACHINE, NOTHING),
+        ("7.15", EVIDENCE_MACHINE, NOTHING),
+        ("7.16:Side effect:", EFFECT_MACHINE, NOTHING),
+        ("7.16:Watch:", WATCH_MACHINE, NOTHING),
         ("7.18:Model credential", CREDENTIAL_MACHINE, NOTHING),
         ("7.18:Circuit breaker", BREAKER_MACHINE, NOTHING),
     ],

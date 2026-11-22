@@ -207,6 +207,7 @@ async def test_LLM_3_the_quality_dial_sets_class_and_effort_by_seat_kind(
 
     assert await view("fast") == {
         "CEO": ("balanced", "medium", "claude-sonnet-5-5"),
+        "Reviewer": ("balanced", "medium", "claude-sonnet-5-5"),
         "crew-1": ("balanced", "medium", "claude-sonnet-5-5"),
         "crew-2": ("fast", "low", "claude-haiku-5-5"),
     }

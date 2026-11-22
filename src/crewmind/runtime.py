@@ -20,6 +20,7 @@ from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.service import Gateway
 from crewmind.live import StreamHub
+from crewmind.runner.check_sandbox import ContainerCheckRunner, ProcessCheckRunner
 from crewmind.services import Services
 from crewmind.storage.engine import create_engine
 
@@ -43,6 +44,10 @@ class Runtime:
         await self.engine.dispose()
 
 
+SANDBOX_IMAGE = "crewmind-agent"
+"""The image agent sandboxes and check sandboxes run in, in container mode (EXE-12)."""
+
+
 def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool = False) -> Runtime:
     load_domain_modules()
     engine = create_engine(config.database_url)
@@ -55,6 +60,10 @@ def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool 
         memory=Mem0Engine(config.data_dir, config.database_url)
         if config.memory_engine == "mem0"
         else InProcessEngine(clock),
+        checks=ContainerCheckRunner(SANDBOX_IMAGE)
+        if config.sandbox_mode == "container"
+        else ProcessCheckRunner(),
+        allow_agent_checks_unisolated=config.allow_agent_checks_unisolated,
     )
     recall.purge_engine = services.memory
     mock = MockProvider(config.mock_script_dir)

@@ -23,7 +23,6 @@ REASON = "The team asked for more parallel work."
         ({"run.concurrency": "six"}, REASON, "value_out_of_range"),
         ({"budget.warn_at": 95, "budget.wrapup_at": 60}, REASON, "constraint_broken"),
         ({"budget.warn_at": 95}, REASON, "constraint_broken"),
-        ({"review.independent": False}, REASON, "constraint_broken"),
         ({"authority.verdict": "ceo"}, REASON, "value_out_of_range"),
         ({"authority.preset": "custom"}, REASON, "preset_custom"),
         ({"authority.preset": "supervised", "authority.date": "ceo"}, REASON, "preset_conflict"),

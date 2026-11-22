@@ -28,6 +28,7 @@ EXPECTED = [
     "project.created",
     "member.added",
     "seat.created",
+    "seat.created",
     "setting.changed",
     "setting.changed",
     "project.state_changed",
@@ -67,7 +68,7 @@ async def test_phase_1_exit_demo_every_change_is_in_the_event_log_on_every_surfa
         assert event["actor_kind"] == "person"
         assert event["via"] == "direct"
         assert event["at"]
-    setting = from_api[4]
+    setting = from_api[5]
     assert setting["before"] == {"value": 4}
     assert setting["after"] == {"value": 6}
     assert setting["detail"]["reason"] == "More parallel work for the launch."
@@ -276,4 +277,6 @@ NO_EVENT = {
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",
+    "audits.settle": "asserted in test_WRK_13_sampled_closes_are_audited_by_the_chairman_only",
+    "launches.retire": "asserted in test_WRK_17_a_launch_must_be_watched",
 }

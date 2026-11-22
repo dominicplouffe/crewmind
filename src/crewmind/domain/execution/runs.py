@@ -250,7 +250,8 @@ async def lease(
                     Run.state.in_(LIVE_STATES),
                 )
             )
-            if (live or 0) >= int(values["run.concurrency"]):
+            allowed = await concurrency_limit(session, project.id, int(values["run.concurrency"]))
+            if (live or 0) >= allowed:
                 continue
         refusal: Refusal | None = None
         pinned: Pinned | None = None
@@ -346,6 +347,14 @@ async def finish(
     await _end(session, run, RunState.FAILED if failed else RunState.FINISHED, now, detail=detail)
     return True
 
+
+async def _configured_concurrency(session: AsyncSession, project_id: str, configured: int) -> int:
+    return configured
+
+
+concurrency_limit: Callable[[AsyncSession, str, int], Awaitable[int]] = _configured_concurrency
+"""The concurrency a project may use now. The work domain lowers it while the project is
+spinning (GOV-7)."""
 
 FailedHook = Callable[[AsyncSession, Run, datetime], Awaitable[None]]
 failed_hooks: list[FailedHook] = []

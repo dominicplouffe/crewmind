@@ -18,6 +18,7 @@ from crewmind.gateway.mock import ScriptedTurn
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
+from crewmind.jobs.work import WorkJobs
 from crewmind.runner.sandbox import InProcessSandbox
 from crewmind.runner.supervisor import Runner
 from crewmind.runtime import Runtime
@@ -59,6 +60,7 @@ class App:
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+        self.work_jobs = WorkJobs(runtime.sessions, runtime.clock, runtime.services)
         self.platform = PlatformWorker(
             runtime.sessions,
             runtime.clock,

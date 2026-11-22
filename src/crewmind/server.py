@@ -26,9 +26,10 @@ from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
+from crewmind.jobs.work import WorkJobs
 from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
 from crewmind.runner.supervisor import Runner
-from crewmind.runtime import Runtime
+from crewmind.runtime import SANDBOX_IMAGE, Runtime
 from crewmind.storage.migrate import alembic_config
 from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
@@ -96,7 +97,7 @@ def build_sandbox(runtime: Runtime) -> Sandbox:
         return UnisolatedSandbox()
     if config.sandbox_mode == "container":
         return ContainerSandbox(
-            image="crewmind-agent",
+            image=SANDBOX_IMAGE,
             install_id=hashlib.sha256(str(config.data_dir).encode()).hexdigest()[:12],
             cpus=config.sandbox_cpus,
             memory_bytes=config.sandbox_memory,
@@ -141,6 +142,9 @@ def create_app(
                 asyncio.create_task(scheduler.run()),
                 asyncio.create_task(dispatcher.run()),
                 asyncio.create_task(alarms.run()),
+                asyncio.create_task(
+                    WorkJobs(runtime.sessions, runtime.clock, runtime.services).run()
+                ),
                 asyncio.create_task(
                     PlatformWorker(
                         runtime.sessions,

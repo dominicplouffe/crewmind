@@ -133,7 +133,7 @@ async def test_IF_3_5_lists_are_cursor_paginated_and_filter_by_time(
     everything = await app.events(owner, project)
     assert seen == [item["id"] for item in everything]
     assert seen == sorted(seen)
-    assert len(seen) == 17
+    assert len(seen) == 18
 
     window = await app.ok(
         "record.list",
