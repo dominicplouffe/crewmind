@@ -3,6 +3,8 @@ HUM-5, HUM-7, SPD-5, WRK-10, GOV-8, INV-10, INV-17, section 7.5)."""
 
 from __future__ import annotations
 
+import random
+from datetime import datetime, timedelta
 from typing import Any
 
 import pytest
@@ -379,3 +381,51 @@ def test_INV_17_no_registered_kind_defaults_to_a_grant() -> None:
     assert items.kind_of("approval: tool permission").default == "deny"
     deadlines = {kind.name for kind in items.kinds() if kind.window is not None}
     assert {"proposed scope", "proposed commitment", "verdict", "reserve draw"} <= deadlines
+
+
+@pytest.mark.attack("INV-17")
+@pytest.mark.parametrize("seed", [1, 2, 3])
+async def test_INV_17_no_sequence_of_extensions_and_snoozes_escapes_the_default(
+    app: App, clock: FakeClock, seed: int
+) -> None:
+    """INV-17, HUM-3, HUM-10: over random sequences of extending, snoozing and moving the
+    clock, an item past its deadline is never open, it holds its declared default unless
+    the chairman decided it, and a tool permission is never allowed."""
+    draw = random.Random(seed)
+    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
+    await propose(crew)
+    await crew.ok(
+        "build-1", "agent.request_approval", kind="tool permission", tool="send_invoice",
+        recommendation="Allow me to send invoices.", if_declined="Invoices are sent by hand.",
+    )  # fmt: skip
+    watched = [
+        entry["id"]
+        for entry in await open_items(crew)
+        if entry["kind"] in ("proposed scope", "approval: tool permission")
+    ]
+    assert len(watched) == 2
+    for _ in range(8):
+        item, now = draw.choice(watched), app.runtime.clock()
+        step = draw.choice(("extend", "snooze", "wait", "wait"))
+        if step == "extend":
+            await app.call(
+                "items.extend", crew.owner, project_id=crew.project, item_id=item,
+                days=draw.randint(1, 30), reason="I am away for a while.",
+            )  # fmt: skip
+        elif step == "snooze":
+            until = now + timedelta(hours=draw.randint(1, 24 * 40))
+            await app.call(
+                "items.snooze", crew.owner, project_id=crew.project, item_id=item,
+                until=until.isoformat(),
+            )  # fmt: skip
+        else:
+            await later(crew, clock, hours=draw.randint(1, 24 * 20))
+        now = app.runtime.clock()
+        for entry in watched:
+            shown = await app.ok("items.show", crew.owner, project_id=crew.project, item_id=entry)
+            if datetime.fromisoformat(shown["deadline"]) <= now:
+                assert (shown["state"], shown["outcome"]) == (
+                    "defaulted",
+                    shown["default_outcome"],
+                ), (seed, shown)
+            assert shown["outcome"] not in ("allow", "accept", "accept anyway")
