@@ -7,6 +7,7 @@ import "./styles/base.css";
 import "./styles/chat.css";
 import "./styles/panels.css";
 import "./styles/memory.css";
+import "./styles/board.css";
 
 applyTheme(currentTheme());
 registerServiceWorker();

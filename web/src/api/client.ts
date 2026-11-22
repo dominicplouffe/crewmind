@@ -13,6 +13,7 @@ export type ReopenRequest = Schemas["RequestItem"];
 export type Correction = Schemas["CorrectionItem"];
 export type MemoryEntry = Schemas["MemoryItem"];
 export type Seat = Schemas["SeatItem"];
+export type Task = Schemas["TaskItem"];
 
 type Operation<P extends keyof paths, M extends "get" | "post"> = NonNullable<paths[P][M]>;
 type PathsWith<M extends "get" | "post"> = {

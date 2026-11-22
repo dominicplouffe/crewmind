@@ -58,3 +58,14 @@ describe("chat state", () => {
     expect(state.examples).toEqual({ 7: false });
   });
 });
+
+it("drops late words of a reply the person stopped (CHAT-4)", () => {
+  const chunk = { run_id: "r1", seat: "CEO", text: "word " };
+  let state = reduce(initialState, { type: "reply", chunk, at: 1 });
+  expect(state.typing).toHaveLength(1);
+  state = reduce(state, { type: "dropTyping", runId: "r1" });
+  state = reduce(state, { type: "reply", chunk, at: 2 });
+  expect(state.typing).toHaveLength(0);
+  state = reduce(state, { type: "reply", chunk: { ...chunk, run_id: "r2" }, at: 3 });
+  expect(state.typing).toHaveLength(1);
+});

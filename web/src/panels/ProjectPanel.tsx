@@ -3,6 +3,7 @@ import type { MessageHandlers } from "../chat/MessageItem";
 import type { PanelState } from "../chat/panels";
 import { lastMessageId, type ChatState } from "../chat/state";
 import { t } from "../strings";
+import { BoardPanel } from "./board/BoardPanel";
 import { FilesPanel } from "./FilesPanel";
 import { MemoryPanel } from "./memory/MemoryPanel";
 import { PanelFrame } from "./PanelFrame";
@@ -74,6 +75,9 @@ export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPan
           onFile={(file) => onPanel({ id: "files", file })}
         />
       );
+      break;
+    case "board":
+      body = <BoardPanel projectId={projectId} changes={changes} onChanged={onChanged} />;
       break;
     case "thread":
       body = (

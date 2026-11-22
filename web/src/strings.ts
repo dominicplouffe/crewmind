@@ -3,6 +3,7 @@
  * provide another object of the same shape. Text that comes from the server is shown as given.
  */
 
+import { board } from "./strings.board";
 import { listening, memory } from "./strings.memory";
 
 const plural = (count: number, one: string, many: string): string => `${count} ${count === 1 ? one : many}`;
@@ -102,6 +103,7 @@ export const t = {
       settings: "Settings",
       runs: "Runs",
       memory: "Memory",
+      board: "Board",
       thread: "Thread",
     },
   },
@@ -234,6 +236,7 @@ export const t = {
   },
   listening,
   memory,
+  board,
   settings: {
     project: "This project",
     mine: "Only for you",

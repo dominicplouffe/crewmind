@@ -4677,6 +4677,11 @@ export interface components {
             attempts: components["schemas"]["Attempt"][];
             /** Audience */
             audience: string;
+            /**
+             * Audit
+             * @description If this close was drawn for the chairman's audit: waiting, passed, failed or not reviewed.
+             */
+            audit?: string | null;
             /** Author */
             author: string;
             /** Check Output */

@@ -42,6 +42,8 @@ export interface ChatState {
   /** The id to ask before for the previous page of history; null when the first message is loaded. */
   earlier: number | null;
   delivered: number[];
+  /** Runs whose reply the person stopped. Late words from them are not shown. */
+  stopped: string[];
   loaded: boolean;
   live: boolean;
   changes: number;
@@ -59,6 +61,7 @@ export const initialState: ChatState = {
   examples: {},
   earlier: null,
   delivered: [],
+  stopped: [],
   loaded: false,
   live: false,
   changes: 0,
@@ -148,6 +151,8 @@ export function reduce(state: ChatState, action: ChatAction): ChatState {
       return { ...state, pending: state.pending.filter((p) => p.key !== action.key) };
     case "reply": {
       const { run_id: runId, seat, text } = action.chunk;
+      // Words of a reply the person stopped may still be on their way; they are dropped.
+      if (state.stopped.includes(runId)) return state;
       const existing = state.typing.find((t) => t.runId === runId);
       const typing = existing
         ? state.typing.map((t) => (t.runId === runId ? { ...t, text: t.text + text, updatedAt: action.at } : t))
@@ -155,7 +160,11 @@ export function reduce(state: ChatState, action: ChatAction): ChatState {
       return { ...state, typing };
     }
     case "dropTyping":
-      return { ...state, typing: state.typing.filter((t) => t.runId !== action.runId) };
+      return {
+        ...state,
+        typing: state.typing.filter((t) => t.runId !== action.runId),
+        stopped: [...state.stopped, action.runId],
+      };
     case "pruneTyping": {
       const working = new Set((state.header?.now ?? []).map((w) => w.seat));
       const typing = state.typing.filter(

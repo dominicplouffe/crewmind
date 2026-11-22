@@ -57,6 +57,15 @@ export const board = {
     created: "Created",
     closed: "Closed",
     whoChecked: "Who checked it",
+    audit: "Your audit",
+    auditVerdict: (verdict: string): string =>
+      verdict === "waiting"
+        ? "This close was drawn for your audit and waits for you."
+        : verdict === "failed"
+          ? "You audited this close and failed it. The task stays closed."
+          : verdict === "passed"
+            ? "You audited this close and passed it."
+            : "This close was drawn for your audit but was not reviewed in time.",
     failures: "Failed checks",
     attempts: "Attempts",
     noAttempts: "No attempts yet. An attempt is listed here each time the claimant says the task is finished.",

@@ -22,6 +22,23 @@ export function setCeoScript(turns: unknown[]): void {
   writeFileSync(join(runDir, "scripts", "CEO.chat.json"), JSON.stringify(turns));
 }
 
+/** What a mock agent does when it has nothing scripted: one turn with no tools, which ends the run. */
+export const IDLE_SCRIPT = [{ text: "Nothing to do." }];
+
+/**
+ * Replaces what a mock agent does on its next work run (`<seat>.work.json`). Scripts are read again on
+ * every run, and a run that creates tasks wakes the CEO again: set the script back to IDLE_SCRIPT as
+ * soon as the tasks exist, or the next run creates them a second time.
+ */
+export function setWorkScript(seat: "CEO" | "Reviewer", turns: unknown[]): void {
+  writeFileSync(join(runDir, "scripts", `${seat}.work.json`), JSON.stringify(turns));
+}
+
+/** One scripted turn that calls these agent tools in order. */
+export function toolTurn(...tools: [name: string, args: Record<string, unknown>][]): unknown {
+  return { text: "Working.", tools: tools.map(([name, args]) => ({ name, arguments: args })) };
+}
+
 export async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {
   const current = await page.locator("html").getAttribute("data-theme");
   if (current !== theme) {

@@ -4515,6 +4515,18 @@
       "title": "Audience",
       "type": "string"
      },
+     "audit": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "If this close was drawn for the chairman's audit: waiting, passed, failed or not reviewed.",
+      "title": "Audit"
+     },
      "author": {
       "title": "Author",
       "type": "string"

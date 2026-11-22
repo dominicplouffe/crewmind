@@ -202,7 +202,9 @@ test("“Not what I asked” records a correction and the agent answers again (C
   await openMemory("Pinned");
   await expect(panel().getByTestId("listening-score")).toHaveText(/Listening: 1 correction in \d+ repl(y|ies) \(score [\d.,]+\)/);
   await page.getByRole("button", { name: "Models", exact: true }).click();
-  await expect(panel().getByTestId("listening-score")).toHaveText(/Listening: 1 correction in \d+ repl(y|ies) \(score [\d.,]+\)/);
+  // Every project has a second agent, the Reviewer: the correction counts against the CEO only.
+  const ceoCard = panel().getByRole("listitem").filter({ has: page.getByRole("heading", { name: "CEO", exact: true }) });
+  await expect(ceoCard.getByTestId("listening-score")).toHaveText(/Listening: 1 correction in \d+ repl(y|ies) \(score [\d.,]+\)/);
 
   await openMemory("Corrections");
   await correction.getByRole("button", { name: /^Remove/ }).click();
