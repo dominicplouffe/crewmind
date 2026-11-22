@@ -6,14 +6,13 @@ Goal (PLAN.md): "done" means checked by something other than the doer.
 
 - The rule-breaker acceptance scenario passes: a scripted agent tries every forbidden action that exists so far in INV-1 to INV-7 and INV-23, is refused each time, hits the refusal cap and has its token revoked. No forbidden state is reached.
 - A test that passes before any work is refused.
-- A Deliver run passes its final gap review. (See question 2: I recommend moving this item to phase 5.)
 - A launch without a watch is refused.
 
-Status: **draft, waiting for the owner's answers.** The questions are at the end.
+Status: **agreed with the owner on 22 Nov 2026.** The answers are at the end.
 
 ## What phase 4 covers
 
-24 requirement ids: WRK-1 to WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16 and the spinning guard of GOV-7 (both moved here from phase 2).
+23 requirement ids: WRK-1 to WRK-10 and WRK-12 to WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16 and the spinning guard of GOV-7 (both moved here from phase 2).
 
 This is the first phase with tasks. Until now the CEO only talked, hired and published. From here it creates tasks, teams claim them, and nothing is done until the platform or another agent has checked it.
 
@@ -38,7 +37,7 @@ Phase 4's requirements lean on three domains that come later. The plan uses the 
 | --- | --- | --- |
 | **Requirements and bets** (PLN, phase 5) | "The requirement or bet it serves" (WRK-1); "evidence must name a real task" works already | A task may name what it serves in words. The link to a requirement becomes required in phase 5. Explore's bet rules (expiry blocks tasks) arrive with bets |
 | **Flags, the desk, decision items, mistake reports** (HUM, phase 6) | Watch-failing flag, "the CEO is told", "the chairman gets an alarm", the audit sample the chairman passes or fails, "a mistake report is owed" | Chat status lines, notices to agents and push alarms, as phases 2 and 3 already do. Audit samples get their own list and operations. The decision-item half of WRK-10 and the mistake report of WRK-13 arrive in phase 6 |
-| **Deliver readiness and the goal's named standard** (PRJ-4, FND-7; phases 5 and 7) | Final gap review (WRK-11) | See question 2 |
+| **Deliver readiness and the goal's named standard** (PRJ-4, FND-7; phases 5 and 7) | Final gap review (WRK-11) | Moved to phase 5 by the owner |
 
 ## Modules
 
@@ -143,9 +142,13 @@ None. The new rules guard verification, authority and side effects, and INV-2, I
 - **Scripted crews are harder to write than scripted chats.** The mock harness may need a small helper so a script can refer to "the task I just created".
 - **The spinning guard needs a definition of "changed work state".** I will use: a task changed state, or an artifact version was published.
 
-## Questions for the owner
+## Owner answers (22 Nov 2026)
 
-1. **Review stops.** One stop at the full exit demo, as in phases 2 and 3?
-2. **The final gap review (WRK-11).** It needs requirements (phase 5) and the goal's named standard (phase 7), and its must-fix gaps become requirements. Move it, and the exit demo line about it, to phase 5; or pull a minimal requirement record into phase 4 so it can be built now?
-3. **The review items above** (R-41, R-42, R-43, R-54): accept all as recommended?
-4. **The Board panel in the web app.** Build it in this phase, or keep phase 4 to the server and the command line?
+| Question | Answer |
+| --- | --- |
+| Review stops | **One stop, at the full exit demo** |
+| The final gap review (WRK-11) | **Moved to phase 5,** with its exit-demo line, where requirements and Deliver readiness are built |
+| Review items R-41, R-42, R-43, R-54 | Accepted as recommended; applied in spec revision 2.11 |
+| The Board panel | **Built in this phase** |
+
+No open questions remain.

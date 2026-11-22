@@ -2,6 +2,14 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.11 (22 Nov 2026): phase 4 plan answers
+
+- **WRK-3:** "the same command test" means the same pinned command and test-file hashes (R-41).
+- **WRK-5:** can't-fail commands are a fixed list (R-42).
+- **WRK-12:** evidence is fetched after the task was created and must contain the claimed content; event times are compared only where the source supplies one (R-43).
+- **WRK-8, 7.3:** a failed check or rejected review returns the task to ready, reserved for its previous claimant (R-54).
+- **PLAN.md, traceability.csv:** the final gap review (WRK-11) and its exit-demo line move to phase 5, where requirements exist.
+
 ## Revision 2.10 (21 Nov 2026): owner answers after phase 3
 
 - **NFR-23:** idle memory under 400 MB applies before recall memory is first used; about 450 MB once it is in use (Q-008).

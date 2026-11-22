@@ -18,7 +18,7 @@
 - **WRK-3 Ceilings and floors on creation.**
   - At most `tasks.max_open` \[8\] open top-level tasks and `tasks.max_subtasks` \[10\] open subtasks per parent.
   - A success test is at least 15 characters. A not-before time is at most 6 hours ahead.
-  - A new task whose command test has already blocked or killed 2 or more tasks is refused: "the check is the suspect".
+  - A new task whose command test has already blocked or killed 2 or more tasks is refused: "the check is the suspect". The same command test means the same pinned command string and the same `test_files` hashes.
   - Explore only:
     - once 3 or more tasks are open, at least `evidence.min_share` \[50%\] must produce outside evidence;
     - after `evidence.drought_after` \[24 h\] with no verified outside evidence, only evidence-producing tasks may be created. A project younger than that window is never in drought.
@@ -30,7 +30,7 @@
 - **WRK-5 Tests must fail first.**
   - When a task with a command test is created, the platform pins the command and the hashes of its `test_files`, then runs the check once on the current workspace.
   - If it already passes, creation is refused: "this test passes before any work".
-  - Commands that cannot fail (`true`, `exit 0`, a bare `echo`, and similar) are refused.
+  - Commands that cannot fail are refused from a fixed list: `true`, `:`, `exit 0`, and a bare `echo` or `printf`. The run on the current workspace catches every other command that always passes.
   - Every later check runs the pinned command against the pinned test files, so the claimant cannot weaken the test by editing it.
 - **WRK-6 Complete.**
   - Only the claimant completes, and only once no subtasks are open.
@@ -45,7 +45,7 @@
   - Exit 0 passes; an empty command fails. The platform keeps the tail of the output.
   - Checks spend no tokens.
   - On an unisolated host that holds a container-runtime socket, an agent-written check is refused unless the operator explicitly allows it.
-- **WRK-8 Failure loop.** A failed check or a rejected review returns the task to its claimant with the attempt history ("attempt n of 3"). The failure count survives re-claims; only a pass resets it. After 3 failures the task blocks and the CEO is told. If an earlier task died on the same command, the chairman gets an alarm.
+- **WRK-8 Failure loop.** A failed check or a rejected review returns the task to ready, reserved for its previous claimant, with the attempt history ("attempt n of 3"). The claimant takes it back when it holds nothing else, so no agent is made to hold two items (WRK-4). The failure count survives re-claims; only a pass resets it. After 3 failures the task blocks and the CEO is told. If an earlier task died on the same command, the chairman gets an alarm.
 - **WRK-9 Independent read** (`review.independent` \[on\]).
   - Observable-test tasks go to review by a reviewer seat other than the author. Exactly one reviewer is woken per task.
   - A review gives ok or not-ok, plus notes of at least 10 characters.
@@ -63,7 +63,7 @@
   - The chairman can waive any gap with a reason.
 - **WRK-12 Outside evidence.**
   - Agent-claimed evidence starts pending and counts for nothing until the platform verifies it.
-  - Verification checks that the URL is http(s), that the domain is not one the project controls, and that the event postdates the task.
+  - Verification checks that the URL is http(s), that the domain is not one the project controls, that the fetch happens after the task was created, and that the claimed content is found on the page. Event times are compared only where the source supplies one (webhooks, APIs).
   - It fetches the page through the SSRF guard (public addresses only, every redirect re-checked, 20-second timeout, 2 MB cap), then snapshots and hashes it.
   - A fetch failure is retried up to 5 times, then fails closed.
   - In Deliver and Operate, evidence must name a real task.

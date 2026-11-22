@@ -88,7 +88,7 @@ Cutting a requirement kills its open tasks (7.3).
 | claimed | review | Complete, observable test | Claimant |
 | claimed | done | Complete, observable test, solo with independent read off ("self-reported", P5) | Claimant |
 | checking | done | Pinned check exits 0 | Platform |
-| checking, review | claimed | Check fails, or review rejects, with fewer than 3 failures | Platform |
+| checking, review | ready | Check fails, or review rejects, with fewer than 3 failures; reserved for its previous claimant | Platform |
 | checking, review | blocked | Third failure | Platform |
 | review | done | Review ok | Reviewer seat |
 | review | closed unread | No reviewer seat remains | Platform |

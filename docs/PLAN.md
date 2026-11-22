@@ -68,14 +68,14 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 ## Phase 4: Verification
 
 - **Goal:** "done" means checked by something other than the doer.
-- **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused. A Deliver run passes its final gap review, and a launch without a watch is refused.
-- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-11, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
+- **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused, and a launch without a watch is refused.
+- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
 
 ## Phase 5: Planning and speed
 
 - **Goal:** the three project types, honest projections, and speed as a requirement.
 - **Exit demo:** the golden path passes for all three types, and the speed acceptance criterion passes. A nearly finished Deliver project draws the CEO reserve, and a half-finished one is refused.
-- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-5, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19
+- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-5, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19; WRK-11 (moved from phase 4: it needs requirements)
 
 ## Phase 6: Chairman loop
 
