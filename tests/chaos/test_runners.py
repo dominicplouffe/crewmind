@@ -214,3 +214,53 @@ async def test_EXE_5_a_task_cancelled_mid_query_does_not_keep_the_write_lock(app
         task.cancel()
         await asyncio.gather(task, return_exceptions=True)
         await asyncio.wait_for(next_transaction(), 2)
+
+
+async def test_INV_16_a_runner_killed_while_its_agent_holds_a_claim_strands_no_work(
+    app: App, clock: FakeClock
+) -> None:
+    """INV-16, WRK-4, INV-12: a runner dies while its agent holds a claimed task. The run is
+    reaped, the claim returns the task to ready after 2 x `run.timeout`, and the work is
+    claimed and finished afterwards. The task is never left held by nobody."""
+    from tests.attack.work_support import OBSERVABLE, Crew
+
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
+    crew = Crew(app, owner, project)
+    await crew.ok("CEO", "agent.hire_team", team="build", role="Generalist")
+    task = await crew.ok("CEO", "agent.create_task", **OBSERVABLE, team="build")
+    await crew.finish("CEO")
+
+    claim = {"name": "agent_claim_task", "arguments": {"task_id": task["id"]}}
+    app.script("build/work", {"tools": [claim]}, {"text": "x" * 10, "word_delay_ms": 60_000})
+    app.script("CEO/work", {"text": "Waiting on the team."})
+    doomed = app.runner(heartbeat_seconds=30)
+    await app.dispatcher.tick()
+    assert await doomed.step() >= 1
+    for _ in range(100):
+        await asyncio.sleep(0.02)
+        if (await crew.show(task["id"]))["state"] == "claimed":
+            break
+    assert (await crew.show(task["id"]))["claimant"] == "build"
+    await doomed.crash()
+
+    clock.advance(seconds=100)
+    await app.scheduler.tick()
+    await app.work_jobs.keep_work_moving()
+    assert (await crew.show(task["id"]))["state"] == "claimed"
+    clock.advance(hours=4)
+    await app.scheduler.tick()
+    await app.work_jobs.keep_work_moving()
+    owner = await app.login(owner.email)
+    crew.owner = owner
+    back = await crew.show(task["id"])
+    assert (back["state"], back["claimant"]) == ("ready", None)
+
+    complete = {
+        "name": "agent_complete_task",
+        "arguments": {"task_id": task["id"], "evidence": "The summary is in s.md now."},
+    }
+    app.script("build/work", {"tools": [claim]}, {"tools": [complete]}, {"text": "Sent."})
+    for _ in range(4):
+        await app.work()
+    assert (await crew.show(task["id"]))["state"] == "review"
