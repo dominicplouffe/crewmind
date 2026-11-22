@@ -201,8 +201,18 @@ class WorkJobs:
                     independent = await self._services.settings.get(
                         session, tasks.subject(project), "review.independent"
                     )
-                    if independent and project.state not in ("deleting", "deleted", "stopped"):
+                    if project.state in ("deleting", "deleted", "stopped"):
+                        continue
+                    if independent:
                         await roster.ensure_reviewer(session, project, now)
+                    elif await tasks.is_solo(session, project.id):
+                        waiting = await session.scalar(
+                            select(Task.id)
+                            .where(Task.project_id == project.id, Task.state == TaskState.REVIEW)
+                            .limit(1)
+                        )
+                        if waiting is None:
+                            await roster.stand_down_reviewer(session, project, now)
             except Exception:
                 logger.exception("work jobs: project %s failed this tick", project_id)
 

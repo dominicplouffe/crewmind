@@ -132,9 +132,39 @@ REVIEWER_SEAT = "Reviewer"
 STAFFING = platform_job("work: reviewer staffing")
 
 
+def _set_seat_state(session: AsyncSession, seat: Seat, target: SeatState, now: datetime) -> None:
+    SEAT_MACHINE.check(seat.state, target)
+    append_event(
+        session,
+        type=SEAT_STATE_CHANGED,
+        caller=STAFFING,
+        at=now,
+        subject=("seat", seat.name),
+        project_id=seat.project_id,
+        before={"state": seat.state},
+        after={"state": target},
+    )
+    seat.state = target
+
+
+async def _platform_reviewers(session: AsyncSession, project_id: str) -> list[Seat]:
+    """Reviewer seats the platform staffed: they belong to no team."""
+    rows = await session.scalars(
+        select(Seat)
+        .where(
+            Seat.project_id == project_id,
+            Seat.kind == SeatKind.REVIEWER,
+            Seat.team_id.is_(None),
+        )
+        .order_by(Seat.created_at, Seat.name)
+    )
+    return list(rows)
+
+
 async def ensure_reviewer(session: AsyncSession, project: Project, now: datetime) -> bool:
     """WRK-9: a project with independent read on must staff a reviewer seat. When it has
-    none, the platform staffs one. Returns whether a seat was added."""
+    none, the platform brings back the one it stood down, or staffs a new one. Returns
+    whether a seat was added or brought back."""
     have = await session.scalar(
         select(Seat.id)
         .where(
@@ -146,6 +176,10 @@ async def ensure_reviewer(session: AsyncSession, project: Project, now: datetime
     )
     if have is not None:
         return False
+    for seat in await _platform_reviewers(session, project.id):
+        if seat.state == SeatState.STOOD_DOWN:
+            _set_seat_state(session, seat, SeatState.ACTIVE, now)
+            return True
     taken = set(await session.scalars(select(Seat.name).where(Seat.project_id == project.id)))
     name, number = REVIEWER_SEAT, 1
     while name in taken:
@@ -153,7 +187,17 @@ async def ensure_reviewer(session: AsyncSession, project: Project, now: datetime
         name = f"{REVIEWER_SEAT}-{number}"
     role = await newest_role(session, REVIEWER_ROLE)
     _new_seat(session, project.id, role, name, SeatKind.REVIEWER, now, STAFFING)
+    await session.flush()
     return True
+
+
+async def stand_down_reviewer(session: AsyncSession, project: Project, now: datetime) -> None:
+    """Section 3, WRK-9: a solo project that has turned independent read off is one agent.
+    The reviewer seat the platform staffed is stood down; it comes back, with its history,
+    when independent read is turned on again."""
+    for seat in await _platform_reviewers(session, project.id):
+        if seat.state == SeatState.ACTIVE:
+            _set_seat_state(session, seat, SeatState.STOOD_DOWN, now)
 
 
 async def create_first_seats(

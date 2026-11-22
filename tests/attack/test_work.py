@@ -315,7 +315,8 @@ async def test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms(app: App) -
     """WRK-8, WRK-3: a rejected review returns the task, reserved, with its history. The
     third failure blocks it and tells the CEO. A second task dying on the same command
     alarms the chairman, and a third task with that test is refused: the check is the
-    suspect. With no reviewer seat left, a task closes unread."""
+    suspect. When the reviewer seat is gone, the platform staffs it again so the work is
+    still read."""
     crew = await Crew.start(app)
     task = await crew.task()
     back: dict[str, Any] = {}
@@ -359,9 +360,32 @@ async def test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms(app: App) -
         await session.execute(
             update(Seat).where(Seat.kind == "reviewer").values(state="stood down")
         )
-    closed = await crew.ok(
+    read = await crew.ok(
         "build-1", "agent.complete_task", task_id=unread["id"], evidence="The summary is in s3.md."
     )
+    assert read["state"] == "review"
+    names = (await app.ok("roster.show", crew.owner, project_id=crew.project))["seats"]
+    assert [seat["state"] for seat in names if seat["kind"] == "reviewer"] == ["active"]
+
+
+async def test_WRK_9_with_no_reader_but_the_author_a_task_closes_unread(app: App) -> None:
+    """WRK-9, INV-3, WRK-15: when the only reviewer seat is the one that did the work, there
+    is nobody to read it. The task closes unread, and says so; it is never called reviewed."""
+    from crewmind.domain.work import reviews, tasks
+    from crewmind.domain.work.model import TaskState
+
+    crew = await Crew.start(app)
+    task = await crew.task()
+    await crew.ok("build-1", "agent.claim_task", task_id=task["id"])
+    async with app.runtime.sessions() as session, session.begin():
+        reviewer = await session.scalar(select(Seat).where(Seat.kind == "reviewer"))
+        row = await session.get(Task, task["id"])
+        assert reviewer is not None
+        assert row is not None
+        row.claimant_id = reviewer.id
+        tasks.move(session, row, TaskState.REVIEW, tasks.WORK_JOB, app.runtime.clock())
+        await reviews.assign(session, row, app.runtime.clock())
+    closed = await crew.show(task["id"])
     assert (closed["state"], closed["label"]) == ("closed unread", "closed unread")
 
 

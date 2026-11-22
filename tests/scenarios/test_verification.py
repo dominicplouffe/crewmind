@@ -129,3 +129,105 @@ async def test_scenario_the_rule_breaker_gets_nowhere(app: App) -> None:
     history = (await app.ok("chat.history", owner, project_id=project))["items"]
     assert all("got away with it" not in m["body"] for m in history)
     assert OBSERVABLE["title"] == task["title"]
+
+
+async def test_scenario_a_solo_project_works_from_start_to_finish(app: App) -> None:
+    """Section 3 "solo", WRK-2, WRK-4, WRK-6, WRK-9, INV-2, INV-3, P5: one agent plans and
+    does the work.
+
+    - With independent read on (the default), the CEO creates a task with a command test,
+      claims it, does it and completes it; the platform's check closes it as verified. An
+      observable task is read by the reviewer seat the platform staffed.
+    - With independent read off, the project is one agent: the reviewer is stood down and
+      an observable task closes as self-reported, never as verified or reviewed.
+    - Turning independent read on again brings the reviewer back at once."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
+    workspace = app.runtime.config.data_dir / "workspaces" / project
+    workspace.mkdir(parents=True, exist_ok=True)
+    (workspace / "check.sh").write_text("grep -q 41 report.txt\n")
+
+    def tool(name: str, **arguments: Any) -> dict[str, Any]:
+        return {"tools": [{"name": name, "arguments": arguments}]}
+
+    async def active() -> list[str]:
+        seats = (await app.ok("roster.show", owner, project_id=project))["seats"]
+        return [seat["name"] for seat in seats if seat["state"] == "active"]
+
+    async def run_ceo(*turns: dict[str, Any]) -> None:
+        app.script("CEO/work", *turns, {"text": "Done for now."})
+        await app.ok("chat.command", owner, project_id=project, text="/do Carry on.")
+        await app.work()
+        app.script("CEO/work", {"text": "Nothing to do."})
+        await settle(app)
+
+    observable = {
+        "goal": "Summarise the three interviews in one page.",
+        "success_test": "A one-page summary names all three interviewees.",
+        "test_kind": "observable",
+    }
+    assert await active() == ["CEO", "Reviewer"]
+    await run_ceo(
+        tool(
+            "agent_create_task",
+            title="Write the report",
+            test_kind="command",
+            goal="Write report.txt with the third-quarter orders.",
+            success_test="test -f check.sh && sh check.sh",
+            test_files=["check.sh"],
+        ),
+        tool("agent_claim_task", task_id=1),
+        tool("write_file", path="report.txt", content="Third quarter: 41 orders.\n"),
+        tool("agent_complete_task", task_id=1, evidence="report.txt holds the count: 41."),
+    )
+    await app.work_jobs.run_checks()
+
+    app.script(
+        "Reviewer/work",
+        tool("agent_review_task", task_id=2, ok=True, notes="Read it; all three are named."),
+        {"text": "Reviewed."},
+    )
+    await run_ceo(
+        tool("agent_create_task", title="Write the summary", **observable),
+        tool("agent_claim_task", task_id=2),
+        tool("agent_complete_task", task_id=2, evidence="The summary is in summary.md."),
+    )
+
+    off = {"review.independent": False}
+    await app.ok(
+        "settings.change_project", owner, project_id=project, changes=off,
+        reason="Running solo and accepting the cost.",
+    )  # fmt: skip
+    await app.work_jobs.keep_work_moving()
+    assert await active() == ["CEO"]
+    await run_ceo(
+        tool("agent_create_task", title="Write the second summary", **observable),
+        tool("agent_claim_task", task_id=3),
+        tool("agent_complete_task", task_id=3, evidence="The summary is in summary-2.md."),
+    )
+
+    await app.ok(
+        "settings.change_project", owner, project_id=project,
+        changes={"review.independent": True}, reason="Reviews are worth it again.",
+    )  # fmt: skip
+    app.script(
+        "Reviewer/work",
+        tool("agent_review_task", task_id=4, ok=True, notes="Read it; it meets the test."),
+        {"text": "Reviewed."},
+    )
+    await run_ceo(
+        tool("agent_create_task", title="Write the third summary", **observable),
+        tool("agent_claim_task", task_id=4),
+        tool("agent_complete_task", task_id=4, evidence="The summary is in summary-3.md."),
+    )
+
+    tasks = (await app.ok("tasks.list", owner, project_id=project))["items"]
+    assert [(t["state"], t["label"]) for t in tasks] == [
+        ("done", "verified"),
+        ("done", "reviewed"),
+        ("done", "self-reported"),
+        ("done", "reviewed"),
+    ]
+    assert await active() == ["CEO", "Reviewer"]
+    async with app.runtime.sessions() as session:
+        assert await session.scalar(select(func.count()).select_from(RunRefusal)) == 0

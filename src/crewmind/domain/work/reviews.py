@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Caller
 from crewmind.catalog.rules import Rule, rules
-from crewmind.domain.execution import notices
+from crewmind.domain.execution import notices, roster
 from crewmind.domain.execution.model import SeatKind, SeatState
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import tasks
@@ -77,6 +77,10 @@ async def request(
         await tasks.passed(session, task, Label.SELF_REPORTED, None, now, caller)
         await consider_for_audit(session, settings, project, task, now)
         return
+    if independent:
+        # Independent read was turned on a moment ago, or the last reviewer left: staff
+        # the seat now, so the work is read rather than closed unread (WRK-9).
+        await roster.ensure_reviewer(session, project, now)
     tasks.move(session, task, TaskState.REVIEW, caller, now)
     await assign(session, task, now)
 

@@ -50,9 +50,9 @@
 - **WRK-9 Independent read** (`review.independent` \[on\]).
   - Observable-test tasks go to review by a reviewer seat other than the author. Exactly one reviewer is woken per task.
   - A review gives ok or not-ok, plus notes of at least 10 characters.
-  - A project with independent read on must staff a reviewer seat; this is checked at creation, settings change, team change and clone. When a project has none, the platform staffs one, so every new project starts with a CEO and a reviewer. The CEO may not stand down the last reviewer seat.
+  - A project with independent read on must staff a reviewer seat; this is checked at creation, settings change, team change and clone. When a project has none, the platform staffs one, so every new project starts with a CEO and a reviewer. In a solo project that turns independent read off, the platform stands that seat down; turning it on again brings the seat back at once, with its history, so no work closes unread in between. The CEO may not stand down the last reviewer seat.
   - The reviewer woken is the one with the fewest reviews waiting who neither did the work nor wrote its test.
-  - If no reviewer remains, the platform closes the task as "closed unread".
+  - If no reviewer remains, the platform closes the task as "closed unread". Because the platform staffs the seat, this happens only when the one reviewer is the agent that did the work.
   - Only a solo project may turn independent read off, and doing so is labelled as a cost of running solo.
 - **WRK-10 Figures need a basis.**
   - A decision item with a numeric field (an amount, price, count or score) must link that number's basis: a command output, a dataset artifact or verified evidence. Otherwise it is refused.

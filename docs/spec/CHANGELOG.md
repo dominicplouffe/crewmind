@@ -2,6 +2,10 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.13 (22 Nov 2026): solo projects
+
+- **Section 3, WRK-9:** solo is a working shape. With independent read off a solo project is one agent: the platform's reviewer seat is stood down and comes back when independent read is turned on again. A task closes unread only when the one reviewer did the work (Q-009, owner: "solo has to work").
+
 ## Revision 2.12 (22 Nov 2026): phase 4 build
 
 - **Section 3:** a CEO with only a reviewer seat is solo; a lead or worker seat ends that (Q-009).

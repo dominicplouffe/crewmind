@@ -186,7 +186,7 @@ Phase 4 is built in its four parts. Of its 23 requirement ids, 16 are done, 6 ar
 
 **Things to know.**
 
-- **Every project now has a second agent, a Reviewer,** staffed by the platform because independent read is on by default (Q-009).
+- **Every project now starts with a second agent, a Reviewer,** staffed by the platform because independent read is on by default. **Solo works from start to finish** (owner, Q-009): the CEO creates, claims and does its own tasks, and the check or the reviewer closes them. With independent read off a solo project is one agent: the reviewer is stood down, work closes as self-reported, and the reviewer comes back when independent read is turned on again. A scripted scenario covers all of it.
 - **A side effect can get stuck.** If the declaring run and all its retries die after declaring it, nothing can finish it and the chairman cannot retire it. Built to the letter of the spec; a fix is proposed in Q-011.
 - **With the mock provider, a solo CEO that creates a task is woken again to claim it** and replays its script. A real model would simply claim the task.
 
@@ -197,4 +197,4 @@ Phase 4 is built in its four parts. Of its 23 requirement ids, 16 are done, 6 ar
 
 **Tests.** 344 Python tests on SQLite in about 110 seconds and 345 on Postgres in about 150 seconds; 95 web unit tests; 41 browser tests in about 2.6 minutes.
 
-**Open questions for the owner:** Q-009 (the reviewer seat and what solo means), Q-010 (move WRK-10 to phase 6), Q-011 (side effects that can never be finished).
+**Open questions for the owner:** Q-010 (move WRK-10 to phase 6) and Q-011 (side effects that can never be finished). Q-009 is closed.
