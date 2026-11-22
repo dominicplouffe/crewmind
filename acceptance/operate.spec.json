@@ -1,0 +1,35 @@
+{
+  "crewmind_spec": 1,
+  "ceo": {
+    "role": "ceo"
+  },
+  "standing_orders": [],
+  "controlled_domains": [],
+  "integrations": [],
+  "roles": [],
+  "credentials": [],
+  "deadline": null,
+  "budget_tokens": null,
+  "quality": null,
+  "paying_credential": null,
+  "settings": {},
+  "name": "Reference: the weekly price check",
+  "type": "operate",
+  "goal": "Each week, check that every price on the bakery's site matches the price list the baker keeps, and say what differs. The finish line each week is a short report the baker has read. The reader is the baker. A report nobody reads does not count. The quality bar is that no difference is missed, because a missed one is sold at the wrong price; the reviewer owns it. If a week's check cannot be done, what is owed is which prices were not checked and why.",
+  "teams": [
+    {
+      "name": "Checks",
+      "role": "data-analyst",
+      "members": [
+        "Dev"
+      ]
+    },
+    {
+      "name": "Plan review",
+      "role": "plan-adversary",
+      "members": [
+        "Noor"
+      ]
+    }
+  ]
+}

@@ -171,3 +171,36 @@ async def test_RHS_1_the_drill_process_is_given_nothing(
     assert refused.json()["code"] == "rehearsal_too_long"
     assert sorted(started["env"]) == ["PATH", "PYTHONPATH"]
     assert started["command"][1:] == ("-I", "-m", "crewmind.domain.rehearsal.drill")
+
+
+@pytest.mark.usefixtures("drill_here")
+@pytest.mark.parametrize(
+    ("name", "ends_with"),
+    [
+        ("deliver", "The project is ready"),
+        ("explore", "A bet ends with its finding"),
+        ("operate", "A requirement is met"),
+    ],
+)
+async def test_section_13_each_reference_spec_reaches_its_first_verified_close(
+    app: App, name: str, ends_with: str
+) -> None:
+    """Section 13 (golden path, each type), RHS-1, LIB-5: each reference spec in
+    `acceptance/`, run by the crew in code under the real rules, gets from creation to
+    its first verified close with no human input beyond what its authority settings
+    require, hits no rule on the way, and has a goal with no date in its prose."""
+    from crewmind.domain.founder import grammar
+
+    owner = await app.person("owner@example.com")
+    spec = json.loads((EXAMPLES.parents[1] / "acceptance" / f"{name}.spec.json").read_text())
+    assert grammar.date_in(spec["goal"]) is None
+    assert (await app.ok("specs.check", owner, **spec))["ok"]
+    report = await app.ok("specs.rehearse", owner, **spec)
+    assert report["ok"], report["verdict"]
+    assert [step["what"] for step in report["walk"] if not step["happened"]] == []
+    assert report["walk"][-1]["what"] == ends_with
+    assert report["rules_hit"] == []
+    asked = {wait["kind"] for wait in report["waited_for_the_chairman"]}
+    assert asked <= {"delivery sign-off"}
+    if name != "explore":
+        assert not [line for line in report["staffing"] if "plan adversary" in line]
