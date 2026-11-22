@@ -15,10 +15,11 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.execution.agent_operations import work_run_only
 from crewmind.domain.execution.model import SeatKind
-from crewmind.domain.planning import acceptance, readiness, requirements, views
+from crewmind.domain.planning import acceptance, plan_view, readiness, requirements, views
 from crewmind.domain.planning.authority import actor_of
+from crewmind.domain.planning.plan_view import PlanView
 from crewmind.domain.planning.rules import PLN_1, PLN_10
-from crewmind.domain.planning.views import PlanView, RequirementInput
+from crewmind.domain.planning.views import RequirementInput
 from crewmind.services import services_of
 
 AGENT = frozenset({Principal.AGENT_RUN})
@@ -48,7 +49,7 @@ class RuleInput(RequirementRef):
 
 
 async def _plan(context: Context, view: AgentView, note: str | None = None) -> PlanView:
-    return await views.plan_view(
+    return await plan_view.plan_view(
         context.session, services_of(context).settings, view.project, context.now, note
     )
 

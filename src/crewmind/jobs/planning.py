@@ -15,11 +15,19 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.planning import acceptance, bets, commitments, completion, standdown
+from crewmind.domain.planning import (
+    acceptance,
+    bets,
+    commitments,
+    completion,
+    cycles,
+    metrics,
+    standdown,
+)
 from crewmind.domain.planning.model import RequirementState, RequirementTest
 from crewmind.domain.planning.readiness import PLANNING_JOB
-from crewmind.domain.projects.model import ProjectState
-from crewmind.domain.work import checks
+from crewmind.domain.projects.model import HOLDABLE, ProjectState
+from crewmind.domain.work import checks, fetch
 from crewmind.runner.check_sandbox import CHECK_SECONDS_LIMIT
 from crewmind.services import Services
 from crewmind.storage.models import Project, Requirement
@@ -40,6 +48,30 @@ class PlanningJobs:
     async def tick(self) -> None:
         await self.per_project()
         await self.run_requirement_tests()
+        await self.read_metrics()
+
+    async def read_metrics(self) -> int:
+        """PLN-11: read every metric that is due, through the fetch guard, with no
+        transaction open. Returns how many readings were stored."""
+        async with self._sessions() as session:
+            wanted = await metrics.due(session, self._services.settings, self._clock())
+        for requirement_id, url, pattern in wanted:
+            value: float | None = None
+            failure: str | None = None
+            try:
+                value = metrics.read_number(await fetch.fetch_public(url), pattern)
+                if value is None:
+                    failure = "The pattern found no number on the page."
+            except fetch.FetchRefused as refused:
+                failure = f"The page was not fetched: {refused}."
+            async with self._sessions() as session, session.begin():
+                row = await session.get(Requirement, requirement_id)
+                if row is None:
+                    continue
+                project = await session.get(Project, row.project_id)
+                assert project is not None
+                await metrics.record(session, row, project, value, failure, self._clock())
+        return len(wanted)
 
     async def per_project(self) -> None:
         """Per running project, in its own transaction (BG-1). A held, paused, stopped or
@@ -48,7 +80,7 @@ class PlanningJobs:
             project_ids = list(
                 await session.scalars(
                     select(Project.id)
-                    .where(Project.state.in_([ProjectState.RUNNING, ProjectState.READY]))
+                    .where(Project.state.in_([*HOLDABLE, ProjectState.READY]))
                     .order_by(Project.id)
                 )
             )
@@ -63,6 +95,7 @@ class PlanningJobs:
                     if project.state == ProjectState.READY:
                         await completion.auto_complete(session, settings, project, now)
                         continue
+                    await cycles.roll(session, settings, project, now)
                     if project.state != ProjectState.RUNNING:
                         continue
                     await bets.expire(session, project, now)

@@ -7,19 +7,15 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.budget import service as budget
 from crewmind.domain.planning import (
-    bets,
-    commitments,
     estimates,
-    projection,
+    metrics,
     readiness,
     requirements,
-    reserve,
 )
 from crewmind.domain.planning.model import RequirementTest
 from crewmind.domain.planning.rules import PLN_1
@@ -27,13 +23,8 @@ from crewmind.domain.projects.model import ProjectType
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import checks, tasks
 from crewmind.storage.models import (
-    Bet,
-    Gap,
-    GapReview,
     Project,
-    RaiseRequest,
     Requirement,
-    ReserveDraw,
 )
 
 TEXT_MIN_CHARACTERS = 10  # PLN-1: a requirement says what will be true
@@ -47,8 +38,10 @@ class RequirementInput(BaseModel):
         "or metric (the platform reads a number)."
     )
     success_test: str = Field(
+        default="",
         max_length=4000,
-        description="A command that exits 0 when it is met, or what a reviewer will see.",
+        description="A command that exits 0 when it is met, or what a reviewer will see. "
+        "Leave out for a metric.",
     )
     test_files: list[str] = Field(
         default_factory=list[str],
@@ -62,6 +55,26 @@ class RequirementInput(BaseModel):
         default_factory=list[int], description="Requirements that must be met first."
     )
     recurring: bool = Field(default=False, description="Operate only: it is due again every cycle.")
+    metric_url: str | None = Field(
+        default=None, max_length=2000, description="Metric only: the public page to read."
+    )
+    metric_pattern: str | None = Field(
+        default=None, description="Metric only: a pattern with one group around the number."
+    )
+    metric_target: float | None = Field(default=None, description="Metric only: the target.")
+    metric_at_least: bool = Field(
+        default=True, description="Metric only: true to reach the target from below."
+    )
+
+
+class MetricView(BaseModel):
+    url: str
+    target: float
+    at_least: bool
+    latest: float | None = Field(description="The newest reading, if one was read.")
+    read_at: datetime | None
+    failure: str | None = Field(description="Why the newest reading failed, if it did.")
+    losing_ground: bool
 
 
 class RequirementItem(BaseModel):
@@ -83,6 +96,7 @@ class RequirementItem(BaseModel):
     ruling: str | None
     ruling_note: str | None
     reason: str | None
+    metric: MetricView | None
 
 
 class PlanNumbers(BaseModel):
@@ -93,101 +107,6 @@ class PlanNumbers(BaseModel):
     plan_tokens_text: str
     tokens_before_wrapup: int = Field(description="Tokens left before wrap-up mode.")
     unestimated: int = Field(description="Open requirements with no estimate.")
-
-
-class PaceView(BaseModel):
-    projection: str = Field(description="When the open scope will be done, in words.")
-    projection_kind: str = Field(description="measured, best case, unknown or nothing left.")
-    projected_at: datetime | None
-    throughput: float | None = Field(description="Work runs per active hour, once measured.")
-    burn_rate: int | None = Field(description="Median tokens per active hour, once measured.")
-    projected_spend: int | None = Field(description="Spend so far plus plan tokens.")
-
-
-class CommitmentView(BaseModel):
-    id: int
-    state: str
-    date: datetime | None
-    projected_at: datetime | None
-    beside_projection: str | None = Field(description="The date, the projection and the gap.")
-    resets: int
-    reason: str | None
-
-
-class TargetView(BaseModel):
-    date: datetime
-    source: str
-    beside_projection: str = Field(description="The target, the projection and the gap.")
-
-
-class DrawView(BaseModel):
-    id: int
-    state: str = Field(description="requested, drawn, denied or cancelled.")
-    tokens: int
-    reason: str
-    arithmetic: str
-    drawn_by: str
-    at: datetime
-
-
-class ReserveView(BaseModel):
-    size: int = Field(description="Tokens in the reserve; 0 when it is off.")
-    can_draw: bool
-    arithmetic: str
-    draws: list[DrawView]
-
-
-class RaiseView(BaseModel):
-    id: int
-    what: str
-    amount: int
-    arithmetic: str
-    if_declined: str
-    state: str
-    granted: int | None
-
-
-class GapView(BaseModel):
-    id: int
-    text: str
-    must_fix: bool
-    reason: str
-    state: str = Field(description="open, noted, closed or waived.")
-    waived_reason: str | None
-    requirement_id: int | None
-
-
-class BetView(BaseModel):
-    id: int
-    statement: str
-    kill_condition: str
-    kill_at: datetime
-    state: str = Field(description="active, expired, confirmed, killed or inconclusive.")
-    extended: bool
-    extension_reason: str | None
-    finding: str | None = Field(description="The artifact that holds its finding.")
-
-
-class TimeBoxView(BaseModel):
-    started_at: datetime
-    ends_at: datetime
-    new_bets_until: datetime = Field(description="No new bet opens in the final 20%.")
-
-
-class PlanView(BaseModel):
-    requirements: list[RequirementItem]
-    bets: list[BetView]
-    time_box: TimeBoxView | None
-    lowest_open_stage: int | None
-    numbers: PlanNumbers
-    pace: PaceView
-    commitment: CommitmentView | None
-    target: TargetView | None
-    reserve: ReserveView
-    raises: list[RaiseView]
-    gaps: list[GapView]
-    gap_review: str = Field(description="not asked, waiting for the reviewer, or filed.")
-    note: str | None = Field(default=None, description="What the last change means.")
 
 
 async def item(
@@ -215,6 +134,22 @@ async def item(
         ruling=requirement.ruling,
         ruling_note=requirement.ruling_note,
         reason=requirement.reason,
+        metric=await metric_view(session, requirement),
+    )
+
+
+async def metric_view(session: AsyncSession, requirement: Requirement) -> MetricView | None:
+    if requirement.metric is None:
+        return None
+    reading = await metrics.latest(session, requirement.id)
+    return MetricView(
+        url=str(requirement.metric["url"]),
+        target=float(requirement.metric["target"]),
+        at_least=bool(requirement.metric["at_least"]),
+        latest=reading.value if reading else None,
+        read_at=reading.at if reading else None,
+        failure=reading.failure if reading else None,
+        losing_ground=bool(requirement.metric.get("losing")),
     )
 
 
@@ -234,159 +169,6 @@ async def numbers_of(
     )
 
 
-async def plan_view(
-    session: AsyncSession,
-    settings: SettingsService,
-    project: Project,
-    now: datetime,
-    note: str | None = None,
-) -> PlanView:
-    rows = list(
-        await session.scalars(
-            select(Requirement).where(Requirement.project_id == project.id).order_by(Requirement.id)
-        )
-    )
-    graph = await requirements.dependency_graph(session, project.id)
-    numbers = await numbers_of(session, settings, project, now)
-    pace = await projection.pace(session, settings, project, now)
-    commitment = await commitments.latest(session, project.id)
-    target = await commitments.target(session, project.id)
-    found = await reserve.eligibility(session, settings, project, now)
-    draws = await session.scalars(
-        select(ReserveDraw).where(ReserveDraw.project_id == project.id).order_by(ReserveDraw.id)
-    )
-    asked = await session.scalars(
-        select(RaiseRequest).where(RaiseRequest.project_id == project.id).order_by(RaiseRequest.id)
-    )
-    gaps = (
-        await session.execute(
-            select(Gap, Requirement.id)
-            .outerjoin(Requirement, Requirement.gap_id == Gap.id)
-            .where(Gap.project_id == project.id)
-            .order_by(Gap.id)
-        )
-    ).all()
-    reviews = list(
-        await session.scalars(select(GapReview).where(GapReview.project_id == project.id))
-    )
-    review = (
-        "not asked"
-        if not reviews
-        else "waiting for the reviewer"
-        if any(one.filed_at is None for one in reviews)
-        else "filed"
-    )
-    return PlanView(
-        requirements=[await item(session, row, graph, numbers.bias_multiplier) for row in rows],
-        **await explore_part(session, settings, project, now),
-        lowest_open_stage=await readiness.lowest_open_stage(session, project.id),
-        numbers=numbers,
-        pace=PaceView(
-            projection=pace.projection.text(),
-            projection_kind=pace.projection.kind,
-            projected_at=pace.projection.at,
-            throughput=None if pace.throughput is None else round(pace.throughput, 2),
-            burn_rate=pace.burn_rate,
-            projected_spend=pace.projected_spend,
-        ),
-        commitment=None
-        if commitment is None
-        else CommitmentView(
-            id=commitment.id,
-            state=commitment.state,
-            date=commitment.date,
-            projected_at=commitment.projected,
-            beside_projection=None
-            if commitment.date is None
-            else commitments.gap_text(commitment.date, pace.projection.at),
-            resets=commitment.resets,
-            reason=commitment.reason,
-        ),
-        target=None
-        if target is None
-        else TargetView(
-            date=target.date,
-            source=target.source,
-            beside_projection=commitments.gap_text(target.date, pace.projection.at),
-        ),
-        reserve=ReserveView(
-            size=found.tokens,
-            can_draw=found.ok,
-            arithmetic=found.arithmetic,
-            draws=[
-                DrawView(
-                    id=row.id,
-                    state=row.state,
-                    tokens=row.tokens,
-                    reason=row.reason,
-                    arithmetic=row.arithmetic,
-                    drawn_by=row.drawn_by,
-                    at=row.at,
-                )
-                for row in draws
-            ],
-        ),
-        raises=[
-            RaiseView(
-                id=row.id,
-                what=row.what,
-                amount=row.amount,
-                arithmetic=row.arithmetic,
-                if_declined=row.if_declined,
-                state=row.state,
-                granted=row.granted,
-            )
-            for row in asked
-        ],
-        gaps=[
-            GapView(
-                id=gap.id,
-                text=gap.text,
-                must_fix=gap.must_fix,
-                reason=gap.reason,
-                state=gap.state,
-                waived_reason=gap.waived_reason,
-                requirement_id=requirement_id,
-            )
-            for gap, requirement_id in gaps
-        ],
-        gap_review=review,
-        note=note,
-    )
-
-
-async def explore_part(
-    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
-) -> dict[str, Any]:
-    """The Explore side of the plan: bets and the time box."""
-    if project.type != ProjectType.EXPLORE:
-        return {"bets": [], "time_box": None}
-    rows = await session.scalars(select(Bet).where(Bet.project_id == project.id).order_by(Bet.id))
-    box = await bets.time_box(session, settings, project, now)
-    return {
-        "bets": [
-            BetView(
-                id=bet.id,
-                statement=bet.statement,
-                kill_condition=bet.kill_condition,
-                kill_at=bet.kill_at,
-                state=bet.state,
-                extended=bet.extended,
-                extension_reason=bet.extension_reason,
-                finding=bet.finding,
-            )
-            for bet in rows
-        ],
-        "time_box": None
-        if box is None
-        else TimeBoxView(
-            started_at=box[0],
-            ends_at=box[1],
-            new_bets_until=box[1] - (box[1] - box[0]) * bets.LAST_SHARE,
-        ),
-    }
-
-
 async def pin_files(project_id: str, payload: RequirementInput, services: Any) -> checks.Pinned:
     """Read the test files a command requirement names, before the transaction."""
     workspace = Path(services.data_dir) / "workspaces" / project_id
@@ -399,7 +181,8 @@ def new_requirement(
     project: Project, payload: RequirementInput, pinned: checks.Pinned, blobs: Any
 ) -> requirements.NewRequirement:
     """Check what a requirement says about itself, whoever writes it."""
-    if len(payload.success_test.strip()) < tasks.TEST_MIN_CHARACTERS:
+    is_metric = payload.test_kind == RequirementTest.METRIC
+    if not is_metric and len(payload.success_test.strip()) < tasks.TEST_MIN_CHARACTERS:
         raise Refusal(
             "success_test_too_short",
             f"A success test has at least {tasks.TEST_MIN_CHARACTERS} characters, so that "
@@ -426,17 +209,22 @@ def new_requirement(
             "Only an Operate project has recurring requirements.",
             rule=PLN_1.id,
         )
-    if payload.test_kind == RequirementTest.METRIC:
-        raise Refusal(
-            "metric_needs_a_source",
-            "A metric requirement names where its number is read. Add it with the metric "
-            "operation.",
-            rule=PLN_1.id,
-        )
+    metric: dict[str, Any] | None = None
+    success_test = payload.success_test
+    if is_metric:
+        metrics.check_source(payload.metric_url, payload.metric_pattern, payload.metric_target)
+        metric = {
+            "url": payload.metric_url,
+            "pattern": payload.metric_pattern,
+            "target": payload.metric_target,
+            "at_least": payload.metric_at_least,
+        }
+        success_test = metrics.describe(metric)
     return requirements.NewRequirement(
         text=payload.text,
         test_kind=payload.test_kind,
-        success_test=payload.success_test,
+        success_test=success_test,
+        metric=metric,
         test_files=checks.stored(pinned, blobs),
         estimate_runs=payload.estimate_runs,
         stage=payload.stage,

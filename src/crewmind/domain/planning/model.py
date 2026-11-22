@@ -95,3 +95,22 @@ BET_MACHINE = StateMachine(
         *((source, target) for source in (B.ACTIVE, B.EXPIRED) for target in FINDINGS),
     ],
 )
+
+
+class CycleState(StrEnum):
+    OPEN = "open"
+    COMPLETED = "completed"
+    MISSED = "missed"
+    SKIPPED = "skipped"
+
+
+CYCLE_MACHINE = StateMachine(
+    "cycle",
+    "7.13",
+    [
+        (NEW, CycleState.OPEN),
+        (CycleState.OPEN, CycleState.COMPLETED),
+        (CycleState.OPEN, CycleState.MISSED),
+        (CycleState.OPEN, CycleState.SKIPPED),
+    ],
+)

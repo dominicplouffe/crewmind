@@ -13,9 +13,9 @@ from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Principal, Reversibility
 from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.execution.agent_operations import work_run_only
-from crewmind.domain.planning import commitments, completion, raises, reserve, views
+from crewmind.domain.planning import commitments, completion, plan_view, raises, reserve
 from crewmind.domain.planning.authority import actor_of
-from crewmind.domain.planning.views import PlanView
+from crewmind.domain.planning.plan_view import PlanView
 from crewmind.services import services_of
 
 AGENT = frozenset({Principal.AGENT_RUN})
@@ -44,7 +44,7 @@ class GapReviewInput(BaseModel):
 
 
 async def _plan(context: Context, view: AgentView, note: str | None = None) -> PlanView:
-    return await views.plan_view(
+    return await plan_view.plan_view(
         context.session, services_of(context).settings, view.project, context.now, note
     )
 

@@ -6,7 +6,7 @@ from typing import Any
 
 from crewmind.domain.planning import bets
 from crewmind.storage.models import Project
-from tests.attack.delivery_support import SOLO, set_states, view
+from tests.attack.delivery_support import SOLO, command_requirement, meet, set_states, view
 from tests.attack.work_support import OBSERVABLE, Crew
 from tests.conftest import FakeClock
 from tests.site_support import Site
@@ -164,3 +164,39 @@ async def test_scenario_explore_confirms_one_bet_and_kills_another(app: App, sit
         draft = await session.get(Project, promoted["project_id"])
         assert draft is not None
         assert "A firm placed a paid order" in draft.goal
+
+
+async def test_scenario_operate_meets_a_recurring_requirement(app: App, clock: FakeClock) -> None:
+    """Operate golden path (PRJ-8, PLN-10): a recurring requirement is met in each of
+    three weekly cycles. Each roll writes a scorecard and opens the requirement again.
+    The chairman then completes the operation, and its receipt carries every cycle and
+    the final scorecard."""
+    crew = await Crew.start(app, type="operate", team=False, settings=SOLO)
+    await set_states(app, {crew.requirement: "cut"})
+    weekly = await command_requirement(crew, "report", recurring=True)
+
+    for cycle in (1, 2, 3):
+        (crew.workspace / "report.txt").unlink(missing_ok=True)
+        await meet(crew, clock, weekly, "report")
+        shown = await view(crew)
+        assert (shown["cycles"][-1]["number"], shown["cycles"][-1]["state"]) == (cycle, "open")
+        assert shown["requirements"][-1]["state"] == "met"
+        clock.advance(days=7)
+        await crew.finish_all()
+        await app.planning.tick()
+        crew.owner = await app.login(crew.owner.email)
+        shown = await view(crew)
+        assert shown["cycles"][cycle - 1]["state"] == "completed"
+        assert shown["requirements"][-1]["state"] == "accepted"
+
+    done = await app.ok("projects.complete", crew.owner, project_id=crew.project)
+    receipt = done["receipt"]
+    assert [(c["number"], c["state"]) for c in receipt["cycles"]] == [
+        (1, "completed"),
+        (2, "completed"),
+        (3, "completed"),
+        (4, "missed"),
+    ]
+    assert receipt["final_scorecard"]["cycle"] == 4
+    status = await app.ok("projects.status", crew.owner, project_id=crew.project)
+    assert status["state"] == "completed"

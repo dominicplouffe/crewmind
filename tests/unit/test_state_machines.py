@@ -28,6 +28,7 @@ from crewmind.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
 from crewmind.domain.planning.model import (
     BET_MACHINE,
     COMMITMENT_MACHINE,
+    CYCLE_MACHINE,
     REQUIREMENT_MACHINE,
 )
 from crewmind.domain.projects.model import (
@@ -108,6 +109,7 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.2", REQUIREMENT_MACHINE, NOTHING),
         ("7.6", COMMITMENT_MACHINE, NOTHING),
         ("7.4", BET_MACHINE, NOTHING),
+        ("7.13", CYCLE_MACHINE, NOTHING),
         ("7.15", EVIDENCE_MACHINE, NOTHING),
         ("7.16:Side effect:", EFFECT_MACHINE, NOTHING),
         ("7.16:Watch:", WATCH_MACHINE, NOTHING),

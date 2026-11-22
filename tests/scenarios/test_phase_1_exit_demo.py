@@ -307,6 +307,8 @@ NO_EVENT = {
     "bets.extend": "asserted in test_PRJ_7_a_bet_expires_and_is_extended_once",
     "projects.end": "asserted in test_scenario_explore_confirms_one_bet_and_kills_another",
     "projects.promote": "asserted in test_scenario_explore_confirms_one_bet_and_kills_another",
+    "cycles.set_due": "asserted in test_PRJ_8_a_cycle_closes_completed_missed_or_skipped",
+    "projects.complete": "asserted in test_scenario_operate_meets_a_recurring_requirement",
     "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",

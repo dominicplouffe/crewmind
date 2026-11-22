@@ -22,6 +22,7 @@ class Site:
     def __init__(self) -> None:
         site = self
         self.status = 200
+        self.page = PAGE
 
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self) -> None:
@@ -32,7 +33,7 @@ class Site:
                     return
                 if self.path == "/slow":
                     time.sleep(3)
-                body = b"x" * (3 * 1024 * 1024) if self.path == "/big" else PAGE
+                body = b"x" * (3 * 1024 * 1024) if self.path == "/big" else site.page
                 self.send_response(site.status)
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()

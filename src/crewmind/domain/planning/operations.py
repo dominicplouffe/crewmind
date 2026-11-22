@@ -11,9 +11,10 @@ from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
-from crewmind.domain.planning import acceptance, readiness, requirements, views
+from crewmind.domain.planning import acceptance, plan_view, readiness, requirements, views
 from crewmind.domain.planning.authority import actor_of
-from crewmind.domain.planning.views import PlanView, RequirementInput
+from crewmind.domain.planning.plan_view import PlanView
+from crewmind.domain.planning.views import RequirementInput
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.services import services_of
@@ -53,7 +54,7 @@ class RuleInput(RequirementRef):
 
 
 async def _plan(context: Context, note: str | None = None) -> PlanView:
-    return await views.plan_view(
+    return await plan_view.plan_view(
         context.session,
         services_of(context).settings,
         view_of(context).project,

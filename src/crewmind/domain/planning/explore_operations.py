@@ -16,11 +16,11 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.domain.execution.agent import agent_of
 from crewmind.domain.execution.agent_operations import work_run_only
-from crewmind.domain.planning import bets, completion, views
+from crewmind.domain.planning import bets, completion, plan_view
 from crewmind.domain.planning.authority import actor_of
 from crewmind.domain.planning.delivery_operations import Receipt
 from crewmind.domain.planning.model import BetState
-from crewmind.domain.planning.views import PlanView
+from crewmind.domain.planning.plan_view import PlanView
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.model import ProjectState, ProjectType
 from crewmind.domain.projects.operations import CreateInput, ProjectItem, ProjectRef
@@ -84,7 +84,7 @@ async def open_bet(context: Context, payload: OpenBetInput) -> PlanView:
         window_hours=payload.window_hours,
         now=context.now,
     )
-    return await views.plan_view(context.session, settings, view.project, context.now)
+    return await plan_view.plan_view(context.session, settings, view.project, context.now)
 
 
 @operation(
@@ -113,7 +113,7 @@ async def publish_finding(context: Context, payload: FindingInput) -> PlanView:
         evidence=payload.evidence,
         now=context.now,
     )
-    return await views.plan_view(
+    return await plan_view.plan_view(
         context.session, services.settings, view.project, context.now, f"Published as {name}."
     )
 
@@ -137,7 +137,7 @@ async def extend_bet(context: Context, payload: ExtendInput) -> PlanView:
         payload.reason,
         context.now,
     )
-    return await views.plan_view(
+    return await plan_view.plan_view(
         context.session, services_of(context).settings, project, context.now
     )
 
