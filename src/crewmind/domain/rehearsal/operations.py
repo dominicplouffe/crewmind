@@ -128,7 +128,10 @@ async def rehearse(context: Context, spec: ProjectSpec) -> RehearsalReport:
             "started_at": context.now.isoformat(),
         }
         return build(found, spec.type, History())
-    return build(await drill(context, spec), spec.type, await history(context))
+    found = await drill(context, spec)
+    # The drill's own install has no credentials. What is missing is this install's answer.
+    found["missing"] = await transfer.missing_setup(context, spec)
+    return build(found, spec.type, await history(context))
 
 
 @operation(

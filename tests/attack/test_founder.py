@@ -493,3 +493,30 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
         ("drafting.edited", "answered"),
         ("drafting.state_changed", "created"),
     ]
+
+
+async def test_FND_14_a_doctrine_fix_is_a_finding_on_an_older_project_and_changes_nothing(
+    app: App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """FND-14: a project records the doctrine it was drafted under. When the doctrine
+    changes, the project's status carries a finding with its fix; the project itself is
+    not rewritten and still starts. A project made by hand has no such finding."""
+    from crewmind.domain.founder import drafting
+
+    owner = await app.person("owner@example.com")
+    await credential(app, owner, "main")
+    script(app, propose(), {"text": "Drafted."})
+    quick = await app.ok("founder.quick", owner, brief=BRIEF)
+    await app.founder.tick()
+    project = (await app.ok("founder.show", owner, drafting_id=quick["drafting_id"]))["project_id"]
+    by_hand = await app.project(owner, name="By hand")
+    before = await app.ok("projects.export", owner, project_id=project)
+    assert (await app.ok("projects.status", owner, project_id=project))["health"] == []
+
+    monkeypatch.setattr(drafting, "doctrine_text", lambda: "A later doctrine.")
+    status = await app.ok("projects.status", owner, project_id=project)
+    assert len(status["health"]) == 1
+    assert "earlier version of the Founder's doctrine" in status["health"][0]
+    assert status["state"] == "running"
+    assert await app.ok("projects.export", owner, project_id=project) == before
+    assert (await app.ok("projects.status", owner, project_id=by_hand))["health"] == []

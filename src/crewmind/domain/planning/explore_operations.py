@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -24,11 +24,10 @@ from crewmind.domain.planning.model import BetState
 from crewmind.domain.planning.plan_view import PlanView
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.model import ProjectState, ProjectType
-from crewmind.domain.projects.operations import CreateInput, ProjectItem, ProjectRef
+from crewmind.domain.projects.operations import ProjectRef
 from crewmind.services import services_of
 
 AGENT = frozenset({Principal.AGENT_RUN})
-GOAL_SHOWN = 4000  # characters of the findings report carried into the new project's goal
 
 
 class OpenBetInput(BaseModel):
@@ -56,6 +55,11 @@ class ExtendInput(ProjectRef):
     bet_id: int = Field(description="The bet's id, from `plan show`.")
     until: datetime = Field(description="The new kill date.")
     reason: str = Field(max_length=2000, description="Why it gets more time.")
+
+
+class Promoted(BaseModel):
+    drafting_id: str = Field(description="The drafting conversation that was opened.")
+    next: str
 
 
 class PromoteInput(ProjectRef):
@@ -177,13 +181,14 @@ async def end_project(context: Context, payload: ProjectRef) -> Receipt:
 
 @operation(
     "projects.promote",
-    summary="Create a draft Deliver project from an Explore project's findings.",
+    summary="Start drafting a Deliver project from an Explore project's findings.",
     authority=Authority.PROJECT_CHAIR,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def promote(context: Context, payload: PromoteInput) -> ProjectItem:
-    """PRJ-7: promote to Deliver. The new project is a draft whose goal is the findings
-    report; you become its chairman."""
+async def promote(context: Context, payload: PromoteInput) -> Promoted:
+    """PRJ-7: promote to Deliver, through the Founder. A drafting conversation is opened
+    with the findings report as its document, so the report is grilled before anything
+    is drafted from it. The Deliver project exists once you confirm that draft."""
     project = view_of(context).project
     if project.type != ProjectType.EXPLORE:
         raise Refusal("only_explore_promotes", "Only an Explore project is promoted.")
@@ -196,25 +201,25 @@ async def promote(context: Context, payload: PromoteInput) -> ProjectItem:
         )  # fmt: skip
         report = await bets.report_text(context.session, services.blobs, project)
     assert report is not None
-    goal = (
-        f"Deliver what the Explore project {project.name} found worth building.\n\n"
-        f"{report[:GOAL_SHOWN]}"
-    )
-    created = await context.executor.call(
+    name = payload.name or f"{project.name}: deliver"
+    start = catalog.get("founder.start")
+    drafting: Any = await context.executor.call(
         context,
-        catalog.get("projects.create"),
-        CreateInput(
-            name=payload.name or f"{project.name}: deliver",
-            type=ProjectType.DELIVER,
-            goal=goal,
-            timezone=None,
+        start,
+        start.input(
+            brief=f"Deliver what the Explore project {project.name} found worth building. "
+            f"Call the new project {name}. Its findings report is attached.",
+            document=report,
         ),
     )
-    assert isinstance(created, ProjectItem)
     context.record(
         bets.PROMOTED,
         subject=("project", project.id),
         project_id=project.id,
-        after={"deliver_project": created.project_id},
+        after={"drafting": drafting.drafting_id},
     )
-    return created
+    return Promoted(
+        drafting_id=drafting.drafting_id,
+        next="The Founder will ask about the findings. Carry on with "
+        f"`crewmind draft --resume {drafting.drafting_id}`, or in the app.",
+    )

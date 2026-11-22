@@ -40,7 +40,7 @@ class RuleHit(BaseModel):
     message: str
 
 
-class Estimate(BaseModel):
+class RunEstimate(BaseModel):
     runs_to_first_close: int
     tokens_to_first_close: int | None
     basis: str
@@ -54,7 +54,7 @@ class RehearsalReport(BaseModel):
     clock: list[str] = Field(description="What the wall-clock rules do at their real numbers.")
     staffing: list[str]
     rules_hit: list[RuleHit]
-    estimate: Estimate
+    estimate: RunEstimate
     parallelism: str
     longest_chain: str
     projected_duration: str
@@ -224,14 +224,14 @@ def build(found: dict[str, Any], type: str, history: History) -> RehearsalReport
         last = next((step.what for step in reversed(walk) if step.happened), "nothing")
         verdict = f"Stalls. The last step reached was: {last}."
     if history.median_tokens is not None:
-        estimate = Estimate(
+        estimate = RunEstimate(
             runs_to_first_close=runs,
             tokens_to_first_close=runs * history.median_tokens,
             basis=f"{runs} runs at this install's median of {history.median_tokens:,} tokens "
             f"a run, from {history.runs} finished runs.",
         )
     else:
-        estimate = Estimate(
+        estimate = RunEstimate(
             runs_to_first_close=runs,
             tokens_to_first_close=None,
             basis="This install has too few finished runs to estimate tokens from.",

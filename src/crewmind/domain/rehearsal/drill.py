@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import event, select
 
 from crewmind.catalog import catalog
 from crewmind.catalog.caller import Caller, CallerKind, InstanceRole
@@ -105,6 +105,7 @@ class Drill:
         )
         self.crew = DrillCrew(Roster("deliver", [], {}, set(), True))
         self.runtime: Runtime = build_runtime(config, self.clock, mock_default=True, mock=self.crew)
+        event.listen(self.runtime.engine.sync_engine, "connect", _no_sync)
         self.waits: list[dict[str, Any]] = []
         self.jumps: list[dict[str, Any]] = []
         self.refusal: dict[str, Any] | None = None
@@ -381,6 +382,14 @@ class Drill:
         except Refusal:
             pass
         return found
+
+
+def _no_sync(connection: Any, _: Any) -> None:
+    """The drill's database is thrown away with the drill, so it need not survive a
+    power cut: writes are not flushed to disk one by one."""
+    cursor = connection.cursor()
+    cursor.execute("PRAGMA synchronous=OFF")
+    cursor.close()
 
 
 async def _subject(session: Any, project: Project) -> Any:

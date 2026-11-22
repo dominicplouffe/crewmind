@@ -76,7 +76,7 @@ class GrillAnswer(ProjectRef):
     )
 
 
-class ItemView(BaseModel):
+class PassageView(BaseModel):
     id: int
     kind: str
     passage: str
@@ -90,7 +90,7 @@ class GrillView(BaseModel):
     state: str | None
     document: str | None = Field(description="The first page of the document.")
     characters: int
-    items: list[ItemView]
+    items: list[PassageView]
     questions: list[QuestionView]
     ledger: list[LedgerLine]
     can_confirm: bool
@@ -170,7 +170,7 @@ async def _view(session: AsyncSession, row: Drafting | None) -> GrillView:
         document=document[:PAGE_CHARACTERS],
         characters=len(document),
         items=[
-            ItemView(
+            PassageView(
                 id=item.id,
                 kind=item.kind,
                 passage=item.passage,

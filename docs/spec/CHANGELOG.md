@@ -28,6 +28,10 @@ Newest first. One line per change, citing the ids touched.
 - **LLM-14, Appendix A:** `founder.credential`, `founder.model_class`, `grill.min_characters`.
 - **IF-1.2:** an operation called from inside another runs its own preparation step.
 - **FND-16:** one grilling at a time; what the CEO may not do while it is open; a conflict names what it conflicts with.
+- **PRJ-7:** promote opens a Founder drafting with the findings report as its document; the Deliver project exists once that draft is confirmed.
+- **IF-5.8:** the design doctrine and the goal grammar are served as documents; the design prompt goes through the Founder.
+- **FND-14:** the finding is shown in the project's status, with its fix.
+- **IF-4.6, IF-4.7:** `crewmind draft` is the terminal's drafting command; `crewmind founder eval` compares the grader with hand grades.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

@@ -119,7 +119,26 @@ async def _status(context: Context) -> ProjectStatus:
         goal=project.goal,
         holds=[_hold_item(row) for row in holds],
         delete_at=project.delete_at,
+        health=_health(project),
     )
+
+
+OLDER_DOCTRINE = (
+    "This project was drafted under an earlier version of the Founder's doctrine. Nothing "
+    "in it was changed. Rehearse it with `crewmind projects rehearse` to see what the "
+    "current doctrine and rules make of it."
+)
+
+
+def _health(project: Project) -> list[str]:
+    """FND-14: a later doctrine fix shows as a finding on an older project. It never
+    rewrites the project and never blocks it."""
+    from crewmind.domain.founder.drafting import doctrine_fingerprint
+
+    drafted_under = project.doctrine_fingerprint
+    if drafted_under is not None and drafted_under != doctrine_fingerprint():
+        return [OLDER_DOCTRINE]
+    return []
 
 
 @operation(

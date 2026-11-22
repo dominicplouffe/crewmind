@@ -14,6 +14,7 @@ import socket
 import sys
 from collections.abc import Callable, Coroutine
 from enum import IntEnum
+from pathlib import Path
 from typing import Any, cast
 
 import httpx
@@ -250,10 +251,15 @@ def build_cli(source: Catalog, invoker: Invoker, local_invoker: Invoker) -> type
             app.command(name=alias)(commands[target])
     if "chat" in groups:
         add_chat_command(groups["chat"])
+    if "founder" in groups:
+        add_draft_commands(app, groups["founder"])
     return app
 
 
-CLIENT_COMMANDS = {"chat"}
+CLIENT_COMMANDS = {"chat", "draft"}
+CLIENT_VERBS = {"founder.eval"}
+"""Commands inside a group that are clients too: `crewmind founder eval` calls `goals.grade`
+and compares (FND-7)."""
 """Interactive clients of catalog operations. `crewmind chat` is the project chat in the
 terminal (IF-4.8): it calls `chat.*`, `runs.interrupt` and the live stream, and defines no
 operation of its own."""
@@ -294,6 +300,56 @@ def add_chat_command(group: typer.Typer) -> None:
         ChatApp(client, matches[0]["project_id"], matches[0]["name"]).run()
 
 
+def _signed_in_client() -> httpx.Client:
+    token = current_token()
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    return httpx.Client(base_url=api_address(), headers=headers, timeout=120)
+
+
+_DOCUMENT = typer.Option(None, "--document", help="A brief to grill first.")
+_GOALS = typer.Option(..., "--goal", help="A goal file. Repeat for more.")
+_GRADES = typer.Option(..., "--grades", help="Its hand grades (JSON), in the same order.")
+
+
+def add_draft_commands(app: typer.Typer, founder: typer.Typer) -> None:
+    """`crewmind draft` is the Founder in the terminal (IF-4.6, IF-4.7), and `crewmind
+    founder eval` checks the grader against hand grades (FND-7). Both are clients of
+    catalog operations."""
+
+    @app.command(name="draft", help="Draft a project by talking with the Founder.")
+    def draft(  # pyright: ignore[reportUnusedFunction]
+        brief: str = typer.Option(None, "--brief", help="What you want done."),
+        document: Path = _DOCUMENT,
+        resume: str = typer.Option(None, "--resume", help="A conversation to carry on with."),
+        quick: bool = typer.Option(False, "--quick", help="The Founder decides and starts."),
+        credential: str = typer.Option(None, "--credential", help="Who pays, in quick mode."),
+    ) -> None:
+        from crewmind.surfaces.cli.draft import run_draft
+
+        with _signed_in_client() as client:
+            try:
+                run_draft(
+                    client, brief=brief, document=document, resume=resume, quick=quick,
+                    credential=credential,
+                )  # fmt: skip
+            except httpx.TransportError as error:
+                typer.echo(
+                    f"The server at {api_address()} did not answer. Start it with `crewmind up`.",
+                    err=True,
+                )
+                raise typer.Exit(ExitCode.UNREACHABLE) from error
+
+    @founder.command(name="eval", help="Grade goals with the Founder's model and compare.")
+    def evaluate(  # pyright: ignore[reportUnusedFunction]
+        goal: list[Path] = _GOALS,
+        grades: list[Path] = _GRADES,
+    ) -> None:
+        from crewmind.surfaces.cli.draft import run_eval
+
+        with _signed_in_client() as client:
+            raise typer.Exit(run_eval(client, list(zip(goal, grades, strict=True))))
+
+
 def exposed_operations(app: typer.Typer) -> set[str]:
     """The operation names the CLI actually offers. A top-level command is a host-local
     operation unless it is a declared alias; anything else is reported under its own name."""
@@ -305,6 +361,7 @@ def exposed_operations(app: typer.Typer) -> set[str]:
         if isinstance(command, TyperGroup):
             for verb in command.commands:
                 names.add(f"{name}.{verb}".replace("-", "_"))
+            names -= CLIENT_VERBS
         elif name not in ALIASES and name not in CLIENT_COMMANDS:
             names.add(f"{HOST_GROUP}.{name}".replace("-", "_"))
     return names

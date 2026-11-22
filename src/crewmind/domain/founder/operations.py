@@ -23,6 +23,7 @@ from crewmind.domain.founder.model import DRAFTING_MACHINE, D
 from crewmind.domain.founder.turn import grade_goal
 from crewmind.domain.library import transfer
 from crewmind.domain.library.spec import ProjectSpec
+from crewmind.domain.library.spec_operations import missing_credentials
 from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
 from crewmind.services import services_of
@@ -63,7 +64,7 @@ class SayInput(DraftingRef):
     body: str = Field(min_length=1, max_length=BRIEF_MAX, description="Your message.")
 
 
-class AnswerInput(DraftingRef):
+class DraftAnswerInput(DraftingRef):
     question_id: int = Field(description="The question's id.")
     answer: str = Field(
         default="",
@@ -73,7 +74,7 @@ class AnswerInput(DraftingRef):
     )
 
 
-class CreateInput(DraftingRef):
+class ConfirmDraftInput(DraftingRef):
     start: bool = Field(default=False, description="Start the project once it is created.")
 
 
@@ -139,6 +140,9 @@ class CreatedProject(BaseModel):
     name: str
     state: str
     missing: list[str] = Field(description="What is still needed before it can start.")
+    missing_credentials: list[str] = Field(
+        description="Model credentials the roster needs that you do not have yet."
+    )
     can_start: bool
 
 
@@ -350,7 +354,7 @@ async def say(context: Context, payload: SayInput) -> DraftingView:
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def answer(context: Context, payload: AnswerInput) -> DraftingView:
+async def answer(context: Context, payload: DraftAnswerInput) -> DraftingView:
     """FND-3, FND-5: the answer goes into the ledger, tagged as an answer."""
     drafting = await state.get(context.session, payload.drafting_id, context.caller.actor_id)
     _drafting_only(drafting)
@@ -438,7 +442,7 @@ def _move(context: Context, drafting: Drafting, target: D) -> None:
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def create(context: Context, payload: CreateInput) -> CreatedProject:
+async def create(context: Context, payload: ConfirmDraftInput) -> CreatedProject:
     """FND-5, FND-12, FND-13, FND-14: a project is created only from a draft with nothing
     left open: every decision settled, the goal graded ready, the draft rehearsed. Calling
     this is the chairman confirming the ledger. The conversation becomes the project chat,
@@ -525,5 +529,6 @@ async def create(context: Context, payload: CreateInput) -> CreatedProject:
         name=project.name,
         state=project.state,
         missing=still_missing,
+        missing_credentials=await missing_credentials(context, spec),
         can_start=not started and not blocking,
     )

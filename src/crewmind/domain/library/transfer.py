@@ -141,24 +141,33 @@ async def create(context: Context, spec: ProjectSpec) -> tuple[Project, list[str
     return project, await _link_payer(context, project, spec)
 
 
-async def _link_payer(context: Context, project: Project, spec: ProjectSpec) -> list[str]:
-    """Link the paying credential when the person has one by that name; otherwise say
-    what is missing. A spec never carries the value (LIB-4)."""
-    missing: list[str] = []
-    mine = set(
+async def _credentials(context: Context) -> set[str]:
+    return set(
         await context.session.scalars(
             select(ModelCredential.name).where(ModelCredential.owner_id == context.caller.actor_id)
         )
     )
+
+
+async def _link_payer(context: Context, project: Project, spec: ProjectSpec) -> list[str]:
+    """Link the paying credential when the person has one by that name, and say what is
+    still missing. A spec never carries the value (LIB-4)."""
+    if spec.paying_credential in await _credentials(context):
+        await _call(
+            context, "models.set_payer", project_id=project.id, credential=spec.paying_credential
+        )
+    return await missing_setup(context, spec)
+
+
+async def missing_setup(context: Context, spec: ProjectSpec) -> list[str]:
+    """What this person still has to set up before a project from this spec can start,
+    on this install (FND-13). It changes nothing."""
+    missing: list[str] = []
     if spec.paying_credential is None:
         missing.append(
             "No credential pays for this project yet. Choose one with `models set-payer`."
         )
-    elif spec.paying_credential in mine:
-        await _call(
-            context, "models.set_payer", project_id=project.id, credential=spec.paying_credential
-        )
-    else:
+    elif spec.paying_credential not in await _credentials(context):
         missing.append(
             f"You have no credential named {spec.paying_credential}. Add it with "
             "`credentials add`, then choose it with `models set-payer`."

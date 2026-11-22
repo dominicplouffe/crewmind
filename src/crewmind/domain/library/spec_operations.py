@@ -4,6 +4,7 @@ PRJ-9)."""
 from __future__ import annotations
 
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
@@ -13,7 +14,7 @@ from crewmind.domain.library import transfer
 from crewmind.domain.library.spec import ProjectSpec
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
-from crewmind.storage.models import Project
+from crewmind.storage.models import ModelCredential, Project
 
 
 class SpecCheck(BaseModel):
@@ -29,14 +30,32 @@ class Created(BaseModel):
     missing: list[str] = Field(
         description="What is still needed before the project can start, in plain sentences."
     )
+    missing_credentials: list[str] = Field(
+        default_factory=list[str],
+        description="Model credentials the spec names that you do not have yet.",
+    )
 
 
 class CloneInput(ProjectRef):
     name: str = Field(min_length=1, max_length=200, description="The new project's name.")
 
 
-def _created(project: Project, missing: list[str]) -> Created:
+async def missing_credentials(context: Context, spec: ProjectSpec) -> list[str]:
+    """The paying credential a spec names, when the caller has none by that name."""
+    if spec.paying_credential is None:
+        return []
+    have = await context.session.scalar(
+        select(ModelCredential.id).where(
+            ModelCredential.owner_id == context.caller.actor_id,
+            ModelCredential.name == spec.paying_credential,
+        )
+    )
+    return [] if have else [spec.paying_credential]
+
+
+def _created(project: Project, missing: list[str], names: list[str]) -> Created:
     return Created(
+        missing_credentials=names,
         project_id=project.id,
         name=project.name,
         type=project.type,
@@ -70,7 +89,7 @@ async def import_spec(context: Context, payload: ProjectSpec) -> Created:
     at any step leaves nothing created. Secret values are never in a spec, so what is
     still missing is listed."""
     project, missing = await transfer.create(context, payload)
-    return _created(project, missing)
+    return _created(project, missing, await missing_credentials(context, payload))
 
 
 @operation(
@@ -99,4 +118,4 @@ async def clone(context: Context, payload: CloneInput) -> Created:
     project, missing = await transfer.create(
         context, spec.model_copy(update={"name": payload.name, "roles": []})
     )
-    return _created(project, missing)
+    return _created(project, missing, await missing_credentials(context, spec))

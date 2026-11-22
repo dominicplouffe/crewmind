@@ -101,6 +101,9 @@ class DrillCrew(MockProvider):
             return self._do([(PLAN, {}), (BOARD, {})], calls_so_far)
         if seen.refused or calls_so_far >= TURNS_MOST:
             return self._say("Stopping here.", on_delta)
+        whole = self._whole_job(seat_name, seen)
+        if whole:
+            return self._do(whole, calls_so_far)
         action = self._next(seat_name, seen)
         if action is None:
             return self._say("Nothing more to do in this run.", on_delta)
@@ -117,6 +120,25 @@ class DrillCrew(MockProvider):
             for index, (name, arguments) in enumerate(actions)
         ]
         return CompletionResponse(tool_calls=calls, usage=NO_USAGE)
+
+    def _whole_job(self, seat: str, seen: Seen) -> list[Action]:
+        """A worker with a task to take does the whole of it in one step: claim it, write
+        the first version, hand it in."""
+        if seat == "CEO" or seat in self.roster.reviewers or seen.done:
+            return []
+        for task in seen.board.get("claimable", []):
+            return [
+                ("agent_claim_task", {"task_id": task["id"]}),
+                (
+                    "write_file",
+                    {"path": f"first-version-{task['id']}.txt", "content": FIRST_VERSION},
+                ),
+                (
+                    "agent_complete_task",
+                    {"task_id": task["id"], "evidence": "The first version is written."},
+                ),
+            ]
+        return []
 
     def _next(self, seat: str, seen: Seen) -> Action | None:
         if seat == "CEO":

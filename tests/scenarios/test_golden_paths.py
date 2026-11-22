@@ -166,15 +166,15 @@ async def test_scenario_explore_confirms_one_bet_and_kills_another(app: App, sit
     assert "Order 4411 was delivered" in report
 
     promoted = await app.ok("projects.promote", crew.owner, project_id=crew.project)
-    assert (promoted["type"], promoted["state"], promoted["your_role"]) == (
-        "deliver",
-        "draft",
-        "chairman",
-    )
+    drafting = await app.ok("founder.show", crew.owner, drafting_id=promoted["drafting_id"])
+    assert (drafting["state"], drafting["waiting_for"]) == ("drafting", "the Founder")
+    assert "found worth building" in drafting["lines"][0]["body"]
     async with app.runtime.sessions() as session:
-        draft = await session.get(Project, promoted["project_id"])
-        assert draft is not None
-        assert "A firm placed a paid order" in draft.goal
+        from crewmind.storage.models import Drafting
+
+        row = await session.get(Drafting, promoted["drafting_id"])
+        assert row is not None
+        assert "A firm placed a paid order" in (row.document or "")
 
 
 async def test_scenario_operate_meets_a_recurring_requirement(app: App, clock: FakeClock) -> None:

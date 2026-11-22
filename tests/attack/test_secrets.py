@@ -39,6 +39,7 @@ NOT_SECRET = {
     "content_hash",
     "credential_names",
     "paying_credential",
+    "missing_credentials",
     "credentials",
 }
 
