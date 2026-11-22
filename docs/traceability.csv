@@ -260,14 +260,14 @@ IF-4.5,"Secrets are read from a hidden prompt, stdin or a file. They are never",
 IF-4.6,Drafting a project in the terminal follows the Founder rules (FND-3):,09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.7,"After creating a project, the CLI asks for any missing credentials the",09-interfaces-IF.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 IF-4.8,`crewmind chat [project]` opens a full-screen terminal chat with the same ,09-interfaces-IF.md,2,yes,done,test_IF_4_8_the_chat_client_reports_refusals_in_the_servers_words; test_IF_4_8_the_terminal_chat_sends_streams_and_runs_commands; test_IF_4_8_crewmind_chat_opens_the_terminal_chat_and_keeps_its_subcommands,
-IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,partial,tests/acceptance/test_slim.py; tests/attack/test_mcp.py,Phase 1: minted bearer tokens over streamable HTTP. OAuth in phase 6
-IF-5.2,Scopes,09-interfaces-IF.md,6,yes,partial,tests/attack/test_mcp.py; tests/contract/test_IF_1_4_refusals.py,Phase 1: the read scope only. Other scopes in phase 6
-IF-5.3,Two-phase confirmation,09-interfaces-IF.md,6,yes,not started,,
-IF-5.4,Attribution,09-interfaces-IF.md,6,yes,not started,,
+IF-5.1,Transport and auth,09-interfaces-IF.md,6,yes,partial,test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process; test_IF_5_1_the_mcp_endpoint_takes_only_a_live_mcp_token; test_IF_5_1_a_person_revokes_a_client; test_IF_5_1_the_five_named_attacks_fail; test_NFR_13_codes_are_single_use_and_a_replayed_refresh_is_theft; test_NFR_13_registration_is_capped_and_redirects_stay_on_this_machine,Minted tokens and OAuth 2.1 are built and attacked in tests. The consent page in the web app and a real MCP client's full round trip were not run here
+IF-5.2,Scopes,09-interfaces-IF.md,6,yes,done,test_IF_5_2_a_read_client_sees_and_calls_only_read_tools; test_IF_5_2_a_scope_reaches_its_own_tools_and_human_only_verbs_reach_none; test_IF_5_2_every_person_operation_has_a_scope_or_a_stated_reason; test_INV_5_an_mcp_client_sees_only_its_persons_projects; test_IF_5_2_an_unknown_tool_is_answered_as_unknown,Phase 1: the read scope only. Other scopes in phase 6
+IF-5.3,Two-phase confirmation,09-interfaces-IF.md,6,yes,done,test_IF_5_3_an_irreversible_write_needs_two_calls,
+IF-5.4,Attribution,09-interfaces-IF.md,6,yes,done,test_IF_5_3_an_irreversible_write_needs_two_calls; test_NFR_13_codes_are_single_use_and_a_replayed_refresh_is_theft; test_phase_1_exit_demo_every_change_is_in_the_event_log_on_every_surface,
 IF-5.5,Untrusted content,09-interfaces-IF.md,6,yes,not started,,
-IF-5.6,Human-only verbs,09-interfaces-IF.md,6,yes,not started,,
-IF-5.7,Context budget,09-interfaces-IF.md,6,yes,not started,,
-IF-5.8,Resources and prompts,09-interfaces-IF.md,6,yes,not started,,
+IF-5.6,Human-only verbs,09-interfaces-IF.md,6,yes,done,test_IF_5_2_a_read_client_sees_and_calls_only_read_tools; test_IF_5_2_a_scope_reaches_its_own_tools_and_human_only_verbs_reach_none; test_IF_5_2_every_person_operation_has_a_scope_or_a_stated_reason,
+IF-5.7,Context budget,09-interfaces-IF.md,6,yes,done,test_IF_5_7_a_payload_is_cut_to_the_budget_and_says_so,
+IF-5.8,Resources and prompts,09-interfaces-IF.md,6,yes,partial,test_IF_5_8_resources_and_prompts_show_only_what_the_person_may_see,"The desk, each project and the output standard are resources, with four prompts. The Founder doctrine and goal grammar arrive in phase 7"
 IF-6.1,Every call carries the run token. Every refusal is a 403 with the shar,09-interfaces-IF.md,2,yes,done,test_IF_6_1_every_agent_operation_is_only_on_the_agent_api,
 IF-6.2,No agent-facing response may contain a secret value. A test walks the ,09-interfaces-IF.md,2,yes,done,test_INV_6_no_operation_output_carries_a_secret_except_those_shown_once,
 IF-6.3,Capability groups the agent API MUST offer (the role decides which a g,09-interfaces-IF.md,2,yes,partial,,"Context, conversation, artifacts and team (roster) groups built. Work, memory and decisions groups arrive with their domains. Not offered as MCP inside the sandbox yet"
@@ -289,7 +289,7 @@ NFR-9,"The dispatcher, scheduler, leasing, gateway and API all recover on the",1
 NFR-10,Schema changes are forward-only migrations applied at start. Reports a,11-nfr-NFR.md,1,yes,done,tests/unit/test_execute.py; tests/unit/test_storage.py,
 NFR-11,"Every route declares its authorization, enforced before the handler ru",11-nfr-NFR.md,1,yes,done,tests/attack/test_access.py,
 NFR-12,Secrets are encrypted at rest under the master key. Tokens are stored ,11-nfr-NFR.md,1,yes,done,tests/attack/test_accounts.py; tests/attack/test_secrets.py,
-NFR-13,The OAuth server for MCP enforces:,11-nfr-NFR.md,6,yes,not started,,
+NFR-13,The OAuth server for MCP enforces:,11-nfr-NFR.md,6,yes,partial,test_NFR_13_codes_are_single_use_and_a_replayed_refresh_is_theft; test_NFR_13_registration_is_capped_and_redirects_stay_on_this_machine,"PKCE S256, exact redirects, 60-second single-use codes, 1-hour tokens, refresh rotation with replay as theft, audience binding and the 200-client cap are built. The redirect allowlist is this machine only; adding hosted clients waits for the setup wizard"
 NFR-14,SECURITY.md states:,11-nfr-NFR.md,1,yes,partial,,"SECURITY.md updated for phase 2: sandboxes, gateway, web app, push. Skills and browser sections come with those features"
 NFR-15,Retention,11-nfr-NFR.md,1,yes,partial,tests/unit/test_scheduler.py,Deleting a project purges everything. Trace and snapshot retention arrive in phase 2
 NFR-16,"Deciding whether an agent has work costs no tokens. Briefs, agendas, r",11-nfr-NFR.md,1,yes,partial,,Not yet exercised: nothing in phase 1 can spend tokens

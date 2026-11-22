@@ -14,6 +14,9 @@ Newest first. One line per change, citing the ids touched.
 - **HUM-11:** how the brief is delivered before mail exists.
 - **INV-24:** a chat run that gives no reply is answered by a platform status, not run again.
 - **GOV-8:** purchases are declared until a purchasing integration exists.
+- **IF-5.2:** one table maps each operation to its scope; the person's own account and instance administration are reached by no client.
+- **IF-5.1, NFR-13:** each OAuth step is an operation behind the standard endpoint; a code presented with wrong values is spent; redirects are http on this machine until an admin allowlist exists.
+- **IF-5.8:** the output standard is served as a document; the Founder doctrine and goal grammar join with the Founder.
 - **INT-6, INT-7:** the install's outbound mail account moves to phase 8 with project mailboxes; until then alerts and briefs go by browser push and in the app (owner).
 
 ## Revision 2.16 (22 Nov 2026): phase 5 build

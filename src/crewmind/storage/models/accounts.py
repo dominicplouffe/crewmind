@@ -60,6 +60,10 @@ class Token(Base):
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     expires_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     revoked_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    audience: Mapped[str | None] = mapped_column(String(300))
+    """The MCP server an OAuth access token was issued for (RFC 8707). None for a minted one."""
+    family_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    """The grant an OAuth access token belongs to, so a replayed refresh revokes it."""
 
 
 class Link(Base):
@@ -123,3 +127,49 @@ class McpConfirmToken(Base):
     state: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
     expires_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class OAuthClient(Base):
+    """A dynamically registered MCP client (IF-5.1). At most 200 exist (NFR-13)."""
+
+    __tablename__ = "oauth_clients"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    name: Mapped[str] = mapped_column(String(100))
+    redirect_uris: Mapped[list[Any]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class OAuthCode(Base):
+    """A single-use authorization code, stored as a hash, alive for 60 seconds (NFR-13)."""
+
+    __tablename__ = "oauth_codes"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    code_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    client_id: Mapped[str] = mapped_column(ForeignKey("oauth_clients.id", ondelete="CASCADE"))
+    person_id: Mapped[str] = mapped_column(ForeignKey("persons.id", ondelete="CASCADE"))
+    redirect_uri: Mapped[str] = mapped_column(String(600))
+    challenge: Mapped[str] = mapped_column(String(128))
+    scopes: Mapped[list[Any]] = mapped_column(JSON)
+    audience: Mapped[str] = mapped_column(String(300))
+    family_id: Mapped[str] = mapped_column(String(32))
+    used: Mapped[bool] = mapped_column(default=False)
+    expires_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class OAuthRefresh(Base):
+    """A refresh token, stored as a hash. Each use rotates it; a second use of the same
+    one is treated as theft and revokes its whole grant (NFR-13)."""
+
+    __tablename__ = "oauth_refresh_tokens"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    family_id: Mapped[str] = mapped_column(String(32), index=True)
+    client_id: Mapped[str] = mapped_column(ForeignKey("oauth_clients.id", ondelete="CASCADE"))
+    person_id: Mapped[str] = mapped_column(ForeignKey("persons.id", ondelete="CASCADE"))
+    scopes: Mapped[list[Any]] = mapped_column(JSON)
+    audience: Mapped[str] = mapped_column(String(300))
+    state: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)

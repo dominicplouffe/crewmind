@@ -47,6 +47,8 @@ NOT_FOR_CLIENTS: dict[str, str] = {
     "tokens.revoke": "the person's own credentials",
     "mcp_clients.list": "the person's own credentials",
     "mcp_clients.revoke": "the person's own credentials",
+    "oauth.register": "a step of the OAuth protocol itself",
+    "oauth.token": "a step of the OAuth protocol itself",
     "oauth.clients": "the person's own credentials",
     "oauth.revoke": "the person's own credentials",
 }

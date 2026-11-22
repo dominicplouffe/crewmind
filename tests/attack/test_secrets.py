@@ -26,9 +26,12 @@ SHOWN_ONCE = {
     ("install.bootstrap_admin", "link"),
     ("install.reset_link", "link"),
     ("install.setup", "setup_link"),
+    ("oauth.approve", "redirect_to"),
+    ("oauth.token", "access_token"),
+    ("oauth.token", "refresh_token"),
 }
 SECRET_WORDS = ("password", "secret", "token", "hash", "key", "credential", "session", "link")
-NOT_SECRET = {"token_id", "token_expires_at", "secrets_reencrypted", "content_hash"}
+NOT_SECRET = {"token_id", "token_expires_at", "token_type", "secrets_reencrypted", "content_hash"}
 
 
 def _fields(model: type[BaseModel], prefix: str = "") -> list[str]:

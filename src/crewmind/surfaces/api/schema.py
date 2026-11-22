@@ -17,6 +17,7 @@ from crewmind.runtime import build_runtime
 from crewmind.surfaces.api.app import build_api
 from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.api.stream import add_stream_route
+from crewmind.surfaces.mcp.oauth_routes import add_oauth_routes
 
 
 def schema() -> dict[str, object]:
@@ -33,6 +34,7 @@ def schema() -> dict[str, object]:
     )
     app = build_api(catalog, runtime.executor, runtime.authenticator, base_url="http://127.0.0.1")
     add_file_routes(app, runtime.executor, runtime.authenticator, runtime.services)
+    add_oauth_routes(app, runtime.executor, runtime.config.base_url)
     add_stream_route(app, runtime.executor, runtime.authenticator, runtime.hub)
     return app.openapi()
 

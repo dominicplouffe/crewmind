@@ -15,6 +15,14 @@ down_revision: str | None = "0012"
 
 def upgrade() -> None:
     op.create_table(
+        "oauth_clients",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("name", sa.String(length=100), nullable=False),
+        sa.Column("redirect_uris", sa.JSON(), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_table(
         "brief_runs",
         sa.Column(
             "id",
@@ -45,6 +53,45 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("token_hash"),
     )
+    op.create_table(
+        "oauth_codes",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("code_hash", sa.String(length=64), nullable=False),
+        sa.Column("client_id", sa.String(length=32), nullable=False),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("redirect_uri", sa.String(length=600), nullable=False),
+        sa.Column("challenge", sa.String(length=128), nullable=False),
+        sa.Column("scopes", sa.JSON(), nullable=False),
+        sa.Column("audience", sa.String(length=300), nullable=False),
+        sa.Column("family_id", sa.String(length=32), nullable=False),
+        sa.Column("used", sa.Boolean(), nullable=False),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["client_id"], ["oauth_clients.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["person_id"], ["persons.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("code_hash"),
+    )
+    op.create_table(
+        "oauth_refresh_tokens",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("token_hash", sa.String(length=64), nullable=False),
+        sa.Column("family_id", sa.String(length=32), nullable=False),
+        sa.Column("client_id", sa.String(length=32), nullable=False),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("scopes", sa.JSON(), nullable=False),
+        sa.Column("audience", sa.String(length=300), nullable=False),
+        sa.Column("state", sa.String(length=16), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["client_id"], ["oauth_clients.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["person_id"], ["persons.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("token_hash"),
+    )
+    with op.batch_alter_table("oauth_refresh_tokens", schema=None) as batch_op:
+        batch_op.create_index(
+            batch_op.f("ix_oauth_refresh_tokens_family_id"), ["family_id"], unique=False
+        )
+
     op.create_table(
         "decision_items",
         sa.Column(
@@ -147,3 +194,8 @@ def upgrade() -> None:
     with op.batch_alter_table("alarms", schema=None) as batch_op:
         batch_op.add_column(sa.Column("level", sa.String(length=16), nullable=False))
         batch_op.add_column(sa.Column("person_id", sa.String(length=32), nullable=True))
+
+    with op.batch_alter_table("tokens", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("audience", sa.String(length=300), nullable=True))
+        batch_op.add_column(sa.Column("family_id", sa.String(length=32), nullable=True))
+        batch_op.create_index(batch_op.f("ix_tokens_family_id"), ["family_id"], unique=False)

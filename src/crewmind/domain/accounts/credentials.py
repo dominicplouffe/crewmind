@@ -90,7 +90,11 @@ class Authenticator:
         self._sessions = sessions
         self._clock = clock
 
-    async def authenticate(self, credential: str | None, *, on_mcp: bool = False) -> Caller:
+    async def authenticate(
+        self, credential: str | None, *, on_mcp: bool = False, audience: str | None = None
+    ) -> Caller:
+        """Find the caller behind a credential. An OAuth access token is accepted only by
+        the MCP server it was issued for (RFC 8707, NFR-13)."""
         if not credential:
             return ANONYMOUS
         now = self._clock()
@@ -111,6 +115,8 @@ class Authenticator:
                     select(Token).where(Token.token_hash == digest, Token.kind == kind)
                 )
                 if token is None or not token_is_live(token, now):
+                    raise unauthenticated()
+                if token.audience is not None and token.audience != audience:
                     raise unauthenticated()
                 caller = await self._person(session, token.person_id, credential_id=token.id)
                 if not on_mcp:

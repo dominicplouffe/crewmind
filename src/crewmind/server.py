@@ -22,6 +22,7 @@ from crewmind.catalog.caller import CallerKind
 from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
+from crewmind.domain.accounts.oauth import audience_of
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.planning import PlanningJobs
@@ -37,6 +38,7 @@ from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
 from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.api.stream import add_stream_route
 from crewmind.surfaces.api.web import WebApp, web_directory
+from crewmind.surfaces.mcp.oauth_routes import add_oauth_routes
 from crewmind.surfaces.mcp.server import CALLER_STATE, build_mcp
 
 MCP_PATH = "/mcp"
@@ -77,7 +79,9 @@ class McpAuthentication:
         header = headers.get("authorization", "")
         token = header[7:].strip() if header.lower().startswith("bearer ") else None
         try:
-            caller = await self._runtime.authenticator.authenticate(token, on_mcp=True)
+            caller = await self._runtime.authenticator.authenticate(
+                token, on_mcp=True, audience=audience_of(self._runtime.config.base_url)
+            )
             if caller.kind is not CallerKind.PERSON:
                 raise unauthenticated()
         except Refusal as refusal:
@@ -182,6 +186,7 @@ def create_app(
         app, catalog, runtime.executor, runtime.run_authenticator, runtime.gateway, runtime.settings
     )
     add_file_routes(app, runtime.executor, runtime.authenticator, runtime.services)
+    add_oauth_routes(app, runtime.executor, runtime.config.base_url)
     add_stream_route(app, runtime.executor, runtime.authenticator, runtime.hub)
 
     async def healthz() -> dict[str, str]:
