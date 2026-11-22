@@ -12,7 +12,7 @@ Goal (PLAN.md): start a project by talking. A pasted document is grilled before 
   - the same document grilled in a running project also surfaces its planted conflict with a standing order.
 - The full v2.0 acceptance suite passes. The Standards item and the Slack column of surface parity stay in phase 8.
 
-Status: **agreed with the owner on 22 Nov 2026.** The answers are at the end.
+Status: **built on 22 Nov 2026.** The owner's answers and the outcome are at the end.
 
 ## What phase 7 covers
 
@@ -49,6 +49,8 @@ Each part ends with the suite green on both databases.
 | **Install history** | Rehearsal's estimate of runs and tokens (RHS-3) | From the crew's reference estimate until an install has finished projects of its own; the report says which it used |
 
 ## Modules
+
+This was the plan. What was built differs in places, listed under "Differences from this plan" in the outcome.
 
 ```
 src/crewmind/
@@ -117,3 +119,97 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 | Review stops | One, at the full exit demo |
 
 No open questions remain.
+
+## Outcome (22 Nov 2026)
+
+Phase 7 is built in its five parts. Of its 28 requirement ids, 16 are done and 12 are partial; `docs/traceability.csv` has the tests and a note for each.
+
+**The one thing to know first: the Founder has never spoken to a real model here.** Every test drives it with a scripted model. The tests prove the rules, the tools, the flow and every surface. They do not prove that a real model asks good questions, drafts a good goal or grades one accurately. Before calling this a release candidate, set `founder.credential`, draft one real project, and run `crewmind founder eval` (the README has the command).
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| The reference goal grades ready | Passes, with a scripted grader replaying the hand grade. The platform's part is real: it checks each quote against the goal and computes the verdict |
+| The raw brief does not, and is missing exactly the elements its hand grade names | Passes, on the same terms |
+| Quick mode creates and starts a project in under 2 minutes | Passes on a real server from the real terminal: 8.8 seconds, of which about 5 are the rehearsal. A real model adds its own thinking time, which was not measured |
+| A seeded document yields a question on each planted problem, one at a time, before any draft | Passes. The Founder is refused when it drafts first, asks before listing, or misquotes the document. Finding the four problems is the scripted model's doing; a real model's eye is not tested |
+| The same document grilled in a running project surfaces its conflict with a standing order | Passes, on the same terms |
+| The full v2.0 acceptance suite passes | See the table below. Two items are not met |
+
+**Section 13, item by item.**
+
+| Item | Where it is tested | State |
+| --- | --- | --- |
+| Golden path, each type | The three reference specs in `acceptance/` reach their first verified close under the real rules; the phase 5 scenarios cover ready, findings report and cycles | Passes |
+| Rule-breaker | Phase 2 scenario | Passes |
+| Listening | Phase 3 scenarios and the memory eval | Passes |
+| Never silent | Phase 6: all four cases in-process; two on a real server | Passes in part |
+| Losing | Phase 5 | Passes |
+| Speed | Phase 5, real server | Passes |
+| Chaos | Phase 2 chaos tests | Passes |
+| Surface parity | Conformance test; the web browser tests; the terminal on a real server; an MCP client with steer and create | Passes for three ways. No single test does create, steer, inspect and configure end to end through one surface alone |
+| Multi-provider | Not run. No real provider is called in tests (owner's decision Q-006) | **Not met** |
+| Founder | This phase, with a scripted model | Passes as scripted |
+| Budget | Phases 2 and 5 | Passes |
+| Experience | Accessibility is checked in the browser tests. The section 1.3 timing targets on reference hardware were not measured | **Not met in full** |
+| Standards, and the Slack column of parity | Phase 8 | Deferred |
+| Slim | Phase 1, real server, both databases | Passes |
+
+**What is true now.**
+
+- A project is one portable file. Import, export, clone, check, rehearse and grade all read it. A spec that carries a credential value is refused, and a spec with any problem creates nothing.
+- The library has 41 roles and 17 crews, converted from v1. A role names no model. A team keeps the role version it was hired from until it is re-pinned, and only an admin changes a role that exists.
+- A rehearsal runs a spec through the real rules, dispatcher and scheduler in a process of its own that is given the spec and nothing else. Its crew is code, so it spends no tokens and gives the same report each time.
+- The Founder acts only through eight tools, and each tool call meets the rules: one question at a time and in order, 2 to 4 options, a recommendation on every question except who pays when the chairman has more than one credential, no date in goal prose, a reason for every setting, a plan adversary on Deliver and Operate. A refused call is kept on the conversation.
+- A grade stands only on lines the goal holds. The verdict is computed, not taken from the model.
+- A project is created only from a ledger with nothing open, after the draft has been rehearsed. The ledger tells the chairman's words, their answers and assumptions apart, and goes to the CEO in its first run.
+- A pasted document is grilled before anything is drafted. In a running project, `/grill` stops the CEO proposing new scope until the chairman confirms the ledger.
+- Founder calls are metered against the install and count against no project budget.
+
+**Partial, and why.**
+
+- **A real model (your side).** FND-7's accuracy, and whether the Founder cuts a roster to the smallest team (FND-9), drafts a first usable version (FND-10) or acts well on a rehearsal (FND-11), are the model's judgement and are not checked.
+- **No crew has a reference estimate** (LIB-2, GOV-4, Q-013). With no history on the install, the Founder proposes the project type's default budget and says it is a default.
+- **Phase 8.** Skills, browser and A2A permissions, integrations and role credentials are carried in roles and specs and grant nothing yet (LIB-1, LIB-4). A document reaches the Founder as text only: no PDF (FND-1).
+- **Rehearsal (RHS-3).** Tokens and duration are estimated to the first close, and only once the install has 10 finished runs. A rehearsal does not estimate the whole project.
+- **Grilling in a project (FND-16).** The platform checks that a conflict names something that exists; finding the conflicts is the CEO's work. A ruling that changes a standing order is prompted, not applied. The CEO suggesting `/grill` with a card is not built.
+- **After creation (FND-13).** The terminal asks for a missing credential; the web shows the checklist but does not ask for the credential in place.
+- **A whole spec is not graded** (LIB-5): the goal is.
+
+**Differences from this plan.**
+
+- **The rehearsal's database is a temporary file, not in memory** (review item R-51 said in memory). SQLite in memory cannot serve the dispatcher, the runner and the jobs at once. The file lives in a folder made for the drill and deleted after it, and the code refuses a database that already exists. Recorded in spec revision 2.18.
+- **The drill runs one agent at a time,** so the same spec always gives the same report. It does not exercise parallel runs; it reports how much parallelism the roster allows.
+- **No `rehearsals`, `founder_gradings` or separate `roles`/`role_versions` tables.** A rehearsal is not stored except with the draft it ran on; roles stay one table with a version column.
+- **The drafting conversation and a project's grilling share tables** (`draftings` and its lines, questions, ledger and passages).
+- **`crewmind draft` is the terminal command,** not a subcommand of `founder`; `crewmind founder eval` is the grader check.
+- **Promote now opens a Founder drafting** with the findings report attached, instead of creating a draft project with the report as its goal.
+
+**Things to know.**
+
+- **The v1 content was reworded.** 16 of 38 role charters, the doctrine and the goal grammar named v1 tools, settings and file paths. Two changes are more than rewording: the doctrine's "tempo" section became a short section on the token budget, and one sentence on the reviewer seat was added. The v1 originals are in git history at the import commit. Q-012 to Q-017 in `docs/spec-questions.md` list what was changed, dropped and left for you to decide.
+- **Every v1 role named an effort level.** It is dropped; the ten roles v1 ran at its highest level get a floor of the balanced model class.
+- **The 12 v1 example projects import at v2 defaults.** Their v1 settings had no exact v2 counterpart, apart from the timezone.
+- **Three settings were added** (Q-018): `founder.credential` (none by default, so the Founder does nothing until an admin sets it), `founder.model_class` and `grill.min_characters`; and `rehearsal.max_seconds`.
+- **Runs queued at the same instant are now leased in the order their seats were created.** It makes a rehearsal repeatable and changes nothing else.
+- **A rehearsal holds SQLite's write lock for about 5 seconds** on a slim install when called as an operation. Postgres is not affected.
+
+**Found and fixed on the way.**
+
+- A model call made inside a tool's transaction deadlocked on SQLite. Grading now happens with no transaction open.
+- An operation called from inside another did not run its own preparation step.
+- The rehearsal reported a credential as missing that the person had, because the drill's own install has none. It now reports this install's answer.
+- Three schema names in the API clashed with older ones and were renamed. Older clashes of the same kind remain; the web types use the long names for them.
+
+**Found and not fixed.**
+
+- **The suite is close to its 10-second limit under load.** One rehearsal test failed once while the browser tests were running beside it. The drill tests now start no process and take about 5 seconds each.
+- **An answer of a single letter is always read as an option,** so "a" cannot be given as an answer in the chairman's own words.
+- **Refusal hints name CLI commands,** and the web shows them as written.
+
+**Web.** "Start a project" opens a drafting view: the conversation with the Founder's reply streaming in, a question card with the recommended option marked, the ledger, the goal grade, the draft, readiness, and create and start. The Plan panel has a Rehearsal tab; Settings has "Export as a spec" and "Clone". Not covered by a browser test: quick mode, attaching a document, a failed turn, and a question with no recommendation. I did not look at the pages myself; they pass their browser and accessibility tests.
+
+**Tests.** 492 Python tests on SQLite in about 1 minute 45 seconds and on Postgres in about 2 minutes 50 seconds; 8 real-server tests on Postgres in about 2 minutes 35 seconds; 238 web unit tests; 61 browser tests in about 3.5 minutes.
+
+**Open questions for the owner:** Q-012 to Q-018 in `docs/spec-questions.md`. Still on the owner's side: copy `ci/github-actions.yml` to `.github/workflows/`.
