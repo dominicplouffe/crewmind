@@ -90,6 +90,7 @@ _STEER_GROUPS = (
     "directives",
     "examples",
     "gaps",
+    "grill",
     "items",
     "launches",
     "memory",

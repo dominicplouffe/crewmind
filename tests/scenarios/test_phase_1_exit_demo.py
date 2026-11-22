@@ -312,6 +312,16 @@ async def test_INV_21_every_write_operation_records_an_event(
 # Writes that change no governed state, so they record no event (INV-21), and one covered
 # by its own test.
 NO_EVENT = {
+    "grill.start": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.answer": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.confirm": (
+        "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
+    ),
+    "grill.accept_rest": "the same change as founder.accept_rest, on a project's grilling",
     "founder.start": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
     "founder.say": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
     "founder.answer": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",

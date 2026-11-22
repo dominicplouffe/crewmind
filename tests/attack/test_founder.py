@@ -385,3 +385,111 @@ async def test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing(app: App) 
     assert (failed["state"], failed["project_id"]) == ("failed", None)
     assert "nothing was created" in failed["lines"][-1]["body"]
     assert len((await app.ok("projects.list", owner))["items"]) == before
+
+
+@pytest.mark.attack("FND-16")
+async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed(
+    app: App,
+) -> None:
+    """FND-16, FND-3, section 13: `/grill` in a running project makes the CEO interview
+    the chairman about a document. While it is open the CEO can propose no requirement;
+    work already under way goes on. The CEO cannot quote what the document does not say
+    or invent what a passage conflicts with; the planted conflict with a standing order
+    is surfaced as a question in the chat, with no deadline. Nothing is confirmed while a
+    question is open; after the chairman confirms, the CEO may propose scope again."""
+    from tests.attack.work_support import Crew
+    from tests.founder_support import DOCUMENT
+
+    crew = await Crew.start(app)
+    owner, project = crew.owner, crew.project
+    order = await app.ok(
+        "orders.pin", owner, project_id=project, what="Every plate is a photograph."
+    )
+    requirement = {
+        "text": "The guide has a page for the wren.",
+        "test_kind": "observable",
+        "success_test": "A reader finds the wren's page in the guide.",
+        "estimate_runs": 1,
+    }
+    await crew.ok("CEO", "agent.propose_requirement", **requirement)
+
+    stranger = await app.person("stranger@example.com")
+    assert (await app.call("grill.start", stranger, project_id=project)).status_code in (403, 404)
+    grilling = await app.ok("grill.start", owner, project_id=project, document=DOCUMENT)
+    assert (grilling["grilling"], grilling["can_confirm"]) == (True, False)
+    assert_refused(
+        await app.call("grill.start", owner, project_id=project, document=DOCUMENT),
+        rule="FND-16",
+        code="already_grilling",
+    )
+    blocked = await crew.call(
+        "CEO", "agent.propose_requirement", **{**requirement, "text": "The guide has a robin page."}
+    )
+    assert_refused(blocked, rule="FND-16", code="grilling_in_progress")
+    assert_refused(await app.call("grill.confirm", owner, project_id=project), rule="FND-16")
+
+    seen = await crew.ok("CEO", "agent.grill")
+    assert seen["document"].startswith("Hollin Valley bird guide")
+    drawing = {"kind": "constraint", "passage": "Every plate is a drawing.", "problem": "conflict"}
+    invented = await crew.call(
+        "CEO", "agent.grill_extract", items=[{**drawing, "conflicts_with": "order:999"}]
+    )
+    assert_refused(invented, rule="FND-16", code="conflict_with_nothing")
+    misquoted = await crew.call(
+        "CEO", "agent.grill_extract", items=[{"kind": "number", "passage": "Ninety birds."}]
+    )
+    assert_refused(misquoted, rule="FND-15", code="passage_not_in_document")
+    listed = await crew.ok(
+        "CEO",
+        "agent.grill_extract",
+        items=[
+            {"kind": "goal", "passage": "We want a printed field guide to the birds"},
+            {**drawing, "conflicts_with": f"order:{order['id']}"},
+        ],
+    )
+    conflict = next(item for item in listed["items"] if item["problem"] == "conflict")
+    assert (conflict["state"], conflict["note"]) == ("open", f"Conflicts with order:{order['id']}.")
+
+    card = {
+        "text": "The document says drawings; your standing order says photographs. Which wins?",
+        "options": ["The standing order: photographs", "The document: drawings"],
+        "recommended": 0,
+        "changes": "Whether the plates are drawn or photographed.",
+    }
+    clear = next(item for item in listed["items"] if item["problem"] is None)
+    wrong = await crew.call("CEO", "agent.grill_ask", item_id=clear["id"], **card)
+    assert_refused(wrong, rule="FND-15", code="not_the_next_decision")
+    asked = await crew.ok("CEO", "agent.grill_ask", item_id=conflict["id"], **card)
+    question = asked["questions"][0]
+    history = (await app.ok("chat.history", owner, project_id=project, limit=200))["items"]
+    shown = next(line for line in history if "grill question" in str(line["detail"]))
+    assert "Which wins?" in shown["body"]
+    assert "(recommended)" in shown["body"]
+    items = (await app.ok("items.list", owner, project_id=project))["items"]
+    assert not [item for item in items if "grill" in item["kind"]]
+    assert_refused(await app.call("grill.confirm", owner, project_id=project), rule="FND-16")
+
+    answered = await app.ok(
+        "grill.answer", owner, project_id=project, question_id=question["id"], answer="b"
+    )
+    assert answered["can_confirm"] is True
+    assert answered["ledger"][0]["value"] == "The document: drawings"
+    assert answered["ledger"][0]["passage"] == "Every plate is a drawing."
+    history = (await app.ok("chat.history", owner, project_id=project, limit=200))["items"]
+    assert any("change that too" in line["body"] for line in history)
+    confirmed = await app.ok("grill.confirm", owner, project_id=project)
+    assert (confirmed["grilling"], confirmed["state"]) == (False, "created")
+    crew.owner = owner
+    await crew.ok(
+        "CEO", "agent.propose_requirement", **{**requirement, "text": "Every plate is a drawing."}
+    )
+    events = [e for e in await app.events(owner, project) if e["type"].startswith("drafting.")]
+    seen_events = [
+        (str(e["type"]), str(dict(e["after"]).get("state") or dict(e["after"]).get("what")))
+        for e in events
+    ]
+    assert seen_events == [
+        ("drafting.state_changed", "drafting"),
+        ("drafting.edited", "answered"),
+        ("drafting.state_changed", "created"),
+    ]

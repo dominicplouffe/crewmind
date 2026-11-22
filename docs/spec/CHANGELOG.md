@@ -27,6 +27,7 @@ Newest first. One line per change, citing the ids touched.
 - **FND-15:** what a long paste is; items quote the document; examples reach the CEO labelled.
 - **LLM-14, Appendix A:** `founder.credential`, `founder.model_class`, `grill.min_characters`.
 - **IF-1.2:** an operation called from inside another runs its own preparation step.
+- **FND-16:** one grilling at a time; what the CEO may not do while it is open; a conflict names what it conflicts with.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

@@ -224,7 +224,7 @@ class Toolbox:
                 hint="Propose the spec.",
             )
         if asked.extracted:
-            await self._extract(asked.extracted)
+            await self.extract(asked.extracted)
         if drafting.document and not await state.items_extracted(session, drafting.id):
             raise Refusal(
                 "extract_first",
@@ -266,7 +266,7 @@ class Toolbox:
             )
         return {"asked": [row.id for row in rows], "now": "End your turn and wait."}
 
-    async def _extract(self, extracted: list[Extracted]) -> None:
+    async def extract(self, extracted: list[Extracted]) -> None:
         """FND-15: each item quotes the document. One that does not is refused."""
         document = " ".join((self.drafting.document or "").split()).lower()
         said = state.said_by_the_chairman(
@@ -310,6 +310,8 @@ class Toolbox:
         items = {f"{state.ITEM}{item.id}" for item in await state.open_items(session, drafting.id)}
         done = await state.settled(session, drafting.id)
         ready = [decision.key for decision in tree.ready(done)]
+        if drafting.kind == m.GRILL:
+            ready = []
         allowed = items or (set(ready) if pace == "batch" else set(ready[:1]))
         for question in questions:
             if question.settles in allowed:

@@ -17,6 +17,7 @@ from crewmind.catalog.registry import catalog
 from crewmind.domain.execution.agent import agent_of
 from crewmind.domain.execution.agent_operations import work_run_only
 from crewmind.domain.planning import bets, completion, plan_view
+from crewmind.domain.planning.agent_operations import new_scope_hooks
 from crewmind.domain.planning.authority import actor_of
 from crewmind.domain.planning.delivery_operations import Receipt
 from crewmind.domain.planning.model import BetState
@@ -73,6 +74,8 @@ async def open_bet(context: Context, payload: OpenBetInput) -> PlanView:
     reserve draw."""
     view = await agent_of(context)
     work_run_only(view)
+    for hook in new_scope_hooks:
+        await hook(context.session, view.project)
     settings = services_of(context).settings
     await bets.open_bet(
         context.session,
