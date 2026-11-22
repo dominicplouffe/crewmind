@@ -108,6 +108,9 @@ def install(tmp_path: Path) -> Iterator[Install]:
     built.stop()
 
 
+RUN_MOVED = "run.state_changed"
+
+
 def demo(install: Install) -> tuple[str, list[dict[str, Any]], str]:
     """The exit demo through the real CLI. Returns the project, its events and an MCP token."""
     setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
@@ -227,7 +230,9 @@ def test_NFR_23_a_slim_install_moves_to_postgres_with_nothing_lost(
     )
     assert install.run("projects", "hold", "--project-id", project)["state"] == "held"
     after = install.run("record", "list", "--project-id", project, "--limit", "200")["items"]
-    assert len(after) == len(events) + 2
+    # The run the start queued may also move on the new server; the hold adds exactly two.
+    added = [event["type"] for event in after[len(events) :] if event["type"] != RUN_MOVED]
+    assert added == ["project.hold_added", "project.state_changed"]
     assert after[-1]["id"] > events[-1]["id"]
     engine = sqlalchemy.create_engine(sync_url(database_url))
     with engine.connect() as connection:

@@ -187,6 +187,7 @@ Phase 6 is built in its five parts. Of its 29 requirement ids, 19 are done and 1
 - **The empty-reply loop** carried from phase 5: fixed, as above.
 - **The runner error** carried from phase 5 (`readuntil() called while another coroutine is already waiting`): two chat runs for one agent could be given the same warm process. A warm process now answers one run at a time, a second run gets its own process, and a run interrupted mid-answer ends the warm process. The original error was not reproduced first, so this is the likely cause, fixed and tested, not a confirmed one.
 - A setting changed from a decision item failed in a solo project; an event flag reopened after it was acknowledged.
+- **The real-server test of moving an install from SQLite to Postgres had been failing since phase 5 without being seen:** it runs only with `--db=postgres`, and the slow suite had been run on SQLite alone. Its count of events was out of date (starting a project now queues a run); the move itself was correct. The slow suite is now run on both databases.
 
 **Found and not fixed.**
 
@@ -196,6 +197,6 @@ Phase 6 is built in its five parts. Of its 29 requirement ids, 19 are done and 1
 
 **Web.** There is a Desk across projects (what waits on you, the brief, a count in the header), decision cards in the chat with their actions, a "Decision items" tab and an Agenda tab in the Plan panel, a spend view, a since-you-were-away note, an OAuth consent page and a list of approved clients with Revoke. The Desk reloads every 15 seconds rather than live, because the live stream is per project. Not covered by a browser test: since-you-were-away (its setting cannot go below an hour), and clicking through snooze, extend, note, the review levers and answering a question; their input rules are unit-tested. The flaky "earlier messages" test is fixed: late status lines moved the view, and the "live updates stopped" bar flashed on every page load.
 
-**Tests.** 464 Python tests on SQLite in about 95 seconds and on Postgres in about 2 minutes 10 seconds, plus 6 real-server tests in about 2 minutes 40 seconds (a seventh skips without the embedding model on disk); 191 web unit tests; 53 browser tests in about 2.9 minutes, all passing in three full runs.
+**Tests.** 464 Python tests on SQLite in about 95 seconds and on Postgres in about 2 minutes 10 seconds, plus 7 real-server tests in about 2 minutes 45 seconds on Postgres (6 on SQLite; the seventh moves an install to Postgres); 191 web unit tests; 53 browser tests in about 2.9 minutes, all passing in three full runs.
 
 **Open questions for the owner:** none. Still on the owner's side: copy `ci/github-actions.yml` to `.github/workflows/`.
