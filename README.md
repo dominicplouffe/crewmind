@@ -11,6 +11,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [docs/decisions/](docs/decisions/) | Decision records for choices already made |
 | [docs/traceability.csv](docs/traceability.csv) | Every requirement id, its phase, status and tests |
 | [docs/spec-questions.md](docs/spec-questions.md) | Open questions raised while building |
+| [HANDOVER.md](HANDOVER.md) | Where the build stands and how to carry it on |
 | [CLAUDE.md](CLAUDE.md) | Rules for coding agents |
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | The role and crew library, example specs, the Founder's doctrine and the goal grammar |
