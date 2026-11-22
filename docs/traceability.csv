@@ -185,15 +185,15 @@ FND-13,After creation,06-12-founder-FND.md,7,yes,not started,,
 FND-14,Doctrine fingerprint,06-12-founder-FND.md,7,yes,not started,,
 FND-15,Grilling a document,06-12-founder-FND.md,7,yes,not started,,
 FND-16,Grilling in a running project,06-12-founder-FND.md,7,yes,not started,,
-RHS-1,Safe by construction,06-13-rehearsal-RHS.md,7,yes,not started,,
-RHS-2,Clock rules,06-13-rehearsal-RHS.md,7,yes,not started,,
-RHS-3,Report contents:,06-13-rehearsal-RHS.md,7,yes,not started,,
-RHS-4,Surfaces,06-13-rehearsal-RHS.md,7,yes,not started,,
+RHS-1,Safe by construction,06-13-rehearsal-RHS.md,7,yes,done,test_RHS_1_a_rehearsal_spends_nothing_and_touches_nothing; test_RHS_1_the_drill_opens_no_socket_and_refuses_a_database_that_exists,
+RHS-2,Clock rules,06-13-rehearsal-RHS.md,7,yes,done,test_RHS_2_a_wait_on_the_clock_is_reported_at_its_real_length,
+RHS-3,Report contents:,06-13-rehearsal-RHS.md,7,yes,partial,test_RHS_1_a_rehearsal_spends_nothing_and_touches_nothing; test_RHS_3_a_spec_that_cannot_run_is_reported_not_run,"Every part of the report is built. Tokens and duration are estimated to the first close, and only once the install has 10 finished runs; the whole project is not estimated"
+RHS-4,Surfaces,06-13-rehearsal-RHS.md,7,yes,partial,test_RHS_1_a_rehearsal_spends_nothing_and_touches_nothing; test_RHS_2_a_wait_on_the_clock_is_reported_at_its_real_length,"API, CLI, MCP and the chat command /rehearse. The Founder's own use arrives with part 7c"
 LIB-1,Role,06-14-library-LIB.md,7,yes,partial,test_LIB_1_a_role_names_no_model_and_only_an_admin_changes_one; test_LIB_1_a_team_keeps_its_role_version_until_it_is_repinned; test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist,"Roles are versioned, pinned by teams and re-pinned. Skills, browser and A2A permissions are fields that grant nothing until phase 8"
 LIB-2,Crew,06-14-library-LIB.md,7,yes,partial,test_LIB_3_the_starter_library_covers_what_the_spec_names,17 crews load and are searchable. No crew has a reference estimate yet (Q-013)
 LIB-3,Libraries,06-14-library-LIB.md,7,yes,done,test_LIB_1_a_role_names_no_model_and_only_an_admin_changes_one; test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist; test_LIB_3_the_starter_library_covers_what_the_spec_names; test_LIB_3_the_packaged_library_is_a_copy_of_the_content_folder,
 LIB-4,Project spec,06-14-library-LIB.md,7,yes,partial,test_LIB_4_a_spec_never_holds_or_yields_a_secret; test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing,Every field is carried. Integrations and role credentials are stored and listed as missing; nothing uses them until phase 8
-LIB-5,One format,06-14-library-LIB.md,7,yes,partial,test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing,"Import, export, clone and check use the one format. Rehearse and grade arrive with parts 7b and 7c"
+LIB-5,One format,06-14-library-LIB.md,7,yes,partial,test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing; test_LIB_5_every_shipped_example_is_a_spec_that_creates_a_project,"Import, export, clone, check and rehearse use the one format. Grading arrives with part 7c"
 LIB-6,Agent Skills,06-14-library-LIB.md,8,later,not started,,
 INT-1,Signed webhooks,06-15-integrations-INT.md,8,later,not started,,
 INT-2,GitHub events,06-15-integrations-INT.md,8,later,not started,,

@@ -39,6 +39,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `review.independent` | on | on; off only when solo | project | WRK-9 |
 | `audit.sample_rate` | 20% | 0–100% | project | WRK-13 |
 | `audit.window` | 48 h | 12 h–14 days | project | WRK-13, HUM-2 |
+| `rehearsal.max_seconds` | 60 s | 10 s–10 min | install | RHS-1 |
 | `watch.min_interval` | 15 min | 5 min–24 h | install | WRK-17 |
 | `approval.window` | 7 days | 1–30 days | project | HUM-2 |
 | `question.window` | 24 h | 1–72 h | project | HUM-2, HUM-5 |

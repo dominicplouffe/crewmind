@@ -48,7 +48,13 @@ SANDBOX_IMAGE = "crewmind-agent"
 """The image agent sandboxes and check sandboxes run in, in container mode (EXE-12)."""
 
 
-def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool = False) -> Runtime:
+def build_runtime(
+    config: Config,
+    clock: Clock = utc_now,
+    *,
+    mock_default: bool = False,
+    mock: MockProvider | None = None,
+) -> Runtime:
     load_domain_modules()
     engine = create_engine(config.database_url)
     sessions = async_sessionmaker(engine, expire_on_commit=False)
@@ -66,7 +72,7 @@ def build_runtime(config: Config, clock: Clock = utc_now, *, mock_default: bool 
         allow_agent_checks_unisolated=config.allow_agent_checks_unisolated,
     )
     recall.purge_engine = services.memory
-    mock = MockProvider(config.mock_script_dir)
+    mock = mock or MockProvider(config.mock_script_dir)
     runs.seat_resolver = SeatResolver(
         services.settings, clock, mock_default=mock_default or config.mock_script_dir is not None
     )

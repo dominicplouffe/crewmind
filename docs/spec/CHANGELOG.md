@@ -14,6 +14,10 @@ Newest first. One line per change, citing the ids touched.
 - **PRJ-9:** a clone is an export imported under a new name by the same chairman.
 - **WRK-12:** domains a spec declares as controlled count as the project's own.
 - **IF-3.1:** a read that takes a whole document is sent as a POST body.
+- **RHS-1:** the drill's database is a fresh file in a folder of its own, not in memory: SQLite in memory cannot serve the dispatcher, the runner and the jobs at once. The drill is its own process, with a time limit (`rehearsal.max_seconds`), a crew in code, and one agent at a time.
+- **RHS-2, RHS-3:** where the walk ends for each project type; estimates are to the first close.
+- **EXE-5:** runs queued at the same instant are leased in the order their seats were created.
+- **Appendix A:** `rehearsal.max_seconds`.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

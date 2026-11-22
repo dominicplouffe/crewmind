@@ -2,7 +2,7 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
-version = "2.4"
+version = "2.5"
 
 [settings."quality"]
 type = "enum"
@@ -292,6 +292,16 @@ max = 1209600
 used_by = ["WRK-13", "HUM-2"]
 spec_default = "48 h"
 spec_range = "12 h–14 days"
+
+[settings."rehearsal.max_seconds"]
+type = "duration"
+scope = "install"
+default = 60
+min = 10
+max = 600
+used_by = ["RHS-1"]
+spec_default = "60 s"
+spec_range = "10 s–10 min"
 
 [settings."watch.min_interval"]
 type = "duration"

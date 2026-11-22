@@ -215,6 +215,7 @@ async def lease(
     """Lease up to `capacity` queued runs to one runner (EXE-5, INV-12, INV-13).
 
     On Postgres the rows are locked with skip-locking, so two runners never take one run.
+    Runs queued at the same instant are taken in the order their seats were created.
     A run whose project no longer allows its kind is dropped. At the wall nothing is leased.
     A seat that cannot run fails here, before any sandbox starts or token is spent (LLM-6).
     """
@@ -222,10 +223,11 @@ async def lease(
         return []
     candidates = await session.scalars(
         select(Run)
+        .join(Seat, Seat.id == Run.seat_id)
         .where(Run.state == RunState.QUEUED)
         .where((Run.not_before.is_(None)) | (Run.not_before <= now))
-        .order_by(Run.queued_at, Run.id)
-        .with_for_update(skip_locked=True)
+        .order_by(Run.queued_at, Seat.created_at, Seat.name, Run.id)
+        .with_for_update(skip_locked=True, of=Run)
     )
     leases: list[Lease] = []
     for run in candidates:
