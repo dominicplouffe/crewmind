@@ -45,3 +45,31 @@ class RequirementTest(StrEnum):
     COMMAND = "command"
     OBSERVABLE = "observable"
     METRIC = "metric"
+
+
+class CommitmentState(StrEnum):
+    PROPOSED = "proposed"
+    ACCEPTED = "accepted"
+    DECLINED = "declined"
+    AT_RISK = "at risk"
+    BREACHED = "breached"
+    MET = "met"
+
+
+C = CommitmentState
+LIVE_COMMITMENT = (C.ACCEPTED, C.AT_RISK, C.BREACHED)
+COMMITMENT_MACHINE = StateMachine(
+    "commitment",
+    "7.6",
+    [
+        (NEW, C.PROPOSED),
+        (C.PROPOSED, C.ACCEPTED),
+        (C.PROPOSED, C.DECLINED),
+        *(
+            (source, target)
+            for source in LIVE_COMMITMENT
+            for target in (C.AT_RISK, C.BREACHED, C.MET, C.ACCEPTED)
+            if source != target
+        ),
+    ],
+)

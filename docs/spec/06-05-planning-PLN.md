@@ -38,7 +38,7 @@
   - Every transition is disclosed to the CEO.
   - The chairman gets an alarm on breached, an action item on at risk and an FYI on met.
 - **PLN-8 Scope freeze.** While a commitment is at risk or breached, new CEO requirement proposals are refused with the arithmetic. Existing work continues. The chairman may still add scope or move the date, which re-projects at once.
-- **PLN-9 Target dates.** A chairman target date is stored with its source (an outside fact or the chairman's wish). It always reaches the CEO beside the platform's projection and the gap in days, so a target is never read as a pace.
+- **PLN-9 Target dates.** A chairman target date is stored with its source (an outside fact or the chairman's wish). It always reaches the CEO beside the platform's projection and the gap between them (in hours under two days, in days from there), so a target is never read as a pace.
 - **PLN-10 Requirement acceptance.**
   - When every task under an in-progress requirement is closed, at least one is done, and work has changed since the last ruling, the requirement moves to checking.
   - A command test is run by the platform: pass means met. Fail means back to in progress, with escalation to the CEO once after 3 failures.

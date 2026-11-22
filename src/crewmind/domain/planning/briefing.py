@@ -51,11 +51,21 @@ async def section(
             line += f" Last ruling: not met. {item.ruling_note}"
         lines.append(line)
     numbers = plan.numbers
+    dates = [f"Projection: {plan.pace.projection}."]
+    if plan.commitment is not None and plan.commitment.beside_projection is not None:
+        dates.append(f"Commitment ({plan.commitment.state}): {plan.commitment.beside_projection}.")
+    if plan.target is not None:
+        dates.append(
+            f"The chairman's target date ({plan.target.source}): "
+            f"{plan.target.beside_projection}. A target is a wish, not a pace: do not plan "
+            "to it by cutting checks."
+        )
     return (
         "# The plan\n\n"
         + "\n".join(lines)
         + f"\n\n{numbers.remaining_runs} runs of accepted scope remain. Plan tokens: "
         f"{numbers.plan_tokens_text}. {numbers.tokens_before_wrapup:,} tokens are left "
-        "before wrap-up.\nA new task names the ready requirement it serves "
-        "(`requirement_id`)."
+        "before wrap-up.\n"
+        + "\n".join(dates)
+        + "\nA new task names the ready requirement it serves (`requirement_id`)."
     )

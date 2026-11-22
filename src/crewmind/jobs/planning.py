@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.planning import acceptance, standdown
+from crewmind.domain.planning import acceptance, commitments, completion, standdown
 from crewmind.domain.planning.model import RequirementState, RequirementTest
 from crewmind.domain.planning.readiness import PLANNING_JOB
 from crewmind.domain.projects.model import ProjectState
@@ -42,13 +42,13 @@ class PlanningJobs:
         await self.run_requirement_tests()
 
     async def per_project(self) -> None:
-        """Per running project, in its own transaction (BG-1). A held, paused, stopped,
-        ready or completed project changes no state (INV-20)."""
+        """Per running project, in its own transaction (BG-1). A held, paused, stopped or
+        completed project changes no state (INV-20); a ready one only completes."""
         async with self._sessions() as session:
             project_ids = list(
                 await session.scalars(
                     select(Project.id)
-                    .where(Project.state == ProjectState.RUNNING)
+                    .where(Project.state.in_([ProjectState.RUNNING, ProjectState.READY]))
                     .order_by(Project.id)
                 )
             )
@@ -56,12 +56,19 @@ class PlanningJobs:
             try:
                 async with self._sessions() as session, session.begin():
                     project = await session.get(Project, project_id)
-                    if project is None or project.state != ProjectState.RUNNING:
+                    if project is None:
                         continue
                     now = self._clock()
                     settings = self._services.settings
+                    if project.state == ProjectState.READY:
+                        await completion.auto_complete(session, settings, project, now)
+                        continue
+                    if project.state != ProjectState.RUNNING:
+                        continue
                     await acceptance.start_checking(session, settings, project, now)
                     await standdown.stand_down_finished_teams(session, project, now)
+                    await commitments.reproject(session, settings, project, now)
+                    await completion.become_ready(session, settings, project, now)
             except Exception:
                 logger.exception("planning jobs: project %s failed this tick", project_id)
 

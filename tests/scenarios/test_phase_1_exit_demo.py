@@ -268,6 +268,10 @@ async def test_INV_21_every_write_operation_records_an_event(
         reason="It is no longer wanted.",
     )  # fmt: skip
     await write("requirements.reopen", alice, project_id=paid, requirement_id=wanted)
+    await write(
+        "plan.set_target", alice, project_id=paid, date="2027-03-01T00:00:00Z",
+        source="The trade fair opens that day.",
+    )  # fmt: skip
     await write("credentials.delete", alice, name="main")
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
@@ -290,6 +294,16 @@ NO_EVENT = {
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",
+    "commitments.accept": "asserted in test_PLN_6_a_commitment_has_no_date_field",
+    "commitments.decline": "asserted in test_PLN_6_a_commitment_has_no_date_field",
+    "commitments.move": "asserted in test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope",
+    "commitments.reset": "asserted in test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope",
+    "reserve.answer": "asserted in test_GOV_10_under_supervised_the_chairman_answers_a_draw",
+    "reserve.cancel": "asserted in test_GOV_10_the_reserve_is_drawn_once_when_nearly_done",
+    "raises.answer": "asserted in test_GOV_5_only_the_ceo_asks_for_a_raise",
+    "gaps.waive": "asserted in test_WRK_11_the_final_gap_review_blocks_readiness",
+    "projects.sign_off": "asserted in test_scenario_a_deliver_project_ships_and_completes",
+    "projects.reopen": "asserted in test_PRJ_6_a_completed_project_reopens_only_in_its_window",
     "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",

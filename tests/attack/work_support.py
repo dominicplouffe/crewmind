@@ -24,6 +24,8 @@ class Crew:
         self.app, self.owner, self.project = app, owner, project
         self.workspace: Path = app.runtime.config.data_dir / "workspaces" / project
         self.requirement: int = 0
+        self.run_hours: int = 0
+        """When set, every finished run is made this long, so projections are exact."""
 
     @classmethod
     async def start(
@@ -33,8 +35,9 @@ class Crew:
         team: bool = True,
         type: str = "deliver",
         settings: dict[str, Any] | None = None,
+        owner: Actor | None = None,
     ) -> Crew:
-        owner = await app.person("owner@example.com")
+        owner = owner or await app.person("owner@example.com")
         # These tests wake the same agent many times in one clock hour.
         settings = {"agent.max_wakes_per_hour": 60, **(settings or {})}
         if type == "deliver":
@@ -64,7 +67,25 @@ class Crew:
         if name == "agent.create_task":
             values = {**self.scope(), **values}
         run = await live_run(self.app, self.project, seat=seat)
+        await self._stretch_runs()
         return await agent_call(self.app, run.token, name, **values)
+
+    async def _stretch_runs(self) -> None:
+        if not self.run_hours:
+            return
+        from datetime import timedelta
+
+        from sqlalchemy import select
+
+        from crewmind.storage.models import Run
+
+        async with self.app.runtime.sessions() as session, session.begin():
+            rows = await session.scalars(
+                select(Run).where(Run.project_id == self.project, Run.ended_at.is_not(None))
+            )
+            for row in rows:
+                assert row.ended_at is not None
+                row.started_at = row.ended_at - timedelta(hours=self.run_hours)
 
     async def ok(self, seat: str, name: str, /, **values: Any) -> dict[str, Any]:
         answer = await self.call(seat, name, **values)
@@ -125,6 +146,7 @@ class Crew:
                 await runs.finish(
                     session, run.run_id, run.runner_id, self.app.runtime.clock(), failed=False
                 )
+        await self._stretch_runs()
 
     async def fail(self, seat: str) -> None:
         """End the run this agent was last given as failed, so it is retried (EXE-8)."""

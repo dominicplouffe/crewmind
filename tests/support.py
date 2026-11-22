@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -287,6 +288,8 @@ def sample_input(model: type[BaseModel], **known: Any) -> dict[str, Any]:
             values[name] = True
         elif annotation is int:
             values[name] = 1
+        elif annotation is datetime:
+            values[name] = "2030-01-01T00:00:00Z"
         elif get_origin(annotation) is list:
             values[name] = []
         elif "email" in name:

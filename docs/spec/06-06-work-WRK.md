@@ -62,7 +62,9 @@
   - Before a Deliver project can become ready, a reviewer seat that authored none of the deliverables reviews them against the goal's named standard (FND-7, element 3).
   - It files gaps marked must-fix or nice-to-have, each with its reason.
   - Must-fix gaps become CEO-authored requirements, accepted under the usual authority, and block readiness until met.
-  - The chairman can waive any gap with a reason.
+  - The chairman can waive any gap with a reason. The requirement born from a waived gap leaves scope.
+  - A filed review stays current until a requirement that did not come from a gap is accepted after it; then a new review is asked for before the project can become ready.
+  - When every reviewer seat wrote part of the deliverables, no review is done and the chat says so.
 - **WRK-12 Outside evidence.**
   - Agent-claimed evidence starts pending and counts for nothing until the platform verifies it.
   - Verification checks that the URL is http(s), that the domain is not one the project controls, that the fetch happens after the task was created, and that the claimed content is found on the page. Event times are compared only where the source supplies one (webhooks, APIs).

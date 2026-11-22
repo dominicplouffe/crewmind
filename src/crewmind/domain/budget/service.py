@@ -6,8 +6,9 @@ output. Cache reads are recorded and shown but cost the budget nothing (ADR-0003
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
+from typing import Any
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, select
@@ -23,7 +24,7 @@ from crewmind.domain.projects.model import HOLDABLE, Hold, ProjectType
 from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.storage.events import append_event, event_type
-from crewmind.storage.models import LedgerLine, Project
+from crewmind.storage.models import LedgerLine, Project, ReserveDraw
 
 GOV_3 = rules.register(Rule("GOV-3", "The budget is the wall: at it, nothing new is leased."))
 GOV_6 = rules.register(Rule("GOV-6", "A run cannot call a model past its per-run token cap."))
@@ -54,6 +55,8 @@ class BudgetState:
     wall: int
     warn_at: int
     wrapup_at: int
+    reserve: int = 0
+    """Tokens of a drawn CEO reserve, already counted in `wall` (GOV-3, GOV-10)."""
 
     @property
     def remaining(self) -> int:
@@ -68,6 +71,18 @@ def _subject(project: Project) -> Subject:
     return Subject(Scope.PROJECT, project.id, project.type)
 
 
+async def period_start(
+    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
+) -> datetime | None:
+    """When the budget in force began: the start of this calendar month in the project's
+    timezone for an Operate project, and never for the others (GOV-2)."""
+    if project.type != ProjectType.OPERATE:
+        return None
+    zone = ZoneInfo(await settings.get(session, _subject(project), "project.timezone"))
+    local = now.astimezone(zone)
+    return local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+
 async def spent(
     session: AsyncSession, settings: SettingsService, project: Project, now: datetime
 ) -> int:
@@ -76,11 +91,25 @@ async def spent(
     statement = select(func.coalesce(func.sum(LedgerLine.counted), 0)).where(
         LedgerLine.project_id == project.id, LedgerLine.unit == "tokens"
     )
-    if project.type == ProjectType.OPERATE:
-        zone = ZoneInfo(await settings.get(session, _subject(project), "project.timezone"))
-        local = now.astimezone(zone)
-        month_start = local.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        statement = statement.where(LedgerLine.at >= month_start)
+    since = await period_start(session, settings, project, now)
+    if since is not None:
+        statement = statement.where(LedgerLine.at >= since)
+    return int(await session.scalar(statement) or 0)
+
+
+RESERVE_DRAWN = "drawn"
+
+
+async def reserve_drawn(
+    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
+) -> int:
+    """Tokens of the CEO reserve drawn for the budget in force (GOV-10)."""
+    statement = select(func.coalesce(func.sum(ReserveDraw.tokens), 0)).where(
+        ReserveDraw.project_id == project.id, ReserveDraw.state == RESERVE_DRAWN
+    )
+    since = await period_start(session, settings, project, now)
+    if since is not None:
+        statement = statement.where(ReserveDraw.at >= since)
     return int(await session.scalar(statement) or 0)
 
 
@@ -88,12 +117,14 @@ async def state(
     session: AsyncSession, settings: SettingsService, project: Project, now: datetime
 ) -> BudgetState:
     values = await settings.effective(session, _subject(project))
-    wall = int(values["budget.tokens"])
+    base = int(values["budget.tokens"])
+    reserve = await reserve_drawn(session, settings, project, now)
     return BudgetState(
         spent=await spent(session, settings, project, now),
-        wall=wall,
-        warn_at=wall * int(values["budget.warn_at"]) // 100,
-        wrapup_at=wall * int(values["budget.wrapup_at"]) // 100,
+        wall=base + reserve,
+        warn_at=base * int(values["budget.warn_at"]) // 100,
+        wrapup_at=base * int(values["budget.wrapup_at"]) // 100,
+        reserve=reserve,
     )
 
 
@@ -132,8 +163,8 @@ async def record(
         )
     )
     await session.flush()
-    after = BudgetState(before.spent + usage.counted, before.wall, before.warn_at, before.wrapup_at)
-    await _crossed(session, project, before, after, now)
+    after = replace(before, spent=before.spent + usage.counted)
+    await _crossed(session, settings, project, before, after, now)
     return after
 
 
@@ -144,7 +175,12 @@ def arithmetic(budget: BudgetState) -> str:
 
 
 async def _crossed(
-    session: AsyncSession, project: Project, before: BudgetState, after: BudgetState, now: datetime
+    session: AsyncSession,
+    settings: SettingsService,
+    project: Project,
+    before: BudgetState,
+    after: BudgetState,
+    now: datetime,
 ) -> None:
     ceo = await ceo_of(session, project.id)
     steps = (
@@ -168,16 +204,29 @@ async def _crossed(
                 after={"threshold": name, "spent": after.spent, "wall": after.wall},
             )
     if after.at_wall and not before.at_wall:
-        await reach_wall(session, project, after, now)
+        await reach_wall(session, settings, project, after, now)
+
+
+wall_hooks: list[Any] = []
+"""Called as `(session, settings, project, now)` when spend reaches the wall. One that
+returns True has moved the wall above spend, so the project does not pause (GOV-10)."""
 
 
 async def reach_wall(
-    session: AsyncSession, project: Project, budget: BudgetState, now: datetime
+    session: AsyncSession,
+    settings: SettingsService,
+    project: Project,
+    budget: BudgetState,
+    now: datetime,
 ) -> None:
-    """GOV-3: at the wall nothing new is leased and the project pauses. In-flight runs
-    finish within their per-run cap. The chairman is told where things stand."""
+    """GOV-3: at the wall nothing new is leased and the project pauses, unless an eligible
+    CEO reserve is drawn instead (GOV-10). In-flight runs finish within their per-run cap.
+    The chairman is told where things stand."""
     if project.state not in HOLDABLE:
         return
+    for hook in wall_hooks:
+        if await hook(session, settings, project, now):
+            return
     added = await lifecycle.add_hold(
         session,
         project,
@@ -230,4 +279,4 @@ async def follow_wall(
             detail={"kind": "budget wall lifted"},
         )
     elif budget.at_wall and not held:
-        await reach_wall(session, project, budget, now)
+        await reach_wall(session, settings, project, budget, now)

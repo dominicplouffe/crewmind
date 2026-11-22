@@ -14,7 +14,7 @@
   - At the wall: if the CEO reserve is eligible, undrawn and held by the CEO, the platform draws it instead of pausing (GOV-10). Otherwise nothing new is leased, including chat runs; the platform answers chat with a status card instead. In-flight runs finish, each bounded by its per-run cap; their tokens stay valid until they end. This is the only pause that lets live runs finish (PRJ-2). The project pauses. The chairman gets an alarm and a platform-built "where things stand" report listing every deliverable so far.
   - Operate budgets reset at month start. An Operate project paused at the wall resumes automatically into one new cycle.
 - **GOV-4 Budget advice.** The Founder proposes a budget as a range, from the plan's adjusted runs × median tokens per run on this install, or from the reference estimates shipped with each crew (LIB-2) when there is no history. During a project, the burn rate (median tokens per active hour over the last 24 active hours, shown once at least 10 runs exist) and the projected spend at completion are always visible.
-- **GOV-5 Raise requests.** Only the CEO may ask for a higher budget or concurrency. The request carries its arithmetic and what happens if it is declined. A budget raise is refused while less than half the budget is used and the projection fits within it. Approving applies the change; the chairman may grant a different number. A "yes" never lowers anything.
+- **GOV-5 Raise requests.** Only the CEO may ask for a higher budget or concurrency. The request carries its arithmetic and what happens if it is declined. A budget raise is refused while less than half the budget is used and the projected spend (spend so far plus plan tokens, PLN-3) fits within it; unknown plan tokens count as fitting. Only one request of each kind waits at a time. Approving applies the change; the chairman may grant a different number. A "yes" never lowers anything.
 - **GOV-6 Per-run cap.** `run.max_tokens` \[3M\] (0 turns it off). The gateway warns the harness at 80% and refuses further calls at the cap, counting across retries of the same wake. An optional per-run token budget is passed to the model so it can pace itself.
 - **GOV-7 Runaway guards.** These replace v1's run allowances:
   - `run.concurrency` \[4\] concurrent work runs per project.
@@ -40,5 +40,6 @@
   - **Who draws.** Drawing the reserve is a delegable verb (section 3).
     - Under autonomous authority the CEO draws without asking. If the wall arrives while a draw is eligible and undrawn, the platform draws it for the CEO rather than pausing a nearly finished project.
     - Under supervised authority a draw is a decision item for the chairman, denied if unanswered (P6).
+  - **Once.** A draw that was asked for, made or cancelled counts as the one draw; a denied request does not.
   - **Cancelling.** The chairman can cancel a draw at any time. If spend is already past the budget, the project then pauses.
   - **Beyond the reserve,** the CEO can only ask for more (GOV-5). For real-world spend, the CEO's latitude is purchases below `spend.approval_at` (GOV-8).

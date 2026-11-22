@@ -12,13 +12,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.budget import service as budget
-from crewmind.domain.planning import estimates, readiness, requirements
+from crewmind.domain.planning import (
+    commitments,
+    estimates,
+    projection,
+    readiness,
+    requirements,
+    reserve,
+)
 from crewmind.domain.planning.model import RequirementTest
 from crewmind.domain.planning.rules import PLN_1
 from crewmind.domain.projects.model import ProjectType
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import checks, tasks
-from crewmind.storage.models import Project, Requirement
+from crewmind.storage.models import (
+    Gap,
+    GapReview,
+    Project,
+    RaiseRequest,
+    Requirement,
+    ReserveDraw,
+)
 
 TEXT_MIN_CHARACTERS = 10  # PLN-1: a requirement says what will be true
 ESTIMATE_MOST = 10_000  # PLN-3: an estimate is a count of runs
@@ -79,10 +93,79 @@ class PlanNumbers(BaseModel):
     unestimated: int = Field(description="Open requirements with no estimate.")
 
 
+class PaceView(BaseModel):
+    projection: str = Field(description="When the open scope will be done, in words.")
+    projection_kind: str = Field(description="measured, best case, unknown or nothing left.")
+    projected_at: datetime | None
+    throughput: float | None = Field(description="Work runs per active hour, once measured.")
+    burn_rate: int | None = Field(description="Median tokens per active hour, once measured.")
+    projected_spend: int | None = Field(description="Spend so far plus plan tokens.")
+
+
+class CommitmentView(BaseModel):
+    id: int
+    state: str
+    date: datetime | None
+    projected_at: datetime | None
+    beside_projection: str | None = Field(description="The date, the projection and the gap.")
+    resets: int
+    reason: str | None
+
+
+class TargetView(BaseModel):
+    date: datetime
+    source: str
+    beside_projection: str = Field(description="The target, the projection and the gap.")
+
+
+class DrawView(BaseModel):
+    id: int
+    state: str = Field(description="requested, drawn, denied or cancelled.")
+    tokens: int
+    reason: str
+    arithmetic: str
+    drawn_by: str
+    at: datetime
+
+
+class ReserveView(BaseModel):
+    size: int = Field(description="Tokens in the reserve; 0 when it is off.")
+    can_draw: bool
+    arithmetic: str
+    draws: list[DrawView]
+
+
+class RaiseView(BaseModel):
+    id: int
+    what: str
+    amount: int
+    arithmetic: str
+    if_declined: str
+    state: str
+    granted: int | None
+
+
+class GapView(BaseModel):
+    id: int
+    text: str
+    must_fix: bool
+    reason: str
+    state: str = Field(description="open, noted, closed or waived.")
+    waived_reason: str | None
+    requirement_id: int | None
+
+
 class PlanView(BaseModel):
     requirements: list[RequirementItem]
     lowest_open_stage: int | None
     numbers: PlanNumbers
+    pace: PaceView
+    commitment: CommitmentView | None
+    target: TargetView | None
+    reserve: ReserveView
+    raises: list[RaiseView]
+    gaps: list[GapView]
+    gap_review: str = Field(description="not asked, waiting for the reviewer, or filed.")
     note: str | None = Field(default=None, description="What the last change means.")
 
 
@@ -144,10 +227,108 @@ async def plan_view(
     )
     graph = await requirements.dependency_graph(session, project.id)
     numbers = await numbers_of(session, settings, project, now)
+    pace = await projection.pace(session, settings, project, now)
+    commitment = await commitments.latest(session, project.id)
+    target = await commitments.target(session, project.id)
+    found = await reserve.eligibility(session, settings, project, now)
+    draws = await session.scalars(
+        select(ReserveDraw).where(ReserveDraw.project_id == project.id).order_by(ReserveDraw.id)
+    )
+    asked = await session.scalars(
+        select(RaiseRequest).where(RaiseRequest.project_id == project.id).order_by(RaiseRequest.id)
+    )
+    gaps = (
+        await session.execute(
+            select(Gap, Requirement.id)
+            .outerjoin(Requirement, Requirement.gap_id == Gap.id)
+            .where(Gap.project_id == project.id)
+            .order_by(Gap.id)
+        )
+    ).all()
+    reviews = list(
+        await session.scalars(select(GapReview).where(GapReview.project_id == project.id))
+    )
+    review = (
+        "not asked"
+        if not reviews
+        else "waiting for the reviewer"
+        if any(one.filed_at is None for one in reviews)
+        else "filed"
+    )
     return PlanView(
         requirements=[await item(session, row, graph, numbers.bias_multiplier) for row in rows],
         lowest_open_stage=await readiness.lowest_open_stage(session, project.id),
         numbers=numbers,
+        pace=PaceView(
+            projection=pace.projection.text(),
+            projection_kind=pace.projection.kind,
+            projected_at=pace.projection.at,
+            throughput=None if pace.throughput is None else round(pace.throughput, 2),
+            burn_rate=pace.burn_rate,
+            projected_spend=pace.projected_spend,
+        ),
+        commitment=None
+        if commitment is None
+        else CommitmentView(
+            id=commitment.id,
+            state=commitment.state,
+            date=commitment.date,
+            projected_at=commitment.projected,
+            beside_projection=None
+            if commitment.date is None
+            else commitments.gap_text(commitment.date, pace.projection.at),
+            resets=commitment.resets,
+            reason=commitment.reason,
+        ),
+        target=None
+        if target is None
+        else TargetView(
+            date=target.date,
+            source=target.source,
+            beside_projection=commitments.gap_text(target.date, pace.projection.at),
+        ),
+        reserve=ReserveView(
+            size=found.tokens,
+            can_draw=found.ok,
+            arithmetic=found.arithmetic,
+            draws=[
+                DrawView(
+                    id=row.id,
+                    state=row.state,
+                    tokens=row.tokens,
+                    reason=row.reason,
+                    arithmetic=row.arithmetic,
+                    drawn_by=row.drawn_by,
+                    at=row.at,
+                )
+                for row in draws
+            ],
+        ),
+        raises=[
+            RaiseView(
+                id=row.id,
+                what=row.what,
+                amount=row.amount,
+                arithmetic=row.arithmetic,
+                if_declined=row.if_declined,
+                state=row.state,
+                granted=row.granted,
+            )
+            for row in asked
+        ],
+        gaps=[
+            GapView(
+                id=gap.id,
+                text=gap.text,
+                must_fix=gap.must_fix,
+                reason=gap.reason,
+                state=gap.state,
+                waived_reason=gap.waived_reason,
+                requirement_id=requirement_id,
+            )
+            for gap, requirement_id in gaps
+        ],
+        gap_review=review,
         note=note,
     )
 

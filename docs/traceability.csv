@@ -40,9 +40,9 @@ CHAT-20,Everywhere,05-chat.md,2,yes,partial,test_CHAT_20_a_subscription_cannot_p
 PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py,"Start checks are a registry; phase 1 has none to add. Seat, budget and email checks arrive in phases 2 and 8"
 PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Chairman hold, resume time and the hold-reason set are built. The triggers for budget_wall, auth_failures and skipped_cycles arrive in phases 2 and 5"
 PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,partial,tests/unit/test_state_machines.py,Stop is terminal and clears holds. Revoking runs and voiding decision items arrive in phases 2 and 6
-PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,not started,,
-PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,not started,,
-PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,not started,,
+PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_6_a_completed_project_reopens_only_in_its_window; test_WRK_11_the_final_gap_review_blocks_readiness; test_scenario_a_deliver_project_ships_and_completes,"Ready, sign-off, auto-complete and the receipt are built. The receipt's time is running against held or paused until the time accounting (SPD-8)"
+PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
+PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
 PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-8,Operate cycles,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-9,Clone and export,06-01-projects-PRJ.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
@@ -74,22 +74,22 @@ LLM-15,Output standard in every call,06-03-models-LLM.md,2,yes,done,test_EXE_15_
 GOV-1,Settings,06-04-budget-GOV.md,2,yes,partial,test_CHAT_5_a_slash_command_is_the_operation_it_names; test_GOV_1_a_bad_change_is_refused_and_changes_nothing; test_GOV_1_an_unknown_setting_names_the_closest_real_one; test_GOV_1_only_the_right_person_changes_each_scope; test_GOV_1_an_unknown_setting_names_the_closest_real_one; test_appendix_A_constraints_match_the_spec; test_GOV_1_changes_are_versioned_with_their_reason_and_author; test_GOV_1_person_and_install_scopes,Built in phase 1 with the settings service. Disclosure to the CEO arrives in phase 2
 GOV-2,Token budget,06-04-budget-GOV.md,2,yes,done,test_LLM_8_the_ceo_answers_on_a_real_provider_and_the_key_stays_in_the_server; test_GOV_3_at_the_wall_the_project_pauses_and_nothing_new_starts; test_LLM_9_anthropic_usage_is_split_into_fresh_input_cache_writes_and_cache_reads; test_appendix_A_defaults_follow_the_project_type,
 GOV-3,The budget is the wall,06-04-budget-GOV.md,2,yes,done,test_GOV_3_at_the_wall_the_project_pauses_and_nothing_new_starts; test_INV_9_spend_past_the_wall_is_bounded_by_the_runs_in_flight; test_CHAT_20_alarm_reaches_only_the_projects_people_and_no_secret_leaves,
-GOV-4,Budget advice,06-04-budget-GOV.md,5,yes,not started,,
-GOV-5,Raise requests,06-04-budget-GOV.md,5,yes,not started,,
+GOV-4,Budget advice,06-04-budget-GOV.md,5,yes,partial,test_GOV_4_the_burn_rate_is_the_median_tokens_per_active_hour,Burn rate and projected spend are built and shown. The Founder's budget range arrives in phase 7
+GOV-5,Raise requests,06-04-budget-GOV.md,5,yes,partial,test_GOV_5_only_the_ceo_asks_for_a_raise,Built. The request is a chat line with buttons until decision items exist (phase 6)
 GOV-6,Per-run cap,06-04-budget-GOV.md,2,yes,done,test_GOV_6_the_gateway_refuses_calls_past_the_per_run_cap,
 GOV-7,Runaway guards,06-04-budget-GOV.md,2,yes,done,test_GOV_7_spinning_drops_concurrency_to_one_until_something_changes; test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,"Concurrency, wake limit, pair breaker, refusal cap, and the spinning guard (phase 4)"
 GOV-8,Real-world spend,06-04-budget-GOV.md,6,yes,not started,,
 GOV-9,Arithmetic in every refusal,06-04-budget-GOV.md,2,yes,done,test_PRJ_2_resume_is_refused_at_the_budget_wall_with_the_arithmetic,
-GOV-10,CEO reserve,06-04-budget-GOV.md,5,yes,not started,,
+GOV-10,CEO reserve,06-04-budget-GOV.md,5,yes,partial,test_GOV_10_at_the_wall_the_platform_draws_for_a_nearly_finished_project; test_GOV_10_plan_tokens_unknown_refuses_a_deliver_draw; test_GOV_10_the_reserve_is_drawn_once_when_nearly_done; test_GOV_10_under_supervised_the_chairman_answers_a_draw,"Deliver draw, the platform draw at the wall, supervised approval and cancel are built. An unanswered supervised request stays pending rather than being denied by a deadline until decision items exist (phase 6). The Explore and Operate limits after a draw arrive with parts 5c and 5d"
 PLN-1,Requirements,06-05-planning-PLN.md,5,yes,done,test_INV_18_no_task_is_created_under_scope_that_is_not_ready; test_PLN_1_a_chairman_authored_requirement_is_the_chairmans; test_PLN_1_an_explore_project_takes_no_requirements_from_the_ceo; test_PLN_1_the_ceo_cannot_take_authority_it_was_not_given; test_PLN_1_the_chairman_accepts_scope_when_they_hold_it,
 PLN-2,Ready for work,06-05-planning-PLN.md,5,yes,done,test_INV_18_no_task_is_created_under_scope_that_is_not_ready; test_INV_19_a_dependency_loop_is_refused_and_named_and_stages_go_in_order; test_INV_18_INV_19_any_sequence_of_scope_changes_keeps_work_under_ready_scope; test_INV_19_any_sequence_of_edges_leaves_the_graph_acyclic; test_SPD_2_the_longest_chain_is_the_one_that_takes_the_most_runs,
 PLN-3,Fits the budget,06-05-planning-PLN.md,5,yes,done,test_PLN_3_scope_that_does_not_fit_the_budget_is_refused_with_the_arithmetic; test_PLN_3_adjusted_runs_round_up; test_PLN_3_the_bias_multiplier_is_actual_over_estimated_and_never_below_1,
-PLN-4,Throughput,06-05-planning-PLN.md,5,yes,not started,,
-PLN-5,Projection,06-05-planning-PLN.md,5,yes,not started,,
-PLN-6,Commitment (Deliver only),06-05-planning-PLN.md,5,yes,not started,,
-PLN-7,Continuous re-projection,06-05-planning-PLN.md,5,yes,not started,,
-PLN-8,Scope freeze,06-05-planning-PLN.md,5,yes,not started,,
-PLN-9,Target dates,06-05-planning-PLN.md,5,yes,not started,,
+PLN-4,Throughput,06-05-planning-PLN.md,5,yes,done,test_PLN_4_active_hours_exclude_time_held_or_paused; test_PLN_4_throughput_is_runs_per_active_hour_once_10_runs_exist,
+PLN-5,Projection,06-05-planning-PLN.md,5,yes,done,test_PLN_5_the_projection_is_measured_best_case_or_unknown,
+PLN-6,Commitment (Deliver only),06-05-planning-PLN.md,5,yes,done,test_7_6_a_commitment_only_moves_along_its_lifecycle; test_PLN_6_a_commitment_has_no_date_field; test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope; test_scenario_a_deliver_project_ships_and_completes,
+PLN-7,Continuous re-projection,06-05-planning-PLN.md,5,yes,partial,test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope; test_PLN_7_the_commitment_state_follows_the_numbers,"Re-projection, disclosure to the CEO and the breached alarm are built. The at-risk action item and the met FYI are chat lines until decision items exist (phase 6)"
+PLN-8,Scope freeze,06-05-planning-PLN.md,5,yes,done,test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope,
+PLN-9,Target dates,06-05-planning-PLN.md,5,yes,done,test_PLN_9_a_target_date_reaches_the_ceo_beside_the_projection,
 PLN-10,Requirement acceptance,06-05-planning-PLN.md,5,yes,partial,test_PLN_10_only_the_platform_writes_met; test_PLN_10_under_supervised_the_verdict_is_the_chairmans; test_PLN_10_a_command_requirement_is_met_when_the_platform_runs_its_test,Command tests and verdicts are built. Metric requirements arrive with part 5d
 PLN-11,Metric requirements,06-05-planning-PLN.md,5,yes,not started,,
 PLN-12,Stand-down conditions,06-05-planning-PLN.md,5,yes,done,test_PLN_12_a_team_is_stood_down_when_its_condition_becomes_true; test_PLN_12_a_stand_down_condition_is_one_the_platform_can_check,
@@ -103,7 +103,7 @@ WRK-7,Platform checks,06-06-work-WRK.md,4,yes,partial,test_INV_2_a_real_crew_fin
 WRK-8,Failure loop,06-06-work-WRK.md,4,yes,done,test_EXE_15_the_board_is_in_each_agents_context; test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms; test_scenario_a_competent_crew_finishes_a_verified_job,"A failed check returns the task to ready, reserved for its claimant (R-54)"
 WRK-9,Independent read,06-06-work-WRK.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_9_nobody_reviews_their_own_work,The platform staffs a reviewer seat at creation; solo means no lead or worker seat (Q-009)
 WRK-10,Figures need a basis,06-06-work-WRK.md,6,yes,not started,,Moved from phase 4 (Q-010): it needs decision items
-WRK-11,Final gap review (Deliver),06-06-work-WRK.md,5,yes,not started,,Moved from phase 4 (phase 4 plan): the final gap review needs requirements and Deliver readiness
+WRK-11,Final gap review (Deliver),06-06-work-WRK.md,5,yes,partial,test_WRK_11_the_final_gap_review_blocks_readiness; test_scenario_a_deliver_project_ships_and_completes,Built. The goal's named standard (FND-7) arrives with the Founder; the reviewer reviews against the project goal
 WRK-12,Outside evidence,06-06-work-WRK.md,4,yes,partial,test_WRK_12_evidence_counts_only_once_the_platform_verifies_it; test_WRK_12_the_fetch_guard_reaches_no_inside_address; test_WRK_12_the_guard_rechecks_redirects_and_caps_size_and_time; test_WRK_3_an_explore_project_in_an_evidence_drought_makes_only_evidence_tasks,The verifier and the SSRF guard are built and tested against a local server. No real public page was fetched. Signed webhook evidence (platform-attested) arrives with integrations
 WRK-13,Sampled audit,06-06-work-WRK.md,4,yes,partial,test_WRK_13_sampled_closes_are_audited_by_the_chairman_only; web/e2e/board.spec.ts: the chairman fails an audit sample,"Sampling, the chairman verdict and expiry are built. The mistake report a failure owes arrives with HUM-8 in phase 6"
 WRK-14,Block and kill,06-06-work-WRK.md,4,yes,done,test_WRK_14_only_the_claimant_blocks_and_only_the_owner_kills,

@@ -14,8 +14,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.domain.budget import service as budget
 from crewmind.domain.execution.model import RunKind, RunState
 from crewmind.domain.planning.model import OPEN_SCOPE, RequirementState
-from crewmind.domain.settings.service import SettingsService
+from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.storage.models import Event, LedgerLine, Project, Requirement, Run, Task
+
+
+def subject(project: Project) -> Subject:
+    return Subject(Scope.PROJECT, project.id, project.type)
+
 
 BIAS_SAMPLE = 12  # PLN-3: the 12 most recently settled requirements
 BIAS_MIN_SAMPLE = 2  # PLN-3: at least 2 needed

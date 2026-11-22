@@ -189,10 +189,26 @@ async def propose(
 proposal_checks: list[Any] = []
 """More reasons to refuse a CEO proposal, each `(session, settings, project, now)`. The
 scope freeze (PLN-8) registers here."""
+scope_hooks: list[Any] = []
+"""Called as `(session, settings, project, now)` after accepted scope changes, so that
+what depends on it (the commitment, readiness to complete) follows at once."""
+
+
+async def scope_changed(
+    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
+) -> None:
+    await session.flush()
+    for hook in scope_hooks:
+        await hook(session, settings, project, now)
 
 
 async def add(
-    session: AsyncSession, project: Project, actor: Actor, new: NewRequirement, now: datetime
+    session: AsyncSession,
+    settings: SettingsService,
+    project: Project,
+    actor: Actor,
+    new: NewRequirement,
+    now: datetime,
 ) -> Requirement:
     """PLN-1: the chairman adds scope directly; it is accepted at once. The CEO is told."""
     assert actor.is_chairman
@@ -213,6 +229,7 @@ async def add(
         now,
         urgent=True,
     )
+    await scope_changed(session, settings, project, now)
     return requirement
 
 
@@ -261,6 +278,7 @@ async def accept(
             now,
             urgent=True,
         )
+    await scope_changed(session, settings, project, now)
     return fit
 
 
@@ -323,9 +341,11 @@ async def cut(
     _reason(reason)
     requirement.reason = reason.strip()
     move(session, requirement, R.CUT, actor.caller, now, {"reason": reason.strip()})
-    return await kill_open_tasks(
+    killed = await kill_open_tasks(
         session, requirement, actor, now, f"Requirement {requirement.id} was cut."
     )
+    await scope_changed(session, settings, project, now)
+    return killed
 
 
 async def reopen(
@@ -351,6 +371,7 @@ async def reopen(
         )
     requirement.failures, requirement.escalated, requirement.met_at = 0, False, None
     move(session, requirement, R.ACCEPTED, actor.caller, now, {"reopened": True})
+    await scope_changed(session, settings, project, now)
 
 
 @dataclass(frozen=True)
@@ -425,6 +446,7 @@ async def change(
             before=before,
             after=after,
         )
+        await scope_changed(session, settings, project, now)
 
 
 __all__ = ["CEO", "CHAIRMAN", "Change", "NewRequirement"]

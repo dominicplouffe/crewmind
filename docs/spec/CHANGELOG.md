@@ -6,6 +6,10 @@ Newest first. One line per change, citing the ids touched.
 
 - **PLN-1:** a CEO proposal carries an estimate; the CEO gives the first estimate of a chairman-authored requirement that has none.
 - **PLN-12:** the two conditions the platform can check, what "holds work" means, and that a condition fires once.
+- **GOV-5:** what "the projection fits" means for a raise; one waiting request of each kind.
+- **GOV-10:** which draws count as the one draw.
+- **WRK-11:** when a filed gap review stays current; a waived gap's requirement leaves scope; what happens with no independent reviewer.
+- **PLN-9:** a short gap is worded in hours.
 
 ## Revision 2.15 (22 Nov 2026): phase 5 plan answers
 

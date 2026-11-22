@@ -90,7 +90,14 @@ async def add_requirement(context: Context, payload: AddInput) -> PlanView:
     """PLN-1: the chairman adds scope directly and is recorded as its author."""
     project = view_of(context).project
     new = views.new_requirement(project, payload, context.prepared, services_of(context).blobs)
-    await requirements.add(context.session, project, actor_of(context.caller), new, context.now)
+    await requirements.add(
+        context.session,
+        services_of(context).settings,
+        project,
+        actor_of(context.caller),
+        new,
+        context.now,
+    )
     return await _plan(context)
 
 
