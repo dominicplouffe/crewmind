@@ -203,6 +203,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/audits/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the closes drawn for your audit, and how many were considered.
+         * @description Requires: project_observer.
+         */
+        get: operations["audits.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/audits/settle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Pass or fail a close that was drawn for your audit.
+         * @description Requires: project_chair.
+         */
+        post: operations["audits.settle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/change_password": {
         parameters: {
             query?: never;
@@ -1003,6 +1043,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/evidence/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the outside evidence agents have filed and whether it was verified.
+         * @description Requires: project_observer.
+         */
+        get: operations["evidence.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/examples/mark": {
         parameters: {
             query?: never;
@@ -1037,6 +1097,46 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["examples.unmark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/launches/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List side effects and launches, with each launch's watch.
+         * @description Requires: project_observer.
+         */
+        get: operations["launches.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/launches/retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retire a launch. Its watch ends.
+         * @description Requires: project_chair.
+         */
+        post: operations["launches.retire"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2383,6 +2483,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/tasks/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List a project's tasks with their states and honest labels.
+         * @description Requires: project_observer.
+         */
+        get: operations["tasks.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tasks/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one task: its test, its attempts and who checked it.
+         * @description Requires: project_observer.
+         */
+        get: operations["tasks.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tokens/list": {
         parameters: {
             query?: never;
@@ -2646,6 +2786,84 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** Attempt */
+        Attempt: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** By */
+            by: string;
+            /** Evidence */
+            evidence: string;
+            /** Output */
+            output: string | null;
+            /**
+             * Result
+             * @description passed, failed, or not yet checked.
+             */
+            result: string;
+        };
+        /** AuditItem */
+        AuditItem: {
+            /** Evidence */
+            evidence: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Id */
+            id: number;
+            /** Label */
+            label: string;
+            /** Task Id */
+            task_id: number;
+            /** Title */
+            title: string;
+            /**
+             * Verdict
+             * @description passed, failed, not reviewed, or waiting for you.
+             */
+            verdict: string | null;
+        };
+        /** AuditList */
+        AuditList: {
+            /**
+             * Considered
+             * @description Observable closes considered so far.
+             */
+            considered: number;
+            /**
+             * Drawn
+             * @description How many of them were drawn for you.
+             */
+            drawn: number;
+            /** Items */
+            items: components["schemas"]["AuditItem"][];
+        };
+        /** AuditVerdictInput */
+        AuditVerdictInput: {
+            /**
+             * Audit Id
+             * @description The sample's id, from `audits list`.
+             */
+            audit_id: number;
+            /**
+             * Note
+             * @description What you found.
+             */
+            note?: string | null;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Verdict
+             * @description passed or failed.
+             * @enum {string}
+             */
+            verdict: "passed" | "failed";
         };
         /** BaseModel */
         BaseModel: Record<string, never>;
@@ -3144,6 +3362,45 @@ export interface components {
              */
             text: string;
         };
+        /** EffectItem */
+        EffectItem: {
+            /** By */
+            by: string;
+            /**
+             * Declared As
+             * @description The idempotency key it was declared under.
+             */
+            declared_as: string;
+            /**
+             * Fire
+             * @description Whether to go ahead. False means it was already declared: do not fire again.
+             */
+            fire: boolean;
+            /** Fired */
+            fired: boolean | null;
+            /** Id */
+            id: number;
+            /** Launch */
+            launch: boolean;
+            /** Outcome */
+            outcome: string | null;
+            /** State */
+            state: string;
+            /**
+             * Watch
+             * @description passing, failing or ended, for a launch.
+             */
+            watch: string | null;
+            /** Watch Result */
+            watch_result: string | null;
+            /** What */
+            what: string;
+        };
+        /** EffectList */
+        EffectList: {
+            /** Items */
+            items: components["schemas"]["EffectItem"][];
+        };
         /**
          * Effort
          * @enum {string}
@@ -3220,6 +3477,31 @@ export interface components {
              * @description The artifact's name, or the message's id.
              */
             ref: string;
+        };
+        /** EvidenceItem */
+        EvidenceItem: {
+            /** Failure */
+            failure: string | null;
+            /** Filed By */
+            filed_by: string;
+            /** Id */
+            id: number;
+            /** Quote */
+            quote: string;
+            /**
+             * State
+             * @description pending (counts for nothing yet), verified or failed.
+             */
+            state: string;
+            /** Task Id */
+            task_id: number | null;
+            /** Url */
+            url: string;
+        };
+        /** EvidenceList */
+        EvidenceList: {
+            /** Items */
+            items: components["schemas"]["EvidenceItem"][];
         };
         /** ExampleInput */
         ExampleInput: {
@@ -3434,6 +3716,19 @@ export interface components {
          * @enum {string}
          */
         Kind: "deliverable" | "working" | "upload" | "report";
+        /** LaunchRef */
+        LaunchRef: {
+            /**
+             * Effect Id
+             * @description The launch's id, from `launches list`.
+             */
+            effect_id: number;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
         /** LinkOutput */
         LinkOutput: {
             /**
@@ -4376,6 +4671,96 @@ export interface components {
              */
             p256dh: string;
         };
+        /** TaskDetail */
+        TaskDetail: {
+            /** Attempts */
+            attempts: components["schemas"]["Attempt"][];
+            /** Audience */
+            audience: string;
+            /** Author */
+            author: string;
+            /** Check Output */
+            check_output: string | null;
+            /** Claimant */
+            claimant: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Completion Evidence */
+            completion_evidence: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Failures */
+            failures: number;
+            /** Goal */
+            goal: string;
+            /** Id */
+            id: number;
+            /**
+             * Label
+             * @description verified, reviewed, self-reported, or not yet checked.
+             */
+            label: string;
+            /** Outside Evidence */
+            outside_evidence: boolean;
+            /** Parent Id */
+            parent_id: number | null;
+            /** Reason */
+            reason: string | null;
+            /** Serves */
+            serves: string | null;
+            /** State */
+            state: string;
+            /** Success Test */
+            success_test: string;
+            /** Team */
+            team: string | null;
+            /** Test Files */
+            test_files: string[];
+            /** Test Kind */
+            test_kind: string;
+            /** Title */
+            title: string;
+        };
+        /** TaskItem */
+        TaskItem: {
+            /** Check Output */
+            check_output: string | null;
+            /** Claimant */
+            claimant: string | null;
+            /** Failures */
+            failures: number;
+            /** Goal */
+            goal: string;
+            /** Id */
+            id: number;
+            /**
+             * Label
+             * @description verified, reviewed, self-reported, or not yet checked.
+             */
+            label: string;
+            /** Parent Id */
+            parent_id: number | null;
+            /** Reason */
+            reason: string | null;
+            /** State */
+            state: string;
+            /** Success Test */
+            success_test: string;
+            /** Team */
+            team: string | null;
+            /** Test Kind */
+            test_kind: string;
+            /** Title */
+            title: string;
+        };
+        /** TaskList */
+        TaskList: {
+            /** Items */
+            items: components["schemas"]["TaskItem"][];
+        };
         /** TeamRef */
         TeamRef: {
             /**
@@ -4936,6 +5321,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Versions"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "audits.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "audits.settle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuditVerdictInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditItem"];
                 };
             };
             /** @description Validation Error */
@@ -6238,6 +6688,38 @@ export interface operations {
             };
         };
     };
+    "evidence.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "examples.mark": {
         parameters: {
             query?: never;
@@ -6291,6 +6773,71 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExampleItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "launches.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EffectList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "launches.retire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LaunchRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EffectItem"];
                 };
             };
             /** @description Validation Error */
@@ -8457,6 +9004,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SettingsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "tasks.list": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description Only tasks in this state. */
+                state?: string | null;
+                /** @description Leave out closed tasks. */
+                open_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "tasks.show": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+                /** @description The task's id. */
+                task_id: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskDetail"];
                 };
             };
             /** @description Validation Error */

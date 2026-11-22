@@ -15,7 +15,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: phase 3 (listening) is built on top of phase 2 (chat and execution). You can talk to a CEO agent in the web app or the terminal. What you say once sticks: standing orders, decisions and corrections reach every run word for word, and agents recall facts from earlier work. Tasks, verification and planning come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
+Status: phases 2 to 4 are built: chat and execution, listening, and verification. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; and the CEO now creates tasks that are done only when the platform or another agent has checked them. Planning by project type, the Founder and integrations come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
 ## Try it
 

@@ -77,7 +77,7 @@ GOV-3,The budget is the wall,06-04-budget-GOV.md,2,yes,done,test_GOV_3_at_the_wa
 GOV-4,Budget advice,06-04-budget-GOV.md,5,yes,not started,,
 GOV-5,Raise requests,06-04-budget-GOV.md,5,yes,not started,,
 GOV-6,Per-run cap,06-04-budget-GOV.md,2,yes,done,test_GOV_6_the_gateway_refuses_calls_past_the_per_run_cap,
-GOV-7,Runaway guards,06-04-budget-GOV.md,2,yes,partial,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,"Concurrency, wake limit, pair breaker and refusal cap built in phase 2. The spinning guard moves to phase 4 (Q-005)"
+GOV-7,Runaway guards,06-04-budget-GOV.md,2,yes,done,test_GOV_7_spinning_drops_concurrency_to_one_until_something_changes; test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,"Concurrency, wake limit, pair breaker, refusal cap, and the spinning guard (phase 4)"
 GOV-8,Real-world spend,06-04-budget-GOV.md,6,yes,not started,,
 GOV-9,Arithmetic in every refusal,06-04-budget-GOV.md,2,yes,done,test_PRJ_2_resume_is_refused_at_the_budget_wall_with_the_arithmetic,
 GOV-10,CEO reserve,06-04-budget-GOV.md,5,yes,not started,,
@@ -93,23 +93,23 @@ PLN-9,Target dates,06-05-planning-PLN.md,5,yes,not started,,
 PLN-10,Requirement acceptance,06-05-planning-PLN.md,5,yes,not started,,
 PLN-11,Metric requirements,06-05-planning-PLN.md,5,yes,not started,,
 PLN-12,Stand-down conditions,06-05-planning-PLN.md,5,yes,not started,,
-WRK-1,Task content,06-06-work-WRK.md,4,yes,not started,,
-WRK-2,Who creates,06-06-work-WRK.md,4,yes,not started,,
-WRK-3,Ceilings and floors on creation,06-06-work-WRK.md,4,yes,not started,,
-WRK-4,Claim,06-06-work-WRK.md,4,yes,not started,,
-WRK-5,Tests must fail first,06-06-work-WRK.md,4,yes,not started,,
-WRK-6,Complete,06-06-work-WRK.md,4,yes,not started,,
-WRK-7,Platform checks,06-06-work-WRK.md,4,yes,not started,,
-WRK-8,Failure loop,06-06-work-WRK.md,4,yes,not started,,
-WRK-9,Independent read,06-06-work-WRK.md,4,yes,not started,,
-WRK-10,Figures need a basis,06-06-work-WRK.md,4,yes,not started,,
+WRK-1,Task content,06-06-work-WRK.md,4,yes,partial,test_scenario_a_competent_crew_finishes_a_verified_job,"All task content is built. ""The requirement or bet it serves"" is free text until requirements exist (phase 5)"
+WRK-2,Who creates,06-06-work-WRK.md,4,yes,done,test_EXE_15_the_board_is_in_each_agents_context; test_WRK_2_only_the_ceo_creates_tasks_and_only_a_lead_splits_them,
+WRK-3,Ceilings and floors on creation,06-06-work-WRK.md,4,yes,done,test_WRK_3_an_explore_project_in_an_evidence_drought_makes_only_evidence_tasks; test_WRK_3_creation_stays_within_its_ceilings_and_floors; test_WRK_3_explore_keeps_its_share_of_outside_evidence; test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms,"Ceilings, floors, the suspect check and both Explore evidence rules are built"
+WRK-4,Claim,06-06-work-WRK.md,4,yes,done,test_INV_16_a_claim_with_no_live_run_returns_to_ready; test_WRK_4_a_task_is_claimed_only_by_whoever_it_is_for,
+WRK-5,Tests must fail first,06-06-work-WRK.md,4,yes,done,test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies; test_WRK_5_a_test_must_fail_first_and_cannot_be_weakened,
+WRK-6,Complete,06-06-work-WRK.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_9_nobody_reviews_their_own_work,
+WRK-7,Platform checks,06-06-work-WRK.md,4,yes,partial,test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies; test_WRK_5_a_test_must_fail_first_and_cannot_be_weakened; test_WRK_7_a_check_has_no_token_no_key_and_no_way_to_reach_the_server,"Built and run as a process with a clean environment, a memory limit and a timeout. The container version (no network, 1 CPU, 1 GB) is written but has not run: no Docker here"
+WRK-8,Failure loop,06-06-work-WRK.md,4,yes,done,test_EXE_15_the_board_is_in_each_agents_context; test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms; test_scenario_a_competent_crew_finishes_a_verified_job,"A failed check returns the task to ready, reserved for its claimant (R-54)"
+WRK-9,Independent read,06-06-work-WRK.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_9_nobody_reviews_their_own_work,The platform staffs a reviewer seat at creation; solo means no lead or worker seat (Q-009)
+WRK-10,Figures need a basis,06-06-work-WRK.md,4,yes,not started,,Not built. Decision items arrive in phase 6; asked to move there (Q-010)
 WRK-11,Final gap review (Deliver),06-06-work-WRK.md,5,yes,not started,,Moved from phase 4 (phase 4 plan): the final gap review needs requirements and Deliver readiness
-WRK-12,Outside evidence,06-06-work-WRK.md,4,yes,not started,,
-WRK-13,Sampled audit,06-06-work-WRK.md,4,yes,not started,,
-WRK-14,Block and kill,06-06-work-WRK.md,4,yes,not started,,
-WRK-15,Honest labels,06-06-work-WRK.md,4,yes,not started,,
-WRK-16,Side effects,06-06-work-WRK.md,4,yes,not started,,
-WRK-17,Watches,06-06-work-WRK.md,4,yes,not started,,
+WRK-12,Outside evidence,06-06-work-WRK.md,4,yes,partial,test_WRK_12_evidence_counts_only_once_the_platform_verifies_it; test_WRK_12_the_fetch_guard_reaches_no_inside_address; test_WRK_12_the_guard_rechecks_redirects_and_caps_size_and_time; test_WRK_3_an_explore_project_in_an_evidence_drought_makes_only_evidence_tasks,The verifier and the SSRF guard are built and tested against a local server. No real public page was fetched. Signed webhook evidence (platform-attested) arrives with integrations
+WRK-13,Sampled audit,06-06-work-WRK.md,4,yes,partial,test_WRK_13_sampled_closes_are_audited_by_the_chairman_only,"Sampling, the chairman verdict and expiry are built. The mistake report a failure owes arrives with HUM-8 in phase 6"
+WRK-14,Block and kill,06-06-work-WRK.md,4,yes,done,test_WRK_14_only_the_claimant_blocks_and_only_the_owner_kills,
+WRK-15,Honest labels,06-06-work-WRK.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_13_sampled_closes_are_audited_by_the_chairman_only; test_WRK_9_nobody_reviews_their_own_work,
+WRK-16,Side effects,06-06-work-WRK.md,4,yes,done,test_INV_14_a_side_effect_fires_once_across_retries,
+WRK-17,Watches,06-06-work-WRK.md,4,yes,partial,test_WRK_17_a_launch_must_be_watched,Command and URL watches are built. Browser-script watches arrive with the agent browser (EXE-17). The watch-failing flag is a chat line and an alarm until flags exist (phase 6)
 ART-1,Every file is an artifact,06-07-artifacts-ART.md,2,yes,done,test_CHAT_9_an_upload_becomes_an_artifact_every_agent_can_read,
 ART-2,The workspace is visible,06-07-artifacts-ART.md,2,yes,done,test_ART_6_files_and_project_storage_stay_within_their_limits,
 ART-3,One deliverables list,06-07-artifacts-ART.md,2,yes,done,"web/e2e/app.spec.ts: ""lock a file, mark an upload as reference, and compare two versions""",
@@ -159,7 +159,7 @@ EXE-12,Sandboxes,06-10-execution-EXE.md,2,yes,partial,test_EXE_12_a_chat_message
 EXE-13,Secrets in sandboxes,06-10-execution-EXE.md,2,yes,done,test_P3_no_sandbox_holds_a_provider_key,
 EXE-14,Network,06-10-execution-EXE.md,2,yes,partial,,Egress open; SECURITY.md states what is contained. The SSRF guard arrives with WRK-12
 EXE-15,Context pack,06-10-execution-EXE.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
-EXE-16,Stall watchdog,06-10-execution-EXE.md,4,yes,not started,,Moved from phase 2 (Q-005): needs tasks and scope
+EXE-16,Stall watchdog,06-10-execution-EXE.md,4,yes,done,test_EXE_16_stalled_work_wakes_the_ceo_and_alarms_once,Moved from phase 2. The alarm is a chat line and a push alert until flags exist
 EXE-17,Agent browser,06-10-execution-EXE.md,8,later,not started,,
 MEM-1,Pinned memory (exact),06-11-memory-MEM.md,3,yes,done,test_INV_25_every_pinned_record_is_in_the_pack_word_for_word; test_MEM_1_an_agents_notes_are_its_own_and_stay_within_the_cap; test_MEM_6_pinning_moves_a_memory_into_exact_memory,Lessons from mistake reports join pinned memory with HUM-8
 MEM-2,Recall memory on an established library,06-11-memory-MEM.md,3,yes,done,test_MEM_2_without_the_model_memory_refuses_plainly_and_fetches_nothing; test_MEM_2_add_search_update_forget_and_history; test_NFR_1_memory_makes_no_outbound_connection; test_MEM_8_recall_accuracy_meets_the_recorded_baseline,Mem0 2.2.1 with embedded Qdrant or pgvector and a local ONNX model. Graphiti and Letta are not built; the interface allows them
@@ -213,9 +213,9 @@ ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,partial,tests/atta
 ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_settings.py,
 ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_secrets.py,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
-INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,not started,,
-INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,not started,,
-INV-3,"No agent completes, reviews or gives the verdict on work it did, and n",08-invariants-INV.md,4,yes,not started,,
+INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,partial,test_scenario_the_rule_breaker_gets_nowhere,"Covered for everything that exists: settings, standing orders, decisions, corrections, a verdict on own work, locked artifacts. Commitments, tool permissions, revenue lines, flags and chairman-authored scope arrive in later phases"
+INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,done,test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies; test_WRK_5_a_test_must_fail_first_and_cannot_be_weakened; test_scenario_a_competent_crew_finishes_a_verified_job,
+INV-3,"No agent completes, reviews or gives the verdict on work it did, and n",08-invariants-INV.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_4_a_task_is_claimed_only_by_whoever_it_is_for; test_WRK_9_nobody_reviews_their_own_work,
 INV-4,"A run token works only for its own run, agent and project, and only wh",08-invariants-INV.md,2,yes,done,test_INV_4_a_hold_revokes_work_run_tokens_at_once; test_P3_a_run_token_works_only_for_its_own_live_run,Moved from phase 1 (phase 1 plan): needs runs and the dispatcher
 INV-5,A person or client that cannot see a project gets the same answer as f,08-invariants-INV.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_mcp.py; tests/unit/test_catalog.py,
 INV-6,"No secret value, provider key included, appears in any sandbox, agent-",08-invariants-INV.md,1,yes,partial,tests/attack/test_secrets.py,"Checked for every operation output, the database, events and logs. Sandboxes, exports and rehearsals arrive later"
@@ -226,9 +226,9 @@ INV-10,"Real-world spend never exceeds `spend.monthly_cap`, counting committed",
 INV-11,A project with no wake trigger (EXE-2) and no message from a person sp,08-invariants-INV.md,2,yes,done,test_CHAT_9_an_upload_alone_starts_no_reply_and_costs_nothing; test_INV_11_an_idle_project_spends_nothing,
 INV-12,"At most one runner holds a given run, and no run is both queued and ru",08-invariants-INV.md,2,yes,done,test_INV_12_racing_runners_never_take_the_same_run; test_runner_crash_mid_run_breaks_no_execution_invariant,
 INV-13,At most one queued or running work run per agent; work concurrency nev,08-invariants-INV.md,2,yes,done,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit; test_runner_crash_mid_run_breaks_no_execution_invariant,
-INV-14,"A side effect recorded under an idempotency key fires at most once, ac",08-invariants-INV.md,4,yes,not started,,Moved by the phase 2 plan
+INV-14,"A side effect recorded under an idempotency key fires at most once, ac",08-invariants-INV.md,4,yes,done,test_INV_14_a_side_effect_fires_once_across_retries,Moved by the phase 2 plan
 INV-15,A late result from a reaped worker changes nothing.,08-invariants-INV.md,2,yes,done,test_EXE_7_a_killed_runner_is_reaped_and_its_late_result_changes_nothing; test_runner_crash_mid_run_breaks_no_execution_invariant,
-INV-16,A claimed task always has a live run behind it or a path back to ready,08-invariants-INV.md,4,yes,not started,,Moved by the phase 2 plan
+INV-16,A claimed task always has a live run behind it or a path back to ready,08-invariants-INV.md,4,yes,done,test_INV_16_a_claim_with_no_live_run_returns_to_ready,Moved by the phase 2 plan
 INV-17,A decision item reaching its deadline always resolves to its declared ,08-invariants-INV.md,6,yes,not started,,
 INV-18,Proposed scope never has work against it; no task exists under a requi,08-invariants-INV.md,5,yes,not started,,
 INV-19,"The requirement graph is always acyclic, and where stages are used, wo",08-invariants-INV.md,5,yes,not started,,
