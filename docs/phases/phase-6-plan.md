@@ -8,7 +8,7 @@ Goal (PLAN.md): the chairman sees everything that matters and is never left in s
 - The desk, the daily brief, since-you-were-away, the agenda and the alerts all agree with the event log.
 - An MCP client with the steer and create scopes works, and an irreversible write needs two calls.
 
-Status: **agreed with the owner on 22 Nov 2026.** The answers are at the end.
+Status: **built on 22 Nov 2026.** The owner's answers and the outcome are at the end.
 
 ## What phase 6 covers
 
@@ -41,6 +41,8 @@ The web app gets a **Desk** (what waits on you, across projects), **decision car
 | **Email** (phase 8, owner's choice) | Emailed alerts and briefs; the grace period and the daily email cap of INT-7 | Alerts and the brief go by browser push and in the app. The alert level setting is built; the email rules arrive with mail |
 
 ## Modules
+
+This was the plan. What was built differs in places, listed under "Differences from this plan" in the outcome.
 
 ```
 src/crewmind/
@@ -129,3 +131,71 @@ None planned. Deadlines and defaults are invariants.
 | Email | **Left to phase 8.** Alerts and briefs go by browser push and in the app. INT-7 will be partial: its email rules wait for mail |
 
 No open questions remain.
+
+## Outcome (22 Nov 2026)
+
+Phase 6 is built in its five parts. Of its 29 requirement ids, 19 are done and 10 are partial; `docs/traceability.csv` has the tests and a note for each.
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| Never silent | Passes in-process for all four cases (provider down, budget at the wall, project held, crash mid-reply) and for a fifth (an agent that answers with nothing). On a real server in real time it passes for the provider down and the project held; the wall and the crash were not run on a real server |
+| The desk, the brief, since-you-were-away, the agenda and the alerts agree with the event log | Passes for the brief and since-you-were-away, which a test rebuilds from the event log and compares. The agenda's next wake is compared with the dispatcher's to the second. The desk is checked against the items and flags it is built from, and alerts against what was filed, not line by line against the log |
+| An MCP client with steer and create scopes; an irreversible write needs two calls | Passes through the MCP protocol in tests: one client with both scopes creates a project, starts it, asks the CEO a question and reads the answer, decides a waiting item, and stops the project only on the second call, with every write recorded as the person acting through that client. No outside MCP client was connected |
+
+**What is true now.**
+
+- Everything that waits on the chairman is a decision item with typed actions, a deadline and a declared default. Eighteen kinds are registered; a new kind is one registration and appears on every surface.
+- An unanswered item takes its default at the deadline. No default grants anything, except delivery sign-off and a green status review, which only close the books. A kind whose default would grant something cannot be registered. A tool permission never resolves to allow.
+- A question never blocks: the CEO states its default and proceeds. It may not ask about a decision it holds, and at most three are open.
+- Real-world spend is refused past the monthly cap whatever was approved, and a figure in an item needs its basis.
+- Flags open from arithmetic, one per condition. A state flag closes only when its condition clears; an event flag closes when raised and acknowledged.
+- A breached commitment, a failed audit or a correction that cost the chairman opens a mistake report the CEO must file once; its cost is computed, and its lesson is pinned.
+- "Waiting on you" has one definition, used by the desk, the brief and the alerts. A snooze cannot outlast a deadline.
+- A chat run that ends with no reply is answered by a platform line and is not run again.
+- Every person operation has an MCP scope or a stated reason for having none. OAuth 2.1 with PKCE is built; the attacks named in IF-5.1 fail in tests.
+
+**Partial, and why.**
+
+- **Email (phase 8, owner's choice).** Alerts and the brief go by browser push and in the app. The grace period and the daily email cap of INT-7 are not built (INT-7, HUM-11).
+- **Slack (phase 8).** Items and alerts do not appear in Slack (HUM-1, INT-7).
+- **Data sources (phase 8).** A tool-permission approval is filed, decided and defaulted to deny, but an "allow" changes nothing yet (HUM-2).
+- **The Founder (phase 7).** The create scope has only "create a project". The doctrine and goal grammar are not served as MCP documents (IF-5.8).
+- **WRK-10.** A figure in a decision item needs its basis. Figures in deliverables are not listed with their basis, and the reviewer does not check them.
+- **HUM-9.** A lever on a status review records the decision and its reason. The change itself (budget, scope, date) is still made with its own operation.
+- **HUM-6.** The phase 4 and 5 guards are shown as flags, but they are still stored in their own table.
+- **NFR-13, IF-5.1.** OAuth redirects are accepted only to this machine (localhost). Hosted clients need an admin allowlist, which waits for the setup wizard. No outside MCP client has done the full OAuth round trip against this server.
+
+**Differences from this plan.**
+
+- `project_guards` was not folded into `flags`. The guards still enforce; the flags mirror them. Folding touches every phase 4 and 5 rule and gains nothing the chairman can see.
+- Questions, assists, heads-ups and approvals are in one module (`asks.py`), and each kind is registered next to the code that applies it rather than in one `kinds.py`. The periodic work runs inside the existing planning job, not a new `jobs/decisions.py`.
+- OAuth was written as catalog operations behind the standard endpoints, not with the MCP SDK's authorization server: the SDK's version would have kept its own state outside the database and the event log.
+- The INV-17 "property test" is a seeded random test over three sequences through the public API, not a Hypothesis test: each example needs a full project.
+- The parity test checks the API, the CLI, MCP, the desk, the brief and the agenda. The chat card is covered by the web tests.
+
+**Things to know.**
+
+- **Interpretations are in the spec,** revision 2.17: how a mistake's cost is computed, what a lever does, what is not on the desk, how the brief is delivered before mail exists, what happens to a chat run with no reply, that purchases are declared, and how OAuth steps map to operations.
+- **A supervised reserve request is now denied at its deadline** (it waited for ever in phase 5), and an unanswered proposal is declined after 72 hours.
+- **MCP answers are summaries by default** (6,000 characters; 40,000 on request, the fixed figures of IF-5.7) and say so when they are cut.
+- **A purchase is a declaration.** Nothing in crewmind spends money yet; the cap and the threshold are enforced on what an agent declares before it acts.
+
+**Found and fixed on the way.**
+
+- **The empty-reply loop** carried from phase 5: fixed, as above.
+- **The runner error** carried from phase 5 (`readuntil() called while another coroutine is already waiting`): two chat runs for one agent could be given the same warm process. A warm process now answers one run at a time, a second run gets its own process, and a run interrupted mid-answer ends the warm process. The original error was not reproduced first, so this is the likely cause, fixed and tested, not a confirmed one.
+- A setting changed from a decision item failed in a solo project; an event flag reopened after it was acknowledged.
+
+**Found and not fixed.**
+
+- **Three tests failed once and passed on the next run,** during part 6a, with no change between. Not explained and not seen again in about a dozen full runs since.
+- **The consent page names an OAuth client by its id only.** The server has no operation that returns a client's name before it is approved.
+- **An approved client is listed only after it has exchanged its code** for a token, not straight after approval.
+
+**Web.** There is a Desk across projects (what waits on you, the brief, a count in the header), decision cards in the chat with their actions, a "Decision items" tab and an Agenda tab in the Plan panel, a spend view, a since-you-were-away note, an OAuth consent page and a list of approved clients with Revoke. The Desk reloads every 15 seconds rather than live, because the live stream is per project. Not covered by a browser test: since-you-were-away (its setting cannot go below an hour), and clicking through snooze, extend, note, the review levers and answering a question; their input rules are unit-tested. The flaky "earlier messages" test is fixed: late status lines moved the view, and the "live updates stopped" bar flashed on every page load.
+
+**Tests.** 464 Python tests on SQLite in about 95 seconds and on Postgres in about 2 minutes 10 seconds, plus 6 real-server tests in about 2 minutes 40 seconds (a seventh skips without the embedding model on disk); 191 web unit tests; 53 browser tests in about 2.9 minutes, all passing in three full runs.
+
+**Open questions for the owner:** none. Still on the owner's side: copy `ci/github-actions.yml` to `.github/workflows/`.
