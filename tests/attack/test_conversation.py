@@ -347,6 +347,9 @@ async def test_CHAT_14_search_header_and_feed(app: App) -> None:
     assert "The project went from draft to running." in feed
     assert "A hold was added: chairman. It lifts by `/resume`, or its lift time." in feed
     assert any(text.startswith("owner saved version 1 of llama-prices.csv") for text in feed)
+    # P18: no line reads like an event name ("item: state changed (item 3)").
+    assert "The project was created." in feed
+    assert not [text for text in feed if "state changed" in text or "_" in text.split(" ")[0]]
 
 
 async def test_MSG_13_every_surface_reads_and_writes_the_same_conversation(app: App) -> None:

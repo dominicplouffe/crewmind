@@ -410,7 +410,17 @@ def _plain(event: Event) -> str:
         return f"Directive {event.subject_id} is now {after.get('state')}."
     if kind == "budget.threshold_reached":
         return f"The budget passed its {after.get('threshold')} level."
-    return f"{kind.replace('.', ': ').replace('_', ' ')} ({event.subject_kind} {event.subject_id})."
+    noun = event.subject_kind.replace("_", " ").capitalize()
+    if kind == "project.created":
+        return "The project was created."
+    if kind == "seat.created":
+        return f"{event.subject_id} joined the crew."
+    if kind == "guard.changed":
+        return f"The {event.subject_id} guard changed."
+    if kind.endswith(".state_changed") and after.get("state"):
+        return f"{noun} {event.subject_id} is now {after.get('state')}."
+    action = kind.split(".", 1)[-1].replace("_", " ")
+    return f"{noun} {event.subject_id}: {action}."
 
 
 @operation(
