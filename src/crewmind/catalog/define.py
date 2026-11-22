@@ -32,6 +32,7 @@ def operation[Input: BaseModel, Output: BaseModel](
     mcp_scope: str | None = None,
     slash_command: str | None = None,
     exemptions: Mapping[Surface, str] | None = None,
+    prepare: Callable[[Any, Any, Any], Awaitable[Any]] | None = None,
     into: Catalog = product_catalog,
 ) -> Callable[
     [Callable[[Any, Input], Awaitable[Output]]], Callable[[Any, Input], Awaitable[Output]]
@@ -62,6 +63,7 @@ def operation[Input: BaseModel, Output: BaseModel](
                 mcp_scope=mcp_scope,
                 host_local=host_local,
                 exemptions=exemptions or {},
+                prepare=prepare,
             )
         )
         return handler

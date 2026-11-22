@@ -55,6 +55,7 @@ class Context:
     services: Any = None
     project: Any = None
     executor: Any = None
+    prepared: Any = None
     events: list[Event] = field(default_factory=list[Event])
 
     def record(
@@ -157,8 +158,11 @@ class Executor:
         idempotency_key: str | None = None,
     ) -> BaseModel:
         authorize(operation, caller)
+        prepared = (
+            await operation.prepare(caller, payload, self.services) if operation.prepare else None
+        )
         try:
-            return await self._execute(operation, caller, payload, idempotency_key)
+            return await self._execute(operation, caller, payload, idempotency_key, prepared)
         except Refusal as refusal:
             if refusal.afterwards is not None:
                 async with self.sessions() as session, session.begin():
@@ -171,6 +175,7 @@ class Executor:
         caller: Caller,
         payload: BaseModel,
         idempotency_key: str | None,
+        prepared: Any = None,
     ) -> BaseModel:
         async with self.sessions() as session, session.begin():
             context = Context(
@@ -181,6 +186,7 @@ class Executor:
                 sessions=self.sessions,
                 services=self.services,
                 executor=self,
+                prepared=prepared,
             )
             if operation.authority.names_a_project:
                 context.project = await self._access.resolve(

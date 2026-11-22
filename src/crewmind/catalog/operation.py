@@ -68,6 +68,10 @@ class Operation:
     mcp_scope: str | None = None
     host_local: bool = False
     exemptions: Mapping[Surface, str] = field(default_factory=dict[Surface, str])
+    prepare: Callable[[Any, Any, Any], Awaitable[Any]] | None = None
+    """Slow work the operation needs before it touches the database, such as running a
+    check. It is given the caller, the input and the services, runs with no transaction
+    open, and its result reaches the handler as `context.prepared`."""
 
     def __post_init__(self) -> None:
         if not _NAME.match(self.name):
