@@ -74,6 +74,7 @@ async def _prepare(caller: Any, payload: AddInput, services: Any) -> Any:
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
+    slash_command="/plan",
 )
 async def show_plan(context: Context, payload: ProjectRef) -> PlanView:
     """PLN-1, PLN-2, PLN-3."""

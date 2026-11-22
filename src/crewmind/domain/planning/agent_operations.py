@@ -6,6 +6,7 @@ from __future__ import annotations
 from typing import Any
 
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import Empty, operation
@@ -17,10 +18,13 @@ from crewmind.domain.execution.agent_operations import work_run_only
 from crewmind.domain.execution.model import SeatKind
 from crewmind.domain.planning import acceptance, plan_view, readiness, requirements, views
 from crewmind.domain.planning.authority import actor_of
+from crewmind.domain.planning.model import RequirementTest
 from crewmind.domain.planning.plan_view import PlanView
 from crewmind.domain.planning.rules import PLN_1, PLN_10
 from crewmind.domain.planning.views import RequirementInput
+from crewmind.domain.work import checks
 from crewmind.services import services_of
+from crewmind.storage.models import Task
 
 AGENT = frozenset({Principal.AGENT_RUN})
 
@@ -91,6 +95,16 @@ async def propose_requirement(context: Context, payload: RequirementInput) -> Pl
             hint="Give `estimate_runs`.",
         )
     services = services_of(context)
+    if payload.test_kind == RequirementTest.COMMAND and checks.unsafe_host(
+        services.checks, services.allow_agent_checks_unisolated
+    ):
+        raise Refusal(
+            "checks_not_allowed_here",
+            "This host runs agents unisolated and holds a container-runtime socket, so a "
+            "command test an agent wrote is not run on it.",
+            rule=checks.WRK_7.id,
+            hint="Use an observable test, or ask the operator to allow agent checks.",
+        )
     new = views.new_requirement(view.project, payload, context.prepared, services.blobs)
     requirement = await requirements.propose(
         context.session, services.settings, view.project, actor_of(context.caller), new, context.now
@@ -250,6 +264,17 @@ async def rule_requirement(context: Context, payload: RuleInput) -> PlanView:
             hint="Finish the work; the platform asks a reviewer.",
         )
     requirement = await readiness.get(context.session, view.project.id, payload.requirement_id)
+    did_the_work = await context.session.scalar(
+        select(Task.id)
+        .where(Task.requirement_id == requirement.id, Task.claimant_id == view.seat.id)
+        .limit(1)
+    )
+    if did_the_work is not None:
+        raise Refusal(
+            "you_did_this_work",
+            "You did work under this requirement, so another reviewer gives its verdict.",
+            rule=PLN_10.id,
+        )
     await acceptance.rule(
         context.session,
         services_of(context).settings,

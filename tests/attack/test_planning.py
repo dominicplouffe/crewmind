@@ -390,3 +390,72 @@ async def test_PLN_10_under_supervised_the_verdict_is_the_chairmans(
         if event["type"] == "requirement.state_changed" and event["after"]["state"] == "met"
     ]
     assert met[0]["detail"]["ruled_by"] == crew.owner.person_id
+
+
+@pytest.mark.attack("PLN-3")
+async def test_PLN_3_the_ceo_cannot_bring_scope_back_by_reopening_it(app: App) -> None:
+    """PLN-1, PLN-3, GOV-3: a CEO that reopens a cut requirement is held to the same
+    limits as one proposing it: refused when the plan would not fit, and refused in
+    wrap-up mode. The chairman may reopen regardless."""
+    from tests.attack.delivery_support import spend
+
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner, **{"budget.tokens": 1_000_000})
+    propose_it = {"name": "agent_propose_requirement", "arguments": SCOPE | {"estimate_runs": 6}}
+    accept = {"name": "agent_accept_requirement", "arguments": {"requirement_id": 1}}
+    cut = {
+        "name": "agent_cut_requirement",
+        "arguments": {"requirement_id": 1, "reason": "Parked for a later quarter."},
+    }
+    app.script(
+        "CEO/work",
+        {"tools": [propose_it], "usage": {"input": 100_000, "output": 0}},
+        {"tools": [accept], "usage": {"input": 0, "output": 0}},
+        {"tools": [cut], "usage": {"input": 0, "output": 0}},
+        {"text": "Planned.", "usage": {"input": 0, "output": 0}},
+    )
+    await app.ok("chat.command", owner, project_id=project, text="/do Plan the pricing page.")
+    await app.work()
+    await spend(app, project, 300_000)
+
+    live = await live_run(app, project)
+    refused = await agent_call(app, live.token, "agent.reopen_requirement", requirement_id=1)
+    envelope = assert_refused(refused, rule="PLN-3", code="does_not_fit_budget")
+    assert "600,000 tokens (6 runs x 100,000 tokens per run" in envelope.message
+    assert "500,000 tokens are left before wrap-up" in envelope.message
+    await spend(app, project, 510_000)
+    late = await agent_call(app, live.token, "agent.reopen_requirement", requirement_id=1)
+    assert_refused(late, rule="GOV-3", code="wrap_up_mode")
+    by_chair = await app.ok("requirements.reopen", owner, project_id=project, requirement_id=1)
+    assert by_chair["requirements"][0]["state"] == "accepted"
+
+
+@pytest.mark.attack("PLN-10")
+async def test_PLN_10_a_reviewer_that_did_the_work_does_not_rule_on_it(
+    app: App, clock: FakeClock
+) -> None:
+    """PLN-10, P5, INV-3: a reviewer seat that held a task under a requirement cannot give
+    the verdict on that requirement. An Explore project takes no requirement, even from
+    the chairman."""
+    crew = await Crew.start(app, team=False, settings={"review.independent": False})
+    task = await crew.ok("CEO", "agent.create_task", **TASK)
+    await crew.ok("CEO", "agent.claim_task", task_id=task["id"])
+    await crew.ok("CEO", "agent.complete_task", task_id=task["id"], evidence="The page is up.")
+    clock.advance(minutes=1)
+    await app.planning.tick()
+    assert (await plan(crew))[crew.requirement]["state"] == "checking"
+    async with app.runtime.sessions() as session, session.begin():
+        from sqlalchemy import select, update
+
+        from crewmind.storage.models import Seat, Task
+
+        reviewer = await session.scalar(select(Seat.id).where(Seat.name == "Reviewer"))
+        await session.execute(update(Task).values(claimant_id=reviewer))
+    own = await crew.call(
+        "Reviewer", "agent.rule_requirement", requirement_id=crew.requirement, passed=True
+    )
+    assert_refused(own, rule="PLN-10", code="you_did_this_work")
+
+    explore = await Crew.start(app, type="explore", team=False, owner=crew.owner)
+    refused = await app.call("requirements.add", explore.owner, project_id=explore.project, **SCOPE)
+    assert_refused(refused, rule="PLN-1", code="explore_has_bets")

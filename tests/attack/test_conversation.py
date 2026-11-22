@@ -209,8 +209,12 @@ async def test_CHAT_5_a_slash_command_is_the_operation_it_names(app: App) -> Non
         "/decide",
         "/fix",
         "/example",
+        "/plan",
     }
-    assert "/plan" in helped["result"]["later"]
+    assert "/desk" in helped["result"]["later"]
+    shown = await slash(app, owner, project, "/plan")
+    assert shown["operation"] == "plan.show"
+    assert shown["result"]["requirements"] == []
 
     held = await slash(app, owner, project, "/hold until 2026-11-23T09:00:00Z note=Weekend")
     assert held["operation"] == "projects.hold"

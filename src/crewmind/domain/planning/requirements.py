@@ -146,6 +146,24 @@ async def _create(
     return requirement
 
 
+async def _check_new_scope(
+    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
+) -> None:
+    """GOV-3, PLN-8: the CEO takes on no new scope in wrap-up mode or while a commitment
+    is at risk or breached. Proposing and reopening both count."""
+    wrapup = await readiness.in_wrapup(session, settings, project, now)
+    if wrapup is not None:
+        raise Refusal(
+            "wrap_up_mode",
+            f"The project is in wrap-up mode ({budget.arithmetic(wrapup)}), so new scope "
+            "is refused.",
+            rule=budget.GOV_3.id,
+            hint="Land what is in progress, or ask the chairman to raise the budget.",
+        )
+    for check in proposal_checks:
+        await check(session, settings, project, now)
+
+
 async def propose(
     session: AsyncSession,
     settings: SettingsService,
@@ -162,17 +180,7 @@ async def propose(
             rule=PLN_1.id,
             hint="Open a bet instead.",
         )
-    wrapup = await readiness.in_wrapup(session, settings, project, now)
-    if wrapup is not None:
-        raise Refusal(
-            "wrap_up_mode",
-            f"The project is in wrap-up mode ({budget.arithmetic(wrapup)}), so new "
-            "requirements are refused.",
-            rule=budget.GOV_3.id,
-            hint="Land what is in progress, or ask the chairman to raise the budget.",
-        )
-    for check in proposal_checks:
-        await check(session, settings, project, now)
+    await _check_new_scope(session, settings, project, now)
     requirement = await _create(session, project, actor, new, R.PROPOSED, now)
     if not await authority.ceo_holds(session, settings, project, "accept_scope"):
         await conversation.platform_line(
@@ -213,6 +221,13 @@ async def add(
     """PLN-1: the chairman adds scope directly; it is accepted at once. The CEO is told."""
     assert actor.is_chairman
     check_open(project)
+    if project.type == ProjectType.EXPLORE:
+        raise Refusal(
+            "explore_has_bets",
+            "An Explore project has bets, not requirements. Its tasks serve bets.",
+            rule=PLN_1.id,
+            hint="Tell the CEO which bet to open, in the chat.",
+        )
     requirement = await _create(session, project, actor, new, R.ACCEPTED, now)
     ceo = await ceo_of(session, project.id)
     estimate = (
@@ -369,6 +384,18 @@ async def reopen(
             "requirement is reopened.",
             rule=PLN_1.id,
         )
+    if not actor.is_chairman:
+        await _check_new_scope(session, settings, project, now)
+        fit = await estimates.fits_budget(
+            session, settings, project, now, including=requirement.estimate_runs or 0
+        )
+        if not fit.fits:
+            raise Refusal(
+                "does_not_fit_budget",
+                f"Reopening requirement {requirement.id} does not fit the budget. {fit.arithmetic}",
+                rule=PLN_3.id,
+                hint="Ask the chairman to reopen it or to raise the budget.",
+            )
     requirement.failures, requirement.escalated, requirement.met_at = 0, False, None
     move(session, requirement, R.ACCEPTED, actor.caller, now, {"reopened": True})
     await scope_changed(session, settings, project, now)

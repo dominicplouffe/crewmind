@@ -6,7 +6,8 @@
   - A proposed requirement is not scope; no work may be created against it.
   - Accepting needs plan authority.
   - Cutting, rewording, re-estimating or restaging a CEO-authored requirement needs scope authority. The same changes to a chairman-authored requirement are chairman-only (P7).
-  - Reopening applies to met or cut requirements only.
+  - Reopening applies to met or cut requirements only. A CEO reopening scope is held to the same limits as a CEO proposing it: the plan must fit the budget (PLN-3), and it is refused in wrap-up mode (GOV-3) and while a commitment is at risk or breached (PLN-8). The chairman may reopen regardless.
+  - An Explore project takes no requirements from anyone; its tasks serve bets.
   - Only the platform writes **met** (PLN-10).
 - **PLN-2 Ready for work.** Work may be created under a requirement only when:
   - it is accepted;
@@ -42,7 +43,7 @@
 - **PLN-10 Requirement acceptance.**
   - When every task under an in-progress requirement is closed, at least one is done, and work has changed since the last ruling, the requirement moves to checking.
   - A command test is run by the platform: pass means met. Fail means back to in progress, with escalation to the CEO once after 3 failures.
-  - An observable test waits for a verdict from whoever holds verdict authority: an independent reviewer seat under autonomous, the chairman under supervised. A rejection needs a note and sticks.
+  - An observable test waits for a verdict from whoever holds verdict authority: an independent reviewer seat under autonomous, the chairman under supervised. A reviewer seat that did work under the requirement does not rule on it. A rejection needs a note and sticks.
   - The test is not re-run, and the verdict not re-asked, until work under the requirement changes: a task under it reaches done after the last ruling, or the workspace snapshot changes.
   - A metric requirement is met when a platform reading reaches its target (PLN-11). A recurring one resets at the cycle roll.
 - **PLN-11 Metric requirements** are read on a schedule, `metric.read_every` \[24 h\] (at most hourly), from sources outside the project. The project is **losing ground** when the latest reading is further from target than the oldest reading in a 6-reading window. A single bad reading is not enough. Until data-source connectors exist (INT), a metric names a public URL and a pattern with one group around the number; the platform fetches it through the SSRF guard (WRK-12). Losing ground is judged only once 6 readings exist, and the CEO and the chairman are told once each time it begins.

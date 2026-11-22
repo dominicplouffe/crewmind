@@ -15,7 +15,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: phases 2 to 4 are built: chat and execution, listening, and verification. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; and the CEO now creates tasks that are done only when the platform or another agent has checked them. Planning by project type, the Founder and integrations come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
+Status: phases 2 to 5 are built: chat and execution, listening, verification, and planning. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; and every task now serves scope you can see: requirements with estimates in a Deliver or Operate project, bets in an Explore project. The plan shows an honest projection, a commitment whose date no agent can write, the budget arithmetic, and where the time went. Decision items, the Founder and integrations come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
 ## Try it
 
@@ -69,6 +69,14 @@ uv run crewmind chat --project Atlas
 
 Without a credential, a project runs on the mock provider, which answers from scripts in `CREWMIND_MOCK_SCRIPT_DIR` and costs nothing.
 
+Starting a project wakes its CEO at once to plan. Type `/plan` in the chat, open the Plan panel, or run:
+
+```bash
+uv run crewmind plan show --project-id <id>
+```
+
+The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. Add scope yourself with `crewmind requirements add`, and finish a ready Deliver project with `crewmind projects sign-off`.
+
 ## Develop
 
 ```bash
@@ -79,3 +87,5 @@ uv run ruff check && uv run ruff format --check && uv run pyright
 ```
 
 The web app has its own checks; see [web/README.md](web/README.md).
+
+`uv run pytest -m slow` runs the few tests that start a real server, among them the speed criterion: a scripted crew in `acceptance/scripts/deliver-reference.json` must take a four-page project from start to ready in no more than 1.3 times its longest chain of runs. A mock script file is a list of turns replayed in every run, or `{"runs": [[...], [...]], "then": [...]}` to give each run of a seat its own turns; a turn may set `delay_ms` to take time.

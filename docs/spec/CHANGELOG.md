@@ -10,6 +10,8 @@ Newest first. One line per change, citing the ids touched.
 - **GOV-10:** which draws count as the one draw.
 - **WRK-11:** when a filed gap review stays current; a waived gap's requirement leaves scope; what happens with no independent reviewer.
 - **PLN-9:** a short gap is worded in hours.
+- **PLN-1:** a CEO reopening scope meets the same limits as a CEO proposing it; an Explore project takes no requirements.
+- **PLN-10:** a reviewer that did work under a requirement does not rule on it.
 - **BG-2:** writes and job passes wake waiting jobs at once inside one server process.
 - **SPD-8:** how each stretch of time is attributed.
 - **SPD-9:** which seats count as idle, and what "closed" means.

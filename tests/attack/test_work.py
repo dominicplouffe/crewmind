@@ -267,6 +267,11 @@ async def test_WRK_7_a_check_has_no_token_no_key_and_no_way_to_reach_the_server(
         team="build",
     )  # fmt: skip
     assert_refused(unsafe, rule="WRK-7", code="checks_not_allowed_here")
+    scope = await crew.call(
+        "CEO", "agent.propose_requirement", text="The later file is in the workspace.",
+        test_kind="command", success_test="test -f later.txt", estimate_runs=1,
+    )  # fmt: skip
+    assert_refused(scope, rule="WRK-7", code="checks_not_allowed_here")
 
 
 @pytest.mark.attack("WRK-6")

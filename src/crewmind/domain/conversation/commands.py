@@ -46,7 +46,7 @@ class BudgetInput(ProjectRef):
     tokens: int | None = Field(default=None, description="A new token budget. Leave out to see it.")
 
 
-LATER = ["/grill", "/plan", "/desk"]
+LATER = ["/grill", "/desk"]
 
 
 @operation(
