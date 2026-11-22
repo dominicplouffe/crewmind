@@ -24,7 +24,7 @@ crewmind runs a team of AI agents like a company (chairman, CEO, teams) under ru
 - Python 3.12+, managed with `uv`. FastAPI + Pydantic v2, SQLAlchemy 2 + Alembic, Typer (CLI), Textual (`crewmind chat`), the official MCP Python SDK, LiteLLM (inside the model gateway), Mem0 (recall memory), Docker SDK, Playwright, OpenTelemetry SDK.
 - Background work: asyncio workers that lease from the database. No Redis and no broker.
 - Databases: Postgres (with pgvector) and SQLite. **Both from the first commit.** Domain logic never depends on one database's features except behind the storage adapter.
-- Web app: TypeScript + React in `web/`. It is the only non-Python code, and its API client is generated from the OpenAPI schema.
+- Web app: TypeScript + React in `web/`, with its API client generated from the OpenAPI schema. The only other non-Python code is the bash scripts in `deploy/` that run the Docker install (ADR-0009). They hold no product rules: they call the server's own operations.
 - Recording a deviation from a SHOULD library: add a decision record in `docs/decisions/`.
 
 ## Layout
@@ -45,7 +45,7 @@ src/crewmind/
   content/            packaged copies of content the server reads at run time
   live.py             the in-process hub that feeds the live event stream
 web/                  TypeScript/React app
-deploy/               Dockerfile and Compose file for a full server
+deploy/               Dockerfiles, Compose file and shell scripts for a full server
 tests/
   unit/  contract/  attack/  chaos/  scenarios/  acceptance/
 content/              imported v1 roles, crews, doctrine, goal grammar

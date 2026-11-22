@@ -1,17 +1,29 @@
-# A full crewmind server: Postgres with pgvector, plus the server (NFR-2).
+# A full crewmind server (NFR-1, NFR-2): Postgres with pgvector, the server, and a TLS
+# front. Agent runs and platform checks are sibling containers from the agent image
+# (EXE-12, WRK-7).
 #
-#   docker compose -f deploy/compose.yaml up -d
-#   docker compose -f deploy/compose.yaml exec server crewmind bootstrap-admin --email you@example.com
+#   deploy/deploy_single_server.sh --admin-email you@example.com
 #
-# The server is published on 127.0.0.1 only (NFR-6). To publish it, put a TLS proxy in
-# front and set CREWMIND_PUBLIC_URL to its https address.
+# is the supported way to start it: it writes deploy/.env, builds both images, starts
+# everything and prints the first admin's setup link. deploy/update_single_server.sh
+# updates it and deploy/kill_single_server.sh stops it.
+#
+# What is published (NFR-6):
+#   - the TLS front, on CREWMIND_BIND (127.0.0.1 unless you choose another address);
+#   - the server's plain port, on 127.0.0.1 only, for the `crewmind` command on this host.
+# People sign in at CREWMIND_PUBLIC_URL and nowhere else.
+
+name: crewmind
 
 services:
   database:
-    image: pgvector/pgvector:pg16
+    # The same major version as the client tools in the server image (deploy/Dockerfile):
+    # backup and restore use them.
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
     environment:
       POSTGRES_USER: crewmind
-      POSTGRES_PASSWORD: ${CREWMIND_DB_PASSWORD:?set CREWMIND_DB_PASSWORD in the environment or a .env file}
+      POSTGRES_PASSWORD: ${CREWMIND_DB_PASSWORD:?run deploy/deploy_single_server.sh, or set CREWMIND_DB_PASSWORD in deploy/.env}
       POSTGRES_DB: crewmind
     volumes:
       - database:/var/lib/postgresql/data
@@ -25,19 +37,52 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
+    image: crewmind-server
+    restart: unless-stopped
     depends_on:
       database:
         condition: service_healthy
     environment:
       CREWMIND_DATABASE_URL: postgresql://crewmind:${CREWMIND_DB_PASSWORD}@database:5432/crewmind
-      CREWMIND_DATA_DIR: /data
+      CREWMIND_DATA_DIR: ${CREWMIND_STATE_ROOT:-/var/lib/crewmind}
       CREWMIND_HOST: 0.0.0.0
-      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://crewmind.localhost}
+      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://localhost}
+      # Where sandboxes reach the server. The server joins each project's network under
+      # this name (EXE-12).
+      CREWMIND_AGENT_API_URL: http://server:8420
     volumes:
-      - data:/data
+      # Sandboxes are started by the host's container runtime, so a workspace must have
+      # the same path on the host and in the server.
+      - ${CREWMIND_STATE_ROOT:-/var/lib/crewmind}:${CREWMIND_STATE_ROOT:-/var/lib/crewmind}
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "127.0.0.1:8420:8420"
 
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://localhost}
+      CREWMIND_PUBLIC_HOST: ${CREWMIND_PUBLIC_HOST:-localhost}
+      CREWMIND_TLS: ${CREWMIND_TLS:-internal}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - proxy:/data
+    ports:
+      - "${CREWMIND_BIND:-127.0.0.1}:${CREWMIND_TLS_PORT:-443}:${CREWMIND_TLS_PORT:-443}"
+
+  # Not a running service: it exists so that one build makes the agent image too.
+  agent:
+    build:
+      context: ..
+      dockerfile: deploy/agent.Dockerfile
+    image: crewmind-agent
+    restart: "no"
+    network_mode: none
+    command: ["true"]
+
 volumes:
   database:
-  data:
+  proxy:
