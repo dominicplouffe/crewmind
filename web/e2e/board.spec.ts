@@ -76,6 +76,31 @@ async function direct(text: string): Promise<void> {
   expect(response.ok(), await response.text()).toBe(true);
 }
 
+/** Waits until no work run is queued or running, so the next scripted turns go to the next run. */
+async function workRunsEnded(): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const response = await page.request.get(`/v1/runs/list?project_id=${projectId}`);
+        const runs = ((await response.json()) as { items: { kind: string; ended_at: string | null }[] }).items;
+        const work = runs.filter((run) => run.kind === "work");
+        return work.length > 0 && work.every((run) => run.ended_at !== null);
+      },
+      { timeout: SLOW, intervals: [250] },
+    )
+    .toBe(true);
+}
+
+/** The chairman adds a requirement with an estimate: an agent's task must name one (requirements.add). */
+async function addRequirement(text: string, success_test: string): Promise<number> {
+  const response = await page.request.post("/v1/requirements/add", {
+    data: { project_id: projectId, text, test_kind: "observable", success_test, estimate_runs: 2 },
+  });
+  expect(response.ok(), await response.text()).toBe(true);
+  const plan = (await response.json()) as { requirements: { id: number; text: string }[] };
+  return plan.requirements.find((requirement) => requirement.text === text)?.id ?? 0;
+}
+
 async function stateOf(id: number): Promise<string | undefined> {
   return (await tasks()).find((task) => task.id === id)?.state;
 }
@@ -115,9 +140,15 @@ test("tasks the CEO creates appear as ready, not yet checked, without a reload",
   });
   expect(settings.ok(), await settings.text()).toBe(true);
 
+  const requirementId = await addRequirement("The plan is written and a venue is booked.", "A reader finds the plan and a booking.");
+  expect(requirementId).toBeGreaterThan(0);
+  // Starting the project queued the CEO's first planning run. It must end before the script is set,
+  // or it would use the scripted turns and the directive's run would create the tasks a second time.
+  await workRunsEnded();
+
   const task = (title: string, goal: string, success_test: string): [string, Record<string, unknown>] => [
     "agent_create_task",
-    { title, goal, success_test, test_kind: "observable" },
+    { title, goal, success_test, test_kind: "observable", requirement_id: requirementId },
   ];
   setWorkScript("CEO", [
     toolTurn(

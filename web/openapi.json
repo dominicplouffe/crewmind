@@ -1,24 +1,20 @@
 {
  "components": {
   "schemas": {
-   "AcceptInput": {
+   "AcceptDateInput": {
     "properties": {
-     "card_id": {
-      "description": "The card's id.",
-      "title": "Card Id",
-      "type": "integer"
-     },
-     "edited": {
+     "date": {
       "anyOf": [
        {
+        "format": "date-time",
         "type": "string"
        },
        {
         "type": "null"
        }
       ],
-      "description": "An edited instruction, to replace the proposal.",
-      "title": "Edited"
+      "description": "A later date of your own. Leave out to take the projection.",
+      "title": "Date"
      },
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -27,10 +23,9 @@
      }
     },
     "required": [
-     "project_id",
-     "card_id"
+     "project_id"
     ],
-    "title": "AcceptInput",
+    "title": "AcceptDateInput",
     "type": "object"
    },
    "AddCredentialInput": {
@@ -73,6 +68,127 @@
      "key"
     ],
     "title": "AddCredentialInput",
+    "type": "object"
+   },
+   "AddInput": {
+    "properties": {
+     "depends_on": {
+      "description": "Requirements that must be met first.",
+      "items": {
+       "type": "integer"
+      },
+      "title": "Depends On",
+      "type": "array"
+     },
+     "estimate_runs": {
+      "anyOf": [
+       {
+        "maximum": 10000.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "How many work runs it will take.",
+      "title": "Estimate Runs"
+     },
+     "metric_at_least": {
+      "default": true,
+      "description": "Metric only: true to reach the target from below.",
+      "title": "Metric At Least",
+      "type": "boolean"
+     },
+     "metric_pattern": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Metric only: a pattern with one group around the number.",
+      "title": "Metric Pattern"
+     },
+     "metric_target": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Metric only: the target.",
+      "title": "Metric Target"
+     },
+     "metric_url": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Metric only: the public page to read.",
+      "title": "Metric Url"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recurring": {
+      "default": false,
+      "description": "Operate only: it is due again every cycle.",
+      "title": "Recurring",
+      "type": "boolean"
+     },
+     "stage": {
+      "default": 1,
+      "description": "Its stage. Lower stages go first.",
+      "maximum": 99.0,
+      "minimum": 1.0,
+      "title": "Stage",
+      "type": "integer"
+     },
+     "success_test": {
+      "default": "",
+      "description": "A command that exits 0 when it is met, or what a reviewer will see. Leave out for a metric.",
+      "maxLength": 4000,
+      "title": "Success Test",
+      "type": "string"
+     },
+     "test_files": {
+      "description": "For a command test: the workspace files the command uses. They are pinned.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Test Files",
+      "type": "array"
+     },
+     "test_kind": {
+      "$ref": "#/components/schemas/RequirementTest",
+      "description": "command (the platform runs it), observable (someone gives a verdict) or metric (the platform reads a number)."
+     },
+     "text": {
+      "description": "The scope.",
+      "maxLength": 2000,
+      "minLength": 10,
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "text",
+     "test_kind",
+     "project_id"
+    ],
+    "title": "AddInput",
     "type": "object"
    },
    "AddMemberInput": {
@@ -493,6 +609,71 @@
     "title": "BeginUploadInput",
     "type": "object"
    },
+   "BetView": {
+    "properties": {
+     "extended": {
+      "title": "Extended",
+      "type": "boolean"
+     },
+     "extension_reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Extension Reason"
+     },
+     "finding": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The artifact that holds its finding.",
+      "title": "Finding"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "kill_at": {
+      "format": "date-time",
+      "title": "Kill At",
+      "type": "string"
+     },
+     "kill_condition": {
+      "title": "Kill Condition",
+      "type": "string"
+     },
+     "state": {
+      "description": "active, expired, confirmed, killed or inconclusive.",
+      "title": "State",
+      "type": "string"
+     },
+     "statement": {
+      "title": "Statement",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "statement",
+     "kill_condition",
+     "kill_at",
+     "state",
+     "extended",
+     "extension_reason",
+     "finding"
+    ],
+    "title": "BetView",
+    "type": "object"
+   },
    "BreakGlassInput": {
     "properties": {
      "person_id": {
@@ -713,6 +894,115 @@
     "title": "CeilingInput",
     "type": "object"
    },
+   "ChainView": {
+    "properties": {
+     "requirements": {
+      "description": "The chain, in the order it must be done.",
+      "items": {
+       "type": "integer"
+      },
+      "title": "Requirements",
+      "type": "array"
+     },
+     "runs": {
+      "description": "Adjusted runs along the longest dependency chain.",
+      "title": "Runs",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "runs",
+     "requirements"
+    ],
+    "title": "ChainView",
+    "type": "object"
+   },
+   "ChangeInput": {
+    "properties": {
+     "depends_on": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The full list of requirements it depends on.",
+      "title": "Depends On"
+     },
+     "estimate_runs": {
+      "anyOf": [
+       {
+        "maximum": 10000.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Estimate Runs"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "requirement_id": {
+      "description": "The requirement's id, from `plan show`.",
+      "title": "Requirement Id",
+      "type": "integer"
+     },
+     "stage": {
+      "anyOf": [
+       {
+        "maximum": 99.0,
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stage"
+     },
+     "success_test": {
+      "anyOf": [
+       {
+        "maxLength": 4000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Success Test"
+     },
+     "text": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "minLength": 10,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Text"
+     }
+    },
+    "required": [
+     "project_id",
+     "requirement_id"
+    ],
+    "title": "ChangeInput",
+    "type": "object"
+   },
    "ChangeInstallInput": {
     "properties": {
      "changes": {
@@ -928,6 +1218,80 @@
      "result"
     ],
     "title": "CommandResult",
+    "type": "object"
+   },
+   "CommitmentView": {
+    "properties": {
+     "beside_projection": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The date, the projection and the gap.",
+      "title": "Beside Projection"
+     },
+     "date": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Date"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "projected_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Projected At"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason"
+     },
+     "resets": {
+      "title": "Resets",
+      "type": "integer"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "state",
+     "date",
+     "projected_at",
+     "beside_projection",
+     "resets",
+     "reason"
+    ],
+    "title": "CommitmentView",
     "type": "object"
    },
    "ConfirmDeleteInput": {
@@ -1199,6 +1563,94 @@
     "title": "CredentialRef",
     "type": "object"
    },
+   "CycleView": {
+    "properties": {
+     "due_at": {
+      "format": "date-time",
+      "title": "Due At",
+      "type": "string"
+     },
+     "ends_at": {
+      "format": "date-time",
+      "title": "Ends At",
+      "type": "string"
+     },
+     "narrative": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Narrative"
+     },
+     "narrative_by_ceo": {
+      "title": "Narrative By Ceo",
+      "type": "boolean"
+     },
+     "number": {
+      "title": "Number",
+      "type": "integer"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "scorecard": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Scorecard"
+     },
+     "state": {
+      "description": "open, completed, missed or skipped.",
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "number",
+     "state",
+     "opened_at",
+     "ends_at",
+     "due_at",
+     "narrative",
+     "narrative_by_ceo",
+     "scorecard"
+    ],
+    "title": "CycleView",
+    "type": "object"
+   },
+   "DateInput": {
+    "properties": {
+     "date": {
+      "description": "The new date.",
+      "format": "date-time",
+      "title": "Date",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "date"
+    ],
+    "title": "DateInput",
+    "type": "object"
+   },
    "DecideInput": {
     "properties": {
      "project_id": {
@@ -1460,6 +1912,126 @@
      }
     },
     "title": "Done",
+    "type": "object"
+   },
+   "DrawAnswerInput": {
+    "properties": {
+     "approve": {
+      "description": "Whether the CEO may draw the reserve.",
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "draw_id": {
+      "description": "The draw's id, from `plan show`.",
+      "title": "Draw Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "draw_id",
+     "approve"
+    ],
+    "title": "DrawAnswerInput",
+    "type": "object"
+   },
+   "DrawRef": {
+    "properties": {
+     "draw_id": {
+      "description": "The draw's id, from `plan show`.",
+      "title": "Draw Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "draw_id"
+    ],
+    "title": "DrawRef",
+    "type": "object"
+   },
+   "DrawView": {
+    "properties": {
+     "arithmetic": {
+      "title": "Arithmetic",
+      "type": "string"
+     },
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "drawn_by": {
+      "title": "Drawn By",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "reason": {
+      "title": "Reason",
+      "type": "string"
+     },
+     "state": {
+      "description": "requested, drawn, denied or cancelled.",
+      "title": "State",
+      "type": "string"
+     },
+     "tokens": {
+      "title": "Tokens",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "id",
+     "state",
+     "tokens",
+     "reason",
+     "arithmetic",
+     "drawn_by",
+     "at"
+    ],
+    "title": "DrawView",
+    "type": "object"
+   },
+   "DueInput": {
+    "properties": {
+     "due_at": {
+      "description": "When this cycle's recurring scope is due.",
+      "format": "date-time",
+      "title": "Due At",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "source": {
+      "description": "Where the time comes from.",
+      "maxLength": 500,
+      "minLength": 3,
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "due_at",
+     "source"
+    ],
+    "title": "DueInput",
     "type": "object"
    },
    "EditInput": {
@@ -1864,6 +2436,40 @@
     "title": "ExampleItem",
     "type": "object"
    },
+   "ExtendInput": {
+    "properties": {
+     "bet_id": {
+      "description": "The bet's id, from `plan show`.",
+      "title": "Bet Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why it gets more time.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     },
+     "until": {
+      "description": "The new kill date.",
+      "format": "date-time",
+      "title": "Until",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "bet_id",
+     "until",
+     "reason"
+    ],
+    "title": "ExtendInput",
+    "type": "object"
+   },
    "Feed": {
     "properties": {
      "items": {
@@ -1957,6 +2563,64 @@
      "words"
     ],
     "title": "FixInput",
+    "type": "object"
+   },
+   "GapView": {
+    "properties": {
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "must_fix": {
+      "title": "Must Fix",
+      "type": "boolean"
+     },
+     "reason": {
+      "title": "Reason",
+      "type": "string"
+     },
+     "requirement_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Requirement Id"
+     },
+     "state": {
+      "description": "open, noted, closed or waived.",
+      "title": "State",
+      "type": "string"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     },
+     "waived_reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Waived Reason"
+     }
+    },
+    "required": [
+     "id",
+     "text",
+     "must_fix",
+     "reason",
+     "state",
+     "waived_reason",
+     "requirement_id"
+    ],
+    "title": "GapView",
     "type": "object"
    },
    "HTTPValidationError": {
@@ -2061,6 +2725,19 @@
       "description": "The role its members take, from `roles list`.",
       "title": "Role",
       "type": "string"
+     },
+     "stand_down_when": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Stand the team down when this becomes true: \"requirements met\" or \"stage N cleared\".",
+      "title": "Stand Down When"
      },
      "team": {
       "description": "A name for the team.",
@@ -2706,6 +3383,73 @@
     "title": "MessageRef",
     "type": "object"
    },
+   "MetricView": {
+    "properties": {
+     "at_least": {
+      "title": "At Least",
+      "type": "boolean"
+     },
+     "failure": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Why the newest reading failed, if it did.",
+      "title": "Failure"
+     },
+     "latest": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The newest reading, if one was read.",
+      "title": "Latest"
+     },
+     "losing_ground": {
+      "title": "Losing Ground",
+      "type": "boolean"
+     },
+     "read_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Read At"
+     },
+     "target": {
+      "title": "Target",
+      "type": "number"
+     },
+     "url": {
+      "title": "Url",
+      "type": "string"
+     }
+    },
+    "required": [
+     "url",
+     "target",
+     "at_least",
+     "latest",
+     "read_at",
+     "failure",
+     "losing_ground"
+    ],
+    "title": "MetricView",
+    "type": "object"
+   },
    "MintMcpInput": {
     "properties": {
      "client_name": {
@@ -2942,6 +3686,78 @@
      "model"
     ],
     "title": "OverrideLineupInput",
+    "type": "object"
+   },
+   "PaceView": {
+    "properties": {
+     "burn_rate": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Median tokens per active hour, once measured.",
+      "title": "Burn Rate"
+     },
+     "projected_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Projected At"
+     },
+     "projected_spend": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Spend so far plus plan tokens.",
+      "title": "Projected Spend"
+     },
+     "projection": {
+      "description": "When the open scope will be done, in words.",
+      "title": "Projection",
+      "type": "string"
+     },
+     "projection_kind": {
+      "description": "measured, best case, unknown or nothing left.",
+      "title": "Projection Kind",
+      "type": "string"
+     },
+     "throughput": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Work runs per active hour, once measured.",
+      "title": "Throughput"
+     }
+    },
+    "required": [
+     "projection",
+     "projection_kind",
+     "projected_at",
+     "throughput",
+     "burn_rate",
+     "projected_spend"
+    ],
+    "title": "PaceView",
     "type": "object"
    },
    "Page": {
@@ -3194,6 +4010,198 @@
     "title": "PinnedView",
     "type": "object"
    },
+   "PlanNumbers": {
+    "properties": {
+     "bias_multiplier": {
+      "description": "Actual over estimated runs, never below 1.",
+      "title": "Bias Multiplier",
+      "type": "number"
+     },
+     "plan_tokens": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Plan Tokens"
+     },
+     "plan_tokens_text": {
+      "title": "Plan Tokens Text",
+      "type": "string"
+     },
+     "remaining_runs": {
+      "description": "Adjusted runs of all open accepted scope.",
+      "title": "Remaining Runs",
+      "type": "integer"
+     },
+     "tokens_before_wrapup": {
+      "description": "Tokens left before wrap-up mode.",
+      "title": "Tokens Before Wrapup",
+      "type": "integer"
+     },
+     "tokens_per_run": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tokens Per Run"
+     },
+     "unestimated": {
+      "description": "Open requirements with no estimate.",
+      "title": "Unestimated",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "bias_multiplier",
+     "remaining_runs",
+     "tokens_per_run",
+     "plan_tokens",
+     "plan_tokens_text",
+     "tokens_before_wrapup",
+     "unestimated"
+    ],
+    "title": "PlanNumbers",
+    "type": "object"
+   },
+   "PlanView": {
+    "properties": {
+     "bets": {
+      "items": {
+       "$ref": "#/components/schemas/BetView"
+      },
+      "title": "Bets",
+      "type": "array"
+     },
+     "commitment": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/CommitmentView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "cycles": {
+      "items": {
+       "$ref": "#/components/schemas/CycleView"
+      },
+      "title": "Cycles",
+      "type": "array"
+     },
+     "gap_review": {
+      "description": "not asked, waiting for the reviewer, or filed.",
+      "title": "Gap Review",
+      "type": "string"
+     },
+     "gaps": {
+      "items": {
+       "$ref": "#/components/schemas/GapView"
+      },
+      "title": "Gaps",
+      "type": "array"
+     },
+     "longest_chain": {
+      "$ref": "#/components/schemas/ChainView"
+     },
+     "lowest_open_stage": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lowest Open Stage"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What the last change means.",
+      "title": "Note"
+     },
+     "numbers": {
+      "$ref": "#/components/schemas/PlanNumbers"
+     },
+     "pace": {
+      "$ref": "#/components/schemas/PaceView"
+     },
+     "raises": {
+      "items": {
+       "$ref": "#/components/schemas/RaiseView"
+      },
+      "title": "Raises",
+      "type": "array"
+     },
+     "requirements": {
+      "items": {
+       "$ref": "#/components/schemas/RequirementItem"
+      },
+      "title": "Requirements",
+      "type": "array"
+     },
+     "reserve": {
+      "$ref": "#/components/schemas/ReserveView"
+     },
+     "speed": {
+      "$ref": "#/components/schemas/SpeedView"
+     },
+     "target": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/TargetView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "time_box": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/TimeBoxView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "requirements",
+     "bets",
+     "time_box",
+     "cycles",
+     "longest_chain",
+     "speed",
+     "lowest_open_stage",
+     "numbers",
+     "pace",
+     "commitment",
+     "target",
+     "reserve",
+     "raises",
+     "gaps",
+     "gap_review"
+    ],
+    "title": "PlanView",
+    "type": "object"
+   },
    "PreferenceInput": {
     "properties": {
      "text": {
@@ -3401,6 +4409,33 @@
     "title": "ProjectType",
     "type": "string"
    },
+   "PromoteInput": {
+    "properties": {
+     "name": {
+      "anyOf": [
+       {
+        "maxLength": 200,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The new project's name.",
+      "title": "Name"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id"
+    ],
+    "title": "PromoteInput",
+    "type": "object"
+   },
    "ProviderItem": {
     "properties": {
      "ceiling": {
@@ -3500,6 +4535,122 @@
      "project_id"
     ],
     "title": "QualityInput",
+    "type": "object"
+   },
+   "RaiseAnswerInput": {
+    "properties": {
+     "amount": {
+      "anyOf": [
+       {
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Grant this number instead of the one asked for.",
+      "title": "Amount"
+     },
+     "approve": {
+      "description": "Whether to grant a raise.",
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "request_id": {
+      "description": "The request's id, from `plan show`.",
+      "title": "Request Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "request_id",
+     "approve"
+    ],
+    "title": "RaiseAnswerInput",
+    "type": "object"
+   },
+   "RaiseView": {
+    "properties": {
+     "amount": {
+      "title": "Amount",
+      "type": "integer"
+     },
+     "arithmetic": {
+      "title": "Arithmetic",
+      "type": "string"
+     },
+     "granted": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Granted"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "what",
+     "amount",
+     "arithmetic",
+     "if_declined",
+     "state",
+     "granted"
+    ],
+    "title": "RaiseView",
+    "type": "object"
+   },
+   "Receipt": {
+    "properties": {
+     "completed": {
+      "title": "Completed",
+      "type": "boolean"
+     },
+     "receipt": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Per requirement estimated and actual runs and tokens, total tokens by kind, any reserve drawn, where the time went, and whether the commitment was kept.",
+      "title": "Receipt"
+     }
+    },
+    "required": [
+     "completed",
+     "receipt"
+    ],
+    "title": "Receipt",
     "type": "object"
    },
    "Record": {
@@ -3656,6 +4807,231 @@
     "title": "RequestList",
     "type": "object"
    },
+   "RequirementItem": {
+    "properties": {
+     "actual_runs": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Actual Runs"
+     },
+     "adjusted_runs": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The estimate times the bias multiplier.",
+      "title": "Adjusted Runs"
+     },
+     "author": {
+      "description": "chairman or ceo.",
+      "title": "Author",
+      "type": "string"
+     },
+     "depends_on": {
+      "items": {
+       "type": "integer"
+      },
+      "title": "Depends On",
+      "type": "array"
+     },
+     "estimate_runs": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Estimate Runs"
+     },
+     "failures": {
+      "title": "Failures",
+      "type": "integer"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "metric": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/MetricView"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "not_ready_because": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Not Ready Because"
+     },
+     "ready": {
+      "description": "Whether work may be created under it now.",
+      "title": "Ready",
+      "type": "boolean"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason"
+     },
+     "recurring": {
+      "title": "Recurring",
+      "type": "boolean"
+     },
+     "ruling": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ruling"
+     },
+     "ruling_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Ruling Note"
+     },
+     "stage": {
+      "title": "Stage",
+      "type": "integer"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "success_test": {
+      "title": "Success Test",
+      "type": "string"
+     },
+     "test_kind": {
+      "title": "Test Kind",
+      "type": "string"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "text",
+     "author",
+     "state",
+     "test_kind",
+     "success_test",
+     "estimate_runs",
+     "adjusted_runs",
+     "actual_runs",
+     "stage",
+     "depends_on",
+     "recurring",
+     "ready",
+     "not_ready_because",
+     "failures",
+     "ruling",
+     "ruling_note",
+     "reason",
+     "metric"
+    ],
+    "title": "RequirementItem",
+    "type": "object"
+   },
+   "RequirementRef": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "requirement_id": {
+      "description": "The requirement's id, from `plan show`.",
+      "title": "Requirement Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "requirement_id"
+    ],
+    "title": "RequirementRef",
+    "type": "object"
+   },
+   "RequirementTest": {
+    "enum": [
+     "command",
+     "observable",
+     "metric"
+    ],
+    "title": "RequirementTest",
+    "type": "string"
+   },
+   "ReserveView": {
+    "properties": {
+     "arithmetic": {
+      "title": "Arithmetic",
+      "type": "string"
+     },
+     "can_draw": {
+      "title": "Can Draw",
+      "type": "boolean"
+     },
+     "draws": {
+      "items": {
+       "$ref": "#/components/schemas/DrawView"
+      },
+      "title": "Draws",
+      "type": "array"
+     },
+     "size": {
+      "description": "Tokens in the reserve; 0 when it is off.",
+      "title": "Size",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "size",
+     "can_draw",
+     "arithmetic",
+     "draws"
+    ],
+    "title": "ReserveView",
+    "type": "object"
+   },
    "RoleItem": {
     "properties": {
      "description": {
@@ -3732,34 +5108,6 @@
     "title": "Roster",
     "type": "object"
    },
-   "RuleInput": {
-    "properties": {
-     "decision_id": {
-      "description": "The decision's id, from `decisions list`.",
-      "title": "Decision Id",
-      "type": "integer"
-     },
-     "project_id": {
-      "description": "The project's id, from `projects list`.",
-      "title": "Project Id",
-      "type": "string"
-     },
-     "ruling": {
-      "description": "Your new ruling.",
-      "maxLength": 4000,
-      "minLength": 3,
-      "title": "Ruling",
-      "type": "string"
-     }
-    },
-    "required": [
-     "project_id",
-     "decision_id",
-     "ruling"
-    ],
-    "title": "RuleInput",
-    "type": "object"
-   },
    "RunItem": {
     "properties": {
      "attempt": {
@@ -3792,6 +5140,18 @@
      "kind": {
       "title": "Kind",
       "type": "string"
+     },
+     "leased_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Leased At"
      },
      "model": {
       "anyOf": [
@@ -3835,6 +5195,18 @@
       "title": "Seat",
       "type": "string"
      },
+     "started_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
      "state": {
       "title": "State",
       "type": "string"
@@ -3854,6 +5226,8 @@
      "model",
      "provider",
      "queued_at",
+     "leased_at",
+     "started_at",
      "ended_at",
      "end_detail",
      "tokens_counted"
@@ -3952,6 +5326,18 @@
       "title": "Kind",
       "type": "string"
      },
+     "leased_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Leased At"
+     },
      "model": {
       "anyOf": [
        {
@@ -3994,6 +5380,18 @@
       "title": "Seat",
       "type": "string"
      },
+     "started_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Started At"
+     },
      "state": {
       "title": "State",
       "type": "string"
@@ -4032,6 +5430,8 @@
      "model",
      "provider",
      "queued_at",
+     "leased_at",
+     "started_at",
      "ended_at",
      "end_detail",
      "tokens_counted",
@@ -4473,6 +5873,68 @@
     "title": "SmokeResult",
     "type": "object"
    },
+   "SpeedView": {
+    "properties": {
+     "flags": {
+      "description": "What is slowing the project now, in words.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Flags",
+      "type": "array"
+     },
+     "to_done_seconds": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "To Done Seconds"
+     },
+     "to_first_deliverable_seconds": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "To First Deliverable Seconds"
+     },
+     "to_first_task_seconds": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "To First Task Seconds"
+     },
+     "where": {
+      "additionalProperties": {
+       "type": "integer"
+      },
+      "description": "Seconds spent working, waiting on the chairman, waiting on a limit or the budget, waiting on a provider, and reviewing.",
+      "title": "Where",
+      "type": "object"
+     }
+    },
+    "required": [
+     "to_first_task_seconds",
+     "to_first_deliverable_seconds",
+     "to_done_seconds",
+     "where",
+     "flags"
+    ],
+    "title": "SpeedView",
+    "type": "object"
+   },
    "SubscribeInput": {
     "properties": {
      "auth": {
@@ -4500,6 +5962,65 @@
      "auth"
     ],
     "title": "SubscribeInput",
+    "type": "object"
+   },
+   "TargetInput": {
+    "properties": {
+     "date": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The date; leave out to clear it.",
+      "title": "Date"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "source": {
+      "default": "",
+      "description": "Where it comes from: a fact or your wish.",
+      "maxLength": 500,
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id"
+    ],
+    "title": "TargetInput",
+    "type": "object"
+   },
+   "TargetView": {
+    "properties": {
+     "beside_projection": {
+      "description": "The target, the projection and the gap.",
+      "title": "Beside Projection",
+      "type": "string"
+     },
+     "date": {
+      "format": "date-time",
+      "title": "Date",
+      "type": "string"
+     },
+     "source": {
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "date",
+     "source",
+     "beside_projection"
+    ],
+    "title": "TargetView",
     "type": "object"
    },
    "TaskDetail": {
@@ -4530,6 +6051,17 @@
      "author": {
       "title": "Author",
       "type": "string"
+     },
+     "bet_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Bet Id"
      },
      "check_output": {
       "anyOf": [
@@ -4624,6 +6156,17 @@
       ],
       "title": "Reason"
      },
+     "requirement_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Requirement Id"
+     },
      "serves": {
       "anyOf": [
        {
@@ -4673,6 +6216,8 @@
     "required": [
      "id",
      "parent_id",
+     "requirement_id",
+     "bet_id",
      "title",
      "goal",
      "success_test",
@@ -4699,6 +6244,17 @@
    },
    "TaskItem": {
     "properties": {
+     "bet_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Bet Id"
+     },
      "check_output": {
       "anyOf": [
        {
@@ -4760,6 +6316,17 @@
       ],
       "title": "Reason"
      },
+     "requirement_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Requirement Id"
+     },
      "state": {
       "title": "State",
       "type": "string"
@@ -4791,6 +6358,8 @@
     "required": [
      "id",
      "parent_id",
+     "requirement_id",
+     "bet_id",
      "title",
      "goal",
      "success_test",
@@ -4866,6 +6435,33 @@
      "channel"
     ],
     "title": "ThreadRef",
+    "type": "object"
+   },
+   "TimeBoxView": {
+    "properties": {
+     "ends_at": {
+      "format": "date-time",
+      "title": "Ends At",
+      "type": "string"
+     },
+     "new_bets_until": {
+      "description": "No new bet opens in the final 20%.",
+      "format": "date-time",
+      "title": "New Bets Until",
+      "type": "string"
+     },
+     "started_at": {
+      "format": "date-time",
+      "title": "Started At",
+      "type": "string"
+     }
+    },
+    "required": [
+     "started_at",
+     "ends_at",
+     "new_bets_until"
+    ],
+    "title": "TimeBoxView",
     "type": "object"
    },
    "TokenItem": {
@@ -5201,6 +6797,33 @@
     "title": "Versions",
     "type": "object"
    },
+   "WaiveInput": {
+    "properties": {
+     "gap_id": {
+      "description": "The gap's id, from `plan show`.",
+      "title": "Gap Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why the gap does not need closing.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "gap_id",
+     "reason"
+    ],
+    "title": "WaiveInput",
+    "type": "object"
+   },
    "WhoAmI": {
     "properties": {
      "email": {
@@ -5257,6 +6880,66 @@
     "title": "Working",
     "type": "object"
    },
+   "crewmind__domain__conversation__decisions__RuleInput": {
+    "properties": {
+     "decision_id": {
+      "description": "The decision's id, from `decisions list`.",
+      "title": "Decision Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "ruling": {
+      "description": "Your new ruling.",
+      "maxLength": 4000,
+      "minLength": 3,
+      "title": "Ruling",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "decision_id",
+     "ruling"
+    ],
+    "title": "RuleInput",
+    "type": "object"
+   },
+   "crewmind__domain__conversation__directives__AcceptInput": {
+    "properties": {
+     "card_id": {
+      "description": "The card's id.",
+      "title": "Card Id",
+      "type": "integer"
+     },
+     "edited": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "An edited instruction, to replace the proposal.",
+      "title": "Edited"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "card_id"
+    ],
+    "title": "AcceptInput",
+    "type": "object"
+   },
    "crewmind__domain__conversation__operations__History": {
     "properties": {
      "earlier": {
@@ -5294,6 +6977,119 @@
      "items"
     ],
     "title": "History",
+    "type": "object"
+   },
+   "crewmind__domain__planning__delivery_operations__ReasonInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "reason"
+    ],
+    "title": "ReasonInput",
+    "type": "object"
+   },
+   "crewmind__domain__planning__operations__AcceptInput": {
+    "properties": {
+     "anyway": {
+      "default": false,
+      "description": "Accept it even though the plan does not fit the budget.",
+      "title": "Anyway",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "requirement_id": {
+      "description": "The requirement's id, from `plan show`.",
+      "title": "Requirement Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "requirement_id"
+    ],
+    "title": "AcceptInput",
+    "type": "object"
+   },
+   "crewmind__domain__planning__operations__ReasonInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "reason": {
+      "description": "Why.",
+      "maxLength": 2000,
+      "title": "Reason",
+      "type": "string"
+     },
+     "requirement_id": {
+      "description": "The requirement's id, from `plan show`.",
+      "title": "Requirement Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "requirement_id",
+     "reason"
+    ],
+    "title": "ReasonInput",
+    "type": "object"
+   },
+   "crewmind__domain__planning__operations__RuleInput": {
+    "properties": {
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What you found.",
+      "title": "Note"
+     },
+     "passed": {
+      "description": "Whether the requirement is met.",
+      "title": "Passed",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "requirement_id": {
+      "description": "The requirement's id, from `plan show`.",
+      "title": "Requirement Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "requirement_id",
+     "passed"
+    ],
+    "title": "RuleInput",
     "type": "object"
    },
    "crewmind__domain__settings__operations__History": {
@@ -6162,6 +7958,48 @@
     ]
    }
   },
+  "/v1/bets/extend": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "bets.extend",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ExtendInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give an expired bet more time, once, with a reason.",
+    "tags": [
+     "bets"
+    ]
+   }
+  },
   "/v1/budget/command": {
    "post": {
     "description": "Requires: project_observer.",
@@ -6257,7 +8095,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/AcceptInput"
+        "$ref": "#/components/schemas/crewmind__domain__conversation__directives__AcceptInput"
        }
       }
      },
@@ -6977,6 +8815,174 @@
     ]
    }
   },
+  "/v1/commitments/accept": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "commitments.accept",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AcceptDateInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Accept the proposed commitment, at the projection or a later date of your own.",
+    "tags": [
+     "commitments"
+    ]
+   }
+  },
+  "/v1/commitments/decline": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "commitments.decline",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__planning__delivery_operations__ReasonInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Decline the proposed commitment, with a reason.",
+    "tags": [
+     "commitments"
+    ]
+   }
+  },
+  "/v1/commitments/move": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "commitments.move",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DateInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Move the commitment's date. It is re-projected at once.",
+    "tags": [
+     "commitments"
+    ]
+   }
+  },
+  "/v1/commitments/reset": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "commitments.reset",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Reset an at-risk or breached commitment to the current projection.",
+    "tags": [
+     "commitments"
+    ]
+   }
+  },
   "/v1/corrections/list": {
    "get": {
     "description": "Requires: project_observer.",
@@ -7422,6 +9428,48 @@
     ]
    }
   },
+  "/v1/cycles/set_due": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "cycles.set_due",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DueInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give the open cycle its own due time, with where it comes from.",
+    "tags": [
+     "cycles"
+    ]
+   }
+  },
   "/v1/decisions/answer": {
    "post": {
     "description": "Requires: project_chair.",
@@ -7646,7 +9694,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/RuleInput"
+        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__RuleInput"
        }
       }
      },
@@ -7893,6 +9941,48 @@
     "summary": "Remove the example mark from a message.",
     "tags": [
      "examples"
+    ]
+   }
+  },
+  "/v1/gaps/waive": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "gaps.waive",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/WaiveInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Waive a gap from the final gap review, with a reason.",
+    "tags": [
+     "gaps"
     ]
    }
   },
@@ -9646,6 +11736,93 @@
     ]
    }
   },
+  "/v1/plan/set_target": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "plan.set_target",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TargetInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Set or clear the date you would like, with where it comes from.",
+    "tags": [
+     "plan"
+    ]
+   }
+  },
+  "/v1/plan/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "plan.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show the plan: requirements, what is ready for work, and the plan's numbers.",
+    "tags": [
+     "plan"
+    ]
+   }
+  },
   "/v1/projects/cancel_delete": {
    "post": {
     "description": "Requires: project_chairman_only.",
@@ -9683,6 +11860,48 @@
      }
     },
     "summary": "Cancel a deletion during its grace period.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/complete": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.complete",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Receipt"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Complete an Operate project, with its final scorecard.",
     "tags": [
      "projects"
     ]
@@ -9809,6 +12028,48 @@
      }
     },
     "summary": "First step of deleting a project. Returns a confirmation code.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/end": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.end",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Receipt"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "End an Explore project. The platform writes the findings report.",
     "tags": [
      "projects"
     ]
@@ -9960,6 +12221,135 @@
     ]
    }
   },
+  "/v1/projects/promote": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.promote",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PromoteInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProjectItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Create a draft Deliver project from an Explore project's findings.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/receipt": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "projects.receipt",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Receipt"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show a completed project's receipt.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/reopen": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.reopen",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Receipt"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Reopen a completed project, within its reopen window.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
   "/v1/projects/resume": {
    "post": {
     "description": "Requires: project_chair.",
@@ -9997,6 +12387,48 @@
      }
     },
     "summary": "Resume a held or paused project.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/sign_off": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.sign_off",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Receipt"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Sign off a ready project. It is completed and its receipt is written.",
     "tags": [
      "projects"
     ]
@@ -10234,6 +12666,48 @@
     "summary": "Turn off alerts in this browser.",
     "tags": [
      "push"
+    ]
+   }
+  },
+  "/v1/raises/answer": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "raises.answer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RaiseAnswerInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Approve or decline the CEO's request for a higher budget or concurrency.",
+    "tags": [
+     "raises"
     ]
    }
   },
@@ -10566,6 +13040,384 @@
     "summary": "Show the install's event log: accounts, tokens and install settings.",
     "tags": [
      "record"
+    ]
+   }
+  },
+  "/v1/requirements/accept": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.accept",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__planning__operations__AcceptInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Accept a proposed requirement into scope.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/add": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.add",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AddInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a requirement to the project's scope. It is accepted at once.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/change": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.change",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChangeInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Reword, re-estimate or restage a requirement, or change what it depends on.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/cut": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.cut",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Cut a requirement from scope, with a reason. Its open tasks are killed.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/decline": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.decline",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Decline a proposed requirement, with a reason.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/reopen": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.reopen",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RequirementRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Reopen a met or cut requirement.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/requirements/rule": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "requirements.rule",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__planning__operations__RuleInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give your verdict on a requirement that is waiting for one.",
+    "tags": [
+     "requirements"
+    ]
+   }
+  },
+  "/v1/reserve/answer": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "reserve.answer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DrawAnswerInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Approve or deny the CEO's request to draw the CEO reserve.",
+    "tags": [
+     "reserve"
+    ]
+   }
+  },
+  "/v1/reserve/cancel": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "reserve.cancel",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DrawRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PlanView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Cancel a reserve draw. If spend is past the budget, the project pauses.",
+    "tags": [
+     "reserve"
     ]
    }
   },

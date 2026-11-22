@@ -231,11 +231,13 @@ test("mark a message as an example with the keyboard, then remove the mark (CHAT
 test("an agent's proposed order and reopen request get buttons on their status lines (MSG-4, MSG-5)", async () => {
   setCeoScript([
     { tools: [{ name: "agent_propose_order", arguments: { text: "Report every Friday on one page." } }] },
-    { text: "" },
+    // The run ends with a reply: a message left unanswered starts another run, which would propose again.
+    { text: "I proposed a standing order." },
   ]);
   await sendMessage(page, "How should you report?");
   const proposal = statusLine("CEO proposes a standing order");
   await expect(proposal.getByTestId("order-actions")).toBeVisible({ timeout: 30_000 });
+  await expect(agentMessages().last()).toContainText("I proposed a standing order.");
   await expect(proposal.getByRole("button", { name: /^Discard/ })).toBeVisible();
   await proposal.getByRole("button", { name: /^Edit/ }).click();
   const dialog = page.getByRole("dialog", { name: "Proposed standing order" });
@@ -262,11 +264,12 @@ test("an agent's proposed order and reopen request get buttons on their status l
         },
       ],
     },
-    { text: "" },
+    { text: "I asked to reopen the decision." },
   ]);
   await sendMessage(page, "Does that change anything?");
   const request = statusLine("CEO asks to reopen decision 1");
   await expect(request.getByTestId("request-actions")).toBeVisible({ timeout: 30_000 });
+  await expect(agentMessages().last()).toContainText("I asked to reopen the decision.");
   setCeoScript(PLAN_SCRIPT);
 
   await openMemory("Decisions");

@@ -1,0 +1,34 @@
+/* The Plan panel: scope, dates and budget, and finishing. */
+.plan-section { margin-bottom: 1.25rem; }
+.plan-add { margin-top: 0.9rem; }
+.plan-form {
+  margin-top: 0.9rem;
+  padding: 0.25rem 0.75rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.plan-form input:not([type="checkbox"]),
+.plan-form select,
+.plan-form textarea { width: 100%; }
+.plan-fieldset {
+  margin: 0 0 0.9rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.plan-fieldset legend { font-weight: 600; padding: 0 0.25rem; }
+.plan-fieldset p { margin: 0.3rem 0; }
+.chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin: 0.3rem 0;
+}
+.chain li + li::before { content: "\2192"; margin-right: 0.5rem; color: var(--muted); }
+.time-rows li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 0.75rem;
+  padding: 0.3rem 0;
+}
+.time-rows progress { grid-column: 1 / -1; width: 100%; }

@@ -12,7 +12,7 @@ Status: **agreed with the owner on 22 Nov 2026.** The answers are at the end.
 
 ## What phase 5 covers
 
-32 requirement ids, the largest phase so far: PRJ-4 to PRJ-8; SPD-1 to SPD-4 and SPD-6 to SPD-9; GOV-4, GOV-5, GOV-10; PLN-1 to PLN-12; INV-18, INV-19; and WRK-11, moved here from phase 4.
+31 requirement ids, the largest phase so far: PRJ-4 to PRJ-8; SPD-1 to SPD-4 and SPD-6 to SPD-9; GOV-4, GOV-5, GOV-10; PLN-1 to PLN-12; INV-18, INV-19; and WRK-11, moved here from phase 4.
 
 Until now a task named what it serves in words. From this phase, scope is real: a task in a Deliver or Operate project must serve an accepted, estimated requirement that is ready for work, and a task in an Explore project must serve an active bet (INV-18).
 
@@ -135,3 +135,60 @@ None. They guard scope, dates and budget, and INV-18 and INV-19 are invariants.
 | The Plan panel | Built in this phase, as the Board was in phase 4 (not asked again) |
 
 No open questions remain.
+
+## Outcome (22 Nov 2026)
+
+Phase 5 is built in its five parts, with the Plan panel. Of its 31 requirement ids, 19 are done and 12 are partial; `docs/traceability.csv` has the tests and a note for each. Every partial is waiting on a later phase, not on unfinished work here.
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| Deliver golden path | Passes. The CEO proposes and accepts scope, commits to the projection, the team builds, a reviewer gives the verdict, the final gap review finds a must-fix gap which is closed, the project becomes ready with its deliverables posted, and sign-off writes the receipt |
+| Explore golden path | Passes. One bet is confirmed on evidence the platform verified, one is killed, the chairman ends the project, the findings report is assembled, and promote creates a draft Deliver project |
+| Operate golden path | Passes. A recurring requirement is met in three weekly cycles, each roll writes a scorecard and opens it again, and the chairman completes the operation |
+| Speed criterion | Passes in real time on a real server: the four-page reference project went from start to ready in 28.1 s against a limit of 31.8 s (1.3 x 5 runs x a 4.9 s median run), and the longest wait for a lease was 0.2 s |
+| The CEO reserve | Passes. With three of four requirements met the reserve is drawn, by the CEO or by the platform at the wall; with two of four it is refused with the arithmetic and the project pauses |
+
+**What is true now.**
+
+- A task must serve an accepted, estimated requirement that is ready for work, or an active bet. A dependency loop is refused and named. Work never runs ahead of the lowest open stage.
+- Only the platform writes a requirement met: on its own run of a command test, a reviewer's or the chairman's verdict, or its own reading of a metric.
+- A commitment has no date field. Its date is the projection or a later date the chairman chooses. Scope the chairman adds re-projects it at once, and while it is at risk the CEO can propose no new scope.
+- Every refusal about budget or dates states its numbers, and tests read them back.
+- Starting a project wakes the CEO to plan at once. Jobs no longer wait out their 15-second period when something has just changed.
+
+**Partial, and why.**
+
+- **Flags and decision items (phase 6).** Slow start, no visible output, seat idle, losing ground, the at-risk commitment and raise requests are chat lines and notices to the CEO, with buttons in the Plan panel (SPD-3, SPD-4, SPD-9, PLN-7, PLN-11, GOV-5). A reserve request under supervised authority waits for the chairman for ever instead of being denied at a deadline (GOV-10).
+- **The Founder (phase 7).** No budget range is proposed (GOV-4), nobody staffs seats to match the concurrency (SPD-2), the CEO writes the first requirement itself (SPD-4), promote copies the findings into the new project's goal (PRJ-7), and the gap review is against the project goal, not a named standard (WRK-11).
+- **Data sources (phase 8).** A metric is a public URL and a pattern (PLN-11).
+- **PRJ-8.** All five cycle periods are computed and unit-tested; only weekly cycles are run end to end. The Operate monthly budget reset resuming into one cycle follows from the same code but has no test of its own.
+- **PLN-10.** "The workspace snapshot changed" is read as "any file of the project got a new version", not per requirement.
+- **PLN-6.** The settings version and scope fixed at acceptance are stored. Nothing reads them yet.
+
+**Things to know.**
+
+- **Interpretations are in the spec,** revision 2.16: who gives a first estimate, which draws count as "once", when a gap review stays current, how a cycle is completed, missed or skipped, how time is attributed, and that a CEO reopening scope meets the same limits as one proposing it.
+- **Three limits were added on review** because the rules were easy to walk around without them: a CEO could bring cut scope back by reopening it; a reviewer seat that did the work could rule on its requirement; an agent-written requirement test could run on a host where agent-written task checks are refused.
+- **A solo project still gets a verdict from a reviewer.** With independent read off, the platform brings the reviewer seat back when an observable requirement needs its verdict.
+- **The speed margin is about 12% on this machine.** The overhead between runs is 0.2 to 1 second per step. A slow CI machine could fail the criterion; the test prints its numbers.
+- **Waking jobs early works inside one server process.** A separate runner process falls back to polling.
+- **Mock scripts can now differ per run** (`{"runs": [...], "then": [...]}`) and take time (`delay_ms`).
+
+**Found and fixed on the way.**
+
+- The live stream could deliver a reply's words after the finished reply when the server was busy. Words that are waiting now go first.
+- The first run of a project waited up to 5 seconds for the runner to poll.
+
+**Found and not fixed.**
+
+- **A chat run that ends with an empty reply is queued again for the same message,** over and over until the wake limit stops it. Seen from the browser tests with a scripted empty reply; a real model rarely answers with nothing. It belongs to phase 3's "asked again" rule and needs a cap of its own.
+- **One runner error in a browser-test log:** `readuntil() called while another coroutine is already waiting`, from the sandbox reader. Not traced.
+- **One browser test is still flaky** ("earlier messages load a page at a time"): the view shifts by one message about half the time, on the old build too.
+
+**Web.** The Plan panel has three tabs: Scope (requirements, or bets and the time box, or cycles), Dates and budget, and Finish (gap review, where the time went, the receipt). Only the estimate of a requirement can be edited there; rewording, restaging and dependencies need the CLI. Receipts and scorecards are untyped in the API, so the panel reads them defensively.
+
+**Tests.** 426 Python tests on SQLite in about 80 seconds and on Postgres in about 2 minutes, plus 5 real-server tests in about 80 seconds; 142 web unit tests; 46 browser tests in about 2.2 minutes, 45 of which pass reliably.
+
+**Open questions for the owner:** none. Still on the owner's side: copy `ci/github-actions.yml` to `.github/workflows/`.

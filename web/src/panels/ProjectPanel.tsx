@@ -7,6 +7,7 @@ import { BoardPanel } from "./board/BoardPanel";
 import { FilesPanel } from "./FilesPanel";
 import { MemoryPanel } from "./memory/MemoryPanel";
 import { PanelFrame } from "./PanelFrame";
+import { PlanPanel } from "./plan/PlanPanel";
 import { RunsPanel } from "./RunsPanel";
 import { SearchPanel } from "./SearchPanel";
 import { SettingsPanel } from "./SettingsPanel";
@@ -78,6 +79,9 @@ export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPan
       break;
     case "board":
       body = <BoardPanel projectId={projectId} changes={changes} onChanged={onChanged} />;
+      break;
+    case "plan":
+      body = <PlanPanel projectId={projectId} changes={changes} onChanged={onChanged} />;
       break;
     case "thread":
       body = (

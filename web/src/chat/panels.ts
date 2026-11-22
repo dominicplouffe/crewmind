@@ -1,5 +1,5 @@
 /** The panels that open beside the chat. */
-export type PanelId = "files" | "feed" | "search" | "budget" | "models" | "settings" | "runs" | "memory" | "board" | "thread";
+export type PanelId = "files" | "feed" | "search" | "budget" | "models" | "settings" | "runs" | "memory" | "board" | "plan" | "thread";
 
 export interface PanelState {
   id: PanelId;
@@ -18,4 +18,5 @@ export const PANEL_ORDER: Exclude<PanelId, "thread">[] = [
   "runs",
   "memory",
   "board",
+  "plan",
 ];

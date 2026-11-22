@@ -49,7 +49,7 @@ from crewmind.storage.models import (
 SLOW_START, NO_OUTPUT, SEAT_IDLE = "slow start", "no output", "seat idle"
 WORKING, CHAIRMAN, LIMIT, PROVIDER, REVIEWING = (
     "working",
-    "chairman",
+    projection.WAITING_ON_CHAIRMAN,
     "limit",
     "provider",
     "reviewing",

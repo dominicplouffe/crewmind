@@ -13,7 +13,7 @@ from hypothesis import strategies as st
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.state_machine import NEW
 from crewmind.domain.execution.roster import check_stand_down
-from crewmind.domain.planning import commitments, projection
+from crewmind.domain.planning import commitments, cycles, projection
 from crewmind.domain.planning.estimates import adjusted_runs, bias_multiplier
 from crewmind.domain.planning.graph import longest_chain, loop_if_added
 from crewmind.domain.planning.model import REQUIREMENT_MACHINE, RequirementState
@@ -213,3 +213,39 @@ def test_PLN_7_the_commitment_state_follows_the_numbers(
         assert state == "at risk"
     else:
         assert state == "accepted"
+
+
+def test_PLN_4_time_waiting_only_on_the_chairman_is_not_active_time() -> None:
+    """PLN-4: active hours exclude time the project was waiting only on the chairman."""
+    running = [(at(0), at(10)), (at(20), at(30))]
+    waits = [(at(2), at(4)), (at(9), at(21)), (at(40), at(50))]
+    assert projection.without(running, waits) == [(at(0), at(2)), (at(4), at(9)), (at(21), at(30))]
+    assert projection.without(running, []) == running
+    assert projection.without(running, [(at(0), at(30))]) == []
+
+
+@pytest.mark.parametrize(
+    ("period", "roll_day", "after", "expected"),
+    [
+        ("hourly", 0, (2026, 11, 21, 9, 30), (2026, 11, 21, 10, 0)),
+        ("daily", 0, (2026, 11, 21, 9, 30), (2026, 11, 22, 0, 0)),
+        ("weekly", 0, (2026, 11, 21, 9, 30), (2026, 11, 23, 0, 0)),
+        ("weekly", 0, (2026, 11, 23, 0, 0), (2026, 11, 30, 0, 0)),
+        ("weekly", 5, (2026, 11, 21, 9, 30), (2026, 11, 28, 0, 0)),
+        ("monthly", 1, (2026, 11, 21, 9, 30), (2026, 12, 1, 0, 0)),
+        ("monthly", 28, (2026, 11, 21, 9, 30), (2026, 11, 28, 0, 0)),
+        ("monthly", 15, (2026, 12, 21, 9, 30), (2027, 1, 15, 0, 0)),
+        ("quarterly", 1, (2026, 11, 21, 9, 30), (2027, 1, 1, 0, 0)),
+        ("quarterly", 10, (2026, 1, 5, 0, 0), (2026, 1, 10, 0, 0)),
+    ],
+)
+def test_PRJ_8_the_next_roll_follows_the_period_and_the_roll_day(
+    period: str,
+    roll_day: int,
+    after: tuple[int, int, int, int, int],
+    expected: tuple[int, int, int, int, int],
+) -> None:
+    """PRJ-8: weekly cycles roll on weekday `cycle.roll_day` (0 is Monday); monthly and
+    quarterly ones on that day of the month; always strictly after the moment asked."""
+    moment = datetime(*after, tzinfo=UTC)
+    assert cycles.next_roll(period, roll_day, moment) == datetime(*expected, tzinfo=UTC)

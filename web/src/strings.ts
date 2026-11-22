@@ -4,6 +4,7 @@
  */
 
 import { board } from "./strings.board";
+import { plan } from "./strings.plan";
 import { listening, memory } from "./strings.memory";
 
 const plural = (count: number, one: string, many: string): string => `${count} ${count === 1 ? one : many}`;
@@ -104,6 +105,7 @@ export const t = {
       runs: "Runs",
       memory: "Memory",
       board: "Board",
+      plan: "Plan",
       thread: "Thread",
     },
   },
@@ -237,6 +239,7 @@ export const t = {
   listening,
   memory,
   board,
+  plan,
   settings: {
     project: "This project",
     mine: "Only for you",

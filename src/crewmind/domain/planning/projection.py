@@ -17,11 +17,13 @@ from crewmind.domain.planning import estimates
 from crewmind.domain.projects.lifecycle import PROJECT_STATE_CHANGED
 from crewmind.domain.projects.model import ProjectState
 from crewmind.domain.settings.service import SettingsService
-from crewmind.storage.models import Event, LedgerLine, Project, Run
+from crewmind.storage.models import Event, LedgerLine, Project, Run, TimeSpan
 
 WINDOW = timedelta(hours=24)  # PLN-4, GOV-4: the trailing 24 active hours
 RUNS_NEEDED = 10  # PLN-4, GOV-4: shown once at least 10 runs exist
 HOUR = 3600.0
+WAITING_ON_CHAIRMAN = "chairman"
+"""How a stretch spent waiting only on the chairman is stored in the time accounting."""
 MEASURED, BEST_CASE, UNKNOWN, NOTHING_LEFT = "measured", "best case", "unknown", "nothing left"
 
 Interval = tuple[datetime, datetime]
@@ -41,6 +43,24 @@ def running_intervals(changes: list[tuple[datetime, str]], now: datetime) -> lis
     if since is not None and now > since:
         intervals.append((since, now))
     return [(start, end) for start, end in intervals if end > start]
+
+
+def without(intervals: list[Interval], gaps: list[Interval]) -> list[Interval]:
+    """`intervals` with every stretch in `gaps` cut out (PLN-4: active hours exclude time
+    spent waiting only on the chairman)."""
+    kept = list(intervals)
+    for gap_start, gap_end in gaps:
+        cut: list[Interval] = []
+        for start, end in kept:
+            if gap_end <= start or gap_start >= end:
+                cut.append((start, end))
+                continue
+            if start < gap_start:
+                cut.append((start, gap_start))
+            if gap_end < end:
+                cut.append((gap_end, end))
+        kept = cut
+    return kept
 
 
 def trailing(intervals: list[Interval], window: timedelta = WINDOW) -> list[Interval]:
@@ -161,6 +181,22 @@ async def intervals_of(session: AsyncSession, project_id: str, now: datetime) ->
     return running_intervals(changes, now)
 
 
+async def active_intervals_of(
+    session: AsyncSession, project_id: str, now: datetime
+) -> list[Interval]:
+    """PLN-4: the stretches that count as active: running, and not waiting only on the
+    chairman."""
+    waits = (
+        await session.execute(
+            select(TimeSpan.started_at, TimeSpan.ended_at).where(
+                TimeSpan.project_id == project_id, TimeSpan.went_to == WAITING_ON_CHAIRMAN
+            )
+        )
+    ).all()
+    running = await intervals_of(session, project_id, now)
+    return without(running, [(start, end) for start, end in waits])
+
+
 async def started_at(session: AsyncSession, project_id: str) -> datetime | None:
     """When the project first started running."""
     rows = await session.execute(
@@ -204,7 +240,7 @@ class Pace:
 async def pace(
     session: AsyncSession, settings: SettingsService, project: Project, now: datetime
 ) -> Pace:
-    intervals = await intervals_of(session, project.id, now)
+    intervals = await active_intervals_of(session, project.id, now)
     runs = await _work_runs(session, project.id)
     durations = [seconds for _, seconds in runs] or [
         seconds for _, seconds in await _work_runs(session, None)
