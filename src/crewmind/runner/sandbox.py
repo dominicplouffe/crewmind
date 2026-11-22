@@ -10,6 +10,8 @@ import asyncio
 import contextlib
 import os
 import sys
+import threading
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -17,6 +19,17 @@ from typing import Any, Protocol
 import httpx
 
 from crewmind.runner.agent import DONE, WARM_FLAG, Stop, agent_loop
+from crewmind.runner.containers import (
+    CONTAINER_PATH,
+    INSTALL_LABEL,
+    RUN_LABEL,
+    WORKSPACE,
+    confinement,
+    docker_client,
+    hand_over,
+    host_of,
+    own_container,
+)
 
 
 @dataclass(frozen=True)
@@ -217,60 +230,139 @@ class UnisolatedSandbox:
         }
 
 
+HARNESS_COMMAND = ("python", "-I", "-m", "crewmind.runner.agent")
+"""What a sandbox container runs: the harness loop from the agent image (LLM-8)."""
+
+
 class _ContainerHandle:
-    def __init__(self, container: Any) -> None:
+    def __init__(self, container: Any, release: Callable[[], None]) -> None:
         self._container = container
+        self._release = release
+
+    def _remove(self) -> None:
+        with contextlib.suppress(Exception):
+            self._container.remove(force=True)
+        self._release()
 
     async def wait(self) -> int:
         result = await asyncio.to_thread(self._container.wait)
-        await asyncio.to_thread(self._container.remove, force=True)
+        await asyncio.to_thread(self._remove)
         return int(result.get("StatusCode", 1))
 
     async def kill(self) -> None:
-        with contextlib.suppress(Exception):
-            await asyncio.to_thread(self._container.remove, force=True)
+        await asyncio.to_thread(self._remove)
 
 
 class ContainerSandbox:
-    """The required mode (EXE-12): a fresh, disposable container per run, with no privilege
-    escalation, CPU and memory limits, one network per project, and an install label so a
-    second install on the same host never adopts another's containers."""
+    """The required mode (EXE-12): a fresh, disposable container per run. It runs as an
+    unprivileged user with no capabilities and no way to gain privileges, under CPU and
+    memory limits, on a network of its project's own. An install label keeps a second
+    install on the same host from adopting this one's containers.
+
+    The container is given the workspace and nothing else of the host. It reaches the
+    server at the agent API address. When the server is itself a container, the server
+    joins each project's network under that address's host name, so a sandbox can reach
+    it and no other project's sandbox."""
 
     mode = "container"
 
-    def __init__(self, *, image: str, install_id: str, cpus: int, memory_bytes: int) -> None:
-        import docker  # pyright: ignore[reportMissingTypeStubs]
-
-        self._docker: Any = docker.from_env()
+    def __init__(
+        self,
+        *,
+        image: str,
+        install_id: str,
+        cpus: int,
+        memory_bytes: int,
+        command: Sequence[str] = HARNESS_COMMAND,
+    ) -> None:
+        self._docker: Any = docker_client()
+        self._command = list(command)
+        self._server: Any | None = own_container(self._docker)
         self._image = image
         self._install_id = install_id
         self._cpus = cpus
         self._memory = memory_bytes
+        self._networks = threading.Lock()
+        self.remove_leftovers()
 
-    def _network(self, project_id: str) -> str:
-        name = f"crewmind-{self._install_id}-{project_id}"
-        if not self._docker.networks.list(names=[name]):
-            self._docker.networks.create(name, labels={"crewmind.install": self._install_id})
+    @property
+    def _label(self) -> dict[str, str]:
+        return {INSTALL_LABEL: self._install_id}
+
+    def remove_leftovers(self) -> None:
+        """Remove what an earlier server process of this install left behind. No run of
+        this install is live when its server starts, so every such container is dead
+        weight (EXE-7 reaps the runs themselves)."""
+        mine = {"label": f"{INSTALL_LABEL}={self._install_id}"}
+        for container in self._docker.containers.list(all=True, filters=mine):
+            with contextlib.suppress(Exception):
+                container.remove(force=True)
+        for network in self._docker.networks.list(filters=mine):
+            self._drop(network)
+
+    def _network_name(self, project_id: str) -> str:
+        return f"crewmind-{self._install_id}-{project_id}"
+
+    def _find(self, name: str) -> Any | None:
+        # Docker matches network names by substring, so the exact one is picked out here.
+        return next((n for n in self._docker.networks.list(names=[name]) if n.name == name), None)
+
+    def _join(self, project_id: str, api_url: str) -> str:
+        """The project's own network (EXE-12), with the server on it if the server is a
+        container. Called with the network lock held."""
+        name = self._network_name(project_id)
+        network = self._find(name) or self._docker.networks.create(name, labels=self._label)
+        if self._server is not None:
+            network.reload()
+            if self._server.id not in network.attrs.get("Containers", {}):
+                network.connect(self._server, aliases=[host_of(api_url)])
         return name
+
+    def _drop(self, network: Any) -> None:
+        with contextlib.suppress(Exception):
+            if self._server is not None:
+                network.disconnect(self._server, force=True)
+        with contextlib.suppress(Exception):
+            network.remove()
+
+    def _leave(self, project_id: str) -> None:
+        """Remove the project's network once no sandbox is on it. Docker has a small pool
+        of network addresses, so an idle project does not keep one."""
+        with self._networks:
+            network = self._find(self._network_name(project_id))
+            if network is None:
+                return
+            network.reload()
+            server = self._server.id if self._server is not None else None
+            if not set(network.attrs.get("Containers", {})) - {server}:
+                self._drop(network)
 
     async def start(self, spec: SandboxSpec) -> SandboxHandle:
         spec.workspace.mkdir(parents=True, exist_ok=True)
 
         def run() -> Any:
-            return self._docker.containers.run(
-                self._image,
-                ["python", "-I", "-m", "crewmind.runner.agent"],
-                detach=True,
-                environment={**sandbox_environment(spec), "HOME": "/workspace"},
-                working_dir="/workspace",
-                volumes={str(spec.workspace): {"bind": "/workspace", "mode": "rw"}},
-                network=self._network(spec.project_id),
-                nano_cpus=self._cpus * 1_000_000_000,
-                mem_limit=self._memory,
-                security_opt=["no-new-privileges"],
-                cap_drop=["ALL"],
-                labels={"crewmind.install": self._install_id, "crewmind.run": spec.run_id},
-                extra_hosts={"host.docker.internal": "host-gateway"},
-            )
+            hand_over(spec.workspace)
+            with self._networks:
+                return self._docker.containers.run(
+                    self._image,
+                    self._command,
+                    detach=True,
+                    init=True,
+                    environment={
+                        **sandbox_environment(spec),
+                        "HOME": WORKSPACE,
+                        "PATH": CONTAINER_PATH,
+                    },
+                    working_dir=WORKSPACE,
+                    volumes={str(spec.workspace): {"bind": WORKSPACE, "mode": "rw"}},
+                    network=self._join(spec.project_id, spec.api_url),
+                    nano_cpus=self._cpus * 1_000_000_000,
+                    mem_limit=self._memory,
+                    memswap_limit=self._memory,
+                    labels={**self._label, RUN_LABEL: spec.run_id},
+                    extra_hosts={"host.docker.internal": "host-gateway"},
+                    **confinement(),
+                )
 
-        return _ContainerHandle(await asyncio.to_thread(run))
+        container = await asyncio.to_thread(run)
+        return _ContainerHandle(container, lambda: self._leave(spec.project_id))

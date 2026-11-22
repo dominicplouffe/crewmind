@@ -21,6 +21,7 @@ from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.service import Gateway
 from crewmind.live import StreamHub
 from crewmind.runner.check_sandbox import ContainerCheckRunner, ProcessCheckRunner
+from crewmind.runner.containers import install_id
 from crewmind.services import Services
 from crewmind.storage.engine import create_engine
 
@@ -66,7 +67,9 @@ def build_runtime(
         memory=Mem0Engine(config.data_dir, config.database_url)
         if config.memory_engine == "mem0"
         else InProcessEngine(clock),
-        checks=ContainerCheckRunner(SANDBOX_IMAGE)
+        checks=ContainerCheckRunner(
+            SANDBOX_IMAGE, config.data_dir / "checks", install_id(config.data_dir)
+        )
         if config.sandbox_mode == "container"
         else ProcessCheckRunner(),
         allow_agent_checks_unisolated=config.allow_agent_checks_unisolated,

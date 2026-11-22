@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
-import hashlib
 import logging
 from collections.abc import AsyncGenerator
 
@@ -30,6 +29,7 @@ from crewmind.jobs.planning import PlanningJobs
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.jobs.work import WorkJobs
+from crewmind.runner.containers import install_id
 from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
 from crewmind.runner.supervisor import Runner
 from crewmind.runtime import SANDBOX_IMAGE, Runtime
@@ -105,7 +105,7 @@ def build_sandbox(runtime: Runtime) -> Sandbox:
     if config.sandbox_mode == "container":
         return ContainerSandbox(
             image=SANDBOX_IMAGE,
-            install_id=hashlib.sha256(str(config.data_dir).encode()).hexdigest()[:12],
+            install_id=install_id(config.data_dir),
             cpus=config.sandbox_cpus,
             memory_bytes=config.sandbox_memory,
         )

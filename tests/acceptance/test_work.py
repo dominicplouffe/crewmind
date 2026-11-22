@@ -18,6 +18,12 @@ def test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies(tmp_path: Path) 
     """INV-2, WRK-5, WRK-7, P5: the CEO's process creates a task whose test fails first; the
     lead's process claims it, writes the file and completes it; the server runs the pinned
     check and only then is the task done, labelled verified."""
+    finish_a_verified_job(tmp_path, {"CREWMIND_SANDBOX_MODE": "unisolated"})
+
+
+def finish_a_verified_job(tmp_path: Path, environment: dict[str, str]) -> None:
+    """The reference competent crew takes one task from planned to verified, in the
+    sandbox mode the environment names."""
     scripts = tmp_path / "scripts"
     scripts.mkdir()
     crew = json.loads((SCRIPTS / "competent-crew.json").read_text())
@@ -25,7 +31,9 @@ def test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies(tmp_path: Path) 
         if key != "about":
             (scripts / f"{key.replace('/', '.')}.json").write_text(json.dumps(turns))
     install = Install(tmp_path / "data")
-    install.env["CREWMIND_SANDBOX_MODE"] = "unisolated"
+    install.env.update(environment)
+    for name, value in environment.items():
+        install.env[name] = value.replace("{port}", str(install.port))
     install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
     install.env["CREWMIND_MEMORY_ENGINE"] = "in-process"
     try:

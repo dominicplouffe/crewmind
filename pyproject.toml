@@ -24,6 +24,7 @@ dependencies = [
     "pywebpush>=2.5.0",
     "mem0ai==2.2.1",
     "fastembed>=0.9.1",
+    "docker>=7",
 ]
 
 [project.scripts]
