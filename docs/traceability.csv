@@ -201,7 +201,7 @@ INT-3,Generic signed events,06-15-integrations-INT.md,8,later,not started,,
 INT-4,Data sources,06-15-integrations-INT.md,8,later,not started,,
 INT-5,Slack: one channel per project,06-15-integrations-INT.md,8,later,not started,,
 INT-6,Email: a mailbox per project,06-15-integrations-INT.md,8,later,not started,,
-INT-7,Alerts,06-15-integrations-INT.md,6,yes,not started,,
+INT-7,Alerts,06-15-integrations-INT.md,6,yes,not started,,"Email rules (grace, daily cap) wait for mail in phase 8 (owner, phase 6 plan)"
 INT-8,Web search,06-15-integrations-INT.md,2,yes,done,test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_limit,moved to phase 2: agents need web search early; Brave Search API first
 INT-9,Code repository,06-15-integrations-INT.md,8,later,not started,,
 INT-10,"Agents on email, and external agents",06-15-integrations-INT.md,8,later,not started,,

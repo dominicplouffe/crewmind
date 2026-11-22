@@ -43,27 +43,28 @@
     - the default the CEO will act on (20 or more characters).
   - At most `question.max_open` \[3\] are open at once.
   - The CEO proceeds on its default at once (SPD-5).
+  - The default must be an action within the CEO's current authority. It may not spend, grant a permission or widen scope (P6). It is checked with the `concerns` field (HUM-4).
   - The chairman answers by picking an option or replying in the question's thread.
   - One reminder goes out halfway through the window. At the deadline the question lapses and the default stands on the record.
-- **HUM-6 Flags** open from arithmetic only. One live flag per condition. The CEO closes a flag only by raising it in the chat with a proposal; the chairman acknowledges raised flags. State flags stay open until the condition clears. The kinds:
+- **HUM-6 Flags** open from arithmetic only. One live flag per condition. The CEO closes a flag only by raising it in the chat with a proposal; the chairman acknowledges raised flags. A **state** flag stays open until its condition clears, whatever is said about it. An **event** flag records something that happened and closes when it is raised and acknowledged. The kinds:
 
-| Flag | Opens when |
-| --- | --- |
-| Recurring requirement missed | A recurring requirement is open at its cycle's due time |
-| Cycle missed | An Operate cycle closes as missed |
-| Deadline at risk | The commitment is at risk or breached (PLN-7) |
-| Losing ground | PLN-11 |
-| Work starved | A cap blocked claimable work for an hour |
-| Self-gated | Only the CEO's own not-before times block work |
-| Budget wrap-up | Spend reaches `budget.wrapup_at` |
-| Spinning | GOV-7 |
-| Slow start | SPD-3 |
-| No visible output | SPD-4 |
-| Seat idle | SPD-9 |
-| Watch failing | WRK-17 |
-| Stall | EXE-16 |
-| Listening | An agent's corrections exceed `listening.flag_at` \[3\] in 7 days |
-| Mistake report owed | A mistake report is unfiled 24 h after it was opened |
+| Flag | Type | Opens when |
+| --- | --- | --- |
+| Recurring requirement missed | event | A recurring requirement is open at its cycle's due time |
+| Cycle missed | event | An Operate cycle closes as missed |
+| Deadline at risk | state | The commitment is at risk or breached (PLN-7) |
+| Losing ground | state | PLN-11 |
+| Work starved | state | A cap blocked claimable work for an hour |
+| Self-gated | state | Only the CEO's own not-before times block work |
+| Budget wrap-up | state | Spend reaches `budget.wrapup_at` |
+| Spinning | state | GOV-7 |
+| Slow start | state | SPD-3 |
+| No visible output | state | SPD-4 |
+| Seat idle | state | SPD-9 |
+| Watch failing | state | WRK-17 |
+| Stall | state | EXE-16 |
+| Listening | event | An agent's corrections exceed `listening.flag_at` \[3\] in 7 days |
+| Mistake report owed | state | A mistake report is unfiled 24 h after it was opened |
 
 - **HUM-7 Assists.** Any agent may file a step only a human can do. The task waits; the rest of the project does not.
 - **HUM-8 Mistake reports.** The platform opens a mistake report when the chairman marks a correction "this cost us", when an audit sample fails, or when a commitment is breached. The CEO files:

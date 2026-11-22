@@ -44,7 +44,7 @@ These must hold at all times, under any sequence of API calls, crashes and retri
 - **INV-19** The requirement graph is always acyclic, and where stages are used, work never runs ahead of the lowest open stage.
 - **INV-20** A held, paused, stopped, ready or completed project changes no work state.
 - **INV-21** Every state change appears in the event log with its actor (person, person via MCP or Slack, agent, or platform job), time, before and after.
-- **INV-22** The agenda's next wake equals the dispatcher's next wake.
+- **INV-22** The agenda's next time-based wake (heartbeat, not-before, deadline, cycle roll, watch) equals the dispatcher's. Wakes caused by messages cannot be predicted and are not compared.
 
 **Conversation**
 

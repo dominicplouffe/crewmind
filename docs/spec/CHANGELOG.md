@@ -2,6 +2,14 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.17 (22 Nov 2026): phase 6 plan answers
+
+- **HUM-5:** a question's default stays within the CEO's authority and may not spend, grant or widen scope (R-27).
+- **HUM-6:** each flag kind is marked state or event (R-47).
+- **IF-5.6, IF-5.2:** approving a skill version is human-only; reopen, complete and edit memory join the steer scope (R-33).
+- **INV-22:** only time-based wakes are compared (R-48).
+- **INT-6, INT-7:** the install's outbound mail account moves to phase 8 with project mailboxes; until then alerts and briefs go by browser push and in the app (owner).
+
 ## Revision 2.16 (22 Nov 2026): phase 5 build
 
 - **PLN-1:** a CEO proposal carries an estimate; the CEO gives the first estimate of a chairman-authored requirement that has none.

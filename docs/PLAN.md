@@ -80,7 +80,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 ## Phase 6: Chairman loop
 
 - **Goal:** the chairman sees everything that matters and is never left in silence.
-- **Includes:** the install-level outbound mail account (part of INT-6) so alerts and briefs can be emailed. Project mailboxes stay in phase 8.
+- **Email:** alerts and briefs go by browser push and in the app. The install's outbound mail account moved to phase 8 with project mailboxes (owner, 22 Nov 2026).
 - **Exit demo:** the never-silent acceptance scenario passes. The desk, daily brief, since-you-were-away, agenda and alerts all agree with the event log, and MCP steer and create scopes work with two-phase confirmation.
 - **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13; WRK-10 (moved from phase 4: it needs decision items); SPD-5 (moved from phase 5: it needs question items)
 

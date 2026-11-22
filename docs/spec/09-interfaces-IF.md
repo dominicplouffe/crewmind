@@ -100,7 +100,7 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
 | Scope | Grants (minimum) |
 | --- | --- |
 | read | Whoami; list projects; the desk; overview; plan; budget and receipts; board; deliverables and artifacts; evidence; org; channels and chat history; memory; the record |
-| steer | Chat with any agent; slash commands (pin, decide, fix, example, grill, do, hold, resume); upload files; decide items; acknowledge flags; lifecycle (start, hold, resume, stop) |
+| steer | Chat with any agent; slash commands (pin, decide, fix, example, grill, do, hold, resume); upload files; decide items; acknowledge flags; lifecycle (start, hold, resume, stop, reopen, complete); edit memory |
 | create | Search roles and crews; read a source URL; grade a goal; rehearse a spec; create a project from a spec; quick project and its status; clone a project |
 | configure | Roster and hiring; skills; budget and quality; settings; data sources (minus human-only verbs); credential names and grants |
 
@@ -112,7 +112,8 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
   - creating or revealing a credential value;
   - changing project membership;
   - handing on the chair;
-  - deleting a project.
+  - deleting a project;
+  - approving a skill version.
 
   MCP may show these as waiting on the person but cannot perform them.
 - **IF-5.7 Context budget.**
