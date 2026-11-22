@@ -21,3 +21,4 @@ The redesign uses only what the server already returns. Where the brief asked fo
 | A-15 | **Who added each key** | Admins see keys without their owner. | `CredentialItem.owner_name`. | Read-only. |
 | A-16 | **Member-visible admin names** | `people.list` is admin-only, so a member is told "ask an admin" without a name. | `people.admins` returning names only. | Read-only. |
 | A-17 | **A test call for mock keys** | The key test fails on the mock provider ("LLM Provider NOT provided"), so first-run setup on a test install offers "Keep it anyway". | Let `credentials.smoke` answer for the mock provider. | Test installs only. |
+| A-18 | **Decision item with its chat message** | A decision card in the chat loads its item after the message renders, so it grows in place and pushes the messages below (layout shift 0.08–0.18 on a slow phone). | `MessageItem.detail` for a decision item carries the `ItemView`, as `desk.show` already does. | Read-only. |
