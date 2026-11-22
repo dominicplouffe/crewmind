@@ -1,13 +1,8 @@
 /** The message box (CHAT-4): markdown, slash and @ completion, attachments, history, Esc to interrupt. */
+import { ArrowUp, CornerUpLeft, File as FileIcon, History, Paperclip, Square, X } from "lucide-react";
 import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { Message } from "../api/client";
-import {
-  applyCompletion,
-  findCompletion,
-  type Completion,
-  type CompletionOption,
-  type MentionTarget,
-} from "../lib/autocomplete";
+import { applyCompletion, findCompletion, type Completion, type CompletionOption, type MentionTarget } from "../lib/autocomplete";
 import { t } from "../strings";
 import { snippet } from "./MessageItem";
 import type { UploadItem } from "./useUploads";
@@ -160,122 +155,157 @@ export const Composer = forwardRef<ComposerHandle, Props>(function Composer(prop
         send();
       }}
     >
-      {replyTo ? (
-        <div className="replying">
-          <span>
-            {t.chat.inReplyTo(replyTo.author)} <q>{snippet(replyTo.body)}</q>
-          </span>
-          <button type="button" className="link" onClick={props.onCancelReply}>
-            {t.composer.cancelReply}
-          </button>
-        </div>
-      ) : null}
-      {uploads.length > 0 ? (
-        <ul className="uploads plain" aria-label={t.composer.uploadsLabel}>
-          {uploads.map((upload) => (
-            <li key={upload.key} className={upload.error ? "upload failed" : "upload"}>
-              <span>{upload.name}</span>
-              {upload.error ? (
-                <span role="alert">
-                  {upload.error.message} {upload.error.hint ?? ""}
-                </span>
-              ) : upload.done ? (
-                <span role="status">{t.composer.uploaded}</span>
-              ) : (
-                <progress max={1} value={upload.progress} aria-label={t.composer.uploading(upload.name)} />
-              )}
-              {upload.done || upload.error ? (
-                <button type="button" className="link" onClick={() => props.onDismissUpload(upload.key)}>
-                  {t.common.dismiss}
-                  <span className="visually-hidden"> {upload.name}</span>
-                </button>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      {completion && options.length > 0 ? (
-        <ul className="completions" role="listbox" id={listId} aria-label={t.composer.suggestions[completion.kind]}>
-          {options.map((option, index) => (
-            // Keyboard use goes through the text box (arrows, Enter, Tab); the click is a pointer shortcut.
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-            <li
-              key={option.value}
-              id={`${listId}-${index}`}
-              role="option"
-              aria-selected={index === activeIndex}
-              className={index === activeIndex ? "active" : ""}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => choose(option)}
+      <div className="composer-inner">
+        {replyTo ? (
+          <div className="replying">
+            <CornerUpLeft size={14} aria-hidden="true" />
+            <span className="replying-text">
+              {t.chat.inReplyTo(replyTo.author)} <q>{snippet(replyTo.body)}</q>
+            </span>
+            <button
+              type="button"
+              className="button small ghost icon-only"
+              onClick={props.onCancelReply}
+              title={t.composer.cancelReply}
             >
-              <span className="completion-value">{option.value}</span>
-              <span className="quiet">{option.detail}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-      <label htmlFor={`${listId}-area`} className="visually-hidden">
-        {t.composer.label}
-      </label>
-      <textarea
-        id={`${listId}-area`}
-        ref={area}
-        rows={1}
-        value={text}
-        placeholder={t.composer.placeholder}
-        aria-describedby={hintId}
-        aria-autocomplete="list"
-        aria-controls={completion && options.length > 0 ? listId : undefined}
-        aria-activedescendant={completion && options.length > 0 ? `${listId}-${activeIndex}` : undefined}
-        onChange={(event) => {
-          setText(event.target.value);
-          setCursor(event.target.selectionStart);
-          setClosed(false);
-          setActive(0);
-          if (recall !== null && event.target.value === "") setRecall(null);
-        }}
-        onSelect={(event) => setCursor(event.currentTarget.selectionStart)}
-        onKeyDown={onKeyDown}
-        onPaste={onPaste}
-      />
-      <div className="composer-row">
-        <input
-          ref={picker}
-          type="file"
-          multiple
-          className="visually-hidden"
-          tabIndex={-1}
-          aria-label={t.composer.pickerLabel}
-          data-testid="file-picker"
-          onChange={(event) => {
-            props.onFiles(Array.from(event.target.files ?? []));
-            event.target.value = "";
-          }}
-        />
-        <button type="button" className="button small" onClick={() => picker.current?.click()}>
-          {t.composer.attach}
-        </button>
-        <button
-          type="button"
-          className="button small"
-          disabled={!last}
-          onClick={() => {
-            if (last) place(last, last.length);
-          }}
-        >
-          {t.composer.editLast}
-        </button>
-        {replying ? (
-          <button type="button" className="button small" onClick={props.onInterrupt}>
-            {t.composer.interrupt}
-          </button>
+              <X size={14} aria-hidden="true" />
+              <span className="visually-hidden">{t.composer.cancelReply}</span>
+            </button>
+          </div>
         ) : null}
-        <span className="quiet composer-hint" id={hintId}>
+        {uploads.length > 0 ? (
+          <ul className="uploads plain" aria-label={t.composer.uploadsLabel}>
+            {uploads.map((upload) => (
+              <li key={upload.key} className={upload.error ? "upload failed" : upload.done ? "upload done" : "upload"}>
+                <FileIcon size={14} aria-hidden="true" />
+                <span className="upload-name">{upload.name}</span>
+                {upload.error ? (
+                  <span role="alert">
+                    {upload.error.message} {upload.error.hint ?? ""}
+                  </span>
+                ) : upload.done ? (
+                  <span role="status">{t.composer.uploaded}</span>
+                ) : (
+                  <progress max={1} value={upload.progress} aria-label={t.composer.uploading(upload.name)} />
+                )}
+                {upload.done || upload.error ? (
+                  <button
+                    type="button"
+                    className="button small ghost icon-only"
+                    onClick={() => props.onDismissUpload(upload.key)}
+                    title={t.common.dismiss}
+                  >
+                    <X size={14} aria-hidden="true" />
+                    <span className="visually-hidden">
+                      {t.common.dismiss} {upload.name}
+                    </span>
+                  </button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {completion && options.length > 0 ? (
+          <ul className="completions" role="listbox" id={listId} aria-label={t.composer.suggestions[completion.kind]}>
+            {options.map((option, index) => (
+              // Keyboard use goes through the text box (arrows, Enter, Tab); the click is a pointer shortcut.
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+              <li
+                key={option.value}
+                id={`${listId}-${index}`}
+                role="option"
+                aria-selected={index === activeIndex}
+                className={index === activeIndex ? "active" : ""}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => choose(option)}
+              >
+                <span className="completion-value">{option.value}</span>
+                <span className="quiet">{option.detail}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="composer-box">
+          <label htmlFor={`${listId}-area`} className="visually-hidden">
+            {t.composer.label}
+          </label>
+          <textarea
+            id={`${listId}-area`}
+            ref={area}
+            rows={1}
+            value={text}
+            placeholder={t.composer.placeholder}
+            aria-describedby={hintId}
+            aria-autocomplete="list"
+            aria-controls={completion && options.length > 0 ? listId : undefined}
+            aria-activedescendant={completion && options.length > 0 ? `${listId}-${activeIndex}` : undefined}
+            onChange={(event) => {
+              setText(event.target.value);
+              setCursor(event.target.selectionStart);
+              setClosed(false);
+              setActive(0);
+              if (recall !== null && event.target.value === "") setRecall(null);
+            }}
+            onSelect={(event) => setCursor(event.currentTarget.selectionStart)}
+            onKeyDown={onKeyDown}
+            onPaste={onPaste}
+          />
+          <div className="composer-row">
+            <input
+              ref={picker}
+              type="file"
+              multiple
+              className="visually-hidden"
+              tabIndex={-1}
+              aria-label={t.composer.pickerLabel}
+              data-testid="file-picker"
+              onChange={(event) => {
+                props.onFiles(Array.from(event.target.files ?? []));
+                event.target.value = "";
+              }}
+            />
+            <button
+              type="button"
+              className="button ghost icon-only composer-tool"
+              onClick={() => picker.current?.click()}
+              title={t.composer.attach}
+            >
+              <Paperclip size={18} aria-hidden="true" />
+              <span className="visually-hidden">{t.composer.attach}</span>
+            </button>
+            <button
+              type="button"
+              className="button ghost icon-only composer-tool"
+              disabled={!last}
+              title={t.composer.editLast}
+              onClick={() => {
+                if (last) place(last, last.length);
+              }}
+            >
+              <History size={18} aria-hidden="true" />
+              <span className="visually-hidden">{t.composer.editLast}</span>
+            </button>
+            <span className="spacer" />
+            {replying ? (
+              <button type="button" className="button small composer-stop" onClick={props.onInterrupt}>
+                <Square size={12} aria-hidden="true" />
+                {t.composer.interrupt}
+              </button>
+            ) : null}
+            <button
+              type="submit"
+              className="button primary icon-only composer-send"
+              disabled={text.trim() === ""}
+              title={t.composer.send}
+            >
+              <ArrowUp size={18} aria-hidden="true" />
+              <span className="visually-hidden">{t.composer.send}</span>
+            </button>
+          </div>
+        </div>
+        <p className="composer-hint" id={hintId}>
           {t.composer.hint}
-        </span>
-        <button type="submit" className="button primary" disabled={text.trim() === ""}>
-          {t.composer.send}
-        </button>
+        </p>
       </div>
     </form>
   );

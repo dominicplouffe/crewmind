@@ -1,8 +1,11 @@
 /** One requirement: its state, estimate, what it waits on, its test and reading, and what the chairman can do to it. */
+import { UserRound } from "lucide-react";
 import { useState } from "react";
 import { ApiError, post } from "../../api/client";
 import { formatDateTime, formatNumber } from "../../lib/format";
+import { useNeedsYou } from "../../needs/NeedsYou";
 import { t } from "../../strings";
+import { Pill } from "../../ui/Status";
 import { webAddress } from "../board/logic";
 import { AgentText } from "../board/parts";
 import { isSettled, requirementActions, wholeNumber } from "./logic";
@@ -43,8 +46,25 @@ function Metric({ metric }: { metric: NonNullable<Requirement["metric"]> }): JSX
   );
 }
 
+/**
+ * Who must act on a requirement that waits on a decision: the chairman when the desk holds an item
+ * about it (the server decides who holds authority), otherwise the CEO (scope) or the reviewer
+ * (a verdict). Null when nobody is being asked.
+ */
+function useWhoDecides(projectId: string, requirement: Requirement): "you" | "ceo" | "reviewer" | null {
+  const desk = useNeedsYou().forProject(projectId);
+  const asking = requirement.state === "proposed" || (requirement.state === "checking" && requirement.test_kind === "observable");
+  if (!asking) return null;
+  const onDesk = desk.some((entry) => entry.item?.fields.requirement_id === requirement.id);
+  if (onDesk) return "you";
+  return requirement.state === "proposed" ? "ceo" : "reviewer";
+}
+
 export function RequirementRow({ projectId, busy, run, apply, requirement, multiplier, refusal }: Props): JSX.Element {
   const [mode, setMode] = useState<Mode>(null);
+  const who = useWhoDecides(projectId, requirement);
+  // The chairman's buttons stay available when someone else decides, but they are not the main action.
+  const lead = who !== "ceo" && who !== "reviewer";
   const [acceptTried, setAcceptTried] = useState(false);
   const words = t.plan.scope;
   const ref = { project_id: projectId, requirement_id: requirement.id };
@@ -70,15 +90,32 @@ export function RequirementRow({ projectId, busy, run, apply, requirement, multi
   );
 
   return (
-    <li data-testid="requirement" data-requirement-id={requirement.id} className={isSettled(requirement.state) ? "is-past" : ""}>
-      <p className="record-text">
-        <span className="quiet">{words.name(requirement.id)}</span> <AgentText text={requirement.text} />
-      </p>
-      <p className="quiet row wrap">
+    <li
+      data-testid="requirement"
+      data-requirement-id={requirement.id}
+      className={`requirement ${isSettled(requirement.state) ? "is-past" : ""} ${who === "you" ? "needs-you" : ""}`}
+    >
+      <p className="requirement-top">
+        <span className="requirement-id">{words.name(requirement.id)}</span>
         <StateTag state={requirement.state} />
-        <span>{words.author[requirement.author] ?? words.authorOther(requirement.author)}</span>
-        {requirement.recurring ? <span className="marker">{words.recurring}</span> : null}
+        {who === "you" ? (
+          <span data-testid="requirement-who" title={t.plan.who.youHint}>
+            <Pill tone="warning" dot={false}>
+              <UserRound size={12} aria-hidden="true" />
+              {t.plan.who.you}
+            </Pill>
+          </span>
+        ) : who ? (
+          <span className="quiet requirement-who" data-testid="requirement-who" title={t.plan.who.otherHint}>
+            {who === "ceo" ? t.plan.who.ceo : t.plan.who.reviewer}
+          </span>
+        ) : null}
+        {requirement.recurring ? <span className="badge">{words.recurring}</span> : null}
       </p>
+      <p className="record-text">
+        <AgentText text={requirement.text} />
+      </p>
+      <p className="quiet requirement-author">{words.author[requirement.author] ?? words.authorOther(requirement.author)}</p>
       <p className="quiet" data-testid="requirement-estimate">
         {requirement.estimate_runs == null ? words.noEstimate : words.estimate(requirement.estimate_runs)}
         {multiplier > 1 && requirement.adjusted_runs != null ? ` (${words.adjusted(requirement.adjusted_runs)})` : ""}
@@ -91,20 +128,22 @@ export function RequirementRow({ projectId, busy, run, apply, requirement, multi
         </p>
       ) : null}
       {isSettled(requirement.state) ? null : (
-        <p data-testid="requirement-ready">
+        <p data-testid="requirement-ready" className={requirement.ready ? "requirement-ready is-ready" : "requirement-ready"}>
           {requirement.ready ? words.ready : words.notReady(requirement.not_ready_because ?? t.plan.unknown)}
         </p>
       )}
-      <p className="quiet">
-        {words.test}: {words.testKinds[requirement.test_kind] ?? requirement.test_kind}
-      </p>
-      {requirement.success_test ? (
-        <p>
-          <AgentText text={requirement.success_test} />
+      <div className="requirement-test">
+        <p className="eyebrow">
+          {words.test}: {words.testKinds[requirement.test_kind] ?? requirement.test_kind}
         </p>
-      ) : requirement.metric ? null : (
-        <p className="quiet">{words.noTest}</p>
-      )}
+        {requirement.success_test ? (
+          <p>
+            <AgentText text={requirement.success_test} />
+          </p>
+        ) : requirement.metric ? null : (
+          <p className="quiet">{words.noTest}</p>
+        )}
+      </div>
       {requirement.metric ? <Metric metric={requirement.metric} /> : null}
       {requirement.ruling ? (
         <p>
@@ -124,7 +163,13 @@ export function RequirementRow({ projectId, busy, run, apply, requirement, multi
       {mode === "estimate" ? (
         <FieldsForm
           fields={[
-            { name: "runs", label: words.estimateLabel, type: "number", required: true, initial: String(requirement.estimate_runs ?? "") },
+            {
+              name: "runs",
+              label: words.estimateLabel,
+              type: "number",
+              required: true,
+              initial: String(requirement.estimate_runs ?? ""),
+            },
           ]}
           submit={words.estimateSubmit}
           onCancel={() => setMode(null)}
@@ -146,21 +191,25 @@ export function RequirementRow({ projectId, busy, run, apply, requirement, multi
         />
       ) : null}
       {mode === null && actions.length > 0 ? (
-        <div className="row wrap">
-          {actions.includes("accept") ? <ActionButton label={words.accept} of={of} primary disabled={busy} onClick={() => accept(false)} /> : null}
+        <div className="row wrap requirement-actions">
+          {actions.includes("accept") ? (
+            <ActionButton label={words.accept} of={of} primary={lead} disabled={busy} onClick={() => accept(false)} />
+          ) : null}
           {doesNotFit ? <ActionButton label={words.acceptAnyway} of={of} disabled={busy} onClick={() => accept(true)} /> : null}
           {actions.includes("decline") ? <ActionButton label={words.decline} of={of} onClick={() => setMode("decline")} /> : null}
           {actions.includes("pass") ? (
             <ActionButton
               label={words.pass}
               of={of}
-              primary
+              primary={lead}
               disabled={busy}
               onClick={() => void run(() => post("/v1/requirements/rule", { ...ref, passed: true }))}
             />
           ) : null}
           {actions.includes("reject") ? <ActionButton label={words.reject} of={of} onClick={() => setMode("reject")} /> : null}
-          {actions.includes("estimate") ? <ActionButton label={words.changeEstimate} of={of} onClick={() => setMode("estimate")} /> : null}
+          {actions.includes("estimate") ? (
+            <ActionButton label={words.changeEstimate} of={of} onClick={() => setMode("estimate")} />
+          ) : null}
           {actions.includes("cut") ? <ActionButton label={words.cut} of={of} onClick={() => setMode("cut")} /> : null}
           {actions.includes("reopen") ? (
             <ActionButton

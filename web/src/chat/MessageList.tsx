@@ -1,8 +1,15 @@
 /** The scrolling chat: stored messages, local notices, messages being sent, and replies being written. */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { Message } from "../api/client";
-import { Empty, Loading, Markdown, Pre } from "../components/common";
+import { MessageCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, RotateCw, Square, X } from "lucide-react";
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { get, type Message } from "../api/client";
+import { useAuth } from "../auth";
+import { Markdown, Pre } from "../components/common";
+import { Empty, Loading } from "../panels/kit";
+import { ItemsContext } from "../desk/context";
 import { formatValue } from "../lib/format";
+import { useLoad } from "../lib/useLoad";
+import { Avatar } from "../ui/Avatar";
 import { t } from "../strings";
 import { MessageItem, type MessageHandlers } from "./MessageItem";
 import type { ChatState, Notice, PendingMessage, Typing } from "./state";
@@ -15,6 +22,8 @@ interface Props {
   onDismissNotice(key: string): void;
   onInterrupt(): void;
   onEarlier(): Promise<void>;
+  /** Each agent's role by name, for the line under its name. Loaded here when not given. */
+  roles?: Record<string, string>;
 }
 
 const NEAR_BOTTOM_PX = 160;
@@ -23,24 +32,30 @@ function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss(): void }
   const entries = notice.data ? Object.entries(notice.data) : [];
   return (
     <div
-      className={`notice ${notice.kind === "error" ? "note-error" : ""}`}
+      className={`notice ${notice.kind === "error" ? "is-error" : "is-result"}`}
       role={notice.kind === "error" ? "alert" : "status"}
       data-testid={`notice-${notice.kind}`}
     >
-      <p className="note-title">{notice.kind === "error" ? notice.text : notice.title}</p>
-      {notice.hint ? <p className="note-hint">{notice.hint}</p> : null}
-      {entries.length > 0 ? (
-        <dl className="pairs">
-          {entries.map(([key, value]) => (
-            <div key={key}>
-              <dt>{key.replace(/_/g, " ")}</dt>
-              <dd>{typeof value === "object" && value !== null ? <Pre>{formatValue(value)}</Pre> : formatValue(value)}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      <button type="button" className="link" onClick={onDismiss}>
-        {t.common.dismiss}
+      <span className="notice-icon" aria-hidden="true">
+        {notice.kind === "error" ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
+      </span>
+      <div className="notice-main">
+        <p className="note-title">{notice.kind === "error" ? notice.text : notice.title}</p>
+        {notice.hint ? <p className="note-hint">{notice.hint}</p> : null}
+        {entries.length > 0 ? (
+          <dl className="pairs">
+            {entries.map(([key, value]) => (
+              <div key={key}>
+                <dt>{key.replace(/_/g, " ")}</dt>
+                <dd>{typeof value === "object" && value !== null ? <Pre>{formatValue(value)}</Pre> : formatValue(value)}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+      </div>
+      <button type="button" className="button small ghost icon-only notice-dismiss" onClick={onDismiss} title={t.common.dismiss}>
+        <X size={15} aria-hidden="true" />
+        <span className="visually-hidden">{t.common.dismiss}</span>
       </button>
     </div>
   );
@@ -56,42 +71,68 @@ function PendingItem({
   onDismiss(): void;
 }): JSX.Element {
   return (
-    <article className="message from-person is-pending" aria-label={t.chat.pendingLabel}>
-      <div className="body">
-        <Markdown source={pending.body} />
-      </div>
-      {pending.error ? (
-        <div className="note note-error" role="alert">
-          <p className="note-title">{pending.error.message}</p>
-          {pending.error.hint ? <p className="note-hint">{pending.error.hint}</p> : null}
-          <div className="row">
-            <button type="button" className="button small" onClick={onRetry}>
-              {t.chat.retry}
-            </button>
-            <button type="button" className="button small" onClick={onDismiss}>
-              {t.common.dismiss}
-            </button>
+    <article
+      className={`message from-person is-bubble is-pending ${pending.error ? "has-error" : ""}`}
+      aria-label={t.chat.pendingLabel}
+    >
+      <div className="message-main">
+        <div className="message-content">
+          <div className="body">
+            <Markdown source={pending.body} />
           </div>
         </div>
-      ) : (
-        <span className="quiet">{t.chat.sending}</span>
-      )}
+        {pending.error ? (
+          <div className="note note-error" role="alert">
+            <p className="note-title">{pending.error.message}</p>
+            {pending.error.hint ? <p className="note-hint">{pending.error.hint}</p> : null}
+            <div className="note-actions">
+              <button type="button" className="button small" onClick={onRetry}>
+                <RotateCw size={14} aria-hidden="true" />
+                {t.chat.retry}
+              </button>
+              <button type="button" className="button small ghost" onClick={onDismiss}>
+                {t.common.dismiss}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <span className="quiet pending-state">
+            <Loader2 size={13} aria-hidden="true" className="spin" />
+            {t.chat.sending}
+          </span>
+        )}
+      </div>
     </article>
   );
 }
 
 function TypingItem({ typing, doing, onInterrupt }: { typing: Typing; doing: string | null; onInterrupt(): void }): JSX.Element {
   return (
-    <article className="message from-agent is-typing" aria-label={t.chat.typingLabel(typing.seat)} data-testid="typing">
-      <header className="message-head">
-        <span className="author">{typing.seat}</span>
-        <span className="quiet">{doing ?? t.chat.writing}</span>
-        <button type="button" className="link" onClick={onInterrupt}>
-          {t.chat.stop}
-        </button>
-      </header>
-      <div className="body" aria-live="polite" aria-atomic="false">
-        <Markdown source={typing.text} />
+    <article className="message from-agent is-bubble is-typing" aria-label={t.chat.typingLabel(typing.seat)} data-testid="typing">
+      <div className="message-gutter">
+        <Avatar name={typing.seat} kind="agent" size="md" status="working" />
+      </div>
+      <div className="message-main">
+        <header className="message-head">
+          <span className="author">{typing.seat}</span>
+          <span className="message-role typing-doing">
+            <span className="typing-dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            {doing ?? t.chat.writing}
+          </span>
+          <button type="button" className="button small ghost typing-stop" onClick={onInterrupt}>
+            <Square size={12} aria-hidden="true" />
+            {t.chat.stop}
+          </button>
+        </header>
+        <div className="message-content">
+          <div className="body" aria-live="polite" aria-atomic="false">
+            <Markdown source={typing.text} />
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -105,6 +146,7 @@ export function MessageList({
   onDismissNotice,
   onInterrupt,
   onEarlier,
+  roles,
 }: Props): JSX.Element {
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
@@ -112,6 +154,18 @@ export function MessageList({
   const held = useRef<{ id: string; top: number } | null>(null);
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const { messages, notices, pending, typing, header, cards } = state;
+  const myName = useAuth().person?.name;
+  const scope = useContext(ItemsContext);
+  const projectId = roles ? "" : (scope?.projectId ?? "");
+  // The roles only label names, so the roster is asked for once per project, not on every change.
+  const roster = useLoad(
+    () => (projectId ? get("/v1/roster/show", { project_id: projectId }) : Promise.resolve(null)),
+    [projectId],
+  );
+  const roleOf = useMemo(
+    () => roles ?? Object.fromEntries((roster.data?.seats ?? []).map((seat) => [seat.name, seat.role])),
+    [roles, roster.data],
+  );
   const firstId = messages[0]?.id ?? 0;
 
   // Older messages go in above: put the message the person was reading back where it was. Measuring
@@ -184,17 +238,14 @@ export function MessageList({
       ) : null}
       {state.loaded && messages.length === 0 && pending.length === 0 ? (
         <Empty
+          icon={MessageCircle}
           title={t.chat.emptyTitle}
           next={header?.state === "draft" ? t.chat.emptyNextDraft : t.chat.emptyNext}
         />
       ) : null}
       {messages.length === 0
-        ? notices.map((notice) => (
-            <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
-          ))
-        : lead.map((notice) => (
-            <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
-          ))}
+        ? notices.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)
+        : lead.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)}
       {messages.map((message: Message, index) => (
         <div key={message.id} className="message-slot">
           <MessageItem
@@ -206,6 +257,8 @@ export function MessageList({
             order={subjectOf(message, "order", state.orders)}
             request={subjectOf(message, "request", state.requests)}
             example={state.examples[message.id]}
+            role={roleOf[message.author]}
+            mine={message.author_kind === "person" && message.author === myName}
           />
           {noticesAfter(message.id, index === messages.length - 1).map((notice) => (
             <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />

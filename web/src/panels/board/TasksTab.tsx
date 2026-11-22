@@ -1,7 +1,9 @@
 /** Tasks, grouped by state, with subtasks under their parent. People only watch: agents create and close them. */
+import { ListChecks } from "lucide-react";
 import { useId, useState } from "react";
 import { get, type Task } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { groupTasks, type TaskGroup } from "./logic";
@@ -15,11 +17,13 @@ function Group({ group, onSelect }: { group: TaskGroup<Task>; onSelect(id: numbe
   const words = t.board.tasks;
   return (
     <section data-testid="task-group" data-state={group.state}>
-      <h3 className="group-title">{words.group(group.state, group.rows.length)}</h3>
+      <h3 className="group-title">
+        <span className="cap">{words.group(group.state, group.rows.length)}</span>
+      </h3>
       <ul className="records plain" aria-label={words.listLabel(group.state)}>
         {group.rows.map(({ task, depth }) => (
           <li key={task.id} data-testid="task" data-task-id={task.id} className={`depth-${Math.min(depth, MAX_INDENT)}`}>
-            <button type="button" className="link strong task-title" onClick={() => onSelect(task.id)}>
+            <button type="button" className="row-title task-title" onClick={() => onSelect(task.id)}>
               {depth > 0 ? <span className="visually-hidden">{words.subtask}: </span> : null}
               {task.title}
             </button>
@@ -65,9 +69,9 @@ export function TasksTab({ projectId, changes }: BoardTabProps): JSX.Element {
       {tasks.loading && !tasks.data ? <Loading /> : null}
       {tasks.data && items.length === 0 ? (
         openOnly ? (
-          <Empty title={words.emptyOpenTitle} next={words.emptyOpenNext} />
+          <Empty icon={ListChecks} title={words.emptyOpenTitle} next={words.emptyOpenNext} />
         ) : (
-          <Empty title={words.emptyTitle} next={words.emptyNext} />
+          <Empty icon={ListChecks} title={words.emptyTitle} next={words.emptyNext} />
         )
       ) : null}
       {grouped.open.map((group) => (
@@ -75,7 +79,7 @@ export function TasksTab({ projectId, changes }: BoardTabProps): JSX.Element {
       ))}
       {grouped.closedCount > 0 ? (
         <>
-          <button type="button" className="button small closed-toggle" aria-expanded={showClosed} onClick={() => setShowClosed((value) => !value)}>
+          <button type="button" className="button small ghost closed-toggle" aria-expanded={showClosed} onClick={() => setShowClosed((value) => !value)}>
             {showClosed ? words.hideClosed : words.showClosed(grouped.closedCount)}
           </button>
           {showClosed ? grouped.closed.map((group) => <Group key={group.state} group={group} onSelect={setSelected} />) : null}

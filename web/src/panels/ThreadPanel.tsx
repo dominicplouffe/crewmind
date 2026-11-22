@@ -1,8 +1,10 @@
 /** One thread: the message that started it and every reply. */
+import { CornerDownRight, MessagesSquare } from "lucide-react";
 import { get } from "../api/client";
 import { MessageItem, type MessageHandlers } from "../chat/MessageItem";
 import type { ChatState } from "../chat/state";
-import { Empty, ErrorNote, Loading } from "../components/common";
+import { ErrorNote } from "../components/common";
+import { Empty, Loading } from "./kit";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
 
@@ -22,10 +24,10 @@ export function ThreadPanel({ projectId, threadId, latest, cards, handlers }: Pr
   );
   const items = thread.data?.items ?? [];
   return (
-    <div data-testid="thread">
+    <div data-testid="thread" className="thread">
       <ErrorNote error={thread.error} />
       {thread.loading && !thread.data ? <Loading /> : null}
-      {thread.data && items.length === 0 ? <Empty title={t.thread.emptyTitle} next={t.thread.emptyNext} /> : null}
+      {thread.data && items.length === 0 ? <Empty icon={MessagesSquare} title={t.thread.emptyTitle} next={t.thread.emptyNext} /> : null}
       {items.map((message) => {
         const cardId = (message.detail as { card?: unknown } | null)?.card;
         return (
@@ -40,7 +42,8 @@ export function ThreadPanel({ projectId, threadId, latest, cards, handlers }: Pr
           />
         );
       })}
-      <button type="button" className="link" onClick={() => handlers.onJump(threadId)}>
+      <button type="button" className="button small ghost thread-jump" onClick={() => handlers.onJump(threadId)}>
+        <CornerDownRight size={14} aria-hidden="true" />
         {t.thread.jump}
       </button>
     </div>

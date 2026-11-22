@@ -1,8 +1,11 @@
 /** Deliverables and files (ART-3): the latest version of each, with older ones folded away. */
+import { FileText, FolderOpen, Lock } from "lucide-react";
 import { useState } from "react";
 import { get, post, type Artifact, type Schemas } from "../api/client";
-import { Empty, ErrorNote, Loading } from "../components/common";
+import { ErrorNote } from "../components/common";
+import { Empty, Loading } from "./kit";
 import { formatBytes, formatDateTime } from "../lib/format";
+import { fromNow } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
 import { FileView } from "./FileView";
@@ -46,46 +49,60 @@ function FileRow({
   const ref = { project_id: projectId, name: artifact.name };
 
   return (
-    <li className="mini-card" data-testid="file-row">
-      <button type="button" className="link strong" onClick={onOpen}>
-        {artifact.name}
-      </button>
-      <p className="quiet">
-        {t.files.line(t.files.kinds[artifact.kind as Kind] ?? artifact.kind, artifact.status)}
-        {artifact.locked ? ` · ${t.files.locked}` : ""}
-        {artifact.mark ? ` · ${t.files.marked(artifact.mark)}` : ""}
-      </p>
-      <p className="quiet">
-        {t.files.changed(formatDateTime(artifact.last_change), artifact.last_author)} ·{" "}
-        {t.files.versions(artifact.versions)} · {formatBytes(artifact.size)}
-      </p>
-      <div className="row wrap">
-        <button
-          type="button"
-          className="button small"
-          disabled={busy}
-          onClick={() => void act(() => post(artifact.locked ? "/v1/artifacts/unlock" : "/v1/artifacts/lock", ref))}
-        >
-          {artifact.locked ? t.files.unlock : t.files.lock}
-          <span className="visually-hidden"> {artifact.name}</span>
+    <li className="file-row" data-testid="file-row">
+      <span className="row-icon" aria-hidden="true">
+        <FileText size={18} />
+      </span>
+      <div className="row-main">
+        <button type="button" className="row-title" onClick={onOpen}>
+          {artifact.name}
         </button>
-        {artifact.kind === "upload"
-          ? (["reference", "example"] as const).map((mark) => (
-              <button
-                key={mark}
-                type="button"
-                className="button small"
-                disabled={busy}
-                aria-pressed={artifact.mark === mark}
-                onClick={() => void act(() => post("/v1/artifacts/mark", { ...ref, mark }))}
-              >
-                {t.files.markAs[mark]}
-                <span className="visually-hidden"> {artifact.name}</span>
-              </button>
-            ))
-          : null}
+        <p className="row-meta">
+          <span className="badge">{t.files.kinds[artifact.kind as Kind] ?? artifact.kind}</span>
+          {artifact.status ? <span className="badge">{artifact.status}</span> : null}
+          {artifact.locked ? (
+            <span className="badge badge-warning">
+              <Lock size={11} aria-hidden="true" />
+              {t.files.locked}
+            </span>
+          ) : null}
+          {artifact.mark ? <span className="badge badge-accent">{t.files.marked(artifact.mark)}</span> : null}
+        </p>
+        <p className="row-meta">
+          <span title={formatDateTime(artifact.last_change)}>
+            {t.files.changedAgo(fromNow(artifact.last_change), artifact.last_author)}
+          </span>
+          <span>{t.files.versions(artifact.versions)}</span>
+          <span>{formatBytes(artifact.size)}</span>
+        </p>
+        <div className="row-actions">
+          <button
+            type="button"
+            className="button small ghost"
+            disabled={busy}
+            onClick={() => void act(() => post(artifact.locked ? "/v1/artifacts/unlock" : "/v1/artifacts/lock", ref))}
+          >
+            {artifact.locked ? t.files.unlock : t.files.lock}
+            <span className="visually-hidden"> {artifact.name}</span>
+          </button>
+          {artifact.kind === "upload"
+            ? (["reference", "example"] as const).map((mark) => (
+                <button
+                  key={mark}
+                  type="button"
+                  className="button small ghost"
+                  disabled={busy}
+                  aria-pressed={artifact.mark === mark}
+                  onClick={() => void act(() => post("/v1/artifacts/mark", { ...ref, mark }))}
+                >
+                  {t.files.markAs[mark]}
+                  <span className="visually-hidden"> {artifact.name}</span>
+                </button>
+              ))
+            : null}
+        </div>
+        <ErrorNote error={error} />
       </div>
-      <ErrorNote error={error} />
     </li>
   );
 }
@@ -124,7 +141,7 @@ export function FilesPanel({ projectId, changes, file, onFile }: Props): JSX.Ele
 
   return (
     <>
-      <div className="row wrap">
+      <div className="row wrap file-filter">
         <label htmlFor="files-kind">{t.files.show}</label>
         <select id="files-kind" value={kind} onChange={(event) => setKind(event.target.value as Kind | "")}>
           <option value="">{t.files.all}</option>
@@ -137,15 +154,15 @@ export function FilesPanel({ projectId, changes, file, onFile }: Props): JSX.Ele
       </div>
       <ErrorNote error={list.error} />
       {list.loading && !list.data ? <Loading /> : null}
-      {list.data && items.length === 0 ? <Empty title={t.files.emptyTitle} next={t.files.emptyNext} /> : null}
-      <ul className="cards plain">{current.map(row)}</ul>
+      {list.data && items.length === 0 ? <Empty icon={FolderOpen} title={t.files.emptyTitle} next={t.files.emptyNext} /> : null}
+      <ul className="rows plain">{current.map(row)}</ul>
       {superseded.length > 0 ? (
         <details>
           <summary>{t.files.superseded(superseded.length)}</summary>
-          <ul className="cards plain">{superseded.map(row)}</ul>
+          <ul className="rows plain">{superseded.map(row)}</ul>
         </details>
       ) : null}
-      {list.data ? <p className="quiet">{t.files.storage(formatBytes(list.data.storage_used))}</p> : null}
+      {list.data ? <p className="quiet files-footer">{t.files.storage(formatBytes(list.data.storage_used))}</p> : null}
     </>
   );
 }

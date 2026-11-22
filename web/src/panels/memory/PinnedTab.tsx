@@ -1,10 +1,12 @@
 /** Pinned memory: exactly what one agent is given at the start of every run, and how full it is. */
 import { useId, useState } from "react";
 import { get, type Seat } from "../../api/client";
-import { ErrorNote, Loading, Markdown } from "../../components/common";
+import { ErrorNote, Markdown } from "../../components/common";
+import { Loading } from "../kit";
 import { formatNumber } from "../../lib/format";
 import { meter } from "../../lib/meter";
 import { useLoad } from "../../lib/useLoad";
+import { Meter } from "../../ui/Progress";
 import { t } from "../../strings";
 import type { TabProps } from "./parts";
 
@@ -15,12 +17,15 @@ export function listeningLine(seat: Pick<Seat, "replies" | "corrections" | "list
 }
 
 function SizeMeter({ name, used, cap }: { name: string; used: number; cap: number }): JSX.Element {
-  const id = useId();
   const size = meter(used, cap);
+  const line = t.memory.pinned.meter(name, formatNumber(used), formatNumber(cap));
   return (
-    <div className="meter" data-testid="meter">
-      <p id={id}>{t.memory.pinned.meter(name, formatNumber(used), formatNumber(cap))}</p>
-      <progress max={100} value={size.percent} aria-labelledby={id} />
+    <div className="size-meter" data-testid="meter">
+      <p className="size-meter-line">
+        <span>{line}</span>
+        <span className="quiet tabular">{size.percent}%</span>
+      </p>
+      <Meter value={Math.min(used, cap)} max={cap} label={line} tone={size.over ? "danger" : "accent"} />
       {size.over ? (
         <p className="note note-error" role="status">
           {t.memory.pinned.over(name, formatNumber(size.overBy))}
@@ -47,7 +52,7 @@ export function PinnedTab({ projectId, changes }: TabProps): JSX.Element {
   return (
     <>
       <ErrorNote error={roster.error} />
-      <div className="field">
+      <div className="field panel-field">
         <label htmlFor={id}>{t.memory.pinned.agent}</label>
         <select id={id} value={seatName} onChange={(event) => setChosen(event.target.value)}>
           {seats.length === 0 && seatName ? <option value={seatName}>{seatName}</option> : null}

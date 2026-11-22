@@ -1,7 +1,8 @@
 /** Explore: the bets being tested, when each is dropped, and the time box they must fit in. */
+import { Dices } from "lucide-react";
 import { useState } from "react";
 import { post } from "../../api/client";
-import { Empty } from "../../components/common";
+import { Empty } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { t } from "../../strings";
 import { AgentText } from "../board/parts";
@@ -24,7 +25,7 @@ export function Bets({ projectId, plan, apply }: PlanTabProps): JSX.Element {
         </Section>
       ) : null}
       <Section title={words.title}>
-        {plan.bets.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+        {plan.bets.length === 0 ? <Empty icon={Dices} title={words.emptyTitle} next={words.emptyNext} /> : null}
         <ul className="records plain" aria-label={words.listLabel}>
           {plan.bets.map((bet) => (
             <li key={bet.id} data-testid="bet" className={OPEN_STATES.includes(bet.state) ? "" : "is-past"}>

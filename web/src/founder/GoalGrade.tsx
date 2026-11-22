@@ -10,7 +10,7 @@ export function GoalGrade({ grade }: { grade: Grade | null }): JSX.Element {
       {grade ? (
         <>
           <p className="row wrap">
-            <span className={grade.ready ? "marker grade-present" : "marker grade-missing"}>
+            <span className={grade.ready ? "badge grade-present" : "badge grade-missing"}>
               {grade.ready ? words.gradeReady : words.gradeNotReady}
             </span>
             <span data-testid="grade-summary">{grade.summary}</span>
@@ -20,7 +20,7 @@ export function GoalGrade({ grade }: { grade: Grade | null }): JSX.Element {
               <li key={element.element} data-testid="grade-element" data-grade={element.grade}>
                 <p className="row wrap">
                   <span className="record-text">{elementName(element.element)}</span>
-                  <span className={`marker grade-${element.grade}`}>{words.grades[element.grade] ?? element.grade}</span>
+                  <span className={`badge grade-${element.grade}`}>{words.grades[element.grade] ?? element.grade}</span>
                 </p>
                 {element.quote ? <blockquote className="quote">{element.quote}</blockquote> : null}
                 {element.reason ? <p className="quiet">{words.reason(element.reason)}</p> : null}

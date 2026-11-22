@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { post } from "../api/client";
 import { ErrorNote, Field } from "../components/common";
 import { t } from "../strings";
+import { LogoMark } from "../ui/Logo";
 
 export function AcceptLink(): JSX.Element {
   const { token = "" } = useParams();
@@ -35,7 +36,10 @@ export function AcceptLink(): JSX.Element {
 
   return (
     <main className="center-page">
-      <div className="card">
+      <div className="card auth-card">
+        <div className="auth-brand">
+          <LogoMark size={40} />
+        </div>
         <h1>{t.accept.title}</h1>
         <p className="quiet">{t.accept.intro}</p>
         <form onSubmit={(event) => void submit(event)}>

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { Markdown } from "../components/common";
 import { formatDateTime, formatTime } from "../lib/format";
 import { t } from "../strings";
+import { Avatar } from "../ui/Avatar";
 import type { Line } from "./logic";
 
 interface Props {
@@ -17,21 +18,34 @@ function LineItem({ line }: { line: Line }): JSX.Element {
   const words = t.founder.talk;
   const author = words.authors[line.author] ?? line.author;
   const kind = (line.detail as { kind?: unknown } | null)?.kind;
+  const side = SIDE[line.author] ?? "is-status";
+  const head = (
+    <header className="message-head">
+      <span className="author">{author}</span>
+      <time dateTime={line.at} title={formatDateTime(line.at)} className="message-time">
+        {formatTime(line.at)}
+      </time>
+      {kind === "document" ? <span className="badge">{words.documentTag}</span> : null}
+    </header>
+  );
   return (
     <article
-      className={`message ${SIDE[line.author] ?? "is-status"}`}
+      className={`message ${side} ${side === "is-status" ? "is-row" : "is-bubble"}`}
       aria-label={words.lineLabel(author, formatDateTime(line.at))}
       data-testid={`line-${line.author}`}
     >
-      <header className="message-head">
-        <span className="author">{author}</span>
-        <time dateTime={line.at} title={formatDateTime(line.at)}>
-          {formatTime(line.at)}
-        </time>
-        {kind === "document" ? <span className="marker">{words.documentTag}</span> : null}
-      </header>
-      <div className="body">
-        <Markdown source={line.body} />
+      {side === "from-agent" ? (
+        <div className="message-gutter">
+          <Avatar name={words.avatarName} kind="agent" size="md" />
+        </div>
+      ) : null}
+      <div className="message-main">
+        {head}
+        <div className="message-content">
+          <div className="body">
+            <Markdown source={line.body} />
+          </div>
+        </div>
       </div>
     </article>
   );
@@ -57,13 +71,20 @@ export function Conversation({ lines, reply }: Props): JSX.Element {
         <LineItem key={line.id} line={line} />
       ))}
       {reply ? (
-        <article className="message from-agent is-typing" aria-label={words.writingLabel} data-testid="founder-reply">
-          <header className="message-head">
-            <span className="author">{words.authors.founder}</span>
-            <span className="quiet">{words.writing}</span>
-          </header>
-          <div className="body">
-            <Markdown source={reply} />
+        <article className="message from-agent is-bubble is-typing" aria-label={words.writingLabel} data-testid="founder-reply">
+          <div className="message-gutter">
+            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" status="working" />
+          </div>
+          <div className="message-main">
+            <header className="message-head">
+              <span className="author">{words.authors.founder ?? t.founder.talk.avatarName}</span>
+              <span className="message-role">{words.writing}</span>
+            </header>
+            <div className="message-content">
+              <div className="body">
+                <Markdown source={reply} />
+              </div>
+            </div>
           </div>
         </article>
       ) : null}

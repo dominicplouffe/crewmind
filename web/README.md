@@ -59,18 +59,37 @@ work run with a `/do` directive. Set `CREWMIND_E2E_PORT` to change the port and
 `CREWMIND_E2E_SKIP_BUILD=1` to reuse an existing `dist`. Playwright is pinned to the version
 whose Chromium is already installed; do not run `playwright install`.
 
+## Design
+
+The design system, the navigation map and the copy deck are in `docs/design/` (start with its README).
+Colours, type, spacing and motion are tokens in `src/styles/tokens.css`; never hard-code one in a
+component. Shared components live in `src/ui/`.
+
 ## Layout
 
 ```
 src/api/         generated schema, typed client, live stream (SSE), uploads
-src/chat/        chat state, history paging, header strip, messages and their actions, action cards, composer
+src/shell/       the app shell: sidebar, phone tab bar, user menu, ⌘K palette, keyboard shortcuts
+src/needs/       "what needs me": the one selector every count reads (HUM-10), and its tests
+src/ui/          design-system components: Avatar, Pill, Sheet, Menu, Skeleton, progress, Logo
+src/home/        Home's inbox items and project cards
+src/project/     the project header, tabs, chat rail, work view, needs sheet
+src/chat/        chat state, history paging, messages and their actions, action cards, composer
+src/overview/    the project overview: progress, budget burn chart, timeline
+src/crew/        the crew: org view, agent sheet, crew strip
+src/deliverables/  the gallery of files with inline previews
+src/settings/    Settings (profile, notifications, models and keys, Founder, people, install)
+src/onboarding/  first-run setup (/welcome) and the setup status hook
 src/panels/      files and previews, compare, budget, models, settings, runs, search, activity, thread
 src/panels/memory/  the Memory panel: pinned memory, standing orders, decisions, corrections, recall, preferences
 src/panels/board/   the Board panel: tasks and their check labels, audit samples, outside evidence, launches
-src/components/  shared pieces, command palette, theme and alerts controls
-src/lib/         markdown (sanitized), CSV, diff, autocomplete, file kinds, push
-src/pages/       sign in, accept a link, project list, project
-src/strings.ts   every user-facing string (English), ready for translation (strings.memory.ts and strings.board.ts are part of it)
+src/panels/plan/    the Plan panel: scope, dates and budget, finish, decision items, agenda, rehearsal
+src/founder/     drafting a project with the Founder
+src/desk/        decision cards, snooze, the daily brief
+src/components/  the command palette, common pieces, the theme context
+src/lib/         markdown (sanitized), CSV, diff, autocomplete, file kinds, push, plain-words formatting
+src/pages/       sign in, accept a link, Home, the project list, a project
+src/strings*.ts  every user-facing string (English), ready for translation
 public/          manifest, icons (npm run gen:icons), service worker
 e2e/             Playwright tests and the scripts that start and stop the test server
 ```

@@ -1,6 +1,8 @@
 /** Outside evidence: pages and quotes agents filed, and whether the platform found the quote there. */
+import { FileSearch } from "lucide-react";
 import { get } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { webAddress } from "./logic";
@@ -16,7 +18,7 @@ export function EvidenceTab({ projectId, changes }: BoardTabProps): JSX.Element 
       <Bar onRefresh={evidence.reload} busy={evidence.loading} />
       <ErrorNote error={evidence.error} />
       {evidence.loading && !evidence.data ? <Loading /> : null}
-      {evidence.data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {evidence.data && items.length === 0 ? <Empty icon={FileSearch} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {items.map((item) => {
           const href = webAddress(item.url);

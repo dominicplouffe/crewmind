@@ -46,17 +46,17 @@ export function Markers({ detail, example }: { detail: MessageDetail; example: b
   return (
     <>
       {example ? (
-        <span className="marker" data-testid="marker-example">
+        <span className="badge badge-accent" data-testid="marker-example">
           {t.listening.exampleTag}
         </span>
       ) : null}
       {lint ? (
-        <span className="marker" data-testid="marker-lint" title={t.listening.lintLabel(lint)}>
+        <span className="badge badge-warning" data-testid="marker-lint" title={t.listening.lintLabel(lint)}>
           {lint}
         </span>
       ) : null}
       {detail.kind === "held report" ? (
-        <span className="marker" data-testid="marker-held">
+        <span className="badge" data-testid="marker-held">
           {t.listening.heldReport}
         </span>
       ) : null}

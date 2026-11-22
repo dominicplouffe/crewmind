@@ -1,18 +1,23 @@
 /**
- * A decision item as a card: what is asked, what is recommended, what happens if nobody answers,
- * and the buttons. The chat shows it on the item's own line; the Desk shows the same card.
+ * A decision item as a card (HUM-1, HUM-2): the decision, who asks, by when, what is recommended,
+ * what happens if nobody answers, and the buttons. The chat shows it on the item's own line; the
+ * Desk shows the same card. Every word about the item comes from the server; this only arranges it.
  */
+import { MessageSquare, Sparkles } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { get } from "../api/client";
 import { ErrorNote } from "../components/common";
-import { formatDateTime } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
 import { AgentText } from "../panels/board/parts";
 import { t } from "../strings";
+import { Avatar } from "../ui/Avatar";
+import { Skeleton } from "../ui/Skeleton";
 import { ItemsContext } from "./context";
 import { ItemActions } from "./ItemActions";
-import { ItemFields } from "./ItemFields";
-import { deadlineText, type Item } from "./logic";
+import { ItemBody, ItemFields } from "./ItemFields";
+import type { Item } from "./logic";
+import { askerOf, deadlineWords, kindLabel } from "./when";
 
 interface Props {
   item: Item;
@@ -22,12 +27,17 @@ interface Props {
 
 export function ItemCard({ item: given, onChanged }: Props): JSX.Element {
   const words = t.decisions.card;
+  const inChat = useContext(ItemsContext) !== null;
   // The server's answer to a button press is shown at once; the next load replaces it.
   const [answered, setAnswered] = useState<Item | null>(null);
   useEffect(() => setAnswered(null), [given]);
   const item = answered ?? given;
   const open = item.actions.length > 0;
   const closed = item.closed_at !== null || item.outcome !== null;
+  const asker = askerOf(item.filed_by, item.kind);
+  const when = deadlineWords(item.deadline, item.default_outcome);
+  const urgent = open && (when.urgency === "overdue" || when.urgency === "today");
+  const stateWord = t.decisions.states[item.state] ?? item.state;
 
   const changed = (view: Item): void => {
     setAnswered(view);
@@ -36,61 +46,91 @@ export function ItemCard({ item: given, onChanged }: Props): JSX.Element {
 
   return (
     <section
-      className="action-card item-card"
+      className={`item-card ${open ? "is-open" : "is-closed"} ${urgent ? `is-${when.urgency}` : ""}`}
       aria-label={words.label(item.title)}
       data-testid="item-card"
       data-item-id={item.id}
       data-item-kind={item.kind}
     >
-      <p className="card-what">
-        <AgentText text={item.title} />
-      </p>
-      <p className="quiet row wrap">
-        <span className="marker">
+      <div className="item-top">
+        <span className="badge item-kind">
           <span className="visually-hidden">{words.kind}: </span>
-          {item.kind}
+          {kindLabel(item.kind)}
         </span>
-        <span className="marker" data-testid="item-state">
+        {open && when.badge ? <span className={`badge urgency urgency-${when.urgency}`}>{when.badge}</span> : null}
+        {/* "open" goes without saying on a card that asks; it stays for screen readers. */}
+        <span className={item.state === "open" ? "visually-hidden" : "badge item-state"} data-testid="item-state">
           <span className="visually-hidden">{words.stateOf}: </span>
-          {item.state}
+          <span className="cap">{stateWord}</span>
         </span>
+      </div>
+      <h3 className="item-title">
+        <AgentText text={item.title} />
+      </h3>
+      <ItemBody item={item} />
+      <p className="item-asker">
+        {asker.name ? (
+          <Avatar name={asker.name} kind="agent" size="xs" />
+        ) : (
+          <Sparkles size={14} aria-hidden="true" className="asker-icon" />
+        )}
+        <span>{asker.line}</span>
       </p>
+      {open ? (
+        <p className={`item-deadline urgency-${when.urgency}`} data-testid="item-deadline">
+          {when.line}
+        </p>
+      ) : null}
       {item.recommendation ? (
-        <p>
-          <span className="item-label">{words.recommendation}: </span>
-          <AgentText text={item.recommendation} />
+        <div className="item-recommendation">
+          <span className="item-label">{words.recommendation}</span>
+          <p>
+            <AgentText text={item.recommendation} />
+          </p>
+        </div>
+      ) : null}
+      {open && when.ifNothing ? (
+        <p className="item-default" data-testid="item-default">
+          {when.ifNothing}
         </p>
       ) : null}
       {item.if_declined ? (
-        <p>
-          <span className="item-label">{words.ifDeclined}: </span>
+        <p className="quiet item-if-declined">
+          <span className="item-label-inline">{words.ifDeclined}: </span>
           <AgentText text={item.if_declined} />
         </p>
       ) : null}
       <ItemFields item={item} onChanged={changed} />
-      {open ? (
-        <p data-testid="item-deadline">{deadlineText(item.deadline, item.default_outcome, formatDateTime)}</p>
-      ) : closed ? (
-        <p className="card-state" role="status" data-testid="item-outcome">
+      {open ? null : closed ? (
+        <p className="item-outcome" role="status" data-testid="item-outcome">
           {item.outcome ? (
             <>
-              <span className="item-label">{words.outcome}: </span>
+              <span className="item-label-inline">{words.outcome}: </span>
               <AgentText text={item.outcome} />
             </>
           ) : (
-            words.noOutcome(item.state)
+            words.noOutcome(stateWord)
           )}
         </p>
       ) : (
         <p className="quiet">{words.openNoActions}</p>
       )}
       {item.chairman_note ? (
-        <p>
-          <span className="item-label">{words.yourNote}: </span>
+        <p className="item-note">
+          <span className="item-label-inline">{words.yourNote}: </span>
           <AgentText text={item.chairman_note} />
         </p>
       ) : null}
       <ItemActions item={item} onChanged={changed} />
+      {!inChat ? (
+        <p className="item-discuss">
+          <Link to={`/projects/${item.project_id}`} className="button small ghost">
+            <MessageSquare size={14} aria-hidden="true" />
+            {t.decisions.desk.discuss}
+            <span className="visually-hidden"> {words.of(item.title)}</span>
+          </Link>
+        </p>
+      ) : null}
     </section>
   );
 }
@@ -109,7 +149,13 @@ export function ChatItemCard({ itemId }: { itemId: number }): JSX.Element {
   }, [closedAt]);
 
   if (!item.data) {
-    return item.error ? <ErrorNote error={item.error} /> : <p className="quiet">{t.decisions.card.loading}</p>;
+    return item.error ? (
+      <ErrorNote error={item.error} />
+    ) : (
+      <div className="item-card is-loading">
+        <Skeleton lines={3} label={t.decisions.card.loading} />
+      </div>
+    );
   }
   return <ItemCard item={item.data} onChanged={() => scope?.onChanged()} />;
 }

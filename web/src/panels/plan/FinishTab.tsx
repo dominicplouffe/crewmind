@@ -33,7 +33,7 @@ function Gaps({ projectId, plan, apply }: PlanTabProps): JSX.Element {
             </p>
             <p className="quiet row wrap">
               <StateTag state={gap.state} />
-              <span className="marker">{gap.must_fix ? words.mustFix : words.note}</span>
+              <span className={gap.must_fix ? "badge badge-warning" : "badge"}>{gap.must_fix ? words.mustFix : words.note}</span>
               {gap.requirement_id != null ? <span>{words.requirement(gap.requirement_id)}</span> : null}
             </p>
             {gap.reason ? (

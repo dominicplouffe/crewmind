@@ -16,8 +16,7 @@ import {
   expectNoViolations,
   setWorkRuns,
   setWorkScript,
-  toolTurn,
-} from "./helpers";
+  toolTurn, openPanel } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -41,7 +40,6 @@ test.afterAll(async () => {
 const panel = (): Locator => page.getByTestId("panel");
 const chatCard = (): Locator =>
   page.getByRole("log", { name: "Messages" }).locator('[data-testid="item-card"][data-item-kind="proposed scope"]');
-const deskGroup = (): Locator => page.getByTestId("desk-project").filter({ has: page.getByRole("heading", { name: PROJECT }) });
 
 test("a requirement the CEO proposes appears as a card in the chat", async () => {
   await createProject(page, PROJECT);
@@ -64,14 +62,15 @@ test("a requirement the CEO proposes appears as a card in the chat", async () =>
     ],
   ]);
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
 
   const card = chatCard();
   await expect(card).toBeVisible({ timeout: SLOW });
   await expect(card).toContainText(PROPOSAL);
   await expect(card.getByTestId("item-state")).toHaveText("State: open");
   await expect(card).toContainText("2 runs");
-  await expect(card.getByTestId("item-deadline")).toHaveText(/^Answer by .+\. If you do nothing: it is declined\.$/);
+  await expect(card.getByTestId("item-deadline")).toHaveText(/^Decide by .+ · in \d+ days?$/);
+  await expect(card.getByTestId("item-default")).toHaveText("If you do nothing: it is declined.");
   await expect(card.getByRole("button", { name: /^Accept “/ })).toBeVisible();
   await expect(card.getByRole("button", { name: /^Accept anyway “/ })).toBeVisible();
   await expect(card.getByRole("button", { name: /^Decline “/ })).toBeVisible();
@@ -89,24 +88,37 @@ test("declining asks first, and Cancel leaves the item open", async () => {
   await expect(card.getByTestId("item-state")).toHaveText("State: open");
 });
 
-test("the Desk lists the proposal under its project, with what happens if nothing is done", async () => {
-  await expect(page.getByTestId("desk-link")).toContainText(/Desk \([1-9]\d*\)/);
-  await page.getByTestId("desk-link").click();
-  await expect(page.getByRole("heading", { level: 1, name: "Desk" })).toBeVisible();
+test("every surface agrees on what needs you: header, sidebar, Home inbox, page title and the desk (HUM-10, CHAT-18)", async () => {
+  const desk = await page.request.get("/v1/desk/show");
+  const waiting = ((await desk.json()) as { waiting: { project_id: string }[] }).waiting;
+  const here = waiting.filter((entry) => entry.project_id === projectId).length;
+  expect(here).toBeGreaterThan(0);
+  await expect(page.getByTestId("waiting-count")).toHaveAttribute("data-count", String(here));
+  await expect(page.getByTestId("waiting-count")).toContainText(`${here} decision`);
+  const nav = page.getByTestId("nav-home").getByTestId("nav-needs-count");
+  await expect(nav).toContainText(String(waiting.length));
+  await expect(page).toHaveTitle(new RegExp(`^\\(${waiting.length}\\) `));
 
-  const group = deskGroup();
-  const entry = group.getByTestId("desk-entry").filter({ hasText: PROPOSAL });
+  await page.getByTestId("nav-home").click();
+  await expect(page.getByTestId("inbox-count")).toHaveText(String(waiting.length));
+  await expect(page.getByTestId("home-summary")).toContainText(`${waiting.length} decision`);
+  await expect(page).toHaveTitle(new RegExp(`^\\(${waiting.length}\\) Home`));
+});
+
+test("Home lists the proposal under its project, with what happens if nothing is done", async () => {
+  await expect(page.getByRole("heading", { level: 2, name: /^Needs you/ })).toBeVisible();
+  const entry = page.getByTestId("desk-entry").filter({ hasText: PROPOSAL });
   await expect(entry).toHaveCount(1);
+  await expect(entry).toContainText(PROJECT);
   await expect(entry.getByTestId("item-deadline")).not.toBeEmpty();
   await expect(entry.getByRole("button", { name: /^Accept “/ })).toBeVisible();
   const snooze = entry.getByRole("group", { name: /^Set aside:/ });
   await expect(snooze.getByRole("button", { name: "1 hour" })).toBeEnabled();
   await expect(snooze.getByRole("button", { name: "Until tomorrow" })).toBeVisible();
   await expect(snooze.getByRole("button", { name: "3 days" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Daily brief" })).toBeVisible();
-  await expectAccessible(page, "Desk");
+  await expectAccessible(page, "Home with a decision waiting");
 
-  await group.getByRole("link", { name: /^Open the project/ }).click();
+  await entry.getByRole("link", { name: PROJECT }).click();
   await expect(page.getByRole("heading", { level: 1, name: PROJECT })).toBeVisible();
 });
 
@@ -120,10 +132,13 @@ test("accepting from the card shows the outcome, removes the buttons and clears 
   const desk = await page.request.get("/v1/desk/show");
   const waiting = ((await desk.json()) as { waiting: { project_id: string }[] }).waiting;
   expect(waiting.filter((entry) => entry.project_id === projectId)).toEqual([]);
+  // Every surface follows: the header says nothing needs you, and so does the sidebar.
+  await expect(page.getByTestId("waiting-count")).toHaveAttribute("data-count", "0");
+  if (waiting.length === 0) await expect(page.getByTestId("nav-home").getByTestId("nav-needs-count")).toHaveCount(0);
 });
 
 test("the Plan panel lists the decision item with its history, and the agenda says when the clock next wakes an agent", async () => {
-  await page.getByRole("button", { name: "Plan", exact: true }).click();
+  await openPanel(page, "Plan");
   await panel().getByRole("tab", { name: "Decision items" }).click();
   await expect(panel()).toContainText("Nothing is open.");
   await panel().getByRole("button", { name: "All", exact: true }).click();

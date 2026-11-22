@@ -1,6 +1,8 @@
 /** The agenda: what the clock will do in this project, day by day, and what each event leads to. */
+import { CalendarClock } from "lucide-react";
 import { get } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { groupByDay } from "../../desk/logic";
 import { formatDateTime, formatTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
@@ -21,7 +23,7 @@ export function AgendaTab({ projectId, changes }: Pick<TabProps, "projectId" | "
         {nextWake ? words.nextWake(formatDateTime(nextWake)) : words.noWake}
       </p>
       <p className="quiet">{words.timezone(timezone)}</p>
-      {lines.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {lines.length === 0 ? <Empty icon={CalendarClock} title={words.emptyTitle} next={words.emptyNext} /> : null}
       {groupByDay(lines).map((group) => {
         const day = dayFormat.format(group.date);
         return (

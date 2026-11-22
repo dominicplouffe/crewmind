@@ -1,8 +1,9 @@
 /** The daily brief: per project, what is worth a look, what moved and what happens next. */
+import { Newspaper } from "lucide-react";
 import { useId } from "react";
 import { Link } from "react-router-dom";
 import type { Schemas } from "../api/client";
-import { Empty } from "../components/common";
+import { Empty } from "../panels/kit";
 import { formatDateTime } from "../lib/format";
 import { AgentText } from "../panels/board/parts";
 import { t } from "../strings";
@@ -30,7 +31,7 @@ export function SectionLists({
     <>
       {filledSections(sections, order).map((section, index) => (
         <div key={section.name} data-testid="brief-section">
-          <p className="item-label" id={`${id}-${index}`}>
+          <p className="eyebrow brief-section-title" id={`${id}-${index}`}>
             {titles[section.name] ?? section.name}
           </p>
           <ul aria-labelledby={`${id}-${index}`}>
@@ -53,16 +54,20 @@ export function Brief({ brief }: { brief: Schemas["Brief"] }): JSX.Element {
     <section aria-labelledby="brief-title" data-testid="brief">
       <h2 id="brief-title">{words.title}</h2>
       <p className="quiet">{words.period(formatDateTime(brief.since), formatDateTime(brief.until))}</p>
-      {projects.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {projects.length === 0 ? <Empty icon={Newspaper} title={words.emptyTitle} next={words.emptyNext} /> : null}
       {projects.map((project) => {
         const projectId = String(project.project_id ?? "");
         const filled = filledSections(project.sections, BRIEF_SECTIONS).length > 0;
         return (
-          <article key={projectId} className="desk-group" data-testid="brief-project">
+          <article key={projectId} className="desk-group brief-project" data-testid="brief-project">
             <h3 className="group-title">
               <Link to={`/projects/${projectId}`}>{String(project.name ?? projectId)}</Link>
             </h3>
-            {typeof project.state === "string" ? <p className="quiet">{words.projectState(project.state)}</p> : null}
+            {typeof project.state === "string" ? (
+              <p className="quiet">
+                <span className="badge">{words.projectState(project.state)}</span>
+              </p>
+            ) : null}
             {filled ? (
               <SectionLists sections={project.sections} order={BRIEF_SECTIONS} titles={words.sections} />
             ) : (

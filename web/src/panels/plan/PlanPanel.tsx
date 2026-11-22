@@ -2,9 +2,11 @@
  * The Plan panel: what is in scope, when it will be done and what it will cost, how the project
  * finishes, the decision items filed for the chairman, what the clock will do next, and a rehearsal.
  */
+import { RefreshCw } from "lucide-react";
 import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { get } from "../../api/client";
-import { ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, useAct } from "../memory/parts";
@@ -132,13 +134,14 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
           <span className="spacer" />
           <button
             type="button"
-            className="button small"
+            className="button small ghost"
             disabled={plan.loading}
             onClick={() => {
               plan.reload();
               status.reload();
             }}
           >
+            <RefreshCw size={14} aria-hidden="true" />
             {t.plan.refresh}
           </button>
         </div>

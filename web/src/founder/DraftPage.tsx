@@ -3,17 +3,16 @@
  * starts a conversation, `/draft/:draftingId` goes on with one. The conversation and what waits on
  * the person are in the main column; the ledger, the goal grade and the draft are beside it.
  */
-import { useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../auth";
-import { AlertsButton } from "../components/AlertsButton";
 import { ErrorNote, Loading } from "../components/common";
-import { ThemeButton } from "../components/ThemeButton";
+import { usePageTitle } from "../needs/NeedsYou";
 import { t } from "../strings";
+import { settingsWords } from "../strings.settings";
 import { AcceptRest } from "./AcceptRest";
 import { Conversation } from "./Conversation";
 import { DraftComposer } from "./DraftComposer";
 import { DraftSummary } from "./DraftSummary";
+import { FounderSetupNote, isNoModelFailure, lastSaid } from "./FounderSetupNote";
 import { GoalGrade } from "./GoalGrade";
 import { Ledger } from "./Ledger";
 import { draftSummary, gradeOf, stageOf, visibleLines } from "./logic";
@@ -72,11 +71,20 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
           </p>
         ) : null}
         {view.failure && view.state === "drafting" && stage !== "founder" ? (
-          <div className="note note-error" role="alert" data-testid="turn-failure">
-            <p className="note-title">{words.talk.failureTitle}</p>
-            <p className="note-hint">{view.failure}</p>
-            <p className="note-hint">{words.talk.failureNext}</p>
-          </div>
+          isNoModelFailure(view.failure) ? (
+            <FounderSetupNote
+              when="failed"
+              returnTo={`/draft/${draftingId}`}
+              retrying={busy}
+              onRetry={() => void actions.say(lastSaid(view.lines) ?? settingsWords.setupNote.retryBody)}
+            />
+          ) : (
+            <div className="note note-error" role="alert" data-testid="turn-failure">
+              <p className="note-title">{words.talk.failureTitle}</p>
+              <p className="note-hint">{view.failure}</p>
+              <p className="note-hint">{words.talk.failureNext}</p>
+            </div>
+          )
         ) : null}
         {view.quick ? <QuickProgress state={view.state} /> : null}
         {talking
@@ -90,7 +98,9 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         {talking ? <DraftComposer busy={busy} onSend={actions.say} /> : null}
         {view.state !== "drafting" && !view.quick ? <p className="quiet">{words.talk.closed}</p> : null}
       </main>
-      <aside className="draft-side" aria-label={words.page.sideLabel}>
+      {/* The side column scrolls on its own, so it takes focus for keyboard users (WCAG 2.1.1). */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <aside className="draft-side" aria-label={words.page.sideLabel} tabIndex={0}>
         <Ledger ledger={view.ledger} />
         <GoalGrade grade={gradeOf(view.grade)} />
         <DraftSummary draft={draft} rehearsal={view.rehearsal} rulesHit={view.rules_hit} />
@@ -102,40 +112,16 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
 export function DraftPage(): JSX.Element {
   const words = t.founder.page;
   const { draftingId } = useParams();
-  const { person, signOut } = useAuth();
+  usePageTitle(words.title);
 
-  useEffect(() => {
-    document.title = words.pageTitle;
-    return () => {
-      document.title = t.app.name;
-    };
-  }, [words.pageTitle]);
-
-  return (
-    <div className="page">
-      <header className="appbar">
-        <Link to="/" className="brand">
-          {t.app.name}
-        </Link>
-        <Link to="/" className="button small">
-          {words.projectsLink}
-        </Link>
-        <span className="spacer" />
-        <span className="quiet who">{person?.name}</span>
-        <AlertsButton />
-        <ThemeButton />
-        <button type="button" className="button" onClick={() => void signOut()}>
-          {t.app.signOut}
-        </button>
-      </header>
-      {draftingId ? (
-        <Drafting key={draftingId} draftingId={draftingId} />
-      ) : (
-        <main className="page-main">
-          <h1 id="start-title">{words.title}</h1>
-          <StartForm />
-        </main>
-      )}
+  return draftingId ? (
+    <div className="draft-page">
+      <Drafting key={draftingId} draftingId={draftingId} />
     </div>
+  ) : (
+    <main className="content narrow draft-start">
+      <h1 id="start-title">{words.title}</h1>
+      <StartForm />
+    </main>
   );
 }

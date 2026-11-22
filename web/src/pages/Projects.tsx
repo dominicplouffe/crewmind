@@ -1,21 +1,21 @@
-/** The project list: starting a project by talking with the Founder, unfinished drafts, and the form as the other way. */
-import { useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { get, post, type Schemas } from "../api/client";
-import { useAuth } from "../auth";
-import { AlertsButton } from "../components/AlertsButton";
-import { Empty, ErrorNote, Field, Loading } from "../components/common";
-import { ThemeButton } from "../components/ThemeButton";
-import { DeskLink } from "../desk/DeskLink";
+/** The project list: every project as a card, unfinished drafts, and starting one (the Founder, or a form). */
+import { useState, type FormEvent } from "react";
+import { FolderKanban, Plus } from "lucide-react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { post, type Schemas } from "../api/client";
+import { ErrorNote, Field } from "../components/common";
 import { Unfinished } from "../founder/Unfinished";
-import { formatDateTime } from "../lib/format";
-import { useLoad } from "../lib/useLoad";
+import { ProjectCard } from "../home/ProjectCard";
+import { usePageTitle } from "../needs/NeedsYou";
+import { LIVE_STATES, sortProjects, useProjects } from "../shell/projects";
 import { t } from "../strings";
+import { home, projectsPage } from "../strings.shell";
+import { Skeleton } from "../ui/Skeleton";
 
 type ProjectType = Schemas["ProjectType"];
 const TYPES: ProjectType[] = ["explore", "deliver", "operate"];
 
-function NewProject({ onClose }: { onClose(): void }): JSX.Element {
+function NewProject({ onClose, onCreated }: { onClose(): void; onCreated(): void }): JSX.Element {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [type, setType] = useState<ProjectType>("explore");
@@ -29,6 +29,7 @@ function NewProject({ onClose }: { onClose(): void }): JSX.Element {
     setError(null);
     try {
       const project = await post("/v1/projects/create", { name, type, goal });
+      onCreated();
       navigate(`/projects/${project.project_id}`);
     } catch (reason) {
       setError(reason);
@@ -80,60 +81,83 @@ function NewProject({ onClose }: { onClose(): void }): JSX.Element {
 }
 
 export function Projects(): JSX.Element {
-  const { person, signOut } = useAuth();
-  const projects = useLoad(() => get("/v1/projects/list", {}), []);
-  const [creating, setCreating] = useState(false);
-  const newButton = useRef<HTMLButtonElement>(null);
-  const items = projects.data?.items ?? [];
+  usePageTitle(projectsPage.title);
+  const projects = useProjects();
+  const [params, setParams] = useSearchParams();
+  const [creating, setCreating] = useState(params.get("new") === "form");
+  const items = sortProjects(projects.data?.items ?? []).filter((project) => project.state !== "deleted");
+  const live = items.filter((project) => LIVE_STATES.includes(project.state));
+  const other = items.filter((project) => !LIVE_STATES.includes(project.state));
+  const close = (): void => {
+    setCreating(false);
+    if (params.has("new")) setParams({}, { replace: true });
+  };
 
   return (
-    <div className="page">
-      <header className="appbar">
-        <span className="brand">{t.app.name}</span>
-        <DeskLink />
-        <span className="spacer" />
-        <span className="quiet who">{person?.name}</span>
-        <AlertsButton />
-        <ThemeButton />
-        <button type="button" className="button" onClick={() => void signOut()}>
-          {t.app.signOut}
-        </button>
-      </header>
-      <main className="page-main">
-        <div className="row spread wrap">
-          <h1>{t.projects.title}</h1>
-          {creating ? null : (
-            <div className="row wrap">
-              <Link to="/draft" className="button primary">
-                {t.founder.way.start}
-              </Link>
-              <button type="button" className="button" ref={newButton} onClick={() => setCreating(true)}>
-                {t.founder.way.byForm}
-              </button>
-            </div>
-          )}
+    <main className="content" aria-labelledby="projects-title">
+      <header className="page-head">
+        <div>
+          <h1 id="projects-title">{t.projects.title}</h1>
+          <p>{projectsPage.intro}</p>
         </div>
-        {creating ? <NewProject onClose={() => setCreating(false)} /> : null}
-        <ErrorNote error={projects.error} />
-        {projects.loading && !projects.data ? <Loading /> : null}
-        {projects.data && items.length === 0 && !creating ? (
-          <Empty title={t.projects.emptyTitle} next={t.founder.way.emptyNext} />
-        ) : null}
-        {creating ? null : <Unfinished />}
-        <ul className="project-list">
-          {items.map((project) => (
-            <li key={project.project_id}>
-              <Link to={`/projects/${project.project_id}`} className="project-link">
-                <span className="project-name">{project.name}</span>
-                <span className="quiet">
-                  {t.projects.line(t.projects.types[project.type as ProjectType] ?? project.type, project.state)}
-                </span>
-                <span className="quiet">{t.projects.created(formatDateTime(project.created_at))}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </main>
-    </div>
+        {creating ? null : (
+          <div className="row wrap">
+            <button type="button" className="button" onClick={() => setCreating(true)}>
+              {t.founder.way.byForm}
+            </button>
+            <Link to="/draft" className="button primary">
+              <Plus size={16} aria-hidden="true" />
+              {t.founder.way.start}
+            </Link>
+          </div>
+        )}
+      </header>
+      {creating ? <NewProject onClose={close} onCreated={projects.reload} /> : null}
+      <ErrorNote error={projects.error} />
+      {projects.loading && !projects.data ? <Skeleton lines={3} block /> : null}
+      {projects.data && items.length === 0 && !creating ? (
+        <div className="empty">
+          <span className="empty-icon" aria-hidden="true">
+            <FolderKanban size={22} />
+          </span>
+          <p className="empty-title">{t.projects.emptyTitle}</p>
+          <p className="quiet">{t.founder.way.emptyNext}</p>
+          <div className="empty-action">
+            <Link to="/draft" className="button primary">
+              {home.start}
+            </Link>
+          </div>
+        </div>
+      ) : null}
+      {creating ? null : <Unfinished />}
+      {live.length > 0 ? (
+        <section aria-labelledby="projects-live">
+          <h2 id="projects-live" className="eyebrow section-label">
+            {projectsPage.live}
+          </h2>
+          <ul className="plain project-cards grid">
+            {live.map((project) => (
+              <li key={project.project_id}>
+                <ProjectCard project={project} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {other.length > 0 ? (
+        <section aria-labelledby="projects-other">
+          <h2 id="projects-other" className="eyebrow section-label">
+            {projectsPage.other}
+          </h2>
+          <ul className="plain project-cards grid">
+            {other.map((project) => (
+              <li key={project.project_id}>
+                <ProjectCard project={project} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+    </main>
   );
 }

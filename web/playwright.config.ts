@@ -13,6 +13,8 @@ export default defineConfig({
   expect: { timeout: 20_000 },
   reporter: [["list"]],
   use: {
+    // Animations finish at once, so accessibility scans never see an element mid fade-in.
+    reducedMotion: "reduce",
     ...devices["Desktop Chrome"],
     baseURL: `http://127.0.0.1:${port}`,
     serviceWorkers: "block",

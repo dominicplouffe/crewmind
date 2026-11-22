@@ -1,7 +1,8 @@
 /** The commitment: the finish date the CEO promises, beside the projection, and the chairman's answers to it. */
+import { CalendarCheck } from "lucide-react";
 import { useState } from "react";
 import { post } from "../../api/client";
-import { Empty } from "../../components/common";
+import { Empty } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { t } from "../../strings";
 import { toMoment } from "./logic";
@@ -22,7 +23,7 @@ export function Commitment({ projectId, plan, busy, run, apply }: PlanTabProps):
   if (!commitment) {
     return (
       <Section title={words.title} testId="commitment">
-        <Empty title={words.emptyTitle} next={words.emptyNext} />
+        <Empty icon={CalendarCheck} title={words.emptyTitle} next={words.emptyNext} />
       </Section>
     );
   }

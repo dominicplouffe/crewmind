@@ -32,7 +32,7 @@ function LeverForm({ item, onChanged }: { item: Item; onChanged(item: Item): voi
       <div className="row wrap" role="group" aria-label={words.record}>
         <span className="quiet">{words.record}:</span>
         {LEVERS.map((name) => (
-          <button key={name} type="button" className="button small" onClick={() => setLever(name)}>
+          <button key={name} type="button" className="button small ghost" onClick={() => setLever(name)}>
             {words.levers[name]}
           </button>
         ))}
@@ -87,7 +87,7 @@ export function ReviewBody({ item, onChanged }: { item: Item; onChanged(item: It
   ];
   return (
     <div data-testid="review">
-      <p>{fields.green === true ? words.green : words.notGreen}</p>
+      <p className={fields.green === true ? "review-health is-green" : "review-health is-attention"}>{fields.green === true ? words.green : words.notGreen}</p>
       <p className="item-label">{words.numbers}</p>
       <dl className="pairs item-fields">
         {rows.map(([label, value]) => (

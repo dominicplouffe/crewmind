@@ -1,7 +1,8 @@
 /** The target date: when the chairman wants the work done, shown beside the projection. */
+import { Crosshair } from "lucide-react";
 import { useState } from "react";
 import { post } from "../../api/client";
-import { Empty } from "../../components/common";
+import { Empty } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { t } from "../../strings";
 import { toMoment } from "./logic";
@@ -26,7 +27,7 @@ export function Target({ projectId, plan, busy, run, apply }: PlanTabProps): JSX
           </p>
         </>
       ) : setting ? null : (
-        <Empty title={words.emptyTitle} next={words.emptyNext} />
+        <Empty icon={Crosshair} title={words.emptyTitle} next={words.emptyNext} />
       )}
       {setting ? (
         <FieldsForm

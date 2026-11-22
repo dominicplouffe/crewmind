@@ -1,6 +1,8 @@
 /** Corrections: each time the chairman said "not what I asked", with the question and the agent. */
+import { PenLine } from "lucide-react";
 import { get, post } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
@@ -20,7 +22,7 @@ export function CorrectionsTab({ projectId, changes, onChanged }: TabProps): JSX
       <ErrorNote error={corrections.error} />
       <ErrorNote error={act.error} />
       {corrections.loading && !corrections.data ? <Loading /> : null}
-      {corrections.data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {corrections.data && items.length === 0 ? <Empty icon={PenLine} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {items.map((correction) => (
           <li key={correction.id} data-testid="correction" className={correction.state === "active" ? "" : "is-past"}>

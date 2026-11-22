@@ -1,7 +1,9 @@
 /** Recalled memory: facts by scope, search, add, edit, pin and forget; and the person's own preferences. */
+import { Brain, Heart } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 import { get, post } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { EntryList } from "./EntryList";
@@ -103,7 +105,7 @@ export function RecallTab({ projectId, changes, onChanged }: TabProps): JSX.Elem
       <ErrorNote error={entries.error} />
       <ErrorNote error={act.error} />
       {entries.loading && !entries.data ? <Loading /> : null}
-      {entries.data && items.length === 0 && !query ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {entries.data && items.length === 0 && !query ? <Empty icon={Brain} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <EntryList
         label={words.listLabel}
         items={items}
@@ -144,7 +146,7 @@ export function PreferencesTab(): JSX.Element {
       <ErrorNote error={preferences.error} />
       <ErrorNote error={act.error} />
       {preferences.loading && !preferences.data ? <Loading /> : null}
-      {preferences.data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {preferences.data && items.length === 0 ? <Empty icon={Heart} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <EntryList
         label={words.listLabel}
         items={items}

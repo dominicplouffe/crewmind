@@ -34,7 +34,11 @@ export function PanelFrame({ title, onClose, children }: Props): JSX.Element {
           {t.panels.close}
         </button>
       </header>
-      <div className="panel-body">{children}</div>
+      {/* The body scrolls, so keyboard users must be able to focus it (WCAG 2.1.1). */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <div className="panel-body" tabIndex={0}>
+        {children}
+      </div>
     </aside>
   );
 }

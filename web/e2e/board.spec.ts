@@ -14,8 +14,7 @@ import {
   expectNoViolations,
   setTheme,
   setWorkScript,
-  toolTurn,
-} from "./helpers";
+  toolTurn, openPanel } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -58,7 +57,7 @@ const group = (state: string): Locator => panel().locator(`[data-testid="task-gr
 
 async function openBoard(tab: string): Promise<void> {
   if (!(await panel().getByRole("tab", { name: tab }).isVisible())) {
-    await page.getByRole("button", { name: "Board", exact: true }).click();
+    await openPanel(page, "Board");
   }
   await panel().getByRole("tab", { name: tab }).click();
   await expect(panel().getByRole("tab", { name: tab })).toHaveAttribute("aria-selected", "true");
@@ -109,10 +108,10 @@ test("the Board opens from the command palette and its empty states say agents c
   await createProject(page, "Board project");
   projectId = new URL(page.url()).pathname.split("/").pop() ?? "";
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
 
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("board");
+  await page.getByRole("dialog", { name: "Command palette" }).getByRole("combobox").fill("open board");
   await page.keyboard.press("Enter");
   await expect(panel().getByRole("heading", { name: "Board" })).toBeFocused();
   await expect(panel()).toContainText("No tasks yet.");

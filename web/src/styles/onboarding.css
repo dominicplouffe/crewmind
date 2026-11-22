@@ -1,0 +1,186 @@
+/* First-run setup (/welcome): a calm full page, a step indicator and one card per step. Tokens only. */
+
+.welcome {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(60rem 28rem at 50% -12%, var(--color-accent-soft), transparent 70%),
+    var(--color-canvas);
+}
+.welcome-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+.welcome-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  font-size: var(--text-lg);
+}
+.welcome-main {
+  width: min(40rem, 100%);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Step indicator */
+.welcome-steps ol {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  counter-reset: none;
+}
+.welcome-step { flex: 1 1 auto; display: flex; align-items: center; min-width: 0; }
+.welcome-step:first-child { flex: 0 0 auto; }
+.welcome-step + .welcome-step::before {
+  content: "";
+  flex: 1 1 var(--space-3);
+  min-width: var(--space-2);
+  height: 1px;
+  margin-right: var(--space-1);
+  background: var(--color-border);
+}
+.welcome-step.done + .welcome-step::before { background: var(--color-accent); }
+.welcome-step button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: var(--control-md);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-1);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+.welcome-step button:hover:not(:disabled) { background: var(--color-surface-hover); color: var(--color-text); }
+.welcome-step button:disabled { cursor: default; }
+.welcome-step.todo button:disabled { opacity: 0.8; }
+.welcome-step-dot {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-control);
+  background: var(--color-surface);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
+}
+.welcome-step.current .welcome-step-dot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+  box-shadow: 0 0 0 4px var(--color-accent-soft);
+}
+.welcome-step.current button { color: var(--color-text); }
+.welcome-step.done .welcome-step-dot {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent-soft-text);
+}
+.welcome-step-name { white-space: nowrap; }
+
+/* Step card */
+.welcome-card {
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  animation: rise-in var(--duration-slow) var(--ease-out);
+}
+.welcome-card h1 {
+  font-size: var(--text-2xl);
+  margin: var(--space-1) 0 var(--space-2);
+}
+.welcome-card h1:focus { outline: none; }
+.welcome-card h1:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+.welcome-lead {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-6);
+}
+.welcome-card > p:first-child { margin: 0; }
+
+.welcome-points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: var(--space-4) 0 var(--space-5);
+}
+.welcome-points li { display: flex; gap: var(--space-3); align-items: flex-start; }
+.welcome-points li > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.welcome-point-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-text);
+}
+
+.welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
+.welcome-actions .spacer { flex: 1; }
+.welcome-card .founder-form .form-actions {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.welcome-keys,
+.welcome-invited { display: flex; flex-direction: column; gap: var(--space-1); margin: var(--space-2) 0 0; }
+.welcome-keys li,
+.welcome-invited li { display: flex; align-items: center; gap: var(--space-2); overflow-wrap: anywhere; }
+.welcome-invited { margin: 0 0 var(--space-4); }
+.welcome-card .note-success + .button { margin-top: var(--space-2); }
+
+.welcome-help { margin-top: var(--space-5); }
+.welcome-help summary {
+  cursor: pointer;
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  min-height: 1.5rem;
+}
+.welcome-help p { margin: var(--space-2) 0 0; }
+
+.welcome-goal {
+  font-size: var(--text-base);
+  min-height: 10rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 600px) {
+  .welcome-card { padding: var(--space-5) var(--space-4); }
+  .welcome-card h1 { font-size: var(--text-xl); }
+  .welcome-step-name { display: none; }
+  .welcome-step.current .welcome-step-name { display: inline; }
+  .welcome-actions .button { flex: 1 1 auto; }
+  .welcome-actions .spacer { display: none; }
+}
+
+@media (pointer: coarse) {
+  .welcome-step button { min-height: var(--control-lg); }
+}

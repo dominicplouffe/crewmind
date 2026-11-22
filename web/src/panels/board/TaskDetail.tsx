@@ -1,7 +1,9 @@
 /** One task: what it asks for, how it is checked, each attempt, and who checked it in the end. */
+import { ChevronLeft, RefreshCw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { get } from "../../api/client";
-import { ErrorNote, Loading, Pre } from "../../components/common";
+import { ErrorNote, Pre } from "../../components/common";
+import { Loading } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
@@ -27,11 +29,13 @@ export function TaskDetail({ projectId, changes, taskId, onBack }: Props): JSX.E
   return (
     <div data-testid="task-detail">
       <div className="row wrap board-bar">
-        <button type="button" className="link" onClick={onBack}>
+        <button type="button" className="button small ghost back-button" onClick={onBack}>
+          <ChevronLeft size={16} aria-hidden="true" />
           {words.back}
         </button>
         <span className="spacer" />
-        <button type="button" className="button small" onClick={detail.reload} disabled={detail.loading}>
+        <button type="button" className="button small ghost" onClick={detail.reload} disabled={detail.loading}>
+          <RefreshCw size={14} aria-hidden="true" />
           {t.board.refresh}
         </button>
       </div>

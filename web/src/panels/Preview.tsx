@@ -1,7 +1,8 @@
 /** Shows one version of a file (CHAT-16). HTML runs only in a sandboxed frame with no network. */
 import { useEffect, useMemo, useState } from "react";
 import { errorFrom, fileUrl } from "../api/client";
-import { ErrorNote, Loading, Markdown, Pre } from "../components/common";
+import { ErrorNote, Markdown, Pre } from "../components/common";
+import { Loading } from "./kit";
 import { parseCsv } from "../lib/csv";
 import { codeLanguage, isTextKind, previewKind, sandboxedDocument } from "../lib/files";
 import { formatBytes } from "../lib/format";

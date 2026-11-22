@@ -45,7 +45,7 @@ async function addRequirement(text: string, test_: string, runs: string, after?:
 test("the Plan opens from the command palette and says what to do when it is empty", async () => {
   await createProject(page, "Plan project");
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("open plan");
+  await page.getByRole("dialog", { name: "Command palette" }).getByRole("combobox").fill("open plan");
   await page.keyboard.press("Enter");
   await expect(panel().getByRole("heading", { name: "Plan" })).toBeFocused();
   await expect(panel()).toContainText("No requirements yet.");

@@ -1,28 +1,29 @@
 /* The Board panel: tasks, audit samples, outside evidence and launches. */
-.board-bar { margin-bottom: 0.5rem; min-height: 2rem; }
-.check-field { display: inline-flex; align-items: center; gap: 0.4rem; }
-.check-field label { margin: 0; font-weight: 400; }
+.check-field { display: inline-flex; align-items: center; gap: var(--space-2); }
+.check-field label { margin: 0; font-weight: var(--weight-regular); }
 .check-field input { width: 1.1rem; height: 1.1rem; }
-.group-title { font-size: 1rem; margin: 0.9rem 0 0.1rem; }
-.task-title { text-align: left; min-height: 1.5rem; }
-.records li.depth-1 { padding-left: 1.25rem; }
-.records li.depth-2 { padding-left: 2.5rem; }
-.records li.depth-3 { padding-left: 3.75rem; }
-.closed-toggle { margin-top: 0.9rem; }
+.task-title { font-size: var(--text-base); }
+.records li.depth-1 { padding-left: var(--space-6); }
+.records li.depth-2 { padding-left: var(--space-12); }
+.records li.depth-3 { padding-left: 4.5rem; }
+.records li[class*="depth-"]:not(.depth-0) { border-left: 2px solid var(--color-border-subtle); margin-left: var(--space-2); }
+.closed-toggle { margin-top: var(--space-4); }
 .agent-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .check-output { max-height: 16rem; overflow: auto; }
 .quote {
-  margin: 0.3rem 0;
-  padding: 0.1rem 0.75rem;
-  border-left: 3px solid var(--border);
+  margin: var(--space-1) 0;
+  padding: var(--space-1) var(--space-3);
+  border-left: 3px solid var(--color-border);
+  color: var(--color-text-muted);
 }
+.state-tag, .check { display: inline-flex; }
 
-/* Check labels keep the server's word. Only "verified" is set apart; unchecked work looks unfinished. */
-.marker.check { color: var(--text); }
-.marker.check-verified { color: var(--ok); border-color: var(--ok); font-weight: 600; }
-.marker.check-self-reported,
-.marker.check-closed-unread { border-style: dashed; }
-.marker.check-not-yet-checked { border-style: dotted; color: var(--muted); }
+/* Check labels keep the server's word. Weaker checks are drawn more faintly; the word carries the meaning. */
+.check-self-reported .pill,
+.check-closed-unread .pill { border-style: dashed; border-color: var(--color-border); }
+.check-not-yet-checked .pill { border-style: dotted; border-color: var(--color-border-control); background: transparent; }
+.marker.evidence-verified { color: var(--color-success); background: var(--color-success-soft); border-color: var(--color-success-border); }
 .marker.evidence-pending { border-style: dashed; }
 .marker.evidence-failed,
-.marker.watch-failing { color: var(--danger); border-color: var(--danger); }
+.marker.watch-failing { color: var(--color-danger); background: var(--color-danger-soft); border-color: var(--color-danger-border); }
+.marker.watch-passing { color: var(--color-success); background: var(--color-success-soft); border-color: var(--color-success-border); }

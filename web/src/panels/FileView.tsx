@@ -1,7 +1,9 @@
 /** One file: pick a version, preview it, download any version, compare two text versions. */
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fileUrl, get, type Artifact } from "../api/client";
-import { ErrorNote, Loading } from "../components/common";
+import { ErrorNote } from "../components/common";
+import { Loading } from "./kit";
 import { isTextKind, previewKind } from "../lib/files";
 import { formatBytes, formatDateTime } from "../lib/format";
 import { useLoad } from "../lib/useLoad";
@@ -39,10 +41,11 @@ export function FileView({ projectId, name, artifact, changes, onBack }: Props):
 
   return (
     <div data-testid="file-view">
-      <button type="button" className="link" onClick={onBack}>
+      <button type="button" className="button small ghost back-button" onClick={onBack}>
+        <ChevronLeft size={16} aria-hidden="true" />
         {t.files.back}
       </button>
-      <h3 className="file-name">{name}</h3>
+      <h3 className="file-name mono">{name}</h3>
       {artifact ? (
         <p className="quiet">{t.files.line(t.files.kinds[artifact.kind as keyof typeof t.files.kinds] ?? artifact.kind, artifact.status)}</p>
       ) : null}

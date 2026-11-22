@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "@playwright/test";
 
 const svg = readFileSync(new URL("../public/icon.svg", import.meta.url), "utf8");
-const maskable = svg.replace('rx="96"', 'rx="0"');
+const maskable = svg.replace('rx="128"', 'rx="0"');
 const browser = await chromium.launch();
 for (const [file, size, source] of [
   ["icon-192.png", 192, svg],

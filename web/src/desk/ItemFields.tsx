@@ -88,20 +88,25 @@ function plainRows(item: Item): Row[] {
     .map(([name, value]) => [name.replace(/_/g, " "), typeof value === "number" ? formatNumber(value) : formatValue(value)]);
 }
 
+/** The words the item is about (a proposed requirement, a heads-up), quoted under the title. */
+export function ItemBody({ item }: { item: Item }): JSX.Element | null {
+  const body = item.kind === "proposed scope" || item.kind === "heads-up" ? textField(item.fields, "text") : null;
+  if (!body) return null;
+  return (
+    <blockquote className="item-body">
+      <AgentText text={body} />
+    </blockquote>
+  );
+}
+
 export function ItemFields({ item, onChanged }: { item: Item; onChanged(item: Item): void }): JSX.Element {
   const rows = knownRows(item) ?? plainRows(item);
-  const body = item.kind === "proposed scope" || item.kind === "heads-up" ? textField(item.fields, "text") : null;
   const deliverables = item.kind === "delivery sign-off" ? listField(item.fields, "deliverables") : [];
   // An open question lists its options in the answer form; a closed one lists them here.
   const options = item.kind === "question" && !item.actions.includes("answer") ? listField(item.fields, "options") : [];
   const recommended = numberField(item.fields, "recommended");
   return (
     <>
-      {body ? (
-        <p>
-          <AgentText text={body} />
-        </p>
-      ) : null}
       {rows.length > 0 ? (
         <dl className="pairs item-fields">
           {rows.map(([label, value]) => (
@@ -129,7 +134,7 @@ export function ItemFields({ item, onChanged }: { item: Item; onChanged(item: It
           {options.map((option, index) => (
             <li key={index}>
               <AgentText text={formatValue(option)} />
-              {recommended === index + 1 ? <span className="marker"> {t.decisions.question.recommended}</span> : null}
+              {recommended === index + 1 ? <span className="badge badge-accent"> {t.decisions.question.recommended}</span> : null}
             </li>
           ))}
         </ol>

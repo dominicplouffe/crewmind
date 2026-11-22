@@ -56,6 +56,7 @@ export const founder = {
   talk: {
     logLabel: "What was said",
     authors: { person: "You", founder: "The Founder", platform: "crewmind" } as Record<string, string>,
+    avatarName: "Founder",
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
     writing: "The Founder is writing.",
     writingLabel: "The Founder is writing",

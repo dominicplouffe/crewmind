@@ -13,7 +13,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { STATE_FILE, expectAccessible, expectNoViolations, setFounderScript } from "./helpers";
+import { STATE_FILE, expectAccessible, expectNoViolations, setFounderScript, openPanel } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -92,7 +92,7 @@ const readiness = (): Locator => page.getByTestId("readiness");
 const panel = (): Locator => page.getByTestId("panel");
 
 test("the project list offers talking first, and the start page is accessible", async () => {
-  await page.goto("/");
+  await page.goto("/projects");
   await expect(page.getByRole("button", { name: "Fill in a form instead" })).toBeVisible();
   await page.getByRole("link", { name: "Start a project" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Start a project" })).toBeVisible();
@@ -194,19 +194,19 @@ test("creating the project shows what is still missing and offers to start it; s
   await created.getByRole("button", { name: "Start the project" }).click();
   await expect(page).toHaveURL(/\/projects\/[0-9a-f]+$/);
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
   // The drafting conversation became the project chat.
   await expect(page.getByRole("log", { name: "Messages" })).toContainText(`You: ${BRIEF}`);
 
   await page.goto("/");
-  await expect(page.getByRole("link", { name: new RegExp(NAME) })).toBeVisible();
+  await expect(page.locator("#content").getByRole("link", { name: new RegExp(NAME) })).toBeVisible();
   await expect(page.getByTestId("unfinished")).toHaveCount(0);
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
 });
 
 test("the Plan panel rehearses the project and shows the report in sections (RHS-3, RHS-4)", async () => {
-  await page.getByRole("button", { name: "Plan", exact: true }).click();
+  await openPanel(page, "Plan");
   await panel().getByRole("tab", { name: "Rehearsal" }).click();
   await panel().getByRole("button", { name: "Rehearse", exact: true }).click();
   await expect(panel().getByTestId("rehearsing")).toHaveText("Rehearsing. This takes about 5 seconds.");
@@ -221,7 +221,7 @@ test("the Plan panel rehearses the project and shows the report in sections (RHS
 });
 
 test("the project is exported as a spec file and cloned into a new project", async () => {
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openPanel(page, "Settings");
   const copies = panel().getByTestId("project-copies");
   const download = page.waitForEvent("download");
   await copies.getByRole("button", { name: "Export as a spec" }).click();
@@ -238,5 +238,5 @@ test("the project is exported as a spec file and cloned into a new project", asy
   await name.fill("Second bird guide");
   await copies.getByRole("button", { name: "Clone and open" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Second bird guide" })).toBeVisible();
-  await expect(page.getByTestId("project-state")).toHaveText("draft");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "draft");
 });

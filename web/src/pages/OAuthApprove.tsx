@@ -1,15 +1,12 @@
 /** Asks the signed-in person whether an AI client may act for them, and for which permissions. */
 import { useEffect, useMemo, useState } from "react";
 import { post } from "../api/client";
-import { useAuth } from "../auth";
 import { Empty, ErrorNote } from "../components/common";
-import { ThemeButton } from "../components/ThemeButton";
 import { denialUrl, readApproval } from "../lib/oauth";
 import { t } from "../strings";
 
 export function OAuthApprove({ hash }: { hash: string }): JSX.Element {
   const words = t.oauth;
-  const { person } = useAuth();
   const request = useMemo(() => readApproval(hash), [hash]);
   const [ticked, setTicked] = useState<string[]>(request.scopes);
   const [busy, setBusy] = useState(false);
@@ -50,13 +47,7 @@ export function OAuthApprove({ hash }: { hash: string }): JSX.Element {
   const complete = request.clientId !== "" && request.redirectUri !== "";
   return (
     <div className="page">
-      <header className="appbar">
-        <span className="brand">{t.app.name}</span>
-        <span className="spacer" />
-        <span className="quiet who">{person?.name}</span>
-        <ThemeButton />
-      </header>
-      <main className="page-main">
+      <main className="content narrow">
         <h1>{words.title}</h1>
         {!complete ? (
           <>

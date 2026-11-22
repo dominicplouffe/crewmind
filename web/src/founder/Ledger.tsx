@@ -13,7 +13,7 @@ export function Ledger({ ledger }: { ledger: LedgerLine[] }): JSX.Element {
           <li key={line.settles} data-testid="ledger-line" data-settles={line.settles} data-source={line.source}>
             <p className="row wrap">
               <span className="record-text">{decisionName(line.settles)}</span>
-              <span className={`marker source-${line.source}`}>{sourceTag(line.source)}</span>
+              <span className={`badge source-${line.source}`}>{sourceTag(line.source)}</span>
             </p>
             <p className="agent-text">{line.value}</p>
             {line.passage ? (

@@ -1,6 +1,7 @@
 /** Side-by-side comparison of two text versions of a file (ART-4, CHAT-16). */
 import { useMemo } from "react";
-import { ErrorNote, Loading } from "../components/common";
+import { ErrorNote } from "../components/common";
+import { Loading } from "./kit";
 import { countChanges, sideBySide, type DiffRow } from "../lib/diff";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";

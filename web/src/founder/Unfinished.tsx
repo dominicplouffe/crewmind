@@ -24,7 +24,7 @@ export function Unfinished(): JSX.Element | null {
                 <span className="visually-hidden"> {words.resumeOf(item.opening)}</span>
               </span>
               <span className="draft-opening">{item.opening}</span>
-              {item.quick ? <span className="marker">{words.quickTag}</span> : null}
+              {item.quick ? <span className="badge">{words.quickTag}</span> : null}
               <span className="quiet">{words.updated(formatDateTime(item.updated_at))}</span>
             </Link>
           </li>
