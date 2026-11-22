@@ -279,4 +279,5 @@ NO_EVENT = {
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",
     "audits.settle": "asserted in test_WRK_13_sampled_closes_are_audited_by_the_chairman_only",
     "launches.retire": "asserted in test_WRK_17_a_launch_must_be_watched",
+    "launches.close_unknown": "asserted in test_WRK_16_a_side_effect_is_never_stranded",
 }

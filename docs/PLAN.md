@@ -69,7 +69,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** "done" means checked by something other than the doer.
 - **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused, and a launch without a watch is refused.
-- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
+- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
 
 ## Phase 5: Planning and speed
 
@@ -82,7 +82,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 - **Goal:** the chairman sees everything that matters and is never left in silence.
 - **Includes:** the install-level outbound mail account (part of INT-6) so alerts and briefs can be emailed. Project mailboxes stay in phase 8.
 - **Exit demo:** the never-silent acceptance scenario passes. The desk, daily brief, since-you-were-away, agenda and alerts all agree with the event log, and MCP steer and create scopes work with two-phase confirmation.
-- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13
+- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13; WRK-10 (moved from phase 4: it needs decision items)
 
 ## Phase 7: Founder and rehearsal (v2.0 release candidate)
 

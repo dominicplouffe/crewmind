@@ -7896,6 +7896,48 @@
     ]
    }
   },
+  "/v1/launches/close_unknown": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "launches.close_unknown",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LaunchRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EffectItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Close a side effect its agent never finished, as outcome unknown.",
+    "tags": [
+     "launches"
+    ]
+   }
+  },
   "/v1/launches/list": {
    "get": {
     "description": "Requires: project_observer.",

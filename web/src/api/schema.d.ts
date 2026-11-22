@@ -1103,6 +1103,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/launches/close_unknown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Close a side effect its agent never finished, as outcome unknown.
+         * @description Requires: project_chair.
+         */
+        post: operations["launches.close_unknown"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/launches/list": {
         parameters: {
             query?: never;
@@ -6778,6 +6798,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExampleItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "launches.close_unknown": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LaunchRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EffectItem"];
                 };
             };
             /** @description Validation Error */

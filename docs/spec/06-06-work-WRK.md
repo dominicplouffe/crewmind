@@ -79,7 +79,7 @@
   - Only the claimant blocks a task, with a reason of at least 10 characters; the CEO is notified. There is no unblock: re-plan by killing and re-issuing.
   - The CEO kills top-level tasks and a lead kills its own subtasks, each with a reason. Killing a task kills its open subtasks.
 - **WRK-15 Honest labels.** "Verified" appears only where the platform ran the test. "Reviewed" means an independent reviewer passed it. "Self-reported" means nobody checked. Unsettled claims read "not yet checked". A judgement is never displayed as a verification.
-- **WRK-16 Side effects** are declared before firing, with an idempotency key, and finished afterwards. A duplicate key returns the existing record and "do not fire again". A retried run sees what already fired.
+- **WRK-16 Side effects** are declared before firing, with an idempotency key, and finished afterwards by the agent that declared them, in that run or any later one. The chairman can close one that was never finished as "outcome unknown"; a launch closed this way is watched from then on. A duplicate key returns the existing record and "do not fire again". A retried run sees what already fired.
 - **WRK-17 Watches.**
   - A side effect that leaves something running outside the project is declared as a launch: an ad campaign, a site, a listing, a scheduled job.
   - A launch must declare a watch: a check command, a URL with an expected condition, or a recorded browser script (EXE-17), and an interval no shorter than `watch.min_interval` \[15 min\]. A launch without one is refused. For a URL, the condition is words the page must contain, and the page is fetched through the SSRF guard. Browser scripts arrive with the agent browser.

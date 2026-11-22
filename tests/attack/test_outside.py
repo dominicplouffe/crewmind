@@ -304,3 +304,44 @@ async def test_WRK_3_an_explore_project_in_an_evidence_drought_makes_only_eviden
     await app.work_jobs.verify_evidence()
     await crew.task(title="Write up what we learned", outside_evidence=True)
     await crew.task(title="Plan the next step")
+
+
+async def test_WRK_16_a_side_effect_is_never_stranded(app: App) -> None:
+    """WRK-16, WRK-17, section 7.16: the agent that declared a side effect finishes it in a
+    later run when the declaring run is gone. If the agent never does, the chairman closes
+    it as outcome unknown; a launch is then watched and can be retired. Another agent
+    still cannot finish it, and an agent cannot close one as unknown."""
+    crew = await Crew.start(app)
+    await crew.ok("build-1", "agent.declare_effect", key="send-quote", what="Email the quote.")
+    later = await crew.ok(
+        "build-1", "agent.finish_effect", key="send-quote", fired=True, outcome="Sent it."
+    )
+    assert (later["state"], later["fired"]) == ("finished", True)
+
+    watch = {"kind": "command", "check": "test -f up.txt", "interval_minutes": 15}
+    launch = await crew.ok(
+        "build-1", "agent.declare_effect", key="site-live", what="Publish the landing page.",
+        launch=True, watch=watch,
+    )  # fmt: skip
+    ref = {"project_id": crew.project, "effect_id": launch["id"]}
+    stuck = await app.call("launches.retire", crew.owner, **ref)
+    assert_refused(stuck, rule="7.16-effect")
+    other = await crew.call(
+        "build-2", "agent.finish_effect", key="site-live", fired=True, outcome="I say it is up."
+    )
+    assert_refused(other, rule="WRK-16", code="not_your_side_effect")
+    by_agent = await crew.call("build-1", "launches.close_unknown", **ref)
+    assert by_agent.status_code in (401, 403, 404)
+
+    closed = await app.ok("launches.close_unknown", crew.owner, **ref)
+    assert (closed["state"], closed["fired"], closed["watch"]) == ("finished", None, "passing")
+    assert "unknown" in closed["outcome"]
+    assert_refused(await app.call("launches.close_unknown", crew.owner, **ref), rule="7.16-effect")
+    retired = await app.ok("launches.retire", crew.owner, **ref)
+    assert (retired["state"], retired["watch"]) == ("retired", "ended")
+    changes = [
+        e["after"]["state"]
+        for e in await app.events(crew.owner, crew.project)
+        if e["type"] == "side_effect.state_changed" and e["subject_id"] == str(launch["id"])
+    ]
+    assert changes == ["declared", "finished", "retired"]

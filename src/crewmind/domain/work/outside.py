@@ -41,7 +41,7 @@ from crewmind.domain.work.model import (
 )
 from crewmind.services import services_of
 from crewmind.storage.events import append_event, event_type
-from crewmind.storage.models import Evidence, Project, Run, Seat, SideEffect, Watch
+from crewmind.storage.models import Evidence, Project, Seat, SideEffect, Watch
 
 WRK_12 = rules.register(
     Rule("WRK-12", "Outside evidence counts only once the platform has verified it.")
@@ -410,8 +410,9 @@ async def declare_effect(context: Context, payload: DeclareInput) -> EffectItem:
     principals=AGENT,
 )
 async def finish_effect(context: Context, payload: FinishInput) -> EffectItem:
-    """WRK-16, section 7.16: finished by the declaring run or a retry of it. A launch that
-    fired starts being watched."""
+    """WRK-16, section 7.16: finished by the agent that declared it, in the declaring run
+    or any later one, so a dead run never strands it. A launch that fired starts being
+    watched."""
     view = await agent_of(context)
     work_run_only(view)
     row = await context.session.scalar(
@@ -419,13 +420,10 @@ async def finish_effect(context: Context, payload: FinishInput) -> EffectItem:
             SideEffect.project_id == view.project.id, SideEffect.idempotency_key == payload.key
         )
     )
-    declaring = await context.session.get(Run, row.run_id) if row else None
-    same_wake = declaring is not None and declaring.wake_id == view.run.wake_id
-    if row is None or row.seat_id != view.seat.id or not same_wake:
+    if row is None or row.seat_id != view.seat.id:
         raise Refusal(
             "not_your_side_effect",
-            f"No side effect with the key {payload.key} was declared by this run or an "
-            "earlier attempt of it.",
+            f"You have declared no side effect with the key {payload.key}.",
             rule=WRK_16.id,
             hint="Declare it first with agent_declare_effect.",
         )
@@ -486,6 +484,26 @@ async def retire_launch(context: Context, payload: EffectRef) -> EffectItem:
             hint="Ask the CEO.",
         )
     return await _retire(context, row)
+
+
+@operation(
+    "launches.close_unknown",
+    summary="Close a side effect its agent never finished, as outcome unknown.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.IRREVERSIBLE,
+)
+async def close_unknown(context: Context, payload: LaunchRef) -> EffectItem:
+    """WRK-16, section 7.16: when the agent that declared a side effect can no longer say
+    what happened, the chairman closes it as outcome unknown. Nobody then knows whether
+    it fired, so a launch is watched from here on, and can be retired."""
+    row = await _launch(context.session, view_of(context).project.id, payload.effect_id)
+    row.fired, row.finished_at = None, context.now
+    row.outcome = "Closed by the chairman: the outcome is unknown."
+    _move_effect(context.session, row, F.FINISHED, context.caller, context.now)
+    watch = await context.session.scalar(select(Watch).where(Watch.side_effect_id == row.id))
+    if watch is not None:
+        move_watch(context.session, watch, W.PASSING, tasks.WORK_JOB, context.now)
+    return await _item_of(context.session, row)
 
 
 @operation(

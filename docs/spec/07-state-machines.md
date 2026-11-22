@@ -273,7 +273,8 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | From | To | Trigger | Who |
 | --- | --- | --- | --- |
 | (new) | declared | Declare, with an idempotency key; a duplicate key returns the existing record | Agent |
-| declared | finished | Finish, recording what happened (fired or failed) | Agent (the declaring run or its retry) |
+| declared | finished | Finish, recording what happened (fired or failed) | The declaring agent, in that run or any later one |
+| declared | finished | Close as outcome unknown, when its agent can no longer say | Chairman |
 | finished | retired | Retire a launch; ends its watch | The launching seat; CEO; chairman |
 
 **Watch:**

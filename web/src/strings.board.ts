@@ -131,5 +131,9 @@ export const board = {
     retireOf: (what: string): string => `the launch “${what}”`,
     retireSure: "Retire this launch? Its watch ends, and it cannot be brought back.",
     retireYes: "Yes, retire it",
+    unknown: "Close as outcome unknown",
+    unknownSure:
+      "Close this as outcome unknown? Use it when the agent that declared it can no longer say what happened. A launch is watched from then on.",
+    unknownYes: "Yes, close it",
   },
 };

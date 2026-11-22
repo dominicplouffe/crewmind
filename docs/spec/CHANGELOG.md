@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.14 (22 Nov 2026): owner answers after phase 4
+
+- **WRK-16, 7.16:** the declaring agent may finish a side effect in any later run, and the chairman may close a declared one as outcome unknown, so none is stranded (Q-011).
+- **PLAN.md, traceability.csv:** WRK-10 moves to phase 6, with decision items (Q-010).
+
 ## Revision 2.13 (22 Nov 2026): solo projects
 
 - **Section 3, WRK-9:** solo is a working shape. With independent read off a solo project is one agent: the platform's reviewer seat is stood down and comes back when independent read is turned on again. A task closes unread only when the one reviewer did the work (Q-009, owner: "solo has to work").

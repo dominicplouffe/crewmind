@@ -86,6 +86,35 @@ export function LaunchesTab({ projectId, changes, onChanged }: Props): JSX.Eleme
                 </button>
               )
             ) : null}
+            {effect.state === "declared" ? (
+              confirming === -effect.id ? (
+                <div className="note" role="group" aria-label={words.unknownSure}>
+                  <p>{words.unknownSure}</p>
+                  <div className="row wrap">
+                    <button
+                      type="button"
+                      className="button small primary"
+                      disabled={act.busy}
+                      onClick={() =>
+                        void act.run(() =>
+                          post("/v1/launches/close_unknown", { project_id: projectId, effect_id: effect.id }),
+                        )
+                      }
+                    >
+                      {words.unknownYes}
+                    </button>
+                    <button type="button" className="button small" onClick={() => setConfirming(null)}>
+                      {t.common.cancel}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button type="button" className="button small" onClick={() => setConfirming(-effect.id)}>
+                  {words.unknown}
+                  <span className="visually-hidden"> {words.retireOf(effect.what)}</span>
+                </button>
+              )
+            ) : null}
           </li>
         ))}
       </ul>
