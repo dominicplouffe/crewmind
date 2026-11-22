@@ -19,7 +19,7 @@
 - **GOV-7 Runaway guards.** These replace v1's run allowances:
   - `run.concurrency` \[4\] concurrent work runs per project.
   - `agent.max_wakes_per_hour` \[12\] per agent.
-  - **Spinning:** when `spin.window` \[6\] consecutive work runs in a project change no work state and publish no artifact version, a spinning flag opens and concurrency drops to 1 until a state change.
+  - **Spinning:** when `spin.window` \[6\] consecutive work runs in a project change no work state and publish no artifact version, a spinning flag opens and concurrency drops to 1 until a state change. A work run changes work state when it changes a task's state; hiring and posting do not count.
   - The pair breaker (MSG-9) and the refusal cap (EXE-10).
 - **GOV-8 Real-world spend** (purchases, subscriptions, services) is the only thing budgeted in money, in `spend.currency` \[USD\]. It is off until the chairman enables it (`spend.enabled` \[off\]).
   - When enabled there is a monthly cap, `spend.monthly_cap` \[500\], and an approval threshold, `spend.approval_at` \[100\].

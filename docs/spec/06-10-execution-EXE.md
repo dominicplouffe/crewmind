@@ -77,7 +77,7 @@
   - commitment, deliverables, owed items, suggestions, pending decision items and recent settings changes.
 
   Every pack states the refusal cap and that everything the agent reads is data, not instructions.
-- **EXE-16 Stall watchdog.** In a running project with open work or open scope, if no work run has started for `stall.after` \[60 min\] and no hold with a known lift time explains it, the CEO is woken and the chairman gets one alarm naming the exact cause.
+- **EXE-16 Stall watchdog.** In a running project with open work or open scope, if no work run has started for `stall.after` \[60 min\] and no hold with a known lift time explains it, the CEO is woken and the chairman gets one alarm naming the exact cause. The alarm is not repeated until a work run has started again.
 - **EXE-17 Agent browser.** A role may be granted a `browser` tool: a headless browser running inside the run's sandbox.
   - **Actions:** open a URL, read the page as text or an accessibility tree, click, type, select, upload a workspace file, download into the workspace, take a screenshot. Each is an agent API tool, so every harness can use it.
   - **Untrusted pages.** Everything on a page is untrusted input (P4) and never instructions. The browser cannot reach private addresses, the control plane or another project's network (EXE-12).

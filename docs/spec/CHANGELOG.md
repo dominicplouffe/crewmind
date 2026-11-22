@@ -2,6 +2,18 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.12 (22 Nov 2026): phase 4 build
+
+- **Section 3:** a CEO with only a reviewer seat is solo; a lead or worker seat ends that (Q-009).
+- **WRK-2:** the CEO names the team of a top-level task; in a solo project the CEO claims.
+- **WRK-4:** what "one item" is, and where the claim-expiry time is counted from.
+- **WRK-7:** the check runs in a copy of the workspace; 4,000 characters of output are kept.
+- **WRK-9:** the platform staffs a reviewer seat when a project with independent read has none; how the reviewer is chosen (Q-009).
+- **WRK-12:** which failures are final, what a controlled domain is, and how the quote is matched.
+- **WRK-14:** killing a task kills its open subtasks.
+- **WRK-17:** what a URL watch checks; browser-script watches arrive with the agent browser.
+- **EXE-16, GOV-7:** when the stall alarm repeats, and what counts as a change of work state.
+
 ## Revision 2.11 (22 Nov 2026): phase 4 plan answers
 
 - **WRK-3:** "the same command test" means the same pinned command and test-file hashes (R-41).

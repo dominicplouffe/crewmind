@@ -19,7 +19,7 @@ There are three kinds of actor: people, machines acting for people, and agents. 
 
 **Org shapes.** A project's org is one of three shapes, computed from the roster at creation and recorded:
 
-- **Solo:** one agent plans and does the work.
+- **Solo:** one agent plans and does the work. A reviewer seat does neither, so a CEO with only a reviewer is still solo; a project stops being solo when a lead or worker seat is active.
 - **CEO + team:** flat; the CEO talks to individuals.
 - **CEO + leads + workers:** the full hierarchy. A team with a single member leads itself.
 

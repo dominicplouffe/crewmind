@@ -12,7 +12,7 @@
 
   There is no priority field: order comes from stages, dependencies and the CEO.
 - **WRK-2 Who creates.**
-  - Only the CEO creates top-level tasks, with no assignee: the team lead claims them.
+  - Only the CEO creates top-level tasks, with no assignee: it names the team, and that team's lead claims them. In a solo project there is no team to name and the CEO claims.
   - Only a team's lead creates subtasks, under a parent it has claimed, assigned to a member of its own team. Subtasks go one level deep.
   - Other agents influence the backlog only through suggestions, which create no work and go to the CEO's next planning run. If that run fails, the suggestions are given back.
 - **WRK-3 Ceilings and floors on creation.**
@@ -24,9 +24,9 @@
     - after `evidence.drought_after` \[24 h\] with no verified outside evidence, only evidence-producing tasks may be created. A project younger than that window is never in drought.
 - **WRK-4 Claim.**
   - Only ready tasks past their not-before time can be claimed. The lead claims top-level team tasks; the named assignee claims subtasks.
-  - An agent holds one item at a time.
+  - An agent holds one item at a time: a task it has claimed and not yet completed.
   - An agent may not claim a task whose success test it wrote while another active agent exists.
-  - A claim with no live run behind it for 2 × `run.timeout` returns the task to ready.
+  - A claim with no live run behind it for 2 × `run.timeout` returns the task to ready. The time is counted from the claim or from the end of the claimant's last run, whichever is later.
 - **WRK-5 Tests must fail first.**
   - When a task with a command test is created, the platform pins the command and the hashes of its `test_files`, then runs the check once on the current workspace.
   - If it already passes, creation is refused: "this test passes before any work".
@@ -42,14 +42,16 @@
 - **WRK-7 Platform checks.**
   - A command test runs in a fresh sandbox with the workspace mounted and the pinned test files restored.
   - The sandbox has no model, no credentials and no tokens: 1 CPU, 1 GB, and a timeout of the lesser of `run.timeout` and 300 seconds.
-  - Exit 0 passes; an empty command fails. The platform keeps the tail of the output.
+  - Exit 0 passes; an empty command fails. The platform keeps the last 4,000 characters of the output.
+  - The check runs in a copy of the workspace, so it cannot change the work.
   - Checks spend no tokens.
   - On an unisolated host that holds a container-runtime socket, an agent-written check is refused unless the operator explicitly allows it.
 - **WRK-8 Failure loop.** A failed check or a rejected review returns the task to ready, reserved for its previous claimant, with the attempt history ("attempt n of 3"). The claimant takes it back when it holds nothing else, so no agent is made to hold two items (WRK-4). The failure count survives re-claims; only a pass resets it. After 3 failures the task blocks and the CEO is told. If an earlier task died on the same command, the chairman gets an alarm.
 - **WRK-9 Independent read** (`review.independent` \[on\]).
   - Observable-test tasks go to review by a reviewer seat other than the author. Exactly one reviewer is woken per task.
   - A review gives ok or not-ok, plus notes of at least 10 characters.
-  - A project with independent read on must staff a reviewer seat; this is checked at creation, settings change, team change and clone. The CEO may not stand down the last reviewer seat.
+  - A project with independent read on must staff a reviewer seat; this is checked at creation, settings change, team change and clone. When a project has none, the platform staffs one, so every new project starts with a CEO and a reviewer. The CEO may not stand down the last reviewer seat.
+  - The reviewer woken is the one with the fewest reviews waiting who neither did the work nor wrote its test.
   - If no reviewer remains, the platform closes the task as "closed unread".
   - Only a solo project may turn independent read off, and doing so is labelled as a cost of running solo.
 - **WRK-10 Figures need a basis.**
@@ -65,7 +67,9 @@
   - Agent-claimed evidence starts pending and counts for nothing until the platform verifies it.
   - Verification checks that the URL is http(s), that the domain is not one the project controls, that the fetch happens after the task was created, and that the claimed content is found on the page. Event times are compared only where the source supplies one (webhooks, APIs).
   - It fetches the page through the SSRF guard (public addresses only, every redirect re-checked, 20-second timeout, 2 MB cap), then snapshots and hashes it.
-  - A fetch failure is retried up to 5 times, then fails closed.
+  - A fetch failure is retried up to 5 times, then fails closed. A failed check (an inside address, words not on the page, a domain the project controls) fails at once.
+  - A domain the project controls is one its own launches are watched at.
+  - The claimed content is a quote the agent gives; it must appear on the page, ignoring case, spacing and markup.
   - In Deliver and Operate, evidence must name a real task.
 - **WRK-13 Sampled audit.**
   - `audit.sample_rate` \[20%\] of observable closes are drawn after the fact. Every close considered is recorded as drawn or skipped, and never re-drawn.
@@ -73,11 +77,11 @@
   - Sampling never blocks or reopens work. A failure is recorded, the CEO gets an urgent notice, and a mistake report is owed (HUM-8).
 - **WRK-14 Block and kill.**
   - Only the claimant blocks a task, with a reason of at least 10 characters; the CEO is notified. There is no unblock: re-plan by killing and re-issuing.
-  - The CEO kills top-level tasks and a lead kills its own subtasks, each with a reason.
+  - The CEO kills top-level tasks and a lead kills its own subtasks, each with a reason. Killing a task kills its open subtasks.
 - **WRK-15 Honest labels.** "Verified" appears only where the platform ran the test. "Reviewed" means an independent reviewer passed it. "Self-reported" means nobody checked. Unsettled claims read "not yet checked". A judgement is never displayed as a verification.
 - **WRK-16 Side effects** are declared before firing, with an idempotency key, and finished afterwards. A duplicate key returns the existing record and "do not fire again". A retried run sees what already fired.
 - **WRK-17 Watches.**
   - A side effect that leaves something running outside the project is declared as a launch: an ad campaign, a site, a listing, a scheduled job.
-  - A launch must declare a watch: a check command, a URL with an expected condition, or a recorded browser script (EXE-17), and an interval no shorter than `watch.min_interval` \[15 min\]. A launch without one is refused.
+  - A launch must declare a watch: a check command, a URL with an expected condition, or a recorded browser script (EXE-17), and an interval no shorter than `watch.min_interval` \[15 min\]. A launch without one is refused. For a URL, the condition is words the page must contain, and the page is fetched through the SSRF guard. Browser scripts arrive with the agent browser.
   - The platform runs watches at 0 tokens. A failing watch opens a **watch failing** flag and wakes the seat that launched it.
   - A watch ends when its launch is retired.
