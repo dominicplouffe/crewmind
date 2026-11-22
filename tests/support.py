@@ -68,7 +68,12 @@ class App:
         self.work_jobs = WorkJobs(runtime.sessions, runtime.clock, runtime.services)
         self.planning = PlanningJobs(runtime.sessions, runtime.clock, runtime.services)
         self.founder = FounderWorker(
-            runtime.sessions, runtime.clock, runtime.gateway, runtime.services, runtime.executor
+            runtime.sessions,
+            runtime.clock,
+            runtime.gateway,
+            runtime.services,
+            runtime.executor,
+            runtime.hub,
         )
         self.platform = PlatformWorker(
             runtime.sessions,

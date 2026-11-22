@@ -72,7 +72,7 @@ class FounderWorker:
         hub = self._hub
 
         def publish(text: str) -> None:
-            hub.publish(f"drafting:{drafting_id}", {"type": "reply", "text": text})
+            hub.publish(f"drafting:{drafting_id}", {"text": text})
 
         return publish
 

@@ -294,32 +294,6 @@
     "title": "Alerts",
     "type": "object"
    },
-   "AnswerInput": {
-    "properties": {
-     "approve": {
-      "description": "Whether to reopen the decision.",
-      "title": "Approve",
-      "type": "boolean"
-     },
-     "project_id": {
-      "description": "The project's id, from `projects list`.",
-      "title": "Project Id",
-      "type": "string"
-     },
-     "request_id": {
-      "description": "The request's id, from `decisions requests`.",
-      "title": "Request Id",
-      "type": "integer"
-     }
-    },
-    "required": [
-     "project_id",
-     "request_id",
-     "approve"
-    ],
-    "title": "AnswerInput",
-    "type": "object"
-   },
    "ApproveInput": {
     "properties": {
      "client_id": {
@@ -1339,6 +1313,28 @@
     "title": "ChannelList",
     "type": "object"
    },
+   "CloneInput": {
+    "properties": {
+     "name": {
+      "description": "The new project's name.",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "name"
+    ],
+    "title": "CloneInput",
+    "type": "object"
+   },
    "CommandHelp": {
     "properties": {
      "commands": {
@@ -1634,45 +1630,103 @@
     "title": "CorrectionRef",
     "type": "object"
    },
-   "CreateInput": {
+   "Created": {
     "properties": {
-     "goal": {
-      "description": "The goal, in prose.",
-      "maxLength": 6000,
-      "minLength": 1,
-      "title": "Goal",
-      "type": "string"
+     "missing": {
+      "description": "What is still needed before the project can start, in plain sentences.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Missing",
+      "type": "array"
      },
      "name": {
-      "description": "The project's name.",
-      "maxLength": 200,
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "type": {
+      "title": "Type",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "name",
+     "type",
+     "state",
+     "missing"
+    ],
+    "title": "Created",
+    "type": "object"
+   },
+   "CreatedProject": {
+    "properties": {
+     "can_start": {
+      "title": "Can Start",
+      "type": "boolean"
+     },
+     "missing": {
+      "description": "What is still needed before it can start.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Missing",
+      "type": "array"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "name",
+     "state",
+     "missing",
+     "can_start"
+    ],
+    "title": "CreatedProject",
+    "type": "object"
+   },
+   "CredentialGrant": {
+    "additionalProperties": false,
+    "description": "A credential the project needs, by name, and the roles that receive it.",
+    "properties": {
+     "name": {
+      "maxLength": 100,
       "minLength": 1,
       "title": "Name",
       "type": "string"
      },
-     "timezone": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "IANA timezone. Default: your own.",
-      "title": "Timezone"
-     },
-     "type": {
-      "$ref": "#/components/schemas/ProjectType",
-      "description": "explore, deliver or operate. It never changes."
+     "roles": {
+      "items": {
+       "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
      }
     },
     "required": [
-     "name",
-     "type",
-     "goal"
+     "name"
     ],
-    "title": "CreateInput",
+    "title": "CredentialGrant",
     "type": "object"
    },
    "CredentialItem": {
@@ -1749,6 +1803,241 @@
      "name"
     ],
     "title": "CredentialRef",
+    "type": "object"
+   },
+   "CrewDoc-Input": {
+    "additionalProperties": false,
+    "description": "One crew, as a file (LIB-2).",
+    "properties": {
+     "ceo_role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Ceo Role",
+      "type": "string"
+     },
+     "crewmind_crew": {
+      "const": 1,
+      "default": 1,
+      "title": "Crewmind Crew",
+      "type": "integer"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Estimate-Input"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Reference runs and tokens for the job, when known (GOV-4)."
+     },
+     "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "outcome": {
+      "description": "What the crew delivers.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Outcome",
+      "type": "string"
+     },
+     "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "teams": {
+      "items": {
+       "$ref": "#/components/schemas/CrewTeam"
+      },
+      "title": "Teams",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "ceo_role",
+     "teams"
+    ],
+    "title": "CrewDoc",
+    "type": "object"
+   },
+   "CrewDoc-Output": {
+    "additionalProperties": false,
+    "description": "One crew, as a file (LIB-2).",
+    "properties": {
+     "ceo_role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Ceo Role",
+      "type": "string"
+     },
+     "crewmind_crew": {
+      "const": 1,
+      "default": 1,
+      "title": "Crewmind Crew",
+      "type": "integer"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/crewmind__domain__library__documents__Estimate"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Reference runs and tokens for the job, when known (GOV-4)."
+     },
+     "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "outcome": {
+      "description": "What the crew delivers.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Outcome",
+      "type": "string"
+     },
+     "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "teams": {
+      "items": {
+       "$ref": "#/components/schemas/CrewTeam"
+      },
+      "title": "Teams",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "ceo_role",
+     "teams"
+    ],
+    "title": "CrewDoc",
+    "type": "object"
+   },
+   "CrewItem": {
+    "properties": {
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate_tokens": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Estimate Tokens"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "outcome": {
+      "title": "Outcome",
+      "type": "string"
+     },
+     "seats": {
+      "description": "Seats in its teams, not counting the CEO.",
+      "title": "Seats",
+      "type": "integer"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "domains",
+     "seats",
+     "estimate_tokens"
+    ],
+    "title": "CrewItem",
+    "type": "object"
+   },
+   "CrewList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/CrewItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "CrewList",
+    "type": "object"
+   },
+   "CrewTeam": {
+    "additionalProperties": false,
+    "properties": {
+     "members": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Members",
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Role",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "role",
+     "members"
+    ],
+    "title": "CrewTeam",
     "type": "object"
    },
    "CycleView": {
@@ -1837,6 +2126,29 @@
      "date"
     ],
     "title": "DateInput",
+    "type": "object"
+   },
+   "Deadline": {
+    "additionalProperties": false,
+    "properties": {
+     "date": {
+      "format": "date-time",
+      "title": "Date",
+      "type": "string"
+     },
+     "source": {
+      "description": "The outside fact, or whose wish it is.",
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+     }
+    },
+    "required": [
+     "date",
+     "source"
+    ],
+    "title": "Deadline",
     "type": "object"
    },
    "DecisionItem": {
@@ -2019,7 +2331,7 @@
      "item": {
       "anyOf": [
        {
-        "$ref": "#/components/schemas/ItemView"
+        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
        },
        {
         "type": "null"
@@ -2148,6 +2460,223 @@
      }
     },
     "title": "Done",
+    "type": "object"
+   },
+   "DraftingItem": {
+    "properties": {
+     "drafting_id": {
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "opening": {
+      "title": "Opening",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Project Id"
+     },
+     "quick": {
+      "title": "Quick",
+      "type": "boolean"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "state",
+     "quick",
+     "opening",
+     "project_id",
+     "updated_at"
+    ],
+    "title": "DraftingItem",
+    "type": "object"
+   },
+   "DraftingList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/DraftingItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "DraftingList",
+    "type": "object"
+   },
+   "DraftingRef": {
+    "properties": {
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "drafting_id"
+    ],
+    "title": "DraftingRef",
+    "type": "object"
+   },
+   "DraftingView": {
+    "properties": {
+     "draft": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The proposed project spec.",
+      "title": "Draft"
+     },
+     "drafting_id": {
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "failure": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Failure"
+     },
+     "grade": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Grade"
+     },
+     "ledger": {
+      "items": {
+       "$ref": "#/components/schemas/LedgerLine"
+      },
+      "title": "Ledger",
+      "type": "array"
+     },
+     "lines": {
+      "items": {
+       "$ref": "#/components/schemas/Line"
+      },
+      "title": "Lines",
+      "type": "array"
+     },
+     "not_ready_because": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Not Ready Because",
+      "type": "array"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Project Id"
+     },
+     "questions": {
+      "description": "Questions waiting for your answer.",
+      "items": {
+       "$ref": "#/components/schemas/QuestionView"
+      },
+      "title": "Questions",
+      "type": "array"
+     },
+     "quick": {
+      "title": "Quick",
+      "type": "boolean"
+     },
+     "ready": {
+      "title": "Ready",
+      "type": "boolean"
+     },
+     "rehearsal": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The verdict of the rehearsal of this draft.",
+      "title": "Rehearsal"
+     },
+     "rules_hit": {
+      "description": "Tool calls of the Founder that a rule refused.",
+      "items": {
+       "additionalProperties": true,
+       "type": "object"
+      },
+      "title": "Rules Hit",
+      "type": "array"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "waiting_for": {
+      "description": "you, the Founder, or nobody.",
+      "title": "Waiting For",
+      "type": "string"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "state",
+     "quick",
+     "waiting_for",
+     "failure",
+     "lines",
+     "questions",
+     "ledger",
+     "draft",
+     "grade",
+     "rehearsal",
+     "ready",
+     "not_ready_because",
+     "rules_hit",
+     "project_id"
+    ],
+    "title": "DraftingView",
     "type": "object"
    },
    "DrawAnswerInput": {
@@ -2418,6 +2947,47 @@
     "title": "Effort",
     "type": "string"
    },
+   "ElementGrade": {
+    "properties": {
+     "element": {
+      "title": "Element",
+      "type": "string"
+     },
+     "fix": {
+      "default": "",
+      "description": "The named fix, when weak or missing.",
+      "title": "Fix",
+      "type": "string"
+     },
+     "grade": {
+      "enum": [
+       "present",
+       "weak",
+       "missing"
+      ],
+      "title": "Grade",
+      "type": "string"
+     },
+     "quote": {
+      "default": "",
+      "description": "The line of the goal the grade rests on.",
+      "title": "Quote",
+      "type": "string"
+     },
+     "reason": {
+      "default": "",
+      "description": "Why it does not apply, when graded present unquoted.",
+      "title": "Reason",
+      "type": "string"
+     }
+    },
+    "required": [
+     "element",
+     "grade"
+    ],
+    "title": "ElementGrade",
+    "type": "object"
+   },
    "Empty": {
     "description": "An operation with no input.",
     "properties": {},
@@ -2442,6 +3012,27 @@
      "memory_id"
     ],
     "title": "EntryRef",
+    "type": "object"
+   },
+   "Estimate-Input": {
+    "additionalProperties": false,
+    "properties": {
+     "runs": {
+      "minimum": 1.0,
+      "title": "Runs",
+      "type": "integer"
+     },
+     "tokens": {
+      "minimum": 1.0,
+      "title": "Tokens",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "runs",
+     "tokens"
+    ],
+    "title": "Estimate",
     "type": "object"
    },
    "EventItem": {
@@ -2831,6 +3422,49 @@
     "title": "GapView",
     "type": "object"
    },
+   "Grade": {
+    "properties": {
+     "elements": {
+      "items": {
+       "$ref": "#/components/schemas/ElementGrade"
+      },
+      "title": "Elements",
+      "type": "array"
+     },
+     "missing": {
+      "description": "Elements graded missing.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Missing",
+      "type": "array"
+     },
+     "ready": {
+      "title": "Ready",
+      "type": "boolean"
+     },
+     "summary": {
+      "title": "Summary",
+      "type": "string"
+     },
+     "weak": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Weak",
+      "type": "array"
+     }
+    },
+    "required": [
+     "ready",
+     "elements",
+     "missing",
+     "weak",
+     "summary"
+    ],
+    "title": "Grade",
+    "type": "object"
+   },
    "GrantItem": {
     "properties": {
      "client_name": {
@@ -2891,6 +3525,133 @@
      "grant_id"
     ],
     "title": "GrantRef",
+    "type": "object"
+   },
+   "GrillAnswer": {
+    "properties": {
+     "answer": {
+      "default": "",
+      "description": "Empty or \"yes\" accepts the recommendation.",
+      "maxLength": 4000,
+      "title": "Answer",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "question_id": {
+      "description": "The question's id.",
+      "title": "Question Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "question_id"
+    ],
+    "title": "GrillAnswer",
+    "type": "object"
+   },
+   "GrillInput": {
+    "properties": {
+     "document": {
+      "anyOf": [
+       {
+        "maxLength": 200000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The text to grill. Left out: your last message in the project chat.",
+      "title": "Document"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id"
+    ],
+    "title": "GrillInput",
+    "type": "object"
+   },
+   "GrillView": {
+    "properties": {
+     "can_confirm": {
+      "title": "Can Confirm",
+      "type": "boolean"
+     },
+     "characters": {
+      "title": "Characters",
+      "type": "integer"
+     },
+     "document": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The first page of the document.",
+      "title": "Document"
+     },
+     "grilling": {
+      "description": "Whether a document is being grilled now.",
+      "title": "Grilling",
+      "type": "boolean"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/crewmind__domain__founder__grill__ItemView"
+      },
+      "title": "Items",
+      "type": "array"
+     },
+     "ledger": {
+      "items": {
+       "$ref": "#/components/schemas/LedgerLine"
+      },
+      "title": "Ledger",
+      "type": "array"
+     },
+     "questions": {
+      "items": {
+       "$ref": "#/components/schemas/QuestionView"
+      },
+      "title": "Questions",
+      "type": "array"
+     },
+     "state": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "State"
+     }
+    },
+    "required": [
+     "grilling",
+     "state",
+     "document",
+     "characters",
+     "items",
+     "questions",
+     "ledger",
+     "can_confirm"
+    ],
+    "title": "GrillView",
     "type": "object"
    },
    "HTTPValidationError": {
@@ -2985,6 +3746,21 @@
       "description": "How many members.",
       "title": "Members",
       "type": "integer"
+     },
+     "names": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A name for each member, instead of a count.",
+      "title": "Names"
      },
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -3430,7 +4206,7 @@
     "properties": {
      "items": {
       "items": {
-       "$ref": "#/components/schemas/ItemView"
+       "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
       },
       "title": "Items",
       "type": "array"
@@ -3440,158 +4216,6 @@
      "items"
     ],
     "title": "ItemList",
-    "type": "object"
-   },
-   "ItemView": {
-    "properties": {
-     "actions": {
-      "description": "What you can do with it now.",
-      "items": {
-       "type": "string"
-      },
-      "title": "Actions",
-      "type": "array"
-     },
-     "basis": {
-      "anyOf": [
-       {
-        "additionalProperties": true,
-        "type": "object"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Basis"
-     },
-     "chairman_note": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Chairman Note"
-     },
-     "closed_at": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Closed At"
-     },
-     "deadline": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Deadline"
-     },
-     "default_outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "What happens if nobody answers.",
-      "title": "Default Outcome"
-     },
-     "fields": {
-      "additionalProperties": true,
-      "title": "Fields",
-      "type": "object"
-     },
-     "filed_by": {
-      "description": "agent or platform.",
-      "title": "Filed By",
-      "type": "string"
-     },
-     "id": {
-      "title": "Id",
-      "type": "integer"
-     },
-     "if_declined": {
-      "title": "If Declined",
-      "type": "string"
-     },
-     "kind": {
-      "title": "Kind",
-      "type": "string"
-     },
-     "opened_at": {
-      "format": "date-time",
-      "title": "Opened At",
-      "type": "string"
-     },
-     "outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Outcome"
-     },
-     "project_id": {
-      "title": "Project Id",
-      "type": "string"
-     },
-     "recommendation": {
-      "title": "Recommendation",
-      "type": "string"
-     },
-     "state": {
-      "title": "State",
-      "type": "string"
-     },
-     "title": {
-      "description": "Built from the item's typed fields.",
-      "title": "Title",
-      "type": "string"
-     },
-     "waits_on_you": {
-      "title": "Waits On You",
-      "type": "boolean"
-     }
-    },
-    "required": [
-     "id",
-     "project_id",
-     "kind",
-     "title",
-     "state",
-     "filed_by",
-     "fields",
-     "recommendation",
-     "if_declined",
-     "basis",
-     "actions",
-     "deadline",
-     "default_outcome",
-     "outcome",
-     "chairman_note",
-     "waits_on_you",
-     "opened_at",
-     "closed_at"
-    ],
-    "title": "ItemView",
     "type": "object"
    },
    "Kind": {
@@ -3622,6 +4246,42 @@
      "effect_id"
     ],
     "title": "LaunchRef",
+    "type": "object"
+   },
+   "LedgerLine": {
+    "properties": {
+     "passage": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Passage"
+     },
+     "settles": {
+      "title": "Settles",
+      "type": "string"
+     },
+     "source": {
+      "description": "words (yours), answer or assumption.",
+      "title": "Source",
+      "type": "string"
+     },
+     "value": {
+      "title": "Value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "settles",
+     "value",
+     "source",
+     "passage"
+    ],
+    "title": "LedgerLine",
     "type": "object"
    },
    "LeverInput": {
@@ -3655,6 +4315,49 @@
      "reason"
     ],
     "title": "LeverInput",
+    "type": "object"
+   },
+   "Line": {
+    "properties": {
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "author": {
+      "description": "person, founder or platform.",
+      "title": "Author",
+      "type": "string"
+     },
+     "body": {
+      "title": "Body",
+      "type": "string"
+     },
+     "detail": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Detail"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "id",
+     "author",
+     "body",
+     "detail",
+     "at"
+    ],
+    "title": "Line",
     "type": "object"
    },
    "LinkOutput": {
@@ -5014,6 +5717,143 @@
     "title": "ProjectRef",
     "type": "object"
    },
+   "ProjectSpec": {
+    "additionalProperties": false,
+    "description": "One project, as a file (LIB-4).",
+    "properties": {
+     "budget_tokens": {
+      "anyOf": [
+       {
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Default: the type's budget.",
+      "title": "Budget Tokens"
+     },
+     "ceo": {
+      "$ref": "#/components/schemas/SpecCeo"
+     },
+     "controlled_domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Controlled Domains",
+      "type": "array"
+     },
+     "credentials": {
+      "items": {
+       "$ref": "#/components/schemas/CredentialGrant"
+      },
+      "title": "Credentials",
+      "type": "array"
+     },
+     "crewmind_spec": {
+      "const": 1,
+      "default": 1,
+      "title": "Crewmind Spec",
+      "type": "integer"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Deadline"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "goal": {
+      "maxLength": 6000,
+      "minLength": 1,
+      "title": "Goal",
+      "type": "string"
+     },
+     "integrations": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Integrations",
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "paying_credential": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The credential that pays, by name.",
+      "title": "Paying Credential"
+     },
+     "quality": {
+      "anyOf": [
+       {
+        "enum": [
+         "fast",
+         "balanced",
+         "best"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Quality"
+     },
+     "roles": {
+      "description": "Custom roles the spec brings with it.",
+      "items": {
+       "$ref": "#/components/schemas/RoleDoc"
+      },
+      "title": "Roles",
+      "type": "array"
+     },
+     "settings": {
+      "additionalProperties": true,
+      "description": "Settings that differ from the defaults.",
+      "title": "Settings",
+      "type": "object"
+     },
+     "standing_orders": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Standing Orders",
+      "type": "array"
+     },
+     "teams": {
+      "items": {
+       "$ref": "#/components/schemas/SpecTeam"
+      },
+      "title": "Teams",
+      "type": "array"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ProjectType"
+     }
+    },
+    "required": [
+     "name",
+     "goal",
+     "type"
+    ],
+    "title": "ProjectSpec",
+    "type": "object"
+   },
    "ProjectStatus": {
     "properties": {
      "created_at": {
@@ -5267,6 +6107,84 @@
     "title": "QualityInput",
     "type": "object"
    },
+   "QuestionView": {
+    "properties": {
+     "changes": {
+      "description": "What your answer changes.",
+      "title": "Changes",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "options": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Options",
+      "type": "array"
+     },
+     "recommended": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The recommended option. Empty: you choose.",
+      "title": "Recommended"
+     },
+     "settles": {
+      "title": "Settles",
+      "type": "string"
+     },
+     "text": {
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "settles",
+     "text",
+     "options",
+     "recommended",
+     "changes"
+    ],
+    "title": "QuestionView",
+    "type": "object"
+   },
+   "QuickInput": {
+    "properties": {
+     "brief": {
+      "description": "What you want.",
+      "maxLength": 200000,
+      "minLength": 1,
+      "title": "Brief",
+      "type": "string"
+     },
+     "credential": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The credential that pays. Needed when you have several.",
+      "title": "Credential"
+     }
+    },
+    "required": [
+     "brief"
+    ],
+    "title": "QuickInput",
+    "type": "object"
+   },
    "RaiseAnswerInput": {
     "properties": {
      "amount": {
@@ -5490,6 +6408,112 @@
      "constraints"
     ],
     "title": "Registry",
+    "type": "object"
+   },
+   "RehearsalReport": {
+    "properties": {
+     "clock": {
+      "description": "What the wall-clock rules do at their real numbers.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Clock",
+      "type": "array"
+     },
+     "estimate": {
+      "$ref": "#/components/schemas/crewmind__domain__rehearsal__report__Estimate"
+     },
+     "longest_chain": {
+      "title": "Longest Chain",
+      "type": "string"
+     },
+     "not_exercised": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Not Exercised",
+      "type": "array"
+     },
+     "note": {
+      "default": "A rehearsal checks that the project is set up to run under the rules. It does not predict how good the work will be.",
+      "title": "Note",
+      "type": "string"
+     },
+     "ok": {
+      "description": "Whether the walk reached its first verified close.",
+      "title": "Ok",
+      "type": "boolean"
+     },
+     "parallelism": {
+      "title": "Parallelism",
+      "type": "string"
+     },
+     "projected_duration": {
+      "title": "Projected Duration",
+      "type": "string"
+     },
+     "rules_hit": {
+      "items": {
+       "$ref": "#/components/schemas/RuleHit"
+      },
+      "title": "Rules Hit",
+      "type": "array"
+     },
+     "setup_missing": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Setup Missing",
+      "type": "array"
+     },
+     "staffing": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Staffing",
+      "type": "array"
+     },
+     "text": {
+      "default": "",
+      "description": "The report as plain text.",
+      "title": "Text",
+      "type": "string"
+     },
+     "verdict": {
+      "title": "Verdict",
+      "type": "string"
+     },
+     "waited_for_the_chairman": {
+      "items": {
+       "$ref": "#/components/schemas/Wait"
+      },
+      "title": "Waited For The Chairman",
+      "type": "array"
+     },
+     "walk": {
+      "items": {
+       "$ref": "#/components/schemas/Step"
+      },
+      "title": "Walk",
+      "type": "array"
+     }
+    },
+    "required": [
+     "verdict",
+     "ok",
+     "walk",
+     "waited_for_the_chairman",
+     "clock",
+     "staffing",
+     "rules_hit",
+     "estimate",
+     "parallelism",
+     "longest_chain",
+     "projected_duration",
+     "setup_missing",
+     "not_exercised"
+    ],
+    "title": "RehearsalReport",
     "type": "object"
    },
    "RememberInput": {
@@ -5815,10 +6839,144 @@
     "title": "ReserveView",
     "type": "object"
    },
+   "RoleDoc": {
+    "additionalProperties": false,
+    "description": "One role, as a file (LIB-1).",
+    "properties": {
+     "category": {
+      "maxLength": 40,
+      "title": "Category",
+      "type": "string"
+     },
+     "charter": {
+      "description": "Its standing brief.",
+      "maxLength": 40000,
+      "minLength": 1,
+      "title": "Charter",
+      "type": "string"
+     },
+     "credential_names": {
+      "description": "The credentials it receives, by name only.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Credential Names",
+      "type": "array"
+     },
+     "crewmind_role": {
+      "const": 1,
+      "default": 1,
+      "title": "Crewmind Role",
+      "type": "integer"
+     },
+     "description": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "kind": {
+      "description": "ceo: can be the CEO. reviewer: reads others' work. worker: does tasks.",
+      "enum": [
+       "ceo",
+       "worker",
+       "reviewer"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "min_class": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/ModelClass"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The lowest model class this role may run on, whatever the dial says."
+     },
+     "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "needs_vision": {
+      "default": false,
+      "title": "Needs Vision",
+      "type": "boolean"
+     },
+     "skills": {
+      "description": "Skills it may use, each pinned by version.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Skills",
+      "type": "array"
+     },
+     "slug": {
+      "description": "The role's short id, in lower case with hyphens.",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "tools": {
+      "description": "What the role may use inside its sandbox.",
+      "items": {
+       "enum": [
+        "files",
+        "shell",
+        "web",
+        "data",
+        "browser",
+        "a2a"
+       ],
+       "type": "string"
+      },
+      "title": "Tools",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "kind",
+     "category",
+     "description",
+     "tools",
+     "charter"
+    ],
+    "title": "RoleDoc",
+    "type": "object"
+   },
    "RoleItem": {
     "properties": {
+     "category": {
+      "title": "Category",
+      "type": "string"
+     },
      "description": {
       "title": "Description",
+      "type": "string"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "kind": {
+      "description": "ceo, worker or reviewer.",
+      "title": "Kind",
       "type": "string"
      },
      "name": {
@@ -5827,6 +6985,10 @@
      },
      "seat_kind": {
       "title": "Seat Kind",
+      "type": "string"
+     },
+     "slug": {
+      "title": "Slug",
       "type": "string"
      },
      "tools": {
@@ -5842,9 +7004,13 @@
      }
     },
     "required": [
+     "slug",
      "name",
      "version",
+     "kind",
      "seat_kind",
+     "category",
+     "domains",
      "description",
      "tools"
     ],
@@ -5867,6 +7033,35 @@
     "title": "RoleList",
     "type": "object"
    },
+   "RoleSaved": {
+    "properties": {
+     "changed": {
+      "description": "False when the same content was already the newest.",
+      "title": "Changed",
+      "type": "boolean"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     },
+     "version": {
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "version",
+     "changed"
+    ],
+    "title": "RoleSaved",
+    "type": "object"
+   },
    "Roster": {
     "properties": {
      "seats": {
@@ -5874,6 +7069,13 @@
        "$ref": "#/components/schemas/SeatItem"
       },
       "title": "Seats",
+      "type": "array"
+     },
+     "team_roles": {
+      "items": {
+       "$ref": "#/components/schemas/TeamRole"
+      },
+      "title": "Team Roles",
       "type": "array"
      },
      "teams": {
@@ -5889,6 +7091,34 @@
      "teams"
     ],
     "title": "Roster",
+    "type": "object"
+   },
+   "RuleHit": {
+    "properties": {
+     "code": {
+      "title": "Code",
+      "type": "string"
+     },
+     "message": {
+      "title": "Message",
+      "type": "string"
+     },
+     "rule": {
+      "title": "Rule",
+      "type": "string"
+     },
+     "times": {
+      "title": "Times",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "rule",
+     "code",
+     "times",
+     "message"
+    ],
+    "title": "RuleHit",
     "type": "object"
    },
    "RunItem": {
@@ -6225,6 +7455,57 @@
     "title": "RunTrace",
     "type": "object"
    },
+   "SayInput": {
+    "properties": {
+     "body": {
+      "description": "Your message.",
+      "maxLength": 200000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+     },
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "body"
+    ],
+    "title": "SayInput",
+    "type": "object"
+   },
+   "SearchHit": {
+    "properties": {
+     "kind": {
+      "description": "role or crew.",
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     },
+     "summary": {
+      "title": "Summary",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "slug",
+     "name",
+     "summary"
+    ],
+    "title": "SearchHit",
+    "type": "object"
+   },
    "SearchHits": {
     "properties": {
      "artifacts": {
@@ -6247,6 +7528,22 @@
      "artifacts"
     ],
     "title": "SearchHits",
+    "type": "object"
+   },
+   "SearchResult": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/SearchHit"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "SearchResult",
     "type": "object"
    },
    "SeatItem": {
@@ -6702,6 +7999,98 @@
     "title": "Snoozed",
     "type": "object"
    },
+   "SpecCeo": {
+    "additionalProperties": false,
+    "properties": {
+     "role": {
+      "default": "ceo",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Role",
+      "type": "string"
+     }
+    },
+    "title": "SpecCeo",
+    "type": "object"
+   },
+   "SpecCheck": {
+    "properties": {
+     "ok": {
+      "title": "Ok",
+      "type": "boolean"
+     },
+     "problems": {
+      "description": "What stops the spec from becoming a project.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Problems",
+      "type": "array"
+     }
+    },
+    "required": [
+     "ok",
+     "problems"
+    ],
+    "title": "SpecCheck",
+    "type": "object"
+   },
+   "SpecTeam": {
+    "additionalProperties": false,
+    "properties": {
+     "members": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Members",
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Role",
+      "type": "string"
+     },
+     "stand_down_when": {
+      "anyOf": [
+       {
+        "maxLength": 40,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Stand Down When"
+     },
+     "version": {
+      "anyOf": [
+       {
+        "minimum": 1.0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The role version to pin. Default: newest.",
+      "title": "Version"
+     }
+    },
+    "required": [
+     "name",
+     "role",
+     "members"
+    ],
+    "title": "SpecTeam",
+    "type": "object"
+   },
    "SpeedView": {
     "properties": {
      "flags": {
@@ -6804,6 +8193,66 @@
      "purchases"
     ],
     "title": "SpendView",
+    "type": "object"
+   },
+   "StartInput": {
+    "properties": {
+     "brief": {
+      "description": "What you want, in your own words.",
+      "maxLength": 200000,
+      "minLength": 1,
+      "title": "Brief",
+      "type": "string"
+     },
+     "document": {
+      "anyOf": [
+       {
+        "maxLength": 200000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The text of a brief to grill first.",
+      "title": "Document"
+     }
+    },
+    "required": [
+     "brief"
+    ],
+    "title": "StartInput",
+    "type": "object"
+   },
+   "Step": {
+    "properties": {
+     "after_seconds": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Drill time since the start. Empty when the step did not happen.",
+      "title": "After Seconds"
+     },
+     "happened": {
+      "title": "Happened",
+      "type": "boolean"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "what",
+     "after_seconds",
+     "happened"
+    ],
+    "title": "Step",
     "type": "object"
    },
    "SubscribeInput": {
@@ -7280,6 +8729,37 @@
      "team"
     ],
     "title": "TeamRef",
+    "type": "object"
+   },
+   "TeamRole": {
+    "properties": {
+     "newest": {
+      "description": "The newest version of that role.",
+      "title": "Newest",
+      "type": "integer"
+     },
+     "role": {
+      "description": "The role's slug.",
+      "title": "Role",
+      "type": "string"
+     },
+     "team": {
+      "title": "Team",
+      "type": "string"
+     },
+     "version": {
+      "description": "The role version the team is pinned to.",
+      "title": "Version",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "team",
+     "role",
+     "version",
+     "newest"
+    ],
+    "title": "TeamRole",
     "type": "object"
    },
    "ThreadRef": {
@@ -7790,6 +9270,24 @@
     "title": "Versions",
     "type": "object"
    },
+   "Wait": {
+    "properties": {
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "times": {
+      "title": "Times",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "kind",
+     "times"
+    ],
+    "title": "Wait",
+    "type": "object"
+   },
    "WaiveInput": {
     "properties": {
      "gap_id": {
@@ -7871,6 +9369,32 @@
      "doing"
     ],
     "title": "Working",
+    "type": "object"
+   },
+   "crewmind__domain__conversation__decisions__AnswerInput": {
+    "properties": {
+     "approve": {
+      "description": "Whether to reopen the decision.",
+      "title": "Approve",
+      "type": "boolean"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "request_id": {
+      "description": "The request's id, from `decisions requests`.",
+      "title": "Request Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "project_id",
+     "request_id",
+     "approve"
+    ],
+    "title": "AnswerInput",
     "type": "object"
    },
    "crewmind__domain__conversation__decisions__DecideInput": {
@@ -8105,6 +9629,278 @@
     "title": "ExtendInput",
     "type": "object"
    },
+   "crewmind__domain__decisions__operations__ItemView": {
+    "properties": {
+     "actions": {
+      "description": "What you can do with it now.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Actions",
+      "type": "array"
+     },
+     "basis": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basis"
+     },
+     "chairman_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chairman Note"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "default_outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What happens if nobody answers.",
+      "title": "Default Outcome"
+     },
+     "fields": {
+      "additionalProperties": true,
+      "title": "Fields",
+      "type": "object"
+     },
+     "filed_by": {
+      "description": "agent or platform.",
+      "title": "Filed By",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "title": {
+      "description": "Built from the item's typed fields.",
+      "title": "Title",
+      "type": "string"
+     },
+     "waits_on_you": {
+      "title": "Waits On You",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "project_id",
+     "kind",
+     "title",
+     "state",
+     "filed_by",
+     "fields",
+     "recommendation",
+     "if_declined",
+     "basis",
+     "actions",
+     "deadline",
+     "default_outcome",
+     "outcome",
+     "chairman_note",
+     "waits_on_you",
+     "opened_at",
+     "closed_at"
+    ],
+    "title": "ItemView",
+    "type": "object"
+   },
+   "crewmind__domain__founder__grill__ItemView": {
+    "properties": {
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     },
+     "passage": {
+      "title": "Passage",
+      "type": "string"
+     },
+     "problem": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Problem"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "kind",
+     "passage",
+     "problem",
+     "note",
+     "state"
+    ],
+    "title": "ItemView",
+    "type": "object"
+   },
+   "crewmind__domain__founder__operations__AnswerInput": {
+    "properties": {
+     "answer": {
+      "default": "",
+      "description": "Empty or \"yes\" accepts the recommendation; a letter picks an option; anything else is your own answer.",
+      "maxLength": 4000,
+      "title": "Answer",
+      "type": "string"
+     },
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "question_id": {
+      "description": "The question's id.",
+      "title": "Question Id",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "drafting_id",
+     "question_id"
+    ],
+    "title": "AnswerInput",
+    "type": "object"
+   },
+   "crewmind__domain__founder__operations__CreateInput": {
+    "properties": {
+     "drafting_id": {
+      "description": "The conversation's id, from `founder list`.",
+      "title": "Drafting Id",
+      "type": "string"
+     },
+     "start": {
+      "default": false,
+      "description": "Start the project once it is created.",
+      "title": "Start",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "drafting_id"
+    ],
+    "title": "CreateInput",
+    "type": "object"
+   },
+   "crewmind__domain__library__documents__Estimate": {
+    "additionalProperties": false,
+    "properties": {
+     "runs": {
+      "minimum": 1.0,
+      "title": "Runs",
+      "type": "integer"
+     },
+     "tokens": {
+      "minimum": 1.0,
+      "title": "Tokens",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "runs",
+     "tokens"
+    ],
+    "title": "Estimate",
+    "type": "object"
+   },
    "crewmind__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
@@ -8250,6 +10046,77 @@
      "passed"
     ],
     "title": "RuleInput",
+    "type": "object"
+   },
+   "crewmind__domain__projects__operations__CreateInput": {
+    "properties": {
+     "goal": {
+      "description": "The goal, in prose.",
+      "maxLength": 6000,
+      "minLength": 1,
+      "title": "Goal",
+      "type": "string"
+     },
+     "name": {
+      "description": "The project's name.",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "timezone": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "IANA timezone. Default: your own.",
+      "title": "Timezone"
+     },
+     "type": {
+      "$ref": "#/components/schemas/ProjectType",
+      "description": "explore, deliver or operate. It never changes."
+     }
+    },
+    "required": [
+     "name",
+     "type",
+     "goal"
+    ],
+    "title": "CreateInput",
+    "type": "object"
+   },
+   "crewmind__domain__rehearsal__report__Estimate": {
+    "properties": {
+     "basis": {
+      "title": "Basis",
+      "type": "string"
+     },
+     "runs_to_first_close": {
+      "title": "Runs To First Close",
+      "type": "integer"
+     },
+     "tokens_to_first_close": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tokens To First Close"
+     }
+    },
+    "required": [
+     "runs_to_first_close",
+     "tokens_to_first_close",
+     "basis"
+    ],
+    "title": "Estimate",
     "type": "object"
    },
    "crewmind__domain__settings__operations__History": {
@@ -10798,6 +12665,115 @@
     ]
    }
   },
+  "/v1/crews/list": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "crews.list",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CrewList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List the ready-made crews: each is a job with a team already on it.",
+    "tags": [
+     "crews"
+    ]
+   }
+  },
+  "/v1/crews/save": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "crews.save",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CrewDoc-Input"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CrewItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a crew from a file, or replace one that exists.",
+    "tags": [
+     "crews"
+    ]
+   }
+  },
+  "/v1/crews/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "crews.show",
+    "parameters": [
+     {
+      "description": "The crew's slug, from `crews list`.",
+      "in": "query",
+      "name": "crew",
+      "required": true,
+      "schema": {
+       "description": "The crew's slug, from `crews list`.",
+       "title": "Crew",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CrewDoc-Output"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one crew in full, as the file it can be saved to.",
+    "tags": [
+     "crews"
+    ]
+   }
+  },
   "/v1/cycles/set_due": {
    "post": {
     "description": "Requires: project_chair.",
@@ -10848,7 +12824,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/AnswerInput"
+        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__AnswerInput"
        }
       }
      },
@@ -11336,6 +13312,325 @@
     ]
    }
   },
+  "/v1/founder/accept_rest": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.accept_rest",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DraftingRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Tell the Founder to use its own recommendations for everything still open.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/answer": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.answer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__founder__operations__AnswerInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Answer a question the Founder asked.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/create": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.create",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/crewmind__domain__founder__operations__CreateInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CreatedProject"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Confirm the ledger and create the project from the draft.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/list": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "founder.list",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List your drafting conversations.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/quick": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.quick",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuickInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Quick mode: the Founder decides everything itself, then creates and starts.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/say": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.say",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SayInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Say something to the Founder in a drafting conversation.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "founder.show",
+    "parameters": [
+     {
+      "description": "The conversation's id, from `founder list`.",
+      "in": "query",
+      "name": "drafting_id",
+      "required": true,
+      "schema": {
+       "description": "The conversation's id, from `founder list`.",
+       "title": "Drafting Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show a drafting conversation: what was said, the ledger and the draft.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
+  "/v1/founder/start": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.start",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/StartInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Start drafting a project by describing what you want.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
   "/v1/gaps/waive": {
    "post": {
     "description": "Requires: project_chair.",
@@ -11378,6 +13673,266 @@
     ]
    }
   },
+  "/v1/goals/grade": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "goals.grade",
+    "parameters": [
+     {
+      "description": "The goal, in prose.",
+      "in": "query",
+      "name": "goal",
+      "required": true,
+      "schema": {
+       "description": "The goal, in prose.",
+       "maxLength": 200000,
+       "minLength": 1,
+       "title": "Goal",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Grade"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Grade a goal against the ten elements of the goal grammar.",
+    "tags": [
+     "goals"
+    ]
+   }
+  },
+  "/v1/grill/accept_rest": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "grill.accept_rest",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrillView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Tell the CEO to use its recommendations for every passage still open.",
+    "tags": [
+     "grill"
+    ]
+   }
+  },
+  "/v1/grill/answer": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "grill.answer",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GrillAnswer"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrillView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Answer a question the CEO asked while grilling a document.",
+    "tags": [
+     "grill"
+    ]
+   }
+  },
+  "/v1/grill/confirm": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "grill.confirm",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrillView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Confirm the ledger of a grilled document, so the CEO may propose it as scope.",
+    "tags": [
+     "grill"
+    ]
+   }
+  },
+  "/v1/grill/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "grill.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrillView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show the grilling in this project: the passages, the questions and the ledger.",
+    "tags": [
+     "grill"
+    ]
+   }
+  },
+  "/v1/grill/start": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "grill.start",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GrillInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/GrillView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Have the CEO grill a document, or your last message, before it becomes work.",
+    "tags": [
+     "grill"
+    ]
+   }
+  },
   "/v1/items/decide": {
    "post": {
     "description": "Requires: project_chair.",
@@ -11397,7 +13952,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemView"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
         }
        }
       },
@@ -11439,7 +13994,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemView"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
         }
        }
       },
@@ -11556,7 +14111,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemView"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
         }
        }
       },
@@ -11803,6 +14358,107 @@
     "summary": "Retire a launch. Its watch ends.",
     "tags": [
      "launches"
+    ]
+   }
+  },
+  "/v1/library/reload": {
+   "post": {
+    "description": "Requires: admin.",
+    "operationId": "library.reload",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Empty"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/CrewList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Load the roles and crews shipped with this version of crewmind again.",
+    "tags": [
+     "library"
+    ]
+   }
+  },
+  "/v1/library/search": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "library.search",
+    "parameters": [
+     {
+      "description": "Words describing the work.",
+      "in": "query",
+      "name": "query",
+      "required": true,
+      "schema": {
+       "description": "Words describing the work.",
+       "maxLength": 400,
+       "minLength": 1,
+       "title": "Query",
+       "type": "string"
+      }
+     },
+     {
+      "in": "query",
+      "name": "limit",
+      "required": false,
+      "schema": {
+       "default": 10,
+       "maximum": 50,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SearchResult"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Find roles and crews that fit a piece of work.",
+    "tags": [
+     "library"
     ]
    }
   },
@@ -13746,6 +16402,48 @@
     ]
    }
   },
+  "/v1/projects/clone": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "projects.clone",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/CloneInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Created"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Create a new draft project set up like this one, with none of its history.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
   "/v1/projects/complete": {
    "post": {
     "description": "Requires: project_chair.",
@@ -13838,7 +16536,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/CreateInput"
+        "$ref": "#/components/schemas/crewmind__domain__projects__operations__CreateInput"
        }
       }
      },
@@ -13956,6 +16654,51 @@
     ]
    }
   },
+  "/v1/projects/export": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "projects.export",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProjectSpec"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Export a project as a spec: its goal, settings, roster and standing orders.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
   "/v1/projects/hold": {
    "post": {
     "description": "Requires: project_chair.",
@@ -13993,6 +16736,48 @@
      }
     },
     "summary": "Hold a project, optionally until a time. Work stops; you can still chat.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/import_spec": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "projects.import_spec",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectSpec"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Created"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Create a project in draft from a project spec. You become its chairman.",
     "tags": [
      "projects"
     ]
@@ -14184,6 +16969,51 @@
      }
     },
     "summary": "Show a completed project's receipt.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
+  "/v1/projects/rehearse": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "projects.rehearse",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RehearsalReport"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Rehearse this project as it is set up now, without spending tokens.",
     "tags": [
      "projects"
     ]
@@ -15321,7 +18151,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemView"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemView"
         }
        }
       },
@@ -15361,6 +18191,93 @@
      }
     },
     "summary": "List the roles agents can be hired from.",
+    "tags": [
+     "roles"
+    ]
+   }
+  },
+  "/v1/roles/save": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "roles.save",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RoleDoc"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RoleSaved"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a role from a file, or a new version of one that exists.",
+    "tags": [
+     "roles"
+    ]
+   }
+  },
+  "/v1/roles/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "roles.show",
+    "parameters": [
+     {
+      "description": "The role's slug or name, from `roles list`.",
+      "in": "query",
+      "name": "role",
+      "required": true,
+      "schema": {
+       "description": "The role's slug or name, from `roles list`.",
+       "title": "Role",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RoleDoc"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one role in full, as the file it can be saved to.",
     "tags": [
      "roles"
     ]
@@ -15445,6 +18362,48 @@
      }
     },
     "summary": "Recall a team that was stood down.",
+    "tags": [
+     "roster"
+    ]
+   }
+  },
+  "/v1/roster/repin_team": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "roster.repin_team",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/TeamRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Roster"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Move a team to the newest version of its role.",
     "tags": [
      "roster"
     ]
@@ -16099,6 +19058,90 @@
     "summary": "Show a project's settings and their current values.",
     "tags": [
      "settings"
+    ]
+   }
+  },
+  "/v1/specs/check": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "specs.check",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectSpec"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SpecCheck"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Check a project spec without creating anything.",
+    "tags": [
+     "specs"
+    ]
+   }
+  },
+  "/v1/specs/rehearse": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "specs.rehearse",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProjectSpec"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RehearsalReport"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Rehearse a project spec: a fire drill that spends no tokens.",
+    "tags": [
+     "specs"
     ]
    }
   },
