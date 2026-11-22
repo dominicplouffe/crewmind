@@ -65,6 +65,7 @@ markers = [
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+extend-exclude = ["scripts/dev"]  # working scripts for the build, not product code
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "ASYNC", "PT"]
