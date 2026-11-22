@@ -75,14 +75,14 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** the three project types, honest projections, and speed as a requirement.
 - **Exit demo:** the golden path passes for all three types, and the speed acceptance criterion passes. A nearly finished Deliver project draws the CEO reserve, and a half-finished one is refused.
-- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-5, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19; WRK-11 (moved from phase 4: it needs requirements)
+- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19; WRK-11 (moved from phase 4: it needs requirements)
 
 ## Phase 6: Chairman loop
 
 - **Goal:** the chairman sees everything that matters and is never left in silence.
 - **Includes:** the install-level outbound mail account (part of INT-6) so alerts and briefs can be emailed. Project mailboxes stay in phase 8.
 - **Exit demo:** the never-silent acceptance scenario passes. The desk, daily brief, since-you-were-away, agenda and alerts all agree with the event log, and MCP steer and create scopes work with two-phase confirmation.
-- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13; WRK-10 (moved from phase 4: it needs decision items)
+- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13; WRK-10 (moved from phase 4: it needs decision items); SPD-5 (moved from phase 5: it needs question items)
 
 ## Phase 7: Founder and rehearsal (v2.0 release candidate)
 

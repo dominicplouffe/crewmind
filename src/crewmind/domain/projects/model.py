@@ -65,6 +65,7 @@ PROJECT_MACHINE = StateMachine(
         (S.READY, S.COMPLETED),
         (S.RUNNING, S.COMPLETED),
         (S.HELD, S.COMPLETED),
+        (S.PAUSED, S.COMPLETED),
         (S.COMPLETED, S.RUNNING),
         *((state, S.STOPPED) for state in _STOPPABLE),
         *((state, S.DELETING) for state in _DELETABLE),

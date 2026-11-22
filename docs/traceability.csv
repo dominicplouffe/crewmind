@@ -51,7 +51,7 @@ SPD-1,No clock waits on ready work,06-02-speed-SPD.md,5,yes,not started,,
 SPD-2,Parallel by default,06-02-speed-SPD.md,5,yes,not started,,
 SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,not started,,
 SPD-4,"Ship early, then improve",06-02-speed-SPD.md,5,yes,not started,,
-SPD-5,Questions never block,06-02-speed-SPD.md,5,yes,not started,,
+SPD-5,Questions never block,06-02-speed-SPD.md,6,yes,not started,,Moved from phase 5 (phase 5 plan): it needs question items
 SPD-6,Done means available,06-02-speed-SPD.md,5,yes,not started,,
 SPD-7,Explore is time-boxed,06-02-speed-SPD.md,5,yes,not started,,
 SPD-8,Speed is measured,06-02-speed-SPD.md,5,yes,not started,,

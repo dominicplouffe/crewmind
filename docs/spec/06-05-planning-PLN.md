@@ -42,6 +42,7 @@
   - When every task under an in-progress requirement is closed, at least one is done, and work has changed since the last ruling, the requirement moves to checking.
   - A command test is run by the platform: pass means met. Fail means back to in progress, with escalation to the CEO once after 3 failures.
   - An observable test waits for a verdict from whoever holds verdict authority: an independent reviewer seat under autonomous, the chairman under supervised. A rejection needs a note and sticks.
-  - The test is not re-run, and the verdict not re-asked, until work under the requirement changes.
-- **PLN-11 Metric requirements** are read on a schedule, `metric.read_every` \[24 h\] (at most hourly), from sources outside the project. The project is **losing ground** when the latest reading is further from target than the oldest reading in a 6-reading window. A single bad reading is not enough.
+  - The test is not re-run, and the verdict not re-asked, until work under the requirement changes: a task under it reaches done after the last ruling, or the workspace snapshot changes.
+  - A metric requirement is met when a platform reading reaches its target (PLN-11). A recurring one resets at the cycle roll.
+- **PLN-11 Metric requirements** are read on a schedule, `metric.read_every` \[24 h\] (at most hourly), from sources outside the project. The project is **losing ground** when the latest reading is further from target than the oldest reading in a 6-reading window. A single bad reading is not enough. Until data-source connectors exist (INT), a metric names a public URL and a pattern that finds the number on the page; the platform fetches it through the SSRF guard (WRK-12).
 - **PLN-12 Stand-down conditions.** A team may carry a machine-checkable stand-down condition, such as "requirements met" or "a stage cleared". The platform stands the team down when the condition becomes true, unless the team still holds work.

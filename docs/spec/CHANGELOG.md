@@ -2,6 +2,17 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.15 (22 Nov 2026): phase 5 plan answers
+
+- **GOV-3:** in wrap-up mode a new task may also serve a bet already active (R-24).
+- **GOV-10:** what an Explore draw allows afterwards; a Deliver draw is refused when plan tokens are unknown (R-46).
+- **PLN-10:** what "work has changed" means (R-40); a metric requirement is met when a reading reaches its target (R-44).
+- **PLN-11:** until connectors exist, a metric is read from a public URL with a pattern, through the SSRF guard.
+- **PRJ-8, 7.1:** skipped and missed cycles defined (R-45); the chairman can complete an Operate project (R-62).
+- **INV-18:** reworded so a met requirement with done tasks does not break it (R-55).
+- **7.1:** a CEO adds scope to a ready project only through a chairman directive (R-61). R-58 was already in 7.6.
+- **PLAN.md, traceability.csv:** SPD-5 moves to phase 6, with question items.
+
 ## Revision 2.14 (22 Nov 2026): owner answers after phase 4
 
 - **WRK-16, 7.16:** the declaring agent may finish a side effect in any later run, and the chairman may close a declared one as outcome unknown, so none is stranded (Q-011).

@@ -40,7 +40,7 @@ These must hold at all times, under any sequence of API calls, crashes and retri
 **Decisions and scope**
 
 - **INV-17** A decision item reaching its deadline always resolves to its declared default (HUM-2). Tool permissions never resolve to allow.
-- **INV-18** Proposed scope never has work against it; no task exists under a requirement that is not ready for work (PLN-2).
+- **INV-18** Proposed scope never has work against it; no task is created under a requirement that is not ready for work, and no open task remains under a cut one (PLN-2).
 - **INV-19** The requirement graph is always acyclic, and where stages are used, work never runs ahead of the lowest open stage.
 - **INV-20** A held, paused, stopped, ready or completed project changes no work state.
 - **INV-21** Every state change appears in the event log with its actor (person, person via MCP or Slack, agent, or platform job), time, before and after.

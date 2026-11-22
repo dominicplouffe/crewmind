@@ -32,9 +32,10 @@ A project has a lifecycle state, plus a set of active **hold reasons**. The reas
 | paused | held | The last platform reason lifted while `chairman` remains | Chairman; platform |
 | held, paused | running | The last hold reason lifted | Chairman; platform |
 | running | ready | Deliver only: PRJ-4 conditions met | Platform |
-| ready | running | Scope added or reopened | Chairman; CEO with plan or scope authority |
+| ready | running | Scope added or reopened; a CEO reaches this only through a chairman directive (INV-20) | Chairman; CEO with plan or scope authority |
 | ready | completed | Sign-off, or `completion.auto_after` elapses | Chairman; platform |
 | running, held | completed | Explore only: the chairman ends it | Chairman |
+| running, held, paused | completed | Operate only: the chairman completes it, with a final scorecard | Chairman |
 | completed | running | Reopen within `reopen.window` | Chairman |
 | draft, running, held, paused, ready | stopped | Stop (terminal) | Chairman |
 | draft, stopped, completed | deleting | Delete (two steps, human-only) | Chairman only |
