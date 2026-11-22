@@ -1,33 +1,34 @@
 {
+  "crewmind_crew": 1,
   "slug": "a-data-science-bench",
   "name": "A data-science bench",
   "outcome": "A deep read of a dataset, attacked by a second scientist, delivered as a deck.",
-  "ceo_role_slug": "ceo",
+  "ceo_role": "ceo",
   "domains": [
     "data"
   ],
-  "source": "authored",
   "teams": [
     {
       "name": "Analysis",
-      "role_slug": "data-scientist",
-      "employees": [
+      "role": "data-scientist",
+      "members": [
         "Nina"
       ]
     },
     {
       "name": "Review",
-      "role_slug": "data-skeptic",
-      "employees": [
+      "role": "data-skeptic",
+      "members": [
         "Priya"
       ]
     },
     {
       "name": "Report",
-      "role_slug": "exec-communicator",
-      "employees": [
+      "role": "exec-communicator",
+      "members": [
         "Ada"
       ]
     }
-  ]
+  ],
+  "estimate": null
 }

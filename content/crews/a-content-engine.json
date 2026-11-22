@@ -1,40 +1,41 @@
 {
+  "crewmind_crew": 1,
   "slug": "a-content-engine",
   "name": "A content engine",
   "outcome": "Published posts aimed at real search intent, measured by response.",
-  "ceo_role_slug": "ceo",
+  "ceo_role": "ceo",
   "domains": [
     "general"
   ],
-  "source": "examples/12-a-content-engine",
   "teams": [
     {
       "name": "Research",
-      "role_slug": "researcher",
-      "employees": [
+      "role": "researcher",
+      "members": [
         "Rey"
       ]
     },
     {
       "name": "Editorial",
-      "role_slug": "blog-writer",
-      "employees": [
+      "role": "blog-writer",
+      "members": [
         "Ada"
       ]
     },
     {
-      "role_slug": "editor",
       "name": "Review",
-      "employees": [
+      "role": "editor",
+      "members": [
         "Juno"
       ]
     },
     {
       "name": "Growth",
-      "role_slug": "marketer",
-      "employees": [
+      "role": "marketer",
+      "members": [
         "Sol"
       ]
     }
-  ]
+  ],
+  "estimate": null
 }

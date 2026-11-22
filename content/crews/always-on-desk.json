@@ -1,49 +1,49 @@
 {
+  "crewmind_crew": 1,
   "slug": "always-on-desk",
   "name": "An always-on advertising desk",
   "outcome": "A standup each morning and a Monday memo the owner could forward to a client without editing it.",
-  "ceo_role_slug": "ceo",
+  "ceo_role": "ceo",
   "domains": [
     "data"
   ],
-  "source": "authored",
   "teams": [
     {
       "name": "Analytics",
-      "role_slug": "ppc-analyst",
-      "employees": [
+      "role": "ppc-analyst",
+      "members": [
         "Rae",
         "Tomas"
-      ],
-      "lead": "Rae"
+      ]
     },
     {
       "name": "Strategy",
-      "role_slug": "ppc-strategist",
-      "employees": [
+      "role": "ppc-strategist",
+      "members": [
         "Idris"
       ]
     },
     {
       "name": "Attribution",
-      "role_slug": "attribution-reviewer",
-      "employees": [
+      "role": "attribution-reviewer",
+      "members": [
         "Wren"
       ]
     },
     {
       "name": "Executability",
-      "role_slug": "executability-checker",
-      "employees": [
+      "role": "executability-checker",
+      "members": [
         "Nadia"
       ]
     },
     {
       "name": "Editorial",
-      "role_slug": "exec-communicator",
-      "employees": [
+      "role": "exec-communicator",
+      "members": [
         "Ada"
       ]
     }
-  ]
+  ],
+  "estimate": null
 }

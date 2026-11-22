@@ -1,35 +1,35 @@
 {
+  "crewmind_crew": 1,
   "slug": "settle-an-argument",
   "name": "Settle an argument",
   "outcome": "A sourced answer to a question two people disagree about.",
-  "ceo_role_slug": "ceo",
+  "ceo_role": "ceo",
   "domains": [
     "general"
   ],
-  "source": "examples/02-settle-an-argument",
   "teams": [
     {
-      "role_slug": "researcher",
       "name": "Research",
-      "employees": [
+      "role": "researcher",
+      "members": [
         "Rey",
         "Sol"
-      ],
-      "lead": "Rey"
+      ]
     },
     {
-      "role_slug": "writer",
       "name": "Editorial",
-      "employees": [
+      "role": "writer",
+      "members": [
         "Ada"
       ]
     },
     {
-      "role_slug": "editor",
       "name": "Review",
-      "employees": [
+      "role": "editor",
+      "members": [
         "Kit"
       ]
     }
-  ]
+  ],
+  "estimate": null
 }
