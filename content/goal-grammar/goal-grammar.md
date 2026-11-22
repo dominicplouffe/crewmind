@@ -1,9 +1,9 @@
 # The goal grammar — what separates a goal that works from one that putters
 
-This is the rubric the Founder writes against and the judge grades against. It
-is **not a form**. A goal is prose, and the best goal in this repository is
-prose. What follows is what that prose has to *contain*, and why each element
-earns its place.
+This is the rubric the Founder writes against and the grader grades against. It
+is **not a form**. A goal is prose, and the best goal we have is prose. What
+follows is what that prose has to *contain*, and why each element earns its
+place.
 
 Read it as a checklist for a critic, not as a template for an author. A goal
 that covers all ten elements in four paragraphs beats one that has ten
@@ -20,10 +20,10 @@ nothing downstream can tell the difference between a finding and a quotation.
 
 Three readers, one file:
 
-- **The Founder** (`yaaf/founder/`) drafts against it and asks the chairman
-  only for what it cannot infer.
-- **The judge** (`evals/judge.py`) grades a draft and names what is missing.
-- **A human or an outside agent** authoring a bundle by hand.
+- **The Founder** drafts against it and asks the chairman only for what it
+  cannot infer.
+- **The grader** grades a draft and names what is missing.
+- **A human or an outside agent** authoring a project spec by hand.
 
 Keeping one copy is the point. Two copies drift, and then the critic starts
 failing goals the author was never told about.
@@ -179,11 +179,11 @@ rather than a ceiling. One project shipped every finish-line condition it had
 on day one and then sat idle for thirteen hours, because a sentence said
 November and the CEO would not "pull that timeline forward artificially".
 
-The date belongs in the `deadline` field with a `deadline_source`, where it can
-be reconciled — or nowhere at all. And "nowhere at all" is usually right: the
-median project here finishes its whole accepted scope in under a day, and every
-commitment ever signed on this install was met the day it was made, against
-promises of up to 127 days.
+The date belongs in the spec's `deadline` with its `source`, where it can be
+reconciled — or nowhere at all. And "nowhere at all" is usually right: in the
+record this grammar was written from, the median project finished its whole
+accepted scope in under a day, and every commitment ever signed was met the day
+it was made, against promises of up to 127 days.
 
 What a goal *should* carry instead of a schedule is a **finish line** — the
 condition under which the work is done — and, where the world really does
@@ -284,7 +284,7 @@ produces a project that hits every requirement it was given, passes every gate,
 and is quietly the wrong work. There is no symptom to notice from the inside.
 **A goal that names neither is one where the chairman is the only thing
 standing between the brief and the ceiling**, which is the exact arrangement
-autonomous mode was supposed to remove. `standard` is load-bearing for that
+autonomous authority was supposed to remove. `standard` is load-bearing for that
 reason; `beneficiary` is not yet, and the argument for promoting it too is the
 same one.
 
@@ -297,6 +297,6 @@ write it however they write.
 
 ## The worked example
 
-`evals/fixtures/idea-to-customer.json` carries the goal quoted throughout this
-file. Read it whole before drafting one; it is the standard, and it is the
-regression test (`evals/`) that the Founder is measured against.
+The goal quoted throughout this file is one real goal, for a project that
+takes an idea to its first paying customer. It is the standard, and the grader
+is tested against reference goals like it.

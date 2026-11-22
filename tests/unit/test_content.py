@@ -15,3 +15,6 @@ def test_LIB_3_the_packaged_library_is_a_copy_of_the_content_folder() -> None:
         source = {path.name: path.read_bytes() for path in (ROOT / "content" / folder).glob("*")}
         shipped = {path.name: path.read_bytes() for path in (PACKAGED / folder).glob("*")}
         assert source == shipped, f"content/{folder} and the packaged copy differ"
+    for source in ("doctrine/design-doctrine.md", "goal-grammar/goal-grammar.md"):
+        shipped = PACKAGED.parent / "doctrine" / Path(source).name
+        assert (ROOT / "content" / source).read_bytes() == shipped.read_bytes(), source
