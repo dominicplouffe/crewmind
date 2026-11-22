@@ -106,3 +106,20 @@ class Membership(Base):
     state: Mapped[str] = mapped_column(String(16))
     added_at: Mapped[datetime] = mapped_column(UtcDateTime)
     removed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+
+
+class McpConfirmToken(Base):
+    """A single-use confirm token for one irreversible MCP write (IF-5.3, section 7.10).
+    It is bound to the client, the tool and a hash of the exact arguments."""
+
+    __tablename__ = "mcp_confirm_tokens"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    person_id: Mapped[str] = mapped_column(ForeignKey("persons.id", ondelete="CASCADE"))
+    client: Mapped[str] = mapped_column(String(160))
+    tool: Mapped[str] = mapped_column(String(120))
+    arguments_hash: Mapped[str] = mapped_column(String(64))
+    state: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
+    expires_at: Mapped[datetime] = mapped_column(UtcDateTime)

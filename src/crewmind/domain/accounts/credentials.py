@@ -13,6 +13,7 @@ from typing import Any, cast
 from sqlalchemy import CursorResult, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from crewmind.catalog import mcp_scopes
 from crewmind.catalog.caller import ANONYMOUS, Caller, CallerKind, InstanceRole
 from crewmind.catalog.execute import Clock, unauthenticated, utc_now
 from crewmind.domain.accounts.model import (
@@ -119,7 +120,7 @@ class Authenticator:
                     caller.actor_id,
                     role=caller.role,
                     via=f"mcp:{token.name}",
-                    mcp_scopes=frozenset(str(scope) for scope in token.scopes),
+                    mcp_scopes=mcp_scopes.granted(frozenset(str(scope) for scope in token.scopes)),
                     credential_id=token.id,
                 )
         raise unauthenticated()

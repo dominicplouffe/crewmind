@@ -26,7 +26,11 @@ from crewmind.surfaces.mcp import server as mcp
 from crewmind.surfaces.slash import adapter as slash
 from tests.support import Greeter, invoker_for, operation, sample_api, sample_catalog
 
-ALL_SCOPES = Caller(CallerKind.PERSON, "tester", mcp_scopes=frozenset({"read"}))
+ALL_SCOPES = Caller(
+    CallerKind.PERSON,
+    "tester",
+    mcp_scopes=frozenset({"read", "steer", "create", "configure"}),
+)
 
 
 async def every_scope(_: object) -> Caller:

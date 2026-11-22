@@ -7,6 +7,7 @@ from typing import Any, get_type_hints
 
 from pydantic import BaseModel
 
+from crewmind.catalog import mcp_scopes
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.operation import CatalogError, Operation, Principal, Reversibility
 from crewmind.catalog.registry import Catalog
@@ -48,6 +49,10 @@ def operation[Input: BaseModel, Output: BaseModel](
         if len(parameters) != 2 or "return" not in hints:
             raise CatalogError(f"handler of {name} must be annotated as (context, input) -> output")
         host_local = authority is Authority.HOST_OPERATOR
+        who, scope = principals, mcp_scope
+        if principals == PERSON and mcp_scope is None and not host_local:
+            scope = mcp_scopes.scope_of(name)
+            who = PERSON_AND_MCP if scope is not None else PERSON
         into.register(
             Operation(
                 name=name,
@@ -58,9 +63,9 @@ def operation[Input: BaseModel, Output: BaseModel](
                 authority=authority,
                 reversibility=reversibility,
                 audit_actor="host operator" if host_local else "caller",
-                principals=frozenset() if host_local else principals,
+                principals=frozenset() if host_local else who,
                 slash_command=slash_command,
-                mcp_scope=mcp_scope,
+                mcp_scope=scope,
                 host_local=host_local,
                 exemptions=exemptions or {},
                 prepare=prepare,

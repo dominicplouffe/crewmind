@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
+from crewmind.catalog import mcp_scopes
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import operation
 from crewmind.catalog.execute import Context
@@ -33,8 +34,8 @@ IF_5_2 = rules.register(
 )
 
 SECONDS_PER_DAY = 86_400
-SCOPES_AVAILABLE = ("read",)
-"""MCP scopes that can be minted now. `steer`, `create` and `configure` arrive in phase 6."""
+SCOPES_AVAILABLE = mcp_scopes.SCOPES
+"""IF-5.2: the four MCP scopes. `read` is implied by every other one."""
 
 
 class MintTokenInput(BaseModel):
@@ -218,7 +219,7 @@ async def mint_mcp_token(context: Context, payload: MintMcpInput) -> MintedToken
             f"Only these scopes can be granted now: {', '.join(SCOPES_AVAILABLE)}. "
             f"Asked for: {', '.join(scopes) or 'none'}.",
             rule=IF_5_2.id,
-            hint="Mint the token with the read scope.",
+            hint="Choose from read, steer, create and configure.",
         )
     return await _mint(context, TokenKind.MCP, payload.client_name, scopes, None)
 

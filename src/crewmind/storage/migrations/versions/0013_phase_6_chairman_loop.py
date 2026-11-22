@@ -31,6 +31,21 @@ def upgrade() -> None:
         sa.UniqueConstraint("person_id", "local_date"),
     )
     op.create_table(
+        "mcp_confirm_tokens",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("token_hash", sa.String(length=64), nullable=False),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("client", sa.String(length=160), nullable=False),
+        sa.Column("tool", sa.String(length=120), nullable=False),
+        sa.Column("arguments_hash", sa.String(length=64), nullable=False),
+        sa.Column("state", sa.String(length=16), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["person_id"], ["persons.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("token_hash"),
+    )
+    op.create_table(
         "decision_items",
         sa.Column(
             "id",

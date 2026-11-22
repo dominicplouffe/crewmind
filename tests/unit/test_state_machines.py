@@ -46,6 +46,7 @@ from crewmind.domain.work.model import (
     TASK_MACHINE,
     WATCH_MACHINE,
 )
+from crewmind.surfaces.mcp.confirm import CONFIRM_MACHINE
 
 SECTION_7 = Path(__file__).parents[2] / "docs" / "spec" / "07-state-machines.md"
 PRIOR_STATES = ("draft", "stopped", "completed")
@@ -111,6 +112,7 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.6", COMMITMENT_MACHINE, NOTHING),
         ("7.4", BET_MACHINE, NOTHING),
         ("7.13", CYCLE_MACHINE, NOTHING),
+        ("7.10:MCP confirm token", CONFIRM_MACHINE, NOTHING),
         ("7.5", ITEM_MACHINE, {(str(a), str(b)) for a, b in KIND_SPECIFIC}),
         ("7.15", EVIDENCE_MACHINE, NOTHING),
         ("7.16:Side effect:", EFFECT_MACHINE, NOTHING),
