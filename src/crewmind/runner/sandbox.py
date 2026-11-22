@@ -122,21 +122,22 @@ class _WarmHandle:
         self._process = process
 
     async def wait(self) -> int:
+        """The run's exit code. A process that was interrupted mid-answer is ended, so the
+        next run never reads the answer to this one."""
         assert self._process.stdout is not None
+        clean = False
         try:
             line = (await self._process.stdout.readline()).decode().strip()
-        except RuntimeError:
-            # Another run is still reading this process's answer. The process is ended
-            # and this run fails, so it is retried in a fresh one (EXE-8).
-            await self._owner.end_warm(self._seat_id)
-            return 1
-        if line.startswith(DONE):
-            return int(line.removeprefix(DONE))
-        await self._owner.end_warm(self._seat_id)
-        return 1
+            clean = line.startswith(DONE)
+            return int(line.removeprefix(DONE)) if clean else 1
+        finally:
+            if not clean:
+                await asyncio.shield(self._owner.end_warm(self._seat_id))
+            self._owner.release(self._seat_id)
 
     async def kill(self) -> None:
         await self._owner.end_warm(self._seat_id)
+        self._owner.release(self._seat_id)
 
 
 class UnisolatedSandbox:
@@ -149,6 +150,7 @@ class UnisolatedSandbox:
 
     def __init__(self) -> None:
         self._warm: dict[str, tuple[int, asyncio.subprocess.Process]] = {}
+        self._answering: set[str] = set()
 
     async def _spawn(self, spec: SandboxSpec, *flags: str) -> asyncio.subprocess.Process:
         spec.workspace.mkdir(parents=True, exist_ok=True)
@@ -170,15 +172,24 @@ class UnisolatedSandbox:
         if spec.warm is None:
             return _ProcessHandle(await self._spawn(spec))
         seat_id, generation = spec.warm
-        kept = self._warm.get(seat_id)
-        if kept is None or kept[0] != generation or kept[1].returncode is not None:
-            await self.end_warm(seat_id)
-            kept = (generation, await self._spawn(spec, WARM_FLAG))
-            self._warm[seat_id] = kept
-        process = kept[1]
-        assert process.stdin is not None
-        process.stdin.write(f"{spec.token}\n".encode())
-        await process.stdin.drain()
+        if seat_id in self._answering:
+            # The agent's warm process is answering another run and takes one at a time,
+            # so this run gets a process of its own.
+            return _ProcessHandle(await self._spawn(spec))
+        self._answering.add(seat_id)
+        try:
+            kept = self._warm.get(seat_id)
+            if kept is None or kept[0] != generation or kept[1].returncode is not None:
+                await self.end_warm(seat_id)
+                kept = (generation, await self._spawn(spec, WARM_FLAG))
+                self._warm[seat_id] = kept
+            process = kept[1]
+            assert process.stdin is not None
+            process.stdin.write(f"{spec.token}\n".encode())
+            await process.stdin.drain()
+        except BaseException:
+            self.release(seat_id)
+            raise
         return _WarmHandle(self, seat_id, process)
 
     async def end_warm(self, seat_id: str) -> None:
@@ -187,6 +198,10 @@ class UnisolatedSandbox:
             with contextlib.suppress(ProcessLookupError):
                 kept[1].kill()
             await kept[1].wait()
+
+    def release(self, seat_id: str) -> None:
+        """The run that held this agent's warm process is over."""
+        self._answering.discard(seat_id)
 
     async def keep_warm(self, seats: dict[str, int]) -> None:
         """End every warm process whose session has closed or moved to a new generation."""
