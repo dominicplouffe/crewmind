@@ -2,7 +2,15 @@
   "about": "A small crew that does one verified job without tripping a rule. The chairman has put check.sh in the workspace; it passes once report.txt holds the number 41.",
   "CEO/work": [
     {"tools": [{"name": "agent_hire_team", "arguments": {"team": "build", "role": "Generalist"}}]},
+    {"tools": [{"name": "agent_propose_requirement", "arguments": {
+      "text": "The quarterly report states the number of orders in the third quarter.",
+      "test_kind": "observable",
+      "success_test": "report.txt exists and gives the third-quarter order count.",
+      "estimate_runs": 3
+    }}]},
+    {"tools": [{"name": "agent_accept_requirement", "arguments": {"requirement_id": 1}}]},
     {"tools": [{"name": "agent_create_task", "arguments": {
+      "requirement_id": 1,
       "title": "Write the quarterly report",
       "goal": "Write report.txt with the number of orders in the third quarter.",
       "success_test": "test -f check.sh && sh check.sh",

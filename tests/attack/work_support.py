@@ -23,6 +23,7 @@ class Crew:
     def __init__(self, app: App, owner: Actor, project: str) -> None:
         self.app, self.owner, self.project = app, owner, project
         self.workspace: Path = app.runtime.config.data_dir / "workspaces" / project
+        self.requirement: int = 0
 
     @classmethod
     async def start(
@@ -48,6 +49,8 @@ class Crew:
             await app.ok("projects.start", owner, project_id=project)
         crew = cls(app, owner, project)
         crew.workspace.mkdir(parents=True, exist_ok=True)
+        if type != "explore":
+            crew.requirement = await crew.add_requirement()
         if team:
             hired = await crew.call(
                 "CEO", "agent.hire_team", team="build", role="Generalist", members=2
@@ -56,7 +59,10 @@ class Crew:
         return crew
 
     async def call(self, seat: str, name: str, /, **values: Any) -> httpx.Response:
-        """Call an agent operation as `seat`, in a work run of its own."""
+        """Call an agent operation as `seat`, in a work run of its own. A new top-level
+        task serves the crew's requirement unless the test names another."""
+        if name == "agent.create_task":
+            values = {**self.scope(), **values}
         run = await live_run(self.app, self.project, seat=seat)
         return await agent_call(self.app, run.token, name, **values)
 
@@ -65,10 +71,32 @@ class Crew:
         assert answer.status_code == 200, answer.text
         return answer.json()
 
+    async def add_requirement(self, **fields: Any) -> int:
+        """Scope the chairman adds: accepted at once and estimated, so work can serve it."""
+        plan = await self.app.ok(
+            "requirements.add",
+            self.owner,
+            project_id=self.project,
+            **{
+                "text": "The interviews are summarised for the team.",
+                "test_kind": "observable",
+                "success_test": "A reader finds every interview summarised.",
+                "estimate_runs": 40,
+                **fields,
+            },
+        )
+        return plan["requirements"][-1]["id"]
+
+    def scope(self) -> dict[str, Any]:
+        """What a new top-level task names as the scope it serves."""
+        return {} if not self.requirement else {"requirement_id": self.requirement}
+
     async def task(self, **fields: Any) -> dict[str, Any]:
         """A top-level task for the team, created by the CEO."""
         return await self.ok(
-            "CEO", "agent.create_task", **{**OBSERVABLE, "team": "build", **fields}
+            "CEO",
+            "agent.create_task",
+            **{**OBSERVABLE, "team": "build", **self.scope(), **fields},
         )
 
     async def finish(self, seat: str) -> None:
@@ -78,6 +106,21 @@ class Crew:
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         run = handed.pop((self.project, seat), None)
         if run is not None:
+            async with self.app.runtime.sessions() as session, session.begin():
+                await runs.finish(
+                    session, run.run_id, run.runner_id, self.app.runtime.clock(), failed=False
+                )
+
+    async def finish_all(self) -> None:
+        """End every run this project's agents were given or are waiting to be given."""
+        from crewmind.domain.execution import runs
+
+        handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
+        stash: dict[tuple[str, str], list[Any]] = self.app.__dict__.get("_live_runs", {})
+        waiting = [handed.pop(key) for key in list(handed) if key[0] == self.project]
+        for key in [key for key in stash if key[0] == self.project]:
+            waiting += stash.pop(key)
+        for run in waiting:
             async with self.app.runtime.sessions() as session, session.begin():
                 await runs.finish(
                     session, run.run_id, run.runner_id, self.app.runtime.clock(), failed=False

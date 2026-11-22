@@ -51,6 +51,7 @@ class Team(Base):
     name: Mapped[str] = mapped_column(String(100))
     role_id: Mapped[str] = mapped_column(ForeignKey("roles.id"))
     state: Mapped[str] = mapped_column(String(16))
+    stand_down_when: Mapped[str | None] = mapped_column(String(40))
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 

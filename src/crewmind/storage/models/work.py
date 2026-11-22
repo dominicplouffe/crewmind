@@ -34,6 +34,8 @@ class Task(Base):
     outside_evidence: Mapped[bool] = mapped_column(default=False)
     audience: Mapped[str] = mapped_column(String(16))
     serves: Mapped[str | None] = mapped_column(Text)
+    requirement_id: Mapped[int | None] = mapped_column(SequenceId, index=True)
+    bet_id: Mapped[int | None] = mapped_column(SequenceId, index=True)
     not_before: Mapped[datetime | None] = mapped_column(UtcDateTime)
     state: Mapped[str] = mapped_column(String(16), index=True)
     claimant_id: Mapped[str | None] = mapped_column(String(32), index=True)

@@ -61,6 +61,12 @@ class HireInput(ProjectRef):
     team: str = Field(min_length=1, max_length=60, description="A name for the team.")
     role: str = Field(description="The role its members take, from `roles list`.")
     members: int = Field(1, description="How many members.")
+    stand_down_when: str | None = Field(
+        default=None,
+        max_length=40,
+        description='Stand the team down when this becomes true: "requirements met" or '
+        '"stage N cleared".',
+    )
 
 
 class TeamRef(ProjectRef):
@@ -196,6 +202,7 @@ async def hire_team(context: Context, payload: HireInput) -> Roster:
         name=payload.team,
         role_name=payload.role,
         members=payload.members,
+        stand_down_when=payload.stand_down_when,
         caller=context.caller,
         now=context.now,
     )

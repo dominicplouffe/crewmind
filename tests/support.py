@@ -16,6 +16,7 @@ from crewmind.catalog.define import operation as define
 from crewmind.catalog.execute import Context
 from crewmind.gateway.mock import ScriptedTurn
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.planning import PlanningJobs
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.jobs.work import WorkJobs
@@ -61,6 +62,7 @@ class App:
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
         self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
         self.work_jobs = WorkJobs(runtime.sessions, runtime.clock, runtime.services)
+        self.planning = PlanningJobs(runtime.sessions, runtime.clock, runtime.services)
         self.platform = PlatformWorker(
             runtime.sessions,
             runtime.clock,

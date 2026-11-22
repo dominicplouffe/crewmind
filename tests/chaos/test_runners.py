@@ -227,6 +227,7 @@ async def test_INV_16_a_runner_killed_while_its_agent_holds_a_claim_strands_no_w
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
     crew = Crew(app, owner, project)
+    crew.requirement = await crew.add_requirement()
     await crew.ok("CEO", "agent.hire_team", team="build", role="Generalist")
     task = await crew.ok("CEO", "agent.create_task", **OBSERVABLE, team="build")
     await crew.finish("CEO")

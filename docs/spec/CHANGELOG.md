@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.16 (22 Nov 2026): phase 5 build
+
+- **PLN-1:** a CEO proposal carries an estimate; the CEO gives the first estimate of a chairman-authored requirement that has none.
+- **PLN-12:** the two conditions the platform can check, what "holds work" means, and that a condition fires once.
+
 ## Revision 2.15 (22 Nov 2026): phase 5 plan answers
 
 - **GOV-3:** in wrap-up mode a new task may also serve a bet already active (R-24).

@@ -255,6 +255,19 @@ async def test_INV_21_every_write_operation_records_an_event(
     liked = await write("memory.prefer", alice, text="Plain English, please.")
     await write("memory.forget_preference", alice, memory_id=liked["id"])
     await write("runs.interrupt", alice, project_id=paid, run_id=live.run_id)
+    scope = await write(
+        "requirements.add", alice, project_id=paid, text="The report is published.",
+        test_kind="observable", success_test="A reader can open the report.",
+    )  # fmt: skip
+    wanted = scope["requirements"][-1]["id"]
+    await write(
+        "requirements.change", alice, project_id=paid, requirement_id=wanted, estimate_runs=3
+    )
+    await write(
+        "requirements.cut", alice, project_id=paid, requirement_id=wanted,
+        reason="It is no longer wanted.",
+    )  # fmt: skip
+    await write("requirements.reopen", alice, project_id=paid, requirement_id=wanted)
     await write("credentials.delete", alice, name="main")
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
@@ -277,6 +290,9 @@ NO_EVENT = {
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",
+    "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
+    "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
+    "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",
     "audits.settle": "asserted in test_WRK_13_sampled_closes_are_audited_by_the_chairman_only",
     "launches.retire": "asserted in test_WRK_17_a_launch_must_be_watched",
     "launches.close_unknown": "asserted in test_WRK_16_a_side_effect_is_never_stranded",

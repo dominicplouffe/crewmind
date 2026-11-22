@@ -2,6 +2,7 @@
 
 - **PLN-1 Requirements.**
   - The CEO proposes requirements (not in Explore), and the chairman may add them directly. Each records its author.
+  - A CEO proposal carries an estimate in runs. A requirement the chairman adds may leave it out; the CEO then gives the first estimate, and only the chairman changes it afterwards.
   - A proposed requirement is not scope; no work may be created against it.
   - Accepting needs plan authority.
   - Cutting, rewording, re-estimating or restaging a CEO-authored requirement needs scope authority. The same changes to a chairman-authored requirement are chairman-only (P7).
@@ -45,4 +46,4 @@
   - The test is not re-run, and the verdict not re-asked, until work under the requirement changes: a task under it reaches done after the last ruling, or the workspace snapshot changes.
   - A metric requirement is met when a platform reading reaches its target (PLN-11). A recurring one resets at the cycle roll.
 - **PLN-11 Metric requirements** are read on a schedule, `metric.read_every` \[24 h\] (at most hourly), from sources outside the project. The project is **losing ground** when the latest reading is further from target than the oldest reading in a 6-reading window. A single bad reading is not enough. Until data-source connectors exist (INT), a metric names a public URL and a pattern that finds the number on the page; the platform fetches it through the SSRF guard (WRK-12).
-- **PLN-12 Stand-down conditions.** A team may carry a machine-checkable stand-down condition, such as "requirements met" or "a stage cleared". The platform stands the team down when the condition becomes true, unless the team still holds work.
+- **PLN-12 Stand-down conditions.** A team may carry a machine-checkable stand-down condition, given when it is hired: "requirements met" (all accepted scope is met) or "stage N cleared" (no open scope in stage N or below). The platform stands the team down when the condition becomes true, unless the team still holds work: an open task or a run in progress. A condition fires once, so a team the CEO recalls stays recalled.

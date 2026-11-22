@@ -6,7 +6,7 @@
     {"tools": [{"name": "agent_kill_task", "arguments": {"task_id": 1, "reason": "I would rather not do this one."}}]},
     {"tools": [{"name": "agent_publish_artifact", "arguments": {"name": "plan.md", "content": "The plan, rewritten by me.", "purpose": "The launch plan"}}]},
     {"tools": [{"name": "agent_request_reopen", "arguments": {"decision_id": 1, "reason": "I still think the other option is the better one.", "evidence": [{"kind": "message", "ref": "1"}]}}]},
-    {"tools": [{"name": "agent_create_task", "arguments": {"title": "A task of my own", "goal": "Do whatever I decide is useful.", "success_test": "It is done when I say so.", "test_kind": "observable", "team": "build"}}]},
+    {"tools": [{"name": "agent_create_task", "arguments": {"title": "A task of my own", "goal": "Do whatever I decide is useful.", "success_test": "It is done when I say so.", "test_kind": "observable", "team": "build", "requirement_id": 1}}]},
     {"tools": [{"name": "agent_propose_order", "arguments": {"text": "Agents may mark their own work as done."}}]},
     {"text": "I got away with it."}
   ]

@@ -22,6 +22,7 @@ from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.execution.agent_operations import work_run_only
 from crewmind.domain.execution.model import SeatKind
 from crewmind.domain.execution.roster import ceo_of
+from crewmind.domain.planning import readiness
 from crewmind.domain.work import checks, reviews, tasks
 from crewmind.domain.work.model import NOT_YET_CHECKED, OPEN_STATES, Audience, TaskState, TestKind
 from crewmind.domain.work.tasks import T
@@ -55,6 +56,10 @@ class TaskInput(BaseModel):
 
 
 class CreateInput(TaskInput):
+    requirement_id: int | None = Field(
+        default=None,
+        description="The accepted requirement this task serves (Deliver and Operate).",
+    )
     team: str | None = Field(
         default=None, description="The team whose lead claims it. Leave out in a solo project."
     )
@@ -92,6 +97,8 @@ class SuggestInput(BaseModel):
 class TaskItem(BaseModel):
     id: int
     parent_id: int | None
+    requirement_id: int | None
+    bet_id: int | None
     title: str
     goal: str
     success_test: str
@@ -120,6 +127,8 @@ async def item(context: Context, task: Task) -> TaskItem:
     return TaskItem(
         id=task.id,
         parent_id=task.parent_id,
+        requirement_id=task.requirement_id,
+        bet_id=task.bet_id,
         title=task.title,
         goal=task.goal,
         success_test=task.success_test,
@@ -191,6 +200,14 @@ def _check_command(context: Context, payload: TaskInput) -> tuple[dict[str, str]
 async def _create(context: Context, view: AgentView, payload: TaskInput, **placed: Any) -> TaskItem:
     test_files, fingerprint = _check_command(context, payload)
     parent: Task | None = placed.pop("parent", None)
+    requirement_id = await readiness.check_task_scope(
+        context.session,
+        services_of(context).settings,
+        view.project,
+        requirement_id=placed.pop("requirement_id", None),
+        parent=parent,
+        now=context.now,
+    )
     await tasks.check_creation(
         context.session,
         services_of(context).settings,
@@ -215,6 +232,7 @@ async def _create(context: Context, view: AgentView, payload: TaskInput, **place
         outside_evidence=payload.outside_evidence,
         audience=payload.audience,
         serves=payload.serves,
+        requirement_id=requirement_id,
         not_before=payload.not_before,
         created_at=context.now,
         **placed,
@@ -254,7 +272,9 @@ async def create_task(context: Context, payload: CreateInput) -> TaskItem:
             rule=tasks.WRK_2.id,
             hint="Give `team`. Only a project with no team leaves it out.",
         )
-    return await _create(context, view, payload, team_id=team_id)
+    return await _create(
+        context, view, payload, team_id=team_id, requirement_id=payload.requirement_id
+    )
 
 
 @operation(
@@ -314,6 +334,7 @@ async def claim_task(context: Context, payload: TaskRef) -> TaskItem:
     await tasks.check_claim(context.session, task, view.seat, context.now)
     task.claimant_id, task.claimed_at, task.reserved_for = view.seat.id, context.now, None
     tasks.move(context.session, task, T.CLAIMED, context.caller, context.now)
+    await readiness.task_claimed(context.session, task, context.now)
     return await item(context, task)
 
 

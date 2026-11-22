@@ -16,6 +16,7 @@ from crewmind.domain.execution.agent import AgentView
 from crewmind.domain.execution.model import SeatKind
 from crewmind.domain.memory import pinned, recall
 from crewmind.domain.memory.engine import MemoryEngine
+from crewmind.domain.planning import briefing
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
@@ -118,6 +119,10 @@ async def build(
     if lines:
         sections.append("# Unread messages\n\n" + "\n".join(lines))
     run.delivered = delivered
+
+    plan_section = await briefing.section(session, settings, project, seat, now)
+    if plan_section:
+        sections.append(plan_section)
 
     board_section = await board.section(session, seat, run, now)
     if board_section:

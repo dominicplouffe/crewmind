@@ -73,6 +73,7 @@ async def test_scenario_the_rule_breaker_gets_nowhere(app: App) -> None:
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
     crew = Crew(app, owner, project)
+    crew.requirement = await crew.add_requirement()
     await crew.ok("CEO", "agent.hire_team", team="build", role="Generalist")
     task = await crew.task()
     await app.ok("decisions.decide", owner, project_id=project, text="Launch: in spring.")
@@ -165,12 +166,19 @@ async def test_scenario_a_solo_project_works_from_start_to_finish(app: App) -> N
         "goal": "Summarise the three interviews in one page.",
         "success_test": "A one-page summary names all three interviewees.",
         "test_kind": "observable",
+        "requirement_id": 1,
     }
+    await app.ok(
+        "requirements.add", owner, project_id=project, text="The interviews are summarised.",
+        test_kind="observable", success_test="A reader finds every interview summarised.",
+        estimate_runs=20,
+    )  # fmt: skip
     assert await active() == ["CEO", "Reviewer"]
     await run_ceo(
         tool(
             "agent_create_task",
             title="Write the report",
+            requirement_id=1,
             test_kind="command",
             goal="Write report.txt with the third-quarter orders.",
             success_test="test -f check.sh && sh check.sh",

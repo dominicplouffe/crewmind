@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tomllib
 from datetime import datetime
 from importlib import resources
@@ -212,6 +213,24 @@ async def create_first_seats(
 lifecycle.created_hooks.append(create_first_seats)
 
 
+REQUIREMENTS_MET = "requirements met"
+STAGE_CLEARED = re.compile(r"^stage ([1-9][0-9]?) cleared$")
+
+
+def check_stand_down(condition: str | None) -> str | None:
+    """PLN-12: a stand-down condition is one the platform can check, or nothing."""
+    if condition is None:
+        return None
+    text = " ".join(condition.lower().split())
+    if text == REQUIREMENTS_MET or STAGE_CLEARED.match(text):
+        return text
+    raise Refusal(
+        "unknown_stand_down_condition",
+        f'A stand-down condition is "{REQUIREMENTS_MET}" or "stage N cleared".',
+        rule=EXE_1.id,
+    )
+
+
 async def hire_team(
     session: AsyncSession,
     settings: SettingsService,
@@ -222,6 +241,7 @@ async def hire_team(
     members: int,
     caller: Caller,
     now: datetime,
+    stand_down_when: str | None = None,
 ) -> Team:
     """EXE-1: a team is seats created from one pinned role version, within `teams.max`.
     Its first member leads it. A CEO hire takes the same path as a chairman's."""
@@ -263,7 +283,12 @@ async def hire_team(
         raise Refusal("team_exists", f"There is already a team named {name}.", rule=EXE_1.id)
     TEAM_MACHINE.check("(new)", TeamState.ACTIVE)
     team = Team(
-        project_id=project.id, name=name, role_id=role.id, state=TeamState.ACTIVE, created_at=now
+        project_id=project.id,
+        name=name,
+        role_id=role.id,
+        state=TeamState.ACTIVE,
+        stand_down_when=check_stand_down(stand_down_when),
+        created_at=now,
     )
     session.add(team)
     await session.flush()

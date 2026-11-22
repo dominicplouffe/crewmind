@@ -24,6 +24,7 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.planning import PlanningJobs
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.jobs.work import WorkJobs
@@ -144,6 +145,9 @@ def create_app(
                 asyncio.create_task(alarms.run()),
                 asyncio.create_task(
                     WorkJobs(runtime.sessions, runtime.clock, runtime.services).run()
+                ),
+                asyncio.create_task(
+                    PlanningJobs(runtime.sessions, runtime.clock, runtime.services).run()
                 ),
                 asyncio.create_task(
                     PlatformWorker(
