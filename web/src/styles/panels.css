@@ -1,0 +1,107 @@
+/* Side panels: a column beside the chat on wide screens, a full-screen sheet on phones. */
+.panel {
+  width: min(34rem, 45vw);
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.panel-head h2 { margin: 0; }
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem;
+  min-height: 0;
+}
+.panel-body .message { font-size: 0.95rem; }
+
+@media (max-width: 899px) {
+  .panel {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    z-index: 20;
+    border-left: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* The sheet covers the page, so what is behind it leaves the tab order and the reading order. */
+  .project.has-panel > :not(.workspace):not(dialog),
+  .project.has-panel .chat {
+    visibility: hidden;
+  }
+}
+
+.cards { margin: 0.5rem 0; }
+.feed li {
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.settings li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.setting-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+}
+.setting-name { font-weight: 600; flex: 1 1 10rem; overflow-wrap: anywhere; }
+.setting-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.setting-form { margin-top: 0.4rem; display: grid; gap: 0.3rem; }
+.setting-form label { margin: 0; }
+
+.search-form { margin-bottom: 0.75rem; }
+.search-form input { flex: 1; }
+
+.steps { padding-left: 1.25rem; }
+.steps li { margin-bottom: 0.5rem; }
+.steps pre, details pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 24rem; }
+details { margin: 0.5rem 0; }
+summary { cursor: pointer; font-weight: 600; min-height: 1.5rem; }
+
+.file-name { overflow-wrap: anywhere; margin-top: 0.5rem; }
+.preview { margin: 0.75rem 0; }
+.file-text { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 70vh; }
+.file-image, .file-video { max-width: 100%; height: auto; border: 1px solid var(--border); }
+.html-frame, .pdf-frame {
+  width: 100%;
+  height: 60vh;
+  border: 1px solid var(--control-border);
+  border-radius: 6px;
+  background: #ffffff;
+}
+audio { width: 100%; }
+
+table.diff {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  table-layout: fixed;
+}
+table.diff th { text-align: left; padding: 0.25rem 0.4rem; border-bottom: 1px solid var(--border); }
+table.diff td {
+  padding: 0.05rem 0.4rem;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.diff-mark { width: 1.5rem; font-weight: 700; }
+.diff-number { width: 2.6rem; color: var(--muted); text-align: right; user-select: none; }
+.diff-removed .diff-left, .diff-changed .diff-left { background: var(--removed-bg); }
+.diff-added .diff-right, .diff-changed .diff-right { background: var(--added-bg); }
+.diff-gap { background: var(--surface); }

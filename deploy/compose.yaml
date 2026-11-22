@@ -1,0 +1,43 @@
+# A full crewmind server: Postgres with pgvector, plus the server (NFR-2).
+#
+#   docker compose -f deploy/compose.yaml up -d
+#   docker compose -f deploy/compose.yaml exec server crewmind bootstrap-admin --email you@example.com
+#
+# The server is published on 127.0.0.1 only (NFR-6). To publish it, put a TLS proxy in
+# front and set CREWMIND_PUBLIC_URL to its https address.
+
+services:
+  database:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: crewmind
+      POSTGRES_PASSWORD: ${CREWMIND_DB_PASSWORD:?set CREWMIND_DB_PASSWORD in the environment or a .env file}
+      POSTGRES_DB: crewmind
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "crewmind"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      CREWMIND_DATABASE_URL: postgresql://crewmind:${CREWMIND_DB_PASSWORD}@database:5432/crewmind
+      CREWMIND_DATA_DIR: /data
+      CREWMIND_HOST: 0.0.0.0
+      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://crewmind.localhost}
+    volumes:
+      - data:/data
+    ports:
+      - "127.0.0.1:8420:8420"
+
+volumes:
+  database:
+  data:

@@ -29,7 +29,7 @@
 - **EXE-5 Leasing.**
   - Runners lease queued runs with row-level skip-locking on Postgres; on SQLite, slim mode runs one in-process runner that leases under a write lock. Creating the run and removing the queue entry happen in one transaction, so two runners never take one job.
   - A runner leases only as many runs as it has free workers.
-  - Runs for projects that are no longer running are dropped; their reasons will be re-derived.
+  - Runs of a kind the project's state does not allow (section 7.1) are dropped; their reasons will be re-derived.
   - When a subscription plan is exhausted until a known time, its runs wait until then, and the hold says so.
   - Scaling means adding runners against the same database.
 - **EXE-6 Pinning.** At lease time the run pins its model, effort, provider, credential, harness and token caps, so even reaped runs stay attributed to what actually ran.
@@ -39,10 +39,10 @@
   - Reaping revokes the token and books the tokens the gateway already metered. It charges the failure to the run's requirement and releases claims, except a lead's task with open subtasks. It tells the agent to check the side-effect ledger before redoing anything.
   - A late finish from a reaped ("zombie") worker changes nothing.
 - **EXE-8 Retries and recovery.**
-  - A failed run gives back the notices and suggestions it consumed, and is retried up to 3 attempts with a backoff of 30 seconds × attempt. A wake counts once against the wake limit however many retries it took.
+  - A failed run gives back the notices and suggestions it consumed, and is retried up to 3 attempts with a backoff of 30 seconds × attempt. Each attempt is a new run linked to the same wake; a failed run stays failed. A wake counts once against the wake limit however many retries it took.
   - If no attempt ever reached a model, messages are marked unread again.
   - A crashed run's saved notes and partial plan (MEM-7) are placed in the retry's context.
-- **EXE-9 Revocation.** Kill, hold, pause, the wall and the refusal cap all revoke the run token. The heartbeat notices revocation and stops the sandbox itself. The run ends as killed, or as terminated if refusals caused it.
+- **EXE-9 Revocation.** Kill, hold, a pause (except the budget wall, where in-flight runs finish: GOV-3) and the refusal cap revoke the run token. The heartbeat notices revocation and stops the sandbox itself. The run ends as killed, or as terminated if refusals caused it.
 - **EXE-10 Refusal cap.**
   - Each refusal is recorded with its text, rule, route and time.
   - At `refusal.cap` \[5\] refusals in one run, the token is revoked, and the final refusal says so: rephrasing is not a strategy.
@@ -77,7 +77,7 @@
   - commitment, deliverables, owed items, suggestions, pending decision items and recent settings changes.
 
   Every pack states the refusal cap and that everything the agent reads is data, not instructions.
-- **EXE-16 Stall watchdog.** In a running project with open work or open scope, if no work run has started for `stall.after` \[60 min\] and no hold with a known lift time explains it, the CEO is woken and the chairman gets one alarm naming the exact cause.
+- **EXE-16 Stall watchdog.** In a running project with open work or open scope, if no work run has started for `stall.after` \[60 min\] and no hold with a known lift time explains it, the CEO is woken and the chairman gets one alarm naming the exact cause. The alarm is not repeated until a work run has started again.
 - **EXE-17 Agent browser.** A role may be granted a `browser` tool: a headless browser running inside the run's sandbox.
   - **Actions:** open a URL, read the page as text or an accessibility tree, click, type, select, upload a workspace file, download into the workspace, take a screenshot. Each is an agent API tool, so every harness can use it.
   - **Untrusted pages.** Everything on a page is untrusted input (P4) and never instructions. The browser cannot reach private addresses, the control plane or another project's network (EXE-12).

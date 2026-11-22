@@ -1,0 +1,106 @@
+# The provider registry: data, not code (LLM-1).
+# `prefix` is the LiteLLM provider prefix. `classes` are tried in order; the first pattern
+# that matches a model id decides its class (LLM-4). `default_lineup` is used until the
+# credential's own model list has been read.
+# `native_search` is false everywhere for now: built-in provider search is not wired yet,
+# so web search always goes through the install's search service (INT-8).
+
+[providers.anthropic]
+label = "Anthropic"
+prefix = "anthropic"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["fable|opus", "frontier"], ["sonnet", "balanced"], ["haiku", "fast"]]
+default_lineup = { frontier = "claude-opus-5-5", balanced = "claude-sonnet-5-5", fast = "claude-haiku-5-5" }
+
+[providers.openai]
+label = "OpenAI"
+prefix = "openai"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["nano", "fast"], ["mini", "balanced"], ["^gpt-|^o\\d", "frontier"]]
+default_lineup = {}
+
+[providers.gemini]
+label = "Google Gemini"
+prefix = "gemini"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["flash-lite", "fast"], ["flash", "balanced"], ["pro", "frontier"]]
+default_lineup = {}
+
+[providers.vertex_ai]
+label = "Google Vertex AI"
+prefix = "vertex_ai"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["flash-lite", "fast"], ["flash", "balanced"], ["pro", "frontier"], ["haiku", "fast"], ["sonnet", "balanced"], ["opus", "frontier"]]
+default_lineup = {}
+
+[providers.azure]
+label = "Azure OpenAI"
+prefix = "azure"
+needs_base_url = true
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["nano", "fast"], ["mini", "balanced"], ["gpt|^o\\d", "frontier"]]
+default_lineup = {}
+
+[providers.bedrock]
+label = "AWS Bedrock"
+prefix = "bedrock"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["haiku|micro|lite", "fast"], ["sonnet|pro", "balanced"], ["opus|premier", "frontier"]]
+default_lineup = {}
+
+[providers.mistral]
+label = "Mistral"
+prefix = "mistral"
+needs_base_url = false
+images = false
+native_search = false
+default_harness = "loop"
+classes = [["small|tiny|nemo", "fast"], ["medium", "balanced"], ["large", "frontier"]]
+default_lineup = {}
+
+[providers.deepseek]
+label = "DeepSeek"
+prefix = "deepseek"
+needs_base_url = false
+images = false
+native_search = false
+default_harness = "loop"
+classes = [["reasoner", "frontier"], ["chat", "balanced"]]
+default_lineup = { frontier = "deepseek-reasoner", balanced = "deepseek-chat" }
+
+[providers.openai_compatible]
+label = "OpenAI-compatible endpoint (OpenRouter, Groq, Together, Fireworks, xAI, Ollama, LM Studio)"
+prefix = "openai"
+needs_base_url = true
+images = false
+native_search = false
+default_harness = "loop"
+classes = []
+default_lineup = {}
+
+[providers.mock]
+label = "Scripted mock (tests and rehearsal)"
+prefix = "mock"
+needs_base_url = false
+images = true
+native_search = false
+default_harness = "loop"
+classes = [["frontier", "frontier"], ["balanced", "balanced"], ["fast", "fast"]]
+default_lineup = { frontier = "mock-frontier", balanced = "mock-balanced", fast = "mock-fast" }

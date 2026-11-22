@@ -7,7 +7,7 @@ These are decisions this revision could not settle alone. Each has a recommendat
 - **Desktop install in v2.0?** Recommendation: slim mode (NFR-23) ships in v2.0 using containers; host-jail mode for machines without Docker follows in phase 8.
 - **Which harnesses ship first?** Recommendation: the vendor-neutral loop plus one vendor agent SDK, both through the gateway. Add CLI-based harnesses as plug-ins.
 - **Egress control.** Recommendation: open egress in v2.0, with per-project networks (required, EXE-12) and honest documentation; revisit a logged egress policy after v2.0.
-- **Second factor and SSO.** Recommendation: TOTP in v2.0; SSO later.
+- **Second factor and SSO.** Decided (ADR-0007, PLAN.md): TOTP after v2.0, in phase 8; SSO later. SECURITY.md states the gap.
 - **Guests in Slack.** Messages from unlinked Slack users in a project channel never reach agents. Recommendation: keep this, and show them to people only.
 - **Workspace snapshots.** Snapshotting every workspace file as an artifact (ART-2) has a storage cost on large repositories. Recommendation: content-addressed storage with the retention in NFR-15. Revisit if repositories over 1 GB are common.
 

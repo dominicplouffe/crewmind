@@ -1,0 +1,88 @@
+[project]
+name = "crewmind"
+version = "0.0.1"
+description = "Runs a team of AI agents like a company, under rules the agents cannot talk their way out of."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "aiosqlite>=0.20",
+    "argon2-cffi>=23.1",
+    "cryptography>=43",
+    "alembic>=1.13",
+    "fastapi>=0.115",
+    "httpx>=0.27",
+    "litellm>=1.50",
+    "mcp>=1.2",
+    "psycopg[binary,pool]>=3.2",
+    "pydantic>=2.9",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "textual>=0.80",
+    "typer>=0.12",
+    "tzdata>=2024.1",
+    "uvicorn>=0.30",
+    "pywebpush>=2.5.0",
+    "mem0ai==2.2.1",
+    "fastembed>=0.9.1",
+]
+
+[project.scripts]
+crewmind = "crewmind.surfaces.cli.main:main"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.100",
+    "pyright>=1.1.380",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+# The embedding model is fetched at build time and is not in the repository (MEM-2).
+artifacts = ["src/crewmind/embedding_model/**"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/crewmind"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-n auto"
+markers = [
+    "attack(rule): an attack test for the named rule id (P10)",
+    "slow: a test that starts real processes and may take longer than the per-test limit",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF", "N", "ASYNC", "PT"]
+ignore = [
+    "N802",  # test names carry requirement ids, e.g. test_IF_1_3_...
+    "N818",  # "Refusal" is the spec's name for a refused call
+    "B009",  # getattr with a constant reads a field of an output model typed as BaseModel
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/crewmind/storage/migrations/versions/*" = ["N999"]
+"tests/*" = ["N999", "ASYNC"]  # test modules are named after requirement ids too
+# Host-local commands run alone in their own process, so blocking calls are fine there.
+"src/crewmind/domain/install/*" = ["ASYNC220", "ASYNC221", "ASYNC240"]
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"

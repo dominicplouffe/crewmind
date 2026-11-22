@@ -11,8 +11,11 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
   - a reversibility class: `read`, `reversible` or `irreversible`;
   - the audit actor it records;
   - its chat slash command, if any.
-- **IF-1.2** HTTP routes, CLI commands, MCP tools, slash commands and Slack actions are thin adapters generated from, or registered against, that catalog. No surface contains business rules of its own.
-- **IF-1.3** A conformance test enumerates the catalog. It fails when an operation is missing from a surface it belongs on, unless the catalog carries a written exemption reason for that surface. The same test checks that every decision-item kind appears on every surface listed in HUM-1.
+- **IF-1.2** HTTP routes, CLI commands, MCP tools, slash commands, Slack actions and agent API tools are thin adapters generated from, or registered against, that catalog. No surface contains business rules of its own. The surfaces are `api`, `cli`, `mcp`, `slash`, `slack` and `agent_api`.
+- **IF-1.3** A conformance test enumerates the catalog.
+  - Each operation declares the principals it serves (section 9.2): person, MCP client, agent run. It belongs on every surface those principals reach: a person reaches `api`, `cli` and `slack`, plus `slash` when the operation declares a slash command (IF-1.1); an MCP client reaches `mcp`; an agent run reaches `agent_api`. A host-local operation (IF-4.2) belongs on `cli` only.
+  - The test fails when an operation is missing from a surface it belongs on, unless the catalog carries a written exemption reason for that operation and surface.
+  - A surface not yet built is exempt as a whole, with the phase that builds it named. Once that phase starts, the exemption is removed. The same test checks that every decision-item kind appears on every surface listed in HUM-1.
 - **IF-1.4** Refusals are identical on every surface: the same machine code, the same rule id, the same plain sentence naming the rule and the legitimate path forward, and the arithmetic where numbers are involved (GOV-9).
 
 ### 9.2 Principals
@@ -22,7 +25,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 | Person | Password, then a browser session or a named, expiring, revocable personal token | App, human API, CLI | Rights come from instance role and per-project role |
 | Slack user linked to a person | The install's Slack app, plus the person's linked Slack identity | The project's Slack channel | Acts as the person; recorded as "person via slack" |
 | MCP client | Its own token or OAuth grant, never the person's credential | MCP server | Narrowed by scope; acts for one person; every write recorded as "person via mcp:\<client>" |
-| Agent run | Per-run token: one run, one agent, one project | Agent API and model gateway only | Valid only while the run is live; revoked at end, hold, pause, wall or refusal cap |
+| Agent run | Per-run token: one run, one agent, one project | Agent API and model gateway only | Valid only while the run is live; revoked at end, kill, hold, a pause other than the budget wall (GOV-3), or the refusal cap |
 | External system | Per-project signing secret | Webhook intake | Signature and replay window checked before anything is stored |
 
 ### 9.3 Human HTTP API
@@ -31,7 +34,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 - **IF-3.2** Every route declares who may call it, enforced before the handler runs. A test walks all routes and fails on any without a declaration.
 - **IF-3.3** A project the caller cannot see answers exactly like a project that does not exist (404). A visible project with an insufficient role answers 403, naming the role required.
 - **IF-3.4** A stable error envelope: `code`, `message`, `rule` (when a governed rule refused), `hint` (the legitimate path).
-- **IF-3.5** Writes accept an idempotency key. Lists are cursor-paginated and filterable by time window.
+- **IF-3.5** Writes accept an idempotency key. Lists are cursor-paginated and filterable by time window. A chat's history, read with no cursor, is its newest messages, oldest of them first, with a cursor to page back.
 - **IF-3.6** A live event stream (server-sent events or WebSocket) publishes project changes and streams chat replies token by token. Polling must still work.
 - **IF-3.7** Browser sessions are protected against cross-origin writes. Signing out invalidates the session server-side, and a password change invalidates older sessions.
 - **IF-3.8** Every read view the app shows MUST be a documented API read, so a third-party client could rebuild the app. That covers chat, overview, plan, board, org, runs and traces, evidence, deliverables and artifacts, memory, ledger, brief, agenda and record.
@@ -40,7 +43,16 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 ### 9.4 CLI (`crewmind`)
 
 - **IF-4.1** One command, `crewmind`, talking to the server over the HTTP API. It is configured by `CREWMIND_API` (the server address) and either `crewmind login` (stores a personal token) or `CREWMIND_TOKEN`.
-- **IF-4.2** A small, explicitly marked set of host-local commands may touch storage directly, because they must work when the server is down: bootstrap the first admin or issue a password-reset link, backup, restore, master-key rotation. Nothing else may bypass the API.
+- **IF-4.2** A small, explicitly marked set of host-local commands may touch storage directly, because they must work when the server is down:
+  - install (NFR-2);
+  - `up`, which starts the services and migrates on start (NFR-2, NFR-23);
+  - update (NFR-3);
+  - `migrate --to postgres` (NFR-23);
+  - bootstrap the first admin, or issue a password-reset link;
+  - backup and restore (NFR-4);
+  - master-key rotation (ACC-6).
+
+  Each is marked host-local in the catalog and exempt from the `api`, `mcp`, `slash` and `slack` surfaces. Nothing else may bypass the API.
 - **IF-4.3** Every command supports `--help` and `--json`. With `--json`, or with no TTY: never prompt, write only data to stdout and diagnostics to stderr.
 - **IF-4.4** Exit codes distinguish success, refusal by a rule, authentication failure, not found, and server unreachable.
 - **IF-4.5** Secrets are read from a hidden prompt, stdin or a file. They are never echoed and never required as a command-line argument.
@@ -83,12 +95,13 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
   - Streamable HTTP at one endpoint.
   - Clients authenticate with a minted bearer token, or OAuth 2.1: authorization code with PKCE, dynamic client registration, and audience-bound tokens per RFC 8707.
   - The server must resist PKCE stripping, code replay, redirect swap, audience confusion and scope widening at the token endpoint.
+  - Each step (register, approve, token, revoke) is an operation in the catalog; the standard endpoints are adapters over them. The person approves a client in their own signed-in session. A code presented with a wrong verifier, redirect or audience is spent.
 - **IF-5.2 Scopes.** Four scopes, with `read` implied by every other one. A client sees only its person's projects. Tools outside the client's scope are not listed, and answer as unknown.
 
 | Scope | Grants (minimum) |
 | --- | --- |
 | read | Whoami; list projects; the desk; overview; plan; budget and receipts; board; deliverables and artifacts; evidence; org; channels and chat history; memory; the record |
-| steer | Chat with any agent; slash commands (pin, decide, fix, example, grill, do, hold, resume); upload files; decide items; acknowledge flags; lifecycle (start, hold, resume, stop) |
+| steer | Chat with any agent; slash commands (pin, decide, fix, example, grill, do, hold, resume); upload files; decide items; acknowledge flags; lifecycle (start, hold, resume, stop, reopen, complete); edit memory |
 | create | Search roles and crews; read a source URL; grade a goal; rehearse a spec; create a project from a spec; quick project and its status; clone a project |
 | configure | Roster and hiring; skills; budget and quality; settings; data sources (minus human-only verbs); credential names and grants |
 
@@ -100,7 +113,8 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
   - creating or revealing a credential value;
   - changing project membership;
   - handing on the chair;
-  - deleting a project.
+  - deleting a project;
+  - approving a skill version.
 
   MCP may show these as waiting on the person but cannot perform them.
 - **IF-5.7 Context budget.**

@@ -17,4 +17,6 @@ The owner's standing complaint about v1 was that projects, especially Explore an
   - where the time went: working, waiting on the chairman, waiting on a limit or the budget, waiting on a provider, and reviewing.
 
   Waiting on the chairman is shown separately, so slowness is attributed to the right party.
-- **SPD-9 No idle crew.** Seats with no work are not woken (P8). A seat that has closed nothing in `seat.idle_after` \[3 days\] raises a **seat idle** flag. The CEO stands the seat down or states, in the chat, what it is for.
+
+  The platform attributes each stretch of time when it ticks: a hold reason decides first (chairman or skipped cycles: the chairman; budget wall: a limit or the budget; authentication failures: a provider); then a live work run of a non-reviewer seat means working; a live reviewer run or a task in review or checking means reviewing; an open verdict, proposal or request only the chairman can answer, or a ready project, means waiting on the chairman; work runs queued with none live means a limit; anything else counts as working.
+- **SPD-9 No idle crew.** Seats with no work are not woken (P8). A team seat that has closed nothing (no task done, no review given) in `seat.idle_after` \[3 days\] raises a **seat idle** flag; the CEO seat and the reviewer seat the platform staffs are not counted. The CEO stands the seat down or states, in the chat, what it is for.

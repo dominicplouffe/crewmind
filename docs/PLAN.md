@@ -36,50 +36,60 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** projects exist, are governed by versioned settings, and are reachable from API, CLI and MCP (read).
 - **Exit demo:** in slim mode (`crewmind up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
-- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-9, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-4, INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5, IF-4.6, IF-4.7; BG-1, BG-2, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
+- **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
+- **Partial ids** (spec review R-11):
+  - **MCP:** IF-5.1 is delivered here only as minted bearer tokens, and IF-5.2 only as the `read` scope, so the exit demo can use an MCP client. OAuth and the other scopes stay in phase 6.
+  - **Extension points:** PRJ-1 start checks, PRJ-2 pause causes, PRJ-3 and PRJ-10 stop and purge hooks, NFR-2 install steps and NFR-5 doctor checks are built as registries. Later phases add their checks (seat check, budget, email, Slack, libraries) without changing project code. Each missing piece is noted in `traceability.csv`.
 
 ## Phase 2: Chat and execution
 
 - **Goal:** talk to a CEO in the chat. It runs real work in a sandbox through the model gateway, metered in tokens, and stops at the wall.
 - **Exit demo:**
-  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness and on one real provider.
+  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
   - An upload becomes an artifact.
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.
   - Killing a runner mid-run violates no execution invariant.
-- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15, EXE-16; INV-8, INV-9, INV-10, INV-11, INV-12, INV-13, INV-14, INV-15, INV-16, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; INT-8
+- **Ids:** CHAT-1, CHAT-2, CHAT-3, CHAT-4, CHAT-5, CHAT-6, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-17, CHAT-18, CHAT-19, CHAT-20; LLM-1, LLM-2, LLM-3, LLM-4, LLM-5, LLM-6, LLM-7, LLM-8, LLM-9, LLM-10, LLM-11, LLM-12, LLM-13, LLM-14, LLM-15; GOV-1, GOV-2, GOV-3, GOV-6, GOV-7, GOV-9; ART-1, ART-2, ART-3, ART-4, ART-5, ART-6, ART-7, ART-8, ART-9; MSG-1, MSG-2, MSG-3, MSG-9, MSG-10, MSG-11, MSG-13; EXE-1, EXE-2, EXE-3, EXE-4, EXE-5, EXE-6, EXE-7, EXE-8, EXE-9, EXE-10, EXE-11, EXE-12, EXE-13, EXE-14, EXE-15; INV-4, INV-8, INV-9, INV-11, INV-12, INV-13, INV-15, INV-20, INV-24; IF-3.6, IF-3.9, IF-4.8, IF-6.1, IF-6.2, IF-6.3; BG-2; INT-8
+- **Partial ids** (phase 2 plan):
+  - **LLM-2, LLM-8:** phase 2 ships API-key credentials, the mock harness and the vendor-neutral harness loop. Subscription logins and the vendor agent SDK harness arrive in phase 8.
+  - **EXE-12:** container sandboxes are written here but cannot be run in the build environment, which has no Docker daemon. Their tests skip without one and must pass in CI or on the owner's machine before phase 2 counts as done. The development-only unisolated mode is fully tested.
+  - **INT-8:** the Brave Search API is the first search service.
+  - **No tasks yet:** tasks belong to phase 4, so the task-related wake triggers (EXE-2) and the work group of the agent API (IF-6.3) arrive there.
+- **Review:** one stop, at the exit demo. The work is still built in four parts (execution core, models, conversation, web app), each with the suite green on both databases.
+- **Web app:** the whole chat bar, including audio and video previews, the installable phone app with push, the command palette, version compare and full-text search.
 
 ## Phase 3: Listening
 
 - **Goal:** the chairman says it once. Pins, decisions, corrections, examples and directives work end to end, and memory recalls.
 - **Exit demo:** the frustration scenarios for theme 1 (doesn't listen) and theme 5 (chat is not command) pass. Pinned memory reaches every context pack verbatim (INV-25), and Mem0 recall works on both databases.
-- **Ids:** CHAT-8, CHAT-11, CHAT-12, CHAT-13; MSG-3, MSG-4, MSG-5, MSG-6, MSG-7, MSG-8, MSG-12; MEM-1, MEM-2, MEM-3, MEM-4, MEM-5, MEM-6, MEM-7, MEM-8; INV-23, INV-25, INV-26
+- **Ids:** CHAT-8, CHAT-11, CHAT-12, CHAT-13; MSG-4, MSG-5, MSG-6, MSG-7, MSG-8, MSG-12; MEM-1, MEM-2, MEM-3, MEM-4, MEM-5, MEM-6, MEM-7, MEM-8; INV-23, INV-25, INV-26; plus the rest of MSG-11 (warm chat sessions) and the extractor part of LLM-14, carried from phase 2
 
 ## Phase 4: Verification
 
 - **Goal:** "done" means checked by something other than the doer.
-- **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused. A Deliver run passes its final gap review, and a launch without a watch is refused.
-- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-10, WRK-11, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3
+- **Exit demo:** the rule-breaker acceptance scenario passes. A test that passes before any work is refused, and a launch without a watch is refused.
+- **Ids:** WRK-1, WRK-2, WRK-3, WRK-4, WRK-5, WRK-6, WRK-7, WRK-8, WRK-9, WRK-12, WRK-13, WRK-14, WRK-15, WRK-16, WRK-17; INV-1, INV-2, INV-3, INV-14, INV-16; EXE-16; the spinning guard of GOV-7
 
 ## Phase 5: Planning and speed
 
 - **Goal:** the three project types, honest projections, and speed as a requirement.
 - **Exit demo:** the golden path passes for all three types, and the speed acceptance criterion passes. A nearly finished Deliver project draws the CEO reserve, and a half-finished one is refused.
-- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-5, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19
+- **Ids:** PRJ-4, PRJ-5, PRJ-6, PRJ-7, PRJ-8; SPD-1, SPD-2, SPD-3, SPD-4, SPD-6, SPD-7, SPD-8, SPD-9; GOV-4, GOV-5, GOV-10; PLN-1, PLN-2, PLN-3, PLN-4, PLN-5, PLN-6, PLN-7, PLN-8, PLN-9, PLN-10, PLN-11, PLN-12; INV-18, INV-19; WRK-11 (moved from phase 4: it needs requirements)
 
 ## Phase 6: Chairman loop
 
 - **Goal:** the chairman sees everything that matters and is never left in silence.
-- **Includes:** the install-level outbound mail account (part of INT-6) so alerts and briefs can be emailed. Project mailboxes stay in phase 8.
+- **Email:** alerts and briefs go by browser push and in the app. The install's outbound mail account moved to phase 8 with project mailboxes (owner, 22 Nov 2026).
 - **Exit demo:** the never-silent acceptance scenario passes. The desk, daily brief, since-you-were-away, agenda and alerts all agree with the event log, and MCP steer and create scopes work with two-phase confirmation.
-- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13
+- **Ids:** CHAT-15; GOV-8; HUM-1, HUM-2, HUM-3, HUM-4, HUM-5, HUM-6, HUM-7, HUM-8, HUM-9, HUM-10, HUM-11, HUM-12; INT-7; INV-10, INV-17, INV-22; IF-5.1, IF-5.2, IF-5.3, IF-5.4, IF-5.5, IF-5.6, IF-5.7, IF-5.8; NFR-13; WRK-10 (moved from phase 4: it needs decision items); SPD-5 (moved from phase 5: it needs question items)
 
 ## Phase 7: Founder and rehearsal (v2.0 release candidate)
 
 - **Goal:** start a project by talking. A pasted document is grilled before anything is drafted.
 - **Includes:** importing v1 content from `content/` (roles, crews, doctrine, goal grammar).
 - **Exit demo:** the Founder acceptance scenario passes, grilling included. The full v2.0 acceptance suite passes; the Standards item and the Slack column of surface parity are deferred.
-- **Ids:** FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
+- **Ids:** PRJ-9; IF-4.6, IF-4.7; FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
 
 ## Phase 8: Breadth (after v2.0)
 

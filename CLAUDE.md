@@ -31,15 +31,21 @@ crewmind runs a team of AI agents like a company (chairman, CEO, teams) under ru
 
 ```
 src/crewmind/
-  catalog/            operation registry, schemas, authority, reversibility
-  domain/<module>/    one module per domain: rules, state machines, commands, read models, jobs
+  catalog/            operation registry, schemas, authority, reversibility, the one call path
+  domain/<module>/    one module per domain: rules, state machines, commands, read models
                       (projects, settings, budget, planning, work, artifacts, conversation,
-                       decisions, execution, memory, founder, library, integrations, accounts)
-  surfaces/           api/, cli/, mcp/, agent_api/, slack/: adapters only
+                       decisions, execution, models = credentials and lineups, memory, founder,
+                       library, integrations, accounts, record = the event log, secrets,
+                       install = host-local commands)
+  jobs/               the scheduler and its periodic jobs
+  surfaces/           api/, cli/, mcp/, slash/, agent_api/, slack/: adapters only
   gateway/            model gateway (LiteLLM), metering, per-run caps
   runner/             leasing, sandboxes, harnesses (mock first)
   storage/            SQLAlchemy models, Alembic migrations, the storage adapter
+  content/            packaged copies of content the server reads at run time
+  live.py             the in-process hub that feeds the live event stream
 web/                  TypeScript/React app
+deploy/               Dockerfile and Compose file for a full server
 tests/
   unit/  contract/  attack/  chaos/  scenarios/  acceptance/
 content/              imported v1 roles, crews, doctrine, goal grammar
@@ -51,11 +57,18 @@ Keep files small and focused. A file growing past about 600 lines is a sign it h
 ## Tests
 
 - `uv run pytest`: default suite. It never calls a paid model or the network; use the mock harness.
+- Tests that use the real memory engine need the embedding model on disk: `uv run python -m crewmind.domain.memory.fetch_model` once. Without it they skip and say so. Every other test uses the in-process memory engine.
 - `uv run pytest --db=sqlite` and `uv run pytest --db=postgres`: both must pass. CI runs both.
 - **Every enforced rule gets an attack test** in `tests/attack/` that tries to break it through the public API the way an agent would (P10).
 - **State machines get table-driven tests plus Hypothesis property tests.**
 - **Name tests after the requirement they prove** (for example `test_GOV_3_wall_pauses_project`), and list requirement ids in the docstring.
 - Golden scenarios assert behaviour, never prompt wording.
+- **Tests must stay fast as they multiply.** The suite runs in parallel (`-n auto` is the default), so:
+  - Every test is independent: its own database (the `runtime` and `app` fixtures copy a migrated template; never migrate per test), its own temporary directory, no shared files, no fixed ports, no reliance on test order.
+  - No real waiting. Move the `FakeClock` instead of sleeping; drive jobs with `tick()` instead of waiting for them.
+  - Test a rule at the lowest layer that proves it. Start a real server process only in `tests/acceptance/`, and keep those few.
+  - One test longer than 10 seconds fails the suite unless it is in `tests/acceptance/` (marked `slow`). `uv run pytest -m "not slow"` is the quick loop while developing.
+  - Prefer one parametrized or table-driven test over many near-copies.
 - `uv run ruff check`, `uv run ruff format --check` and `uv run pyright` must be clean.
 
 ## Definition of done for a change

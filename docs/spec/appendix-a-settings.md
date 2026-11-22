@@ -1,10 +1,10 @@
 ## Appendix A. Settings registry
 
-Every governed number and switch, with its default and allowed range. Scopes:
+Every governed number and switch, with its default and allowed range, followed by the constraints between settings and the operational settings. The settings service loads all three. Scopes (GOV-1):
 
-- **project:** a per-project governed setting, changed by the chairman with a reason (GOV-1).
-- **person:** a per-person preference.
-- **install:** set by the admin.
+- **project:** a per-project governed setting, changed by the chairman or a co-chair with a reason.
+- **person:** a per-person preference, changed by that person without a reason.
+- **install:** set by an admin, with a reason.
 
 Values marked "starting default" have no v1 history behind them and are expected to be tuned from measured use. Projects record which registry version their defaults came from.
 
@@ -50,6 +50,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `report.cadence` | off | off, or 1–4 slots a day | project | MSG-8 |
 | `chat.keep_warm` | 10 min | 1–60 min | install | MSG-11 |
 | `chat.brevity` | normal | short, normal, detailed | person | CHAT-13, MSG-12 |
+| `agent.message_words` | 150 (starting default) | 50–1,000 | project | MSG-12, LLM-15 |
 | `brief.time` | 08:00 local | any time; or off | person | HUM-11 |
 | `brief.away_after` | 4 h | 1–48 h | person | CHAT-15 |
 | `review.every` | 7 days | 1–30 days | project | HUM-9 |
@@ -83,3 +84,48 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `a2a.enabled` | off | on, off | project | INT-11 |
 | `otel.endpoint` | none (export off) | an OTLP URL | install | NFR-22 |
 | `otel.capture_content` | off | on, off | project | NFR-22 |
+| `authority.preset` | autonomous | autonomous, supervised, custom (set automatically when a verb setting departs from the preset) | project | Section 3 |
+| `authority.accept_scope` | ceo | ceo, chairman | project | Section 3, PLN-1 |
+| `authority.change_scope` | ceo | ceo, chairman | project | Section 3, PLN-1 |
+| `authority.date` | ceo | ceo, chairman | project | Section 3, PLN-6 |
+| `authority.verdict` | reviewer | reviewer, chairman (never the CEO, P5) | project | Section 3, PLN-10, WRK-9 |
+| `authority.credential_rescope` | ceo | ceo, chairman | project | Section 3 |
+| `authority.reserve_draw` | ceo | ceo, chairman | project | Section 3, GOV-10 |
+| `project.timezone` | The creator's `person.timezone` | IANA timezone name | project | GOV-2, HUM-12, NFR-8, PRJ-8 |
+| `person.timezone` | The browser's timezone at first sign-in, otherwise UTC | IANA timezone name | person | HUM-11, CHAT-15 |
+| `cycle.period` | weekly (Operate only; starting default) | hourly, daily, weekly, monthly, quarterly | project | PRJ-8 |
+| `cycle.roll_day` | 0 for weekly; 1 for monthly and quarterly | Weekly: 0–6, 0 = Monday (ISO). Monthly and quarterly: 1–28 | project | PRJ-8 |
+| `cycle.due_time` | The end of the cycle | A time within the cycle | project | PRJ-8 |
+| `token.default_expiry` | 30 days | 1–365 days | person | ACC-3 |
+
+### Constraints
+
+Validated whenever a bundle of changes is checked (GOV-1). A change that breaks a constraint is refused, naming both settings.
+
+- `budget.warn_at` < `budget.wrapup_at`.
+- `review.independent` may be off only in a solo project (WRK-9).
+- `authority.verdict` is never the CEO (P5).
+- `cycle.*` settings exist only on Operate projects.
+
+### Operational settings
+
+Environment variables, read at start (NFR-7). They are not governed settings: they are not changed through the operation catalog and need no reason. Every tunable number the platform reads from the environment is listed here.
+
+| Variable | Default | Range | Used by |
+| --- | --- | --- | --- |
+| `CREWMIND_DATABASE_URL` | A SQLite file in the data directory (slim mode) | A Postgres or SQLite URL | NFR-8, NFR-23 |
+| `CREWMIND_DATA_DIR` | `~/.crewmind` | A writable directory | NFR-4, NFR-23 |
+| `CREWMIND_MASTER_KEY_FILE` | `<data dir>/master.key`, created once by install and never overwritten | A readable file | ACC-6, NFR-2 |
+| `CREWMIND_HOST` | 127.0.0.1 | An address | NFR-6 |
+| `CREWMIND_PORT` | 8420 (starting default) | 1–65535 | NFR-6 |
+| `CREWMIND_PUBLIC_URL` | none | An https URL; required to bind beyond localhost | NFR-6 |
+| `CREWMIND_SANDBOX_MODE` | container | container, host-jail (once it ships), unisolated (development only) | EXE-12 |
+| `CREWMIND_SANDBOX_CPUS` | 2 | 1–32 | EXE-12 |
+| `CREWMIND_SANDBOX_MEMORY` | 2 GB | 512 MB–64 GB | EXE-12 |
+| `CREWMIND_BROWSER_SANDBOX_MEMORY` | 4 GB | 1–64 GB | EXE-17 |
+| `CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED` | off | on, off | WRK-7 |
+| `CREWMIND_AGENT_API_URL` | The server's own address | The URL at which sandboxes reach the agent API and the model gateway; set it when sandboxes are containers | IF-6.1, EXE-12 |
+| `CREWMIND_MOCK_SCRIPT_DIR` | none | A directory of scripts for the mock provider (tests and rehearsal only) | LLM-8 |
+| `CREWMIND_MEMORY_ENGINE` | mem0 | mem0, or in-process (kept in memory and lost at restart; tests and rehearsal only) | MEM-2 |
+| `CREWMIND_API` | `http://127.0.0.1:8420` | A URL (CLI only) | IF-4.1 |
+| `CREWMIND_TOKEN` | none | A personal token (CLI only) | IF-4.1 |

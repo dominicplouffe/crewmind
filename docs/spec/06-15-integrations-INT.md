@@ -59,7 +59,7 @@
   - At most `alerts.max_per_day` \[5\] decision emails in a rolling 24 hours; the rest go to the daily brief. Alarms (paused, budget wall, commitment breached, credential dead, watch failing) are never held back.
   - Proposed scope and commitments, when they wait on the chairman, are chased after 3 hours, then daily, in one batched message per project.
 - **INT-8 Web search.**
-  - Providers with built-in search use it. Otherwise one install-wide search service is configured.
+  - Providers with built-in search use it. Otherwise one install-wide search service is configured. The Brave Search API is the first supported service; others fit behind the same small interface.
   - Searches are counted in the ledger (count, not tokens), up to `search.max_per_day` \[200\] per project.
   - A role that needs the web on a provider that cannot search, with no service configured, is refused before it runs (LLM-6).
   - The search key never reaches a sandbox.

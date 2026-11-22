@@ -1,36 +1,39 @@
 ### 6.4 Budget and governance (GOV)
 
-- **GOV-1 Settings.**
-  - Only the chairman or a co-chair changes a setting: in chat (`/budget`, `/quality`), in the settings panel, or through any API surface.
-  - Each change needs a reason of at least 10 characters, takes effect immediately, is versioned and audited, and is disclosed in the CEO's next context.
-  - An unknown setting name is refused, naming the closest real one. A bundle of changes is validated as a whole; a refused bundle changes nothing.
+- **GOV-1 Settings.** Who changes a setting, and how, depends on its scope (Appendix A):
+  - **Project settings:** only the chairman or a co-chair changes them, in chat (`/budget`, `/quality`), in the settings panel, or through any API surface. Each change needs a reason of at least 10 characters. It takes effect immediately, is versioned and audited, and is disclosed in the CEO's next context.
+  - **Person settings:** each person changes their own, with no reason. Every change is audited.
+  - **Install settings:** only an admin changes them, with a reason of at least 10 characters. Every change is versioned and audited.
+  - An unknown setting name is refused, naming the closest real one. A bundle of changes is validated as a whole, including the constraints in Appendix A; a refused bundle changes nothing.
   - Agents change no setting.
-- **GOV-2 Token budget.** One number, `budget.tokens`: a total for Explore and Deliver, or per calendar month (project timezone) for Operate. Spend counts non-cached tokens only: input not served from a cache (cache writes included) plus output. Cache reads are recorded in the ledger and shown, but do not count against the budget. The chat shows used, remaining and the wall at all times.
+  - Operational settings (NFR-7) are environment variables, read at start. They are not changed through the operation catalog.
+- **GOV-2 Token budget.** One number, `budget.tokens`: a total for Explore and Deliver, or per calendar month (`project.timezone`) for Operate. Spend counts non-cached tokens only: input not served from a cache (cache writes included) plus output. Cache reads are recorded in the ledger and shown, but do not count against the budget. The chat shows used, remaining and the wall at all times.
 - **GOV-3 The budget is the wall.** The wall is `budget.tokens`, plus the CEO reserve once it is drawn (GOV-10).
   - At `budget.warn_at` \[80%\]: a notice to the CEO and a line in the chat.
-  - At `budget.wrapup_at` \[90%\]: **wrap-up mode**. New requirements and bets are refused. New tasks are refused unless they serve a requirement already in progress. A budget decision item asks the chairman to raise the budget or let the project land. Its default is to land.
-  - At the wall: if the CEO reserve is eligible, undrawn and held by the CEO, the platform draws it instead of pausing (GOV-10). Otherwise nothing new is leased, including chat runs; the platform answers chat with a status card instead. In-flight runs finish, each bounded by its per-run cap. The project pauses. The chairman gets an alarm and a platform-built "where things stand" report listing every deliverable so far.
+  - At `budget.wrapup_at` \[90%\]: **wrap-up mode**. New requirements and bets are refused. New tasks are refused unless they serve a requirement already in progress or a bet already active. A budget decision item asks the chairman to raise the budget or let the project land. Its default is to land.
+  - At the wall: if the CEO reserve is eligible, undrawn and held by the CEO, the platform draws it instead of pausing (GOV-10). Otherwise nothing new is leased, including chat runs; the platform answers chat with a status card instead. In-flight runs finish, each bounded by its per-run cap; their tokens stay valid until they end. This is the only pause that lets live runs finish (PRJ-2). The project pauses. The chairman gets an alarm and a platform-built "where things stand" report listing every deliverable so far.
   - Operate budgets reset at month start. An Operate project paused at the wall resumes automatically into one new cycle.
 - **GOV-4 Budget advice.** The Founder proposes a budget as a range, from the plan's adjusted runs × median tokens per run on this install, or from the reference estimates shipped with each crew (LIB-2) when there is no history. During a project, the burn rate (median tokens per active hour over the last 24 active hours, shown once at least 10 runs exist) and the projected spend at completion are always visible.
-- **GOV-5 Raise requests.** Only the CEO may ask for a higher budget or concurrency. The request carries its arithmetic and what happens if it is declined. A budget raise is refused while less than half the budget is used and the projection fits within it. Approving applies the change; the chairman may grant a different number. A "yes" never lowers anything.
+- **GOV-5 Raise requests.** Only the CEO may ask for a higher budget or concurrency. The request carries its arithmetic and what happens if it is declined. A budget raise is refused while less than half the budget is used and the projected spend (spend so far plus plan tokens, PLN-3) fits within it; unknown plan tokens count as fitting. Only one request of each kind waits at a time. Approving applies the change; the chairman may grant a different number. A "yes" never lowers anything.
 - **GOV-6 Per-run cap.** `run.max_tokens` \[3M\] (0 turns it off). The gateway warns the harness at 80% and refuses further calls at the cap, counting across retries of the same wake. An optional per-run token budget is passed to the model so it can pace itself.
 - **GOV-7 Runaway guards.** These replace v1's run allowances:
   - `run.concurrency` \[4\] concurrent work runs per project.
   - `agent.max_wakes_per_hour` \[12\] per agent.
-  - **Spinning:** when `spin.window` \[6\] consecutive work runs in a project change no work state and publish no artifact version, a spinning flag opens and concurrency drops to 1 until a state change.
+  - **Spinning:** when `spin.window` \[6\] consecutive work runs in a project change no work state and publish no artifact version, a spinning flag opens and concurrency drops to 1 until a state change. A work run changes work state when it changes a task's state; hiring and posting do not count.
   - The pair breaker (MSG-9) and the refusal cap (EXE-10).
 - **GOV-8 Real-world spend** (purchases, subscriptions, services) is the only thing budgeted in money, in `spend.currency` \[USD\]. It is off until the chairman enables it (`spend.enabled` \[off\]).
   - When enabled there is a monthly cap, `spend.monthly_cap` \[500\], and an approval threshold, `spend.approval_at` \[100\].
   - A purchase that would push committed spend past the cap is refused, and no approval overrides that.
   - A purchase at or above the threshold needs an approved spend item covering the amount.
   - After 3 approvals in 90 days with no denial, the system offers to raise the threshold. It never raises it on its own.
+  - Until a purchasing integration exists, an agent declares each purchase before making it; the cap and the threshold are enforced on that declaration. A cancelled purchase stops counting.
   - Purchases are side effects (WRK-16).
 - **GOV-9 Arithmetic in every refusal.** Every budget, cap or limit refusal states the numbers involved, the rule id and when it lifts.
 - **GOV-10 CEO reserve.** Like a real CEO, the CEO has latitude over a slice of the budget, to finish work that is nearly done without stopping to ask.
   - The chairman sets `budget.ceo_reserve` \[10%\] of `budget.tokens`; 0 turns it off. The reserve is part of what the chairman chose to spend, never money the CEO can create.
   - The CEO may draw it once per project (once per month for Operate), only after spend reaches `budget.wrapup_at`, and only when the arithmetic says the project is nearly done:
-    - **Deliver:** at least `budget.reserve_min_done` \[75%\] of accepted requirements are met, and the plan tokens for the rest (PLN-3) fit inside the reserve.
-    - **Explore:** the draw funds only findings for bets already active.
+    - **Deliver:** at least `budget.reserve_min_done` \[75%\] of accepted requirements are met, and the plan tokens for the rest (PLN-3) fit inside the reserve. When plan tokens are unknown, the draw is refused.
+    - **Explore:** the draw funds only findings for bets already active: after it, only tasks serving active bets may be created and no bet may be opened.
     - **Operate:** the draw funds only the current cycle's open requirements.
 
     Otherwise the draw is refused, with the arithmetic.
@@ -38,5 +41,6 @@
   - **Who draws.** Drawing the reserve is a delegable verb (section 3).
     - Under autonomous authority the CEO draws without asking. If the wall arrives while a draw is eligible and undrawn, the platform draws it for the CEO rather than pausing a nearly finished project.
     - Under supervised authority a draw is a decision item for the chairman, denied if unanswered (P6).
+  - **Once.** A draw that was asked for, made or cancelled counts as the one draw; a denied request does not.
   - **Cancelling.** The chairman can cancel a draw at any time. If spend is already past the budget, the project then pauses.
   - **Beyond the reserve,** the CEO can only ask for more (GOV-5). For real-world spend, the CEO's latitude is purchases below `spend.approval_at` (GOV-8).

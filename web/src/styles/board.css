@@ -1,0 +1,28 @@
+/* The Board panel: tasks, audit samples, outside evidence and launches. */
+.board-bar { margin-bottom: 0.5rem; min-height: 2rem; }
+.check-field { display: inline-flex; align-items: center; gap: 0.4rem; }
+.check-field label { margin: 0; font-weight: 400; }
+.check-field input { width: 1.1rem; height: 1.1rem; }
+.group-title { font-size: 1rem; margin: 0.9rem 0 0.1rem; }
+.task-title { text-align: left; min-height: 1.5rem; }
+.records li.depth-1 { padding-left: 1.25rem; }
+.records li.depth-2 { padding-left: 2.5rem; }
+.records li.depth-3 { padding-left: 3.75rem; }
+.closed-toggle { margin-top: 0.9rem; }
+.agent-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.check-output { max-height: 16rem; overflow: auto; }
+.quote {
+  margin: 0.3rem 0;
+  padding: 0.1rem 0.75rem;
+  border-left: 3px solid var(--border);
+}
+
+/* Check labels keep the server's word. Only "verified" is set apart; unchecked work looks unfinished. */
+.marker.check { color: var(--text); }
+.marker.check-verified { color: var(--ok); border-color: var(--ok); font-weight: 600; }
+.marker.check-self-reported,
+.marker.check-closed-unread { border-style: dashed; }
+.marker.check-not-yet-checked { border-style: dotted; color: var(--muted); }
+.marker.evidence-pending { border-style: dashed; }
+.marker.evidence-failed,
+.marker.watch-failing { color: var(--danger); border-color: var(--danger); }

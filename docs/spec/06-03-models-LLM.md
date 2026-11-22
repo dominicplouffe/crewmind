@@ -46,6 +46,24 @@ A role may set a floor (`min_class`) and may require vision; the dial never goes
   - While it is open, seats move to the fallback credential if one is set; otherwise they wait, and the chat header says so.
   - Authentication failures do not trip the breaker, but 3 consecutive ones pause the project (PRJ-2).
   - The chairman is told when a breaker opens and when it closes.
-- **LLM-12 Provider ceilings.** An install-wide concurrency ceiling per provider keeps several projects sharing a key under its rate limits. Leasing looks past a saturated provider so one provider cannot block the others.
+- **LLM-12 Provider ceilings.** An install-wide concurrency ceiling per provider keeps several projects sharing a key under its rate limits. Leasing looks past a saturated provider so one provider cannot block the others. An admin sets each ceiling; a provider with none is not limited, and there is no default.
 - **LLM-13 Cost estimate (display only).** For API-key credentials the app MAY show an estimated money cost beside token figures, from a price catalog, labelled "estimate". Prices never gate hiring, never enforce anything and never appear as a budget.
+- **LLM-15 Output standard in every call.** Every model call is told to answer in clear, plain English and to keep it short (P18).
+  - **One copy.** The output standard is product content, kept once beside the Founder doctrine and published with the communication standard (MSG-12, LIB-6).
+  - **Every call.** The platform places it in the system prompt of every model call it makes or prepares, whatever the harness:
+    - agent work runs and chat runs;
+    - the Founder;
+    - the memory extractor;
+    - image descriptions;
+    - the lint rewrite (MSG-12);
+    - goal grading, and capability checks with a graded answer.
+  - **What it says:**
+    - lead with the answer;
+    - no preamble, no restating the question and no closing summary;
+    - no filler, flattery or hedging;
+    - plain words over jargon;
+    - link instead of pasting.
+  - **When the task asks for length.** The content the task asks for (a deliverable, code, a detailed report the chairman requested) follows the task, and the message around it stays short.
+  - **Checked.** A test enumerates every path that builds a prompt, and fails if one omits the standard.
+  - **Measured, not refused (P1).** Output tokens per message are shown per seat in the run health report, beside the lint results of MSG-12.
 - **LLM-14 Platform models.** The Founder's drafting model and the memory extractor's model are platform settings and can use any provider. The memory layer's embedding model defaults to a bundled open-source model running locally, so it needs no key (MEM-2).
