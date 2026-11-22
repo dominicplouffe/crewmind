@@ -470,7 +470,9 @@ async def test_WRK_13_sampled_closes_are_audited_by_the_chairman_only(
         e for e in await app.events(crew.owner, crew.project) if e["type"] == "audit.settled"
     ]
     assert settled[0]["after"] == {"verdict": "failed", "task": ids[0]}
-    assert (await crew.show(ids[0]))["state"] == "done"
+    shown = await crew.show(ids[0])
+    assert (shown["state"], shown["label"], shown["audit"]) == ("done", "reviewed", "failed")
+    assert (await crew.show(ids[1]))["audit"] == "waiting"
     assert_refused(
         await app.call("audits.settle", crew.owner, **verdict), rule="WRK-13",
         code="audit_already_settled",

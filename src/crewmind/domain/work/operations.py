@@ -58,6 +58,11 @@ class TaskDetail(TaskItem):
     test_files: list[str]
     completion_evidence: str | None
     attempts: list[Attempt]
+    audit: str | None = Field(
+        default=None,
+        description="If this close was drawn for the chairman's audit: waiting, passed, "
+        "failed or not reviewed.",
+    )
     created_at: datetime
     closed_at: datetime | None
 
@@ -122,7 +127,11 @@ async def show_task(context: Context, payload: TaskRef) -> TaskDetail:
         .order_by(TaskAttempt.id)
     )
     words = {True: "passed", False: "failed", None: "not yet checked"}
+    sample = await context.session.scalar(
+        select(AuditSample).where(AuditSample.task_id == task.id, AuditSample.drawn)
+    )
     return TaskDetail(
+        audit=(sample.verdict or "waiting") if sample else None,
         **(await item(context, task)).model_dump(),
         author=author.name if author else "",
         audience=task.audience,
