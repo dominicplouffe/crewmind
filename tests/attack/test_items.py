@@ -320,3 +320,62 @@ async def test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item(
     states = {item["kind"]: item["state"] for item in await open_items(crew, open_only=False)}
     assert states["heads-up"] == "void"
     assert states["budget checkpoint"] == "decided"
+
+
+async def test_HUM_1_a_new_kind_is_only_a_registration(app: App) -> None:
+    """HUM-1, IF-1.3: registering a kind is all it takes. With no other code, an item of
+    it is listed for people and for agents, shown as a card line in the chat, counted on
+    the desk, decided with its typed action, and its title comes from its typed fields."""
+    crew = await Crew.start(app, team=False, settings=SOLO)
+    items.register(
+        items.Kind(
+            name="sample: colour",
+            filed_by="platform",
+            actions=("choose", "skip"),
+            default="skip",
+            title=lambda fields: f"Choose a colour for page {fields['page']}",
+        )
+    )
+    async with app.runtime.sessions() as session, session.begin():
+        from crewmind.storage.models import Project
+
+        project = await session.get(Project, crew.project)
+        assert project is not None
+        await items.file(
+            session, app.runtime.services.settings, project, "sample: colour",
+            filer=items.ITEMS_JOB, fields={"page": 3},
+            recommendation="Pick the colour you like.", if_declined="It stays grey.",
+            now=app.runtime.clock(),
+        )  # fmt: skip
+    (listed,) = await open_items(crew, kind="sample: colour")
+    assert (listed["title"], listed["actions"]) == (
+        "Choose a colour for page 3",
+        ["choose", "skip"],
+    )
+    seen = (await crew.ok("CEO", "agent.items"))["items"]
+    assert "sample: colour" in [item["kind"] for item in seen]
+    desk = (await app.ok("desk.show", crew.owner))["waiting"]
+    assert [entry["title"] for entry in desk] == ["Choose a colour for page 3"]
+    lines = (await app.ok("chat.history", crew.owner, project_id=crew.project))["items"]
+    assert any("Choose a colour for page 3" in line["body"] for line in lines)
+    decided = await decide(crew, listed["id"], "choose")
+    assert (decided["state"], decided["outcome"]) == ("decided", "choose")
+    assert (await app.ok("desk.show", crew.owner))["waiting"] == []
+
+
+def test_INV_17_no_registered_kind_defaults_to_a_grant() -> None:
+    """INV-17, HUM-3, P6: over every registered kind, the default outcome grants nothing,
+    except delivery sign-off and a green status review, which only close the books. A
+    tool permission never defaults to allow."""
+    from crewmind.catalog import registry
+
+    registry.load_domain_modules()
+    positive_defaults = {
+        kind.name
+        for kind in items.kinds()
+        if kind.default is not None and kind.default in kind.positive
+    }
+    assert positive_defaults == {"delivery sign-off", "status review"}
+    assert items.kind_of("approval: tool permission").default == "deny"
+    deadlines = {kind.name for kind in items.kinds() if kind.window is not None}
+    assert {"proposed scope", "proposed commitment", "verdict", "reserve draw"} <= deadlines

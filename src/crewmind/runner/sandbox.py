@@ -123,7 +123,13 @@ class _WarmHandle:
 
     async def wait(self) -> int:
         assert self._process.stdout is not None
-        line = (await self._process.stdout.readline()).decode().strip()
+        try:
+            line = (await self._process.stdout.readline()).decode().strip()
+        except RuntimeError:
+            # Another run is still reading this process's answer. The process is ended
+            # and this run fails, so it is retried in a fresh one (EXE-8).
+            await self._owner.end_warm(self._seat_id)
+            return 1
         if line.startswith(DONE):
             return int(line.removeprefix(DONE))
         await self._owner.end_warm(self._seat_id)

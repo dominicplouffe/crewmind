@@ -15,7 +15,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
 | [content/](content/README.md) | v1 content to import (roles, crews, doctrine) |
 
-Status: phases 2 to 5 are built: chat and execution, listening, verification, and planning. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; and every task now serves scope you can see: requirements with estimates in a Deliver or Operate project, bets in an Explore project. The plan shows an honest projection, a commitment whose date no agent can write, the budget arithmetic, and where the time went. Decision items, the Founder and integrations come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
+Status: phases 2 to 6 are built: chat and execution, listening, verification, planning, and the chairman loop. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; every task serves scope you can see; and everything that waits on you is one kind of item, with a deadline and a stated outcome if you do nothing. The desk lists what waits on you, the daily brief and the agenda are built from the record at no cost, and an AI client of your own can steer a project over MCP within the scopes you grant. The Founder and integrations (Slack, mail, data sources) come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
 ## Try it
 
@@ -67,6 +67,14 @@ Start the project and say hello, in the browser or in the terminal:
 uv run crewmind chat --project Atlas
 ```
 
+To let an AI client of your own work with your projects, mint it a token with the scopes you choose (`read`, `steer`, `create`, `configure`) and point the client at `http://127.0.0.1:8420/mcp`:
+
+```bash
+uv run crewmind mcp-clients mint --client-name "Desk assistant" --scopes steer
+```
+
+A client that speaks OAuth can register itself and ask you to approve it instead. Either way, a write that cannot be undone takes two calls, and a few things stay yours alone: membership, credentials and deleting a project.
+
 Without a credential, a project runs on the mock provider, which answers from scripts in `CREWMIND_MOCK_SCRIPT_DIR` and costs nothing.
 
 Starting a project wakes its CEO at once to plan. Type `/plan` in the chat, open the Plan panel, or run:
@@ -75,7 +83,7 @@ Starting a project wakes its CEO at once to plan. Type `/plan` in the chat, open
 uv run crewmind plan show --project-id <id>
 ```
 
-The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. Add scope yourself with `crewmind requirements add`, and finish a ready Deliver project with `crewmind projects sign-off`.
+The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. `crewmind desk show` lists everything that waits on you across projects, `crewmind items decide` answers one, `crewmind brief show` gives the last day, and `crewmind agenda show` says what happens next. Add scope yourself with `crewmind requirements add`, and finish a ready Deliver project with `crewmind projects sign-off`.
 
 ## Develop
 
