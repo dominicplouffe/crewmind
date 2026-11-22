@@ -63,8 +63,7 @@ function AlertsPrompt({ needed }: { needed: boolean }): JSX.Element | null {
   );
 }
 
-function SetupPrompt(): JSX.Element | null {
-  const setup = useSetupStatus();
+function SetupPrompt({ setup }: { setup: ReturnType<typeof useSetupStatus> }): JSX.Element | null {
   if (setup.loading || setup.founderReady) return null;
   return (
     <section className="callout callout-accent" aria-labelledby="setup-title" data-testid="setup-prompt">
@@ -93,6 +92,13 @@ export function Home(): JSX.Element {
   const projects = useProjects();
   const navigate = useNavigate();
   const brief = useLoad(() => get("/v1/brief/show"), []);
+  const setup = useSetupStatus();
+  // The page appears in one pass once its parts have answered, so nothing jumps as they arrive.
+  const ready =
+    (needs.loaded || Boolean(needs.error)) &&
+    !setup.loading &&
+    (brief.data !== undefined || Boolean(brief.error)) &&
+    (projects.data !== undefined || Boolean(projects.error));
   const list = sortProjects(projects.data?.items ?? []).filter((project) => project.state !== "deleted");
   const live = list.filter((project) => LIVE_STATES.includes(project.state) || project.state === "draft");
   const projectCount = needs.byProject.size;
@@ -116,86 +122,95 @@ export function Home(): JSX.Element {
         </button>
       </header>
 
-      <SetupPrompt />
+      {!ready ? (
+        <div className="home-grid" aria-busy="true">
+          <Skeleton lines={3} block />
+          <Skeleton lines={2} block />
+        </div>
+      ) : (
+        <>
+          <SetupPrompt setup={setup} />
 
-      <div className="home-grid">
-        <section className="home-inbox" aria-labelledby="inbox-title">
-          <div className="section-head">
-            <h2 id="inbox-title">
-              {home.inbox}
-              {needs.count > 0 ? (
-                <span className="count" data-testid="inbox-count">
-                  {needs.count}
-                </span>
+          <div className="home-grid">
+            <section className="home-inbox" aria-labelledby="inbox-title">
+              <div className="section-head">
+                <h2 id="inbox-title">
+                  {home.inbox}
+                  {needs.count > 0 ? (
+                    <span className="count" data-testid="inbox-count">
+                      {needs.count}
+                    </span>
+                  ) : null}
+                </h2>
+              </div>
+              {needs.error && needs.loaded ? (
+                <p className="quiet stale" role="status">
+                  <WifiOff size={14} aria-hidden="true" /> {home.inboxStale}
+                </p>
               ) : null}
-            </h2>
-          </div>
-          {needs.error && needs.loaded ? (
-            <p className="quiet stale" role="status">
-              <WifiOff size={14} aria-hidden="true" /> {home.inboxStale}
-            </p>
-          ) : null}
-          {!needs.loaded && !needs.error ? <Skeleton lines={2} block /> : null}
-          {needs.loaded && needs.count === 0 ? (
-            <div className="empty inbox-empty">
-              <span className="empty-icon success" aria-hidden="true">
-                <CheckCircle2 size={22} />
-              </span>
-              <p className="empty-title">{home.inboxEmptyTitle}</p>
-              <p className="quiet">{home.inboxEmptyNext}</p>
-            </div>
-          ) : null}
-          {needs.count > 0 ? (
-            <ul className="plain inbox-list" aria-label={home.inboxLabel}>
-              {needs.entries.map((entry, index) => (
-                <InboxItem key={entry.item ? `item-${entry.project_id}-${entry.item.id}` : `${entry.project_id}-${entry.what}-${index}`} entry={entry} onChanged={changed} />
-              ))}
-            </ul>
-          ) : null}
-          <AlertsPrompt needed={live.length > 0} />
-          {brief.data ? (
-            <details className="home-brief">
-              <summary>{home.briefTitle}</summary>
-              <Brief brief={brief.data} />
-            </details>
-          ) : null}
-        </section>
+              {!needs.loaded && !needs.error ? <Skeleton lines={2} block /> : null}
+              {needs.loaded && needs.count === 0 ? (
+                <div className="empty inbox-empty">
+                  <span className="empty-icon success" aria-hidden="true">
+                    <CheckCircle2 size={22} />
+                  </span>
+                  <p className="empty-title">{home.inboxEmptyTitle}</p>
+                  <p className="quiet">{home.inboxEmptyNext}</p>
+                </div>
+              ) : null}
+              {needs.count > 0 ? (
+                <ul className="plain inbox-list" aria-label={home.inboxLabel}>
+                  {needs.entries.map((entry, index) => (
+                    <InboxItem key={entry.item ? `item-${entry.project_id}-${entry.item.id}` : `${entry.project_id}-${entry.what}-${index}`} entry={entry} onChanged={changed} />
+                  ))}
+                </ul>
+              ) : null}
+              <AlertsPrompt needed={live.length > 0} />
+              {brief.data ? (
+                <details className="home-brief">
+                  <summary>{home.briefTitle}</summary>
+                  <Brief brief={brief.data} />
+                </details>
+              ) : null}
+            </section>
 
-        <section className="home-projects" aria-labelledby="home-projects-title">
-          <div className="section-head">
-            <h2 id="home-projects-title">{home.projectsTitle}</h2>
-            <Link to="/projects" className="button ghost small">
-              {home.allProjects}
-            </Link>
-          </div>
-          {!projects.data && projects.loading ? <Skeleton lines={3} block /> : null}
-          {projects.data && list.length === 0 ? (
-            <div className="empty">
-              <span className="empty-icon" aria-hidden="true">
-                <Sparkles size={22} />
-              </span>
-              <p className="empty-title">{home.projectsEmptyTitle}</p>
-              <p className="quiet">{home.projectsEmptyNext}</p>
-              <div className="empty-action row wrap">
-                <Link to="/draft" className="button primary">
-                  {home.start}
-                </Link>
-                <Link to="/projects?new=form" className="button">
-                  {home.byForm}
+            <section className="home-projects" aria-labelledby="home-projects-title">
+              <div className="section-head">
+                <h2 id="home-projects-title">{home.projectsTitle}</h2>
+                <Link to="/projects" className="button ghost small">
+                  {home.allProjects}
                 </Link>
               </div>
-            </div>
-          ) : null}
-          <Unfinished />
-          <ul className="plain project-cards">
-            {(live.length > 0 ? live : list).slice(0, 6).map((project) => (
-              <li key={project.project_id}>
-                <ProjectCard project={project} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
+              {!projects.data && projects.loading ? <Skeleton lines={3} block /> : null}
+              {projects.data && list.length === 0 ? (
+                <div className="empty">
+                  <span className="empty-icon" aria-hidden="true">
+                    <Sparkles size={22} />
+                  </span>
+                  <p className="empty-title">{home.projectsEmptyTitle}</p>
+                  <p className="quiet">{home.projectsEmptyNext}</p>
+                  <div className="empty-action row wrap">
+                    <Link to="/draft" className="button primary">
+                      {home.start}
+                    </Link>
+                    <Link to="/projects?new=form" className="button">
+                      {home.byForm}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+              <Unfinished />
+              <ul className="plain project-cards">
+                {(live.length > 0 ? live : list).slice(0, 6).map((project) => (
+                  <li key={project.project_id}>
+                    <ProjectCard project={project} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+        </>
+      )}
     </main>
   );
 }
