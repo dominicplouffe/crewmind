@@ -12,7 +12,7 @@ Goal (PLAN.md): start a project by talking. A pasted document is grilled before 
   - the same document grilled in a running project also surfaces its planted conflict with a standing order.
 - The full v2.0 acceptance suite passes. The Standards item and the Slack column of surface parity stay in phase 8.
 
-Status: **answered by the owner on 22 Nov 2026, except which repository holds v1.** The answers are at the end.
+Status: **agreed with the owner on 22 Nov 2026.** The answers are at the end.
 
 ## What phase 7 covers
 
@@ -101,8 +101,8 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 
 ## Risks
 
-- **The Founder's quality cannot be proven here.** Tests use a scripted model (owner's decision Q-006: no real-provider test). They prove the rules, the tools and the flow. They do not prove that a real model asks good questions or grades goals accurately. See question 2.
-- **The content is not in the repository.** `content/` holds only the output standard; the v1 roles, crews, doctrine and goal grammar were never copied in. See question 1.
+- **The Founder's quality cannot be proven here.** Tests use a scripted model (owner's decision Q-006: no real-provider test). They prove the rules, the tools and the flow. They do not prove that a real model asks good questions or grades goals accurately.
+- **The v1 content needs converting.** 38 roles, 17 crews and 12 example specs are in v1's format: roles name an effort level, and the specs are v1 bundles. Conversion problems go to `docs/spec-questions.md`.
 - **Size.** The largest phase so far in new surface: two new domains, a new web view and the full acceptance run.
 - **The phase 2 role stand-in is used everywhere.** Replacing it with pinned role versions touches hiring, context packs and lineups.
 
@@ -110,10 +110,10 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 
 | Question | Answer |
 | --- | --- |
-| The v1 content | **The owner gives read access to the v1 repository,** and the build imports and converts its roles, crews, doctrine and goal grammar. Which repository is still to be named |
+| The v1 content | **The owner gives read access to the v1 repository,** and the build imports and converts its roles, crews, doctrine and goal grammar. It is `dominicplouffe/yaaf`; its content was copied into `content/` unchanged on 22 Nov 2026 and is converted in part 7a |
 | Proving the grader | **A command the owner runs:** `crewmind founder eval` grades the reference goals with the owner's own model key and prints agreement with the hand grades. Tests here prove the rules and the flow. FND-7's accuracy clause stays partial until it is run |
 | The reference documents | **The build writes them, the owner reviews:** the reference goal with its hand grades, the raw brief, the seeded document and the three reference specs, in `acceptance/` |
 | Review items R-31, R-32, R-51 | Accepted as recommended; applied in spec revision 2.18 |
 | Review stops | One, at the full exit demo |
 
-Open: the name of the v1 repository.
+No open questions remain.

@@ -1,6 +1,8 @@
-# v1 content to import
+# v1 content
 
-The spec (section 12) keeps v1's content, not its code. Copy these from v1 into this folder before phase 7:
+Imported on 22 Nov 2026 from `dominicplouffe/yaaf` at commit `b43bb78` (Apache-2.0), unchanged: 38 roles, 17 crews, 12 example project specs, the design doctrine, the goal grammar and one Founder brief. The files are still in v1's format. Phase 7 converts them: roles lose `effort` and gain the revision 2 fields, and names that say "yaaf" become crewmind.
+
+The spec (section 12) keeps v1's content, not its code. What each folder holds:
 
 | Folder | From v1 | Used by |
 | --- | --- | --- |
