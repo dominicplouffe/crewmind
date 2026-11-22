@@ -63,7 +63,7 @@ _READ = (
     "settings.show_mine",
     "uploads.status",
 )
-_CREATE = ("projects.create", "projects.promote")
+_CREATE = ("projects.create", "projects.promote", "projects.import_spec", "projects.clone")
 _CONFIGURE_GROUPS = ("roster", "settings", "models", "credentials", "roles", "crews")
 _STEER_GROUPS = (
     "artifacts",

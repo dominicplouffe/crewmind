@@ -10,6 +10,10 @@ Newest first. One line per change, citing the ids touched.
 - **LIB-1:** a role states its seat kind (ceo, worker or reviewer); "can be the CEO" is the kind ceo. A role has a slug, and no two roles share a name. Web is a permission; a role that cannot run without web search says so separately.
 - **LIB-3:** anyone adds a role or a crew; only an admin changes one that exists, because every later project picks the change up. A shipped role whose text changes becomes its next version.
 - **LIB-2:** a crew's estimate may be empty; a team's first named member leads it.
+- **LIB-4:** the spec's fields are named; a spec with a problem creates nothing; a spec that carries a value where a credential name belongs is refused; what a spec asks for that the install lacks is listed as missing, not refused. A spec embeds only custom roles.
+- **PRJ-9:** a clone is an export imported under a new name by the same chairman.
+- **WRK-12:** domains a spec declares as controlled count as the project's own.
+- **IF-3.1:** a read that takes a whole document is sent as a POST body.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

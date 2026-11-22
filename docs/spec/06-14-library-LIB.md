@@ -24,7 +24,7 @@
   - embedded custom roles;
   - credential names with role scopes.
 
-  **Secret values never appear in a spec, export, clone or backup of a project.**
+  **Secret values never appear in a spec, export, clone or backup of a project.** A spec that carries a value where a credential name belongs is refused. A spec with any problem creates nothing. What a spec asks for that the install does not have (a credential, an integration) is listed as still missing; it does not stop the import. A spec embeds custom roles only; shipped roles are named.
 - **LIB-5 One format.** A spec can be imported, exported from a live project, cloned, rehearsed and graded. Every surface uses this one format.
 - **LIB-6 Agent Skills.** crewmind reads and writes skills in the open [Agent Skills](https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation) format: a folder holding a `SKILL.md` (name, description, instructions) plus optional scripts, references and assets.
   - **Library.** The install keeps one skill library. The admin or a chairman adds skills from files, a Git repository or a marketplace URL. Skills are versioned, and a role pins the versions it may use (LIB-1).

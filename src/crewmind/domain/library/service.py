@@ -178,6 +178,18 @@ async def role_named(session: AsyncSession, ref: str) -> Role:
     return role
 
 
+async def role_version(session: AsyncSession, slug: str, version: int) -> Role:
+    role = await session.scalar(select(Role).where(Role.slug == slug, Role.version == version))
+    if role is None:
+        raise Refusal(
+            "role_version_not_found",
+            f"There is no version {version} of the role {slug}.",
+            kind=RefusalKind.NOT_FOUND,
+            hint="Leave the version out to use the newest.",
+        )
+    return role
+
+
 async def current_roles(session: AsyncSession) -> list[Role]:
     """The newest version of every role, by slug."""
     newest_of = (

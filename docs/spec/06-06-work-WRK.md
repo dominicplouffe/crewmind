@@ -67,7 +67,7 @@
   - When every reviewer seat wrote part of the deliverables, no review is done and the chat says so.
 - **WRK-12 Outside evidence.**
   - Agent-claimed evidence starts pending and counts for nothing until the platform verifies it.
-  - Verification checks that the URL is http(s), that the domain is not one the project controls, that the fetch happens after the task was created, and that the claimed content is found on the page. Event times are compared only where the source supplies one (webhooks, APIs).
+  - Verification checks that the URL is http(s), that the domain is not one the project controls (a host its launches are watched at, or a domain its spec declares), that the fetch happens after the task was created, and that the claimed content is found on the page. Event times are compared only where the source supplies one (webhooks, APIs).
   - It fetches the page through the SSRF guard (public addresses only, every redirect re-checked, 20-second timeout, 2 MB cap), then snapshots and hashes it.
   - A fetch failure is retried up to 5 times, then fails closed. A failed check (an inside address, words not on the page, a domain the project controls) fails at once.
   - A domain the project controls is one its own launches are watched at.

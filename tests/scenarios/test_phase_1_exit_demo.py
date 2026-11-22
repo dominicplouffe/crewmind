@@ -294,6 +294,9 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("roles.save", admin, **{**role, "charter": "Check each claim twice."})
     await write("roster.repin_team", alice, project_id=project, team="checks")
     await write("library.reload", admin)
+    spec = {"name": "From a spec", "goal": "Publish one page.", "type": "deliver"}
+    imported = await write("projects.import_spec", alice, **spec)
+    await write("projects.clone", alice, project_id=imported["project_id"], name="A clone")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
     await write("auth.logout", alice)

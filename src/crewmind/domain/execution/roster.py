@@ -104,6 +104,16 @@ async def create_ceo(
         await conversation.ensure_channel(session, project.id, name, kind, now)
 
 
+async def set_ceo_role(session: AsyncSession, project: Project, role_name: str) -> None:
+    """LIB-4: a spec may name the role its CEO takes. Only a role that can be the CEO."""
+    role = await newest_role(session, role_name)
+    if role.seat_kind != SeatKind.CEO:
+        raise Refusal(
+            "not_a_ceo_role", f"{role.name} is not a role that can be the CEO.", rule=EXE_1.id
+        )
+    (await ceo_of(session, project.id)).role_id = role.id
+
+
 REVIEWER_ROLE = "reviewer"
 REVIEWER_SEAT = "Reviewer"
 STAFFING = platform_job("work: reviewer staffing")
@@ -219,10 +229,13 @@ async def hire_team(
     now: datetime,
     stand_down_when: str | None = None,
     names: list[str] | None = None,
+    role_version: int | None = None,
 ) -> Team:
     """EXE-1: a team is seats created from one pinned role version, within `teams.max`.
     Its first member leads it. A CEO hire takes the same path as a chairman's."""
     role = await newest_role(session, role_name)
+    if role_version is not None and role_version != role.version:
+        role = await library.role_version(session, role.slug, role_version)
     if role.seat_kind == SeatKind.CEO:
         raise Refusal(
             "second_ceo",

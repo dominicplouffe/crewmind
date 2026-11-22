@@ -6,7 +6,7 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import datetime, timedelta
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field
@@ -210,11 +210,16 @@ async def list_evidence(context: Context, payload: ProjectRef) -> EvidenceList:
 
 
 async def controlled_hosts(session: AsyncSession, project_id: str) -> set[str]:
-    """Domains the project controls: the hosts its own launches are watched at (WRK-12)."""
+    """Domains the project controls: the hosts its own launches are watched at, and those
+    its spec declares (WRK-12, LIB-4)."""
     rows = await session.scalars(
         select(Watch.check).where(Watch.project_id == project_id, Watch.kind == "url")
     )
-    return {host for check in rows if (host := urlsplit(check).hostname)}
+    hosts = {host for check in rows if (host := urlsplit(check).hostname)}
+    project = await session.get(Project, project_id)
+    extras: dict[str, list[Any]] = (project.extras if project else None) or {}
+    declared = extras.get("controlled_domains", [])
+    return hosts | {str(domain).lower() for domain in declared}
 
 
 def settle_evidence(

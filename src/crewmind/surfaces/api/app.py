@@ -22,7 +22,7 @@ from crewmind.catalog.operation import Operation, Reversibility
 from crewmind.catalog.refusal import ErrorEnvelope, Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog
 from crewmind.catalog.rules import Rule, rules
-from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.catalog.surfaces import Surface, exposed_on, takes_a_document
 from crewmind.domain.accounts.credentials import Authenticator
 
 API_PREFIX = "/v1"
@@ -48,8 +48,17 @@ def route_path(operation_name: str) -> str:
     return f"{API_PREFIX}/{operation_name.replace('.', '/')}"
 
 
+def reads_a_document(operation: Operation) -> bool:
+    """A read whose input is a whole document (a role, a crew, a project spec) cannot be
+    sent in a query string."""
+    return operation.reversibility is Reversibility.READ and takes_a_document(operation.input)
+
+
 def route_method(operation: Operation) -> str:
-    return "GET" if operation.reversibility is Reversibility.READ else "POST"
+    """Reads are GET, except one that takes a document, which is sent as a POST body."""
+    if operation.reversibility is Reversibility.READ and not reads_a_document(operation):
+        return "GET"
+    return "POST"
 
 
 def invalid_input(detail: object) -> ErrorEnvelope:
@@ -114,7 +123,7 @@ def _endpoint(
         return response
 
     annotation: Any = operation.input
-    if operation.reversibility is Reversibility.READ:
+    if route_method(operation) == "GET":
         annotation = Annotated[operation.input, Query()]
     parameters = [
         inspect.Parameter("request", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=Request),

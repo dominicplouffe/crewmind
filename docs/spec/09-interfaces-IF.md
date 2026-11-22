@@ -30,7 +30,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 
 ### 9.3 Human HTTP API
 
-- **IF-3.1** JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schema generated from the operation catalog.
+- **IF-3.1** JSON over HTTP, versioned (e.g. `/v1`), with a published OpenAPI schema generated from the operation catalog. Reads are GET requests, except a read that takes a whole document (checking a project spec), which is sent as a POST body.
 - **IF-3.2** Every route declares who may call it, enforced before the handler runs. A test walks all routes and fails on any without a declaration.
 - **IF-3.3** A project the caller cannot see answers exactly like a project that does not exist (404). A visible project with an insufficient role answers 403, naming the role required.
 - **IF-3.4** A stable error envelope: `code`, `message`, `rule` (when a governed rule refused), `hint` (the legitimate path).

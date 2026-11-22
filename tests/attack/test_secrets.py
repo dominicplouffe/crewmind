@@ -38,6 +38,8 @@ NOT_SECRET = {
     "secrets_reencrypted",
     "content_hash",
     "credential_names",
+    "paying_credential",
+    "credentials",
 }
 
 

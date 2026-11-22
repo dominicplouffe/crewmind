@@ -30,6 +30,10 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("slug"),
     )
+    with op.batch_alter_table("projects", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("extras", sa.JSON(), server_default="{}", nullable=False))
+        batch_op.add_column(sa.Column("doctrine_fingerprint", sa.String(length=64), nullable=True))
+
     with op.batch_alter_table("roles", schema=None) as batch_op:
         batch_op.add_column(
             sa.Column("slug", sa.String(length=100), server_default="", nullable=False)
