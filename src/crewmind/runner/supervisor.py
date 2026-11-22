@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 import logging
 import uuid
+from datetime import timedelta
 from pathlib import Path
 
 from sqlalchemy import select
@@ -22,6 +23,7 @@ from crewmind.domain.execution import runs
 from crewmind.domain.execution.model import HEARTBEAT_EVERY, RunKind
 from crewmind.domain.execution.runs import Lease
 from crewmind.domain.settings.service import SettingsService
+from crewmind.jobs.nudge import nudge, pause
 from crewmind.runner.sandbox import Sandbox, SandboxSpec
 from crewmind.storage.models import Artifact, Project, Seat
 
@@ -164,14 +166,16 @@ class Runner:
             await runs.finish(
                 session, lease.run_id, self.id, self._clock(), failed=failed, detail=detail
             )
+        nudge.ping()
 
     async def run(self) -> None:
+        changed = nudge.waiter()
         while True:
             try:
                 await self.step()
             except Exception:
                 logger.exception("runner: step failed")
-            await asyncio.sleep(POLL_SECONDS)
+            await pause(changed, timedelta(seconds=POLL_SECONDS))
 
     async def crash(self) -> None:
         """Stop without finishing anything, as a killed runner would. For chaos tests."""

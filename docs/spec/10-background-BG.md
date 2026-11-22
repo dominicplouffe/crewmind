@@ -8,7 +8,7 @@ There are two long-running programs plus disposable sandboxes:
 The background rules:
 
 - **BG-1** Each project is processed in its own transaction on every tick, so one broken project cannot stall the others.
-- **BG-2** Database notifications SHOULD be used to cut wake latency to near zero. Polling is the safety net, and nothing depends on a notification arriving.
+- **BG-2** Database notifications SHOULD be used to cut wake latency to near zero. Polling is the safety net, and nothing depends on a notification arriving. Within one server process, every write operation and every job pass that changed something wakes the waiting jobs at once, at most once every 200 ms; the intervals below are the longest a job waits.
 - **BG-3** Every scheduled job is idempotent and safe to run twice.
 
 | Job | Interval | Does |

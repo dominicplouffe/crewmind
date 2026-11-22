@@ -416,7 +416,6 @@ async def receipt(
     intervals = await projection.intervals_of(session, project.id, now)
     started = intervals[0][0] if intervals else project.created_at
     wall_clock = (now - started).total_seconds()
-    running = projection.hours_of(intervals) * projection.HOUR
     commitment = await commitments.latest(session, project.id)
     kept: bool | None = None
     if commitment is not None and commitment.date is not None:
@@ -444,7 +443,6 @@ async def receipt(
         },
         "reserve_drawn": await budget.reserve_drawn(session, settings, project, now),
         "wall_clock_seconds": int(wall_clock),
-        "time": {"running": int(running), "held_or_paused": int(max(wall_clock - running, 0))},
         "commitment": None
         if commitment is None or commitment.date is None
         else {

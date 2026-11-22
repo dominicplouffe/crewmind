@@ -6,7 +6,6 @@ costs nothing (P8, INV-11). It also keeps the chat from going silent (CHAT-3, IN
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
 
@@ -22,6 +21,8 @@ from crewmind.domain.execution import notices, runs
 from crewmind.domain.execution.model import OPEN_STATES, RunKind, RunState, SeatKind, SeatState
 from crewmind.domain.projects.model import ProjectState
 from crewmind.domain.settings.service import SettingsService
+from crewmind.jobs.nudge import nudge, pause
+from crewmind.storage.events import newest_event_id
 from crewmind.storage.models import Event, Message, Project, Run, Seat, Wake
 
 logger = logging.getLogger(__name__)
@@ -222,9 +223,13 @@ class Dispatcher:
                 logger.exception("dispatcher: project %s failed this tick", project_id)
 
     async def run(self) -> None:
+        changed = nudge.waiter()
         while True:
             try:
+                before = await newest_event_id(self._sessions)
                 await self.tick()
+                if await newest_event_id(self._sessions) != before:
+                    nudge.ping()
             except Exception:
                 logger.exception("dispatcher: tick failed")
-            await asyncio.sleep(TICK.total_seconds())
+            await pause(changed, TICK)

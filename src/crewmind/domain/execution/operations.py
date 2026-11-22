@@ -87,6 +87,8 @@ class RunItem(BaseModel):
     model: str | None
     provider: str | None
     queued_at: datetime
+    leased_at: datetime | None
+    started_at: datetime | None
     ended_at: datetime | None
     end_detail: str | None
     tokens_counted: int
@@ -261,6 +263,8 @@ async def _run_item(context: Context, run: Run) -> RunItem:
         model=run.model,
         provider=run.provider,
         queued_at=run.queued_at,
+        leased_at=run.leased_at,
+        started_at=run.started_at,
         ended_at=run.ended_at,
         end_detail=run.end_detail,
         tokens_counted=int(counted or 0),

@@ -20,6 +20,7 @@ from crewmind.catalog.operation import PROJECT_FIELD, Operation, Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.catalog.secret import one_time_secret_fields
+from crewmind.jobs.nudge import nudge
 from crewmind.storage.events import append_event
 from crewmind.storage.models import Event, IdempotencyKey
 
@@ -162,7 +163,10 @@ class Executor:
             await operation.prepare(caller, payload, self.services) if operation.prepare else None
         )
         try:
-            return await self._execute(operation, caller, payload, idempotency_key, prepared)
+            result = await self._execute(operation, caller, payload, idempotency_key, prepared)
+            if operation.reversibility is not Reversibility.READ:
+                nudge.ping()
+            return result
         except Refusal as refusal:
             if refusal.afterwards is not None:
                 async with self.sessions() as session, session.begin():

@@ -8,7 +8,6 @@ check again: a check changes nothing, so running it twice is safe.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import timedelta
 from urllib.parse import urlsplit
@@ -21,8 +20,10 @@ from crewmind.domain.execution import roster
 from crewmind.domain.work import board, checks, fetch, outside, reviews, tasks
 from crewmind.domain.work import operations as work_operations
 from crewmind.domain.work.model import Label, TaskState, WatchState
+from crewmind.jobs.nudge import nudge, pause
 from crewmind.runner.check_sandbox import CHECK_SECONDS_LIMIT
 from crewmind.services import Services
+from crewmind.storage.events import newest_event_id
 from crewmind.storage.models import Evidence, Project, Task, Watch
 
 logger = logging.getLogger(__name__)
@@ -218,9 +219,13 @@ class WorkJobs:
 
     async def run(self) -> None:
         """Tick for ever. A failed pass is logged and the next one still runs (NFR-9)."""
+        changed = nudge.waiter()
         while True:
             try:
+                before = await newest_event_id(self._sessions)
                 await self.tick()
+                if await newest_event_id(self._sessions) != before:
+                    nudge.ping()
             except Exception:
                 logger.exception("work jobs: tick failed")
-            await asyncio.sleep(TICK.total_seconds())
+            await pause(changed, TICK)

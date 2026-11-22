@@ -7,7 +7,6 @@ written in another. A test changes nothing, so running it twice after a crash is
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import timedelta
 
@@ -22,14 +21,17 @@ from crewmind.domain.planning import (
     completion,
     cycles,
     metrics,
+    speed,
     standdown,
 )
 from crewmind.domain.planning.model import RequirementState, RequirementTest
 from crewmind.domain.planning.readiness import PLANNING_JOB
 from crewmind.domain.projects.model import HOLDABLE, ProjectState
 from crewmind.domain.work import checks, fetch
+from crewmind.jobs.nudge import nudge, pause
 from crewmind.runner.check_sandbox import CHECK_SECONDS_LIMIT
 from crewmind.services import Services
+from crewmind.storage.events import newest_event_id
 from crewmind.storage.models import Project, Requirement
 
 logger = logging.getLogger(__name__)
@@ -92,6 +94,7 @@ class PlanningJobs:
                         continue
                     now = self._clock()
                     settings = self._services.settings
+                    await speed.account(session, settings, project, now)
                     if project.state == ProjectState.READY:
                         await completion.auto_complete(session, settings, project, now)
                         continue
@@ -104,6 +107,7 @@ class PlanningJobs:
                     await standdown.stand_down_finished_teams(session, project, now)
                     await commitments.reproject(session, settings, project, now)
                     await completion.become_ready(session, settings, project, now)
+                    await speed.watch(session, settings, project, now)
             except Exception:
                 logger.exception("planning jobs: project %s failed this tick", project_id)
 
@@ -150,9 +154,13 @@ class PlanningJobs:
 
     async def run(self) -> None:
         """Tick for ever. A failed pass is logged and the next one still runs (NFR-9)."""
+        changed = nudge.waiter()
         while True:
             try:
+                before = await newest_event_id(self._sessions)
                 await self.tick()
+                if await newest_event_id(self._sessions) != before:
+                    nudge.ping()
             except Exception:
                 logger.exception("planning jobs: tick failed")
-            await asyncio.sleep(TICK.total_seconds())
+            await pause(changed, TICK)

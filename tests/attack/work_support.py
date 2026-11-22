@@ -7,7 +7,7 @@ from typing import Any
 
 import httpx
 
-from tests.support import Actor, App, agent_call, live_run, running_project
+from tests.support import Actor, App, agent_call, live_run, quiet_start, running_project
 
 OBSERVABLE = {
     "title": "Write the summary",
@@ -51,6 +51,7 @@ class Crew:
                     reason="Set up for the test.",
                 )  # fmt: skip
             await app.ok("projects.start", owner, project_id=project)
+            await quiet_start(app, project)
         crew = cls(app, owner, project)
         crew.workspace.mkdir(parents=True, exist_ok=True)
         if type != "explore":

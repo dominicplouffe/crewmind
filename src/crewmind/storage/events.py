@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Caller
@@ -54,3 +55,10 @@ def append_event(
     )
     session.add(event)
     return event
+
+
+async def newest_event_id(sessions: Any) -> int:
+    """The id of the newest event: a cheap way for a job to tell that its pass changed
+    something, so the jobs after it need not wait out their period (SPD-1)."""
+    async with sessions() as session:
+        return int(await session.scalar(select(func.max(Event.id))) or 0)

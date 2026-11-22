@@ -45,6 +45,8 @@ hold_hooks: list[HoldHook] = []
 """Steps run when a hold reason is added, told which reason it was."""
 start_checks: list[ProjectHook] = []
 """Checks run before a project starts (PRJ-1). Each raises a Refusal to block the start."""
+started_hooks: list[ProjectHook] = []
+"""Steps run when a draft project starts: the CEO's first planning run is queued (SPD-3)."""
 stop_hooks: list[ProjectHook] = []
 """Steps run when a project stops (PRJ-3): later phases revoke runs and void decision items."""
 purge_hooks: list[ProjectHook] = []

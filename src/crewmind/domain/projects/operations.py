@@ -265,6 +265,8 @@ async def start(context: Context, payload: ProjectRef) -> ProjectStatus:
     lifecycle.move(
         context.session, project, ProjectState.RUNNING, caller=context.caller, now=context.now
     )
+    for hook in lifecycle.started_hooks:
+        await hook(context.session, project, context.now)
     return await _status(context)
 
 

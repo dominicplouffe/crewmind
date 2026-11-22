@@ -440,4 +440,18 @@ async def running_project(app: App, owner: Actor, **settings: Any) -> str:
             reason="Set up for the test.",
         )
     await app.ok("projects.start", owner, project_id=project)
+    await quiet_start(app, project)
     return project
+
+
+async def quiet_start(app: App, project_id: str) -> None:
+    """Drop the notice that queues the CEO's first planning run (SPD-3), so a test starts
+    from a project that does nothing until the test says so."""
+    from sqlalchemy import delete
+
+    from crewmind.storage.models import Notice
+
+    async with app.runtime.sessions() as session, session.begin():
+        await session.execute(
+            delete(Notice).where(Notice.project_id == project_id, Notice.kind == "project started")
+        )

@@ -16,6 +16,7 @@ from crewmind.domain.planning import (
     readiness,
     requirements,
     reserve,
+    speed,
 )
 from crewmind.domain.planning.views import PlanNumbers, RequirementItem, item, numbers_of
 from crewmind.domain.projects.model import ProjectType
@@ -124,11 +125,29 @@ class CycleView(BaseModel):
     scorecard: dict[str, Any] | None
 
 
+class ChainView(BaseModel):
+    runs: int = Field(description="Adjusted runs along the longest dependency chain.")
+    requirements: list[int] = Field(description="The chain, in the order it must be done.")
+
+
+class SpeedView(BaseModel):
+    to_first_task_seconds: int | None
+    to_first_deliverable_seconds: int | None
+    to_done_seconds: int | None
+    where: dict[str, int] = Field(
+        description="Seconds spent working, waiting on the chairman, waiting on a limit or "
+        "the budget, waiting on a provider, and reviewing."
+    )
+    flags: list[str] = Field(description="What is slowing the project now, in words.")
+
+
 class PlanView(BaseModel):
     requirements: list[RequirementItem]
     bets: list[BetView]
     time_box: TimeBoxView | None
     cycles: list[CycleView]
+    longest_chain: ChainView
+    speed: SpeedView
     lowest_open_stage: int | None
     numbers: PlanNumbers
     pace: PaceView
@@ -183,10 +202,16 @@ async def plan_view(
         if any(one.filed_at is None for one in reviews)
         else "filed"
     )
+    chain = await speed.longest_chain(session, project)
     return PlanView(
         requirements=[await item(session, row, graph, numbers.bias_multiplier) for row in rows],
         **await explore_part(session, settings, project, now),
         cycles=await cycle_part(session, project),
+        longest_chain=ChainView(runs=chain[0], requirements=chain[1]),
+        speed=SpeedView(
+            **await speed.time_report(session, project, now),
+            flags=[flag.cause for flag in await speed.open_flags(session, project.id)],
+        ),
         lowest_open_stage=await readiness.lowest_open_stage(session, project.id),
         numbers=numbers,
         pace=PaceView(

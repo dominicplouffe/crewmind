@@ -1,0 +1,410 @@
+{
+ "about": "The Deliver reference project for the speed criterion (section 13). Four pages; the pricing page depends on the home page, so the longest chain is five runs: the CEO plans, the home team writes the home page, the CEO issues the pricing task, the home team writes it, and the reviewer files the final gap review. Every run thinks for the same time before it acts. A CEO run that finds the pricing task not yet possible, or already done, is refused once and ends.",
+ "chain_runs": 5,
+ "CEO/work": {
+  "runs": [
+   [
+    {
+     "tools": [
+      {
+       "name": "agent_hire_team",
+       "arguments": {
+        "team": "home",
+        "role": "Generalist"
+       }
+      }
+     ],
+     "delay_ms": 4000
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_hire_team",
+       "arguments": {
+        "team": "about",
+        "role": "Generalist"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_hire_team",
+       "arguments": {
+        "team": "contact",
+        "role": "Generalist"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_propose_requirement",
+       "arguments": {
+        "text": "The home page is published on the site.",
+        "test_kind": "command",
+        "success_test": "test -f home.txt",
+        "estimate_runs": 1
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_propose_requirement",
+       "arguments": {
+        "text": "The pricing page is published on the site.",
+        "test_kind": "command",
+        "success_test": "test -f pricing.txt",
+        "estimate_runs": 1,
+        "depends_on": [
+         1
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_propose_requirement",
+       "arguments": {
+        "text": "The about page is published on the site.",
+        "test_kind": "command",
+        "success_test": "test -f about.txt",
+        "estimate_runs": 1
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_propose_requirement",
+       "arguments": {
+        "text": "The contact page is published on the site.",
+        "test_kind": "command",
+        "success_test": "test -f contact.txt",
+        "estimate_runs": 1
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_accept_requirement",
+       "arguments": {
+        "requirement_id": 1
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_accept_requirement",
+       "arguments": {
+        "requirement_id": 2
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_accept_requirement",
+       "arguments": {
+        "requirement_id": 3
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_accept_requirement",
+       "arguments": {
+        "requirement_id": 4
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_create_task",
+       "arguments": {
+        "requirement_id": 1,
+        "team": "home",
+        "title": "Write the home page",
+        "goal": "Write home.txt, the home page of the site.",
+        "success_test": "test -f home.txt",
+        "test_kind": "command",
+        "audience": "chairman"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_create_task",
+       "arguments": {
+        "requirement_id": 3,
+        "team": "about",
+        "title": "Write the about page",
+        "goal": "Write about.txt, the about page of the site.",
+        "success_test": "test -f about.txt",
+        "test_kind": "command",
+        "audience": "chairman"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_create_task",
+       "arguments": {
+        "requirement_id": 4,
+        "team": "contact",
+        "title": "Write the contact page",
+        "goal": "Write contact.txt, the contact page of the site.",
+        "success_test": "test -f contact.txt",
+        "test_kind": "command",
+        "audience": "chairman"
+       }
+      }
+     ]
+    },
+    {
+     "text": "Three pages are with their teams. The pricing page follows the home page."
+    }
+   ]
+  ],
+  "then": [
+   {
+    "tools": [
+     {
+      "name": "agent_create_task",
+      "arguments": {
+       "requirement_id": 2,
+       "team": "home",
+       "title": "Write the pricing page",
+       "goal": "Write pricing.txt, the pricing page of the site.",
+       "success_test": "test -f pricing.txt",
+       "test_kind": "command",
+       "audience": "chairman"
+      }
+     }
+    ],
+    "delay_ms": 4000
+   },
+   {
+    "text": "The pricing page is with the home team."
+   }
+  ]
+ },
+ "home/work": {
+  "runs": [
+   [
+    {
+     "tools": [
+      {
+       "name": "agent_claim_task",
+       "arguments": {
+        "task_id": 1
+       }
+      }
+     ],
+     "delay_ms": 4000
+    },
+    {
+     "tools": [
+      {
+       "name": "write_file",
+       "arguments": {
+        "path": "home.txt",
+        "content": "The home page.\n"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_complete_task",
+       "arguments": {
+        "task_id": 1,
+        "evidence": "home.txt is written and holds the home page."
+       }
+      }
+     ]
+    },
+    {
+     "text": "Sent for checking."
+    }
+   ],
+   [
+    {
+     "tools": [
+      {
+       "name": "agent_claim_task",
+       "arguments": {
+        "task_id": 4
+       }
+      }
+     ],
+     "delay_ms": 4000
+    },
+    {
+     "tools": [
+      {
+       "name": "write_file",
+       "arguments": {
+        "path": "pricing.txt",
+        "content": "The pricing page.\n"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_complete_task",
+       "arguments": {
+        "task_id": 4,
+        "evidence": "pricing.txt is written and holds the pricing page."
+       }
+      }
+     ]
+    },
+    {
+     "text": "Sent for checking."
+    }
+   ]
+  ],
+  "then": [
+   {
+    "text": "Nothing to do."
+   }
+  ]
+ },
+ "about/work": {
+  "runs": [
+   [
+    {
+     "tools": [
+      {
+       "name": "agent_claim_task",
+       "arguments": {
+        "task_id": 2
+       }
+      }
+     ],
+     "delay_ms": 4000
+    },
+    {
+     "tools": [
+      {
+       "name": "write_file",
+       "arguments": {
+        "path": "about.txt",
+        "content": "The about page.\n"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_complete_task",
+       "arguments": {
+        "task_id": 2,
+        "evidence": "about.txt is written and holds the about page."
+       }
+      }
+     ]
+    },
+    {
+     "text": "Sent for checking."
+    }
+   ]
+  ],
+  "then": [
+   {
+    "text": "Nothing to do."
+   }
+  ]
+ },
+ "contact/work": {
+  "runs": [
+   [
+    {
+     "tools": [
+      {
+       "name": "agent_claim_task",
+       "arguments": {
+        "task_id": 3
+       }
+      }
+     ],
+     "delay_ms": 4000
+    },
+    {
+     "tools": [
+      {
+       "name": "write_file",
+       "arguments": {
+        "path": "contact.txt",
+        "content": "The contact page.\n"
+       }
+      }
+     ]
+    },
+    {
+     "tools": [
+      {
+       "name": "agent_complete_task",
+       "arguments": {
+        "task_id": 3,
+        "evidence": "contact.txt is written and holds the contact page."
+       }
+      }
+     ]
+    },
+    {
+     "text": "Sent for checking."
+    }
+   ]
+  ],
+  "then": [
+   {
+    "text": "Nothing to do."
+   }
+  ]
+ },
+ "Reviewer/work": {
+  "runs": [],
+  "then": [
+   {
+    "tools": [
+     {
+      "name": "agent_file_gap_review",
+      "arguments": {
+       "gaps": []
+      }
+     }
+    ],
+    "delay_ms": 4000
+   },
+   {
+    "text": "No gaps."
+   }
+  ]
+ }
+}

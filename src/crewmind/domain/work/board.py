@@ -161,7 +161,7 @@ async def open_guard(session: AsyncSession, project_id: str, kind: str) -> Proje
     )
 
 
-def _record(session: AsyncSession, guard: ProjectGuard, now: datetime, state: str) -> None:
+def record_guard(session: AsyncSession, guard: ProjectGuard, now: datetime, state: str) -> None:
     append_event(
         session,
         type=GUARD_CHANGED,
@@ -179,13 +179,13 @@ async def _open(
     guard = ProjectGuard(project_id=project.id, kind=kind, cause=cause, opened_at=now)
     session.add(guard)
     await session.flush()
-    _record(session, guard, now, "open")
+    record_guard(session, guard, now, "open")
     return guard
 
 
 async def _clear(session: AsyncSession, guard: ProjectGuard, now: datetime) -> None:
     guard.cleared_at = now
-    _record(session, guard, now, "cleared")
+    record_guard(session, guard, now, "cleared")
 
 
 async def _last_work_start(session: AsyncSession, project_id: str) -> datetime | None:

@@ -40,22 +40,22 @@ CHAT-20,Everywhere,05-chat.md,2,yes,partial,test_CHAT_20_a_subscription_cannot_p
 PRJ-1,Lifecycle,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py,"Start checks are a registry; phase 1 has none to add. Seat, budget and email checks arrive in phases 2 and 8"
 PRJ-2,Hold,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Chairman hold, resume time and the hold-reason set are built. The triggers for budget_wall, auth_failures and skipped_cycles arrive in phases 2 and 5"
 PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,partial,tests/unit/test_state_machines.py,Stop is terminal and clears holds. Revoking runs and voiding decision items arrive in phases 2 and 6
-PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_6_a_completed_project_reopens_only_in_its_window; test_WRK_11_the_final_gap_review_blocks_readiness; test_scenario_a_deliver_project_ships_and_completes,"Ready, sign-off, auto-complete and the receipt are built. The receipt's time is running against held or paused until the time accounting (SPD-8)"
+PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,done,test_SPD_1_the_deliver_reference_project_finishes_at_the_speed_of_its_longest_chain; test_PRJ_6_a_completed_project_reopens_only_in_its_window; test_WRK_11_the_final_gap_review_blocks_readiness; test_scenario_a_deliver_project_ships_and_completes,"Ready, sign-off, auto-complete and the receipt are built. The receipt's time is running against held or paused until the time accounting (SPD-8)"
 PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
 PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
 PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_7_a_bet_expires_and_is_extended_once; test_SPD_7_no_new_bet_in_the_final_fifth_of_the_time_box; test_scenario_explore_confirms_one_bet_and_kills_another,"Bets, expiry, one extension, findings, the findings report and ending the project are built. Promote creates a draft Deliver project with the findings as its goal; the Founder refines it in phase 7"
 PRJ-8,Operate cycles,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_8_a_cycle_closes_completed_missed_or_skipped; test_scenario_operate_meets_a_recurring_requirement,"Cycles, the roll, scorecards, narratives, the skipped-cycle pause, a cycle-specific due time and completing an operation are built. Hourly to quarterly periods are computed; only weekly is exercised by tests"
 PRJ-9,Clone and export,06-01-projects-PRJ.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Two-step delete, grace and purge are built. The export offer arrives in phase 7; mailbox purge in phase 8"
-SPD-1,No clock waits on ready work,06-02-speed-SPD.md,5,yes,not started,,
-SPD-2,Parallel by default,06-02-speed-SPD.md,5,yes,not started,,
-SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,not started,,
-SPD-4,"Ship early, then improve",06-02-speed-SPD.md,5,yes,not started,,
+SPD-1,No clock waits on ready work,06-02-speed-SPD.md,5,yes,done,test_SPD_1_the_deliver_reference_project_finishes_at_the_speed_of_its_longest_chain; test_SPD_3_the_ceo_plans_at_once_and_a_slow_start_is_said_out_loud,
+SPD-2,Parallel by default,06-02-speed-SPD.md,5,yes,partial,test_SPD_1_the_deliver_reference_project_finishes_at_the_speed_of_its_longest_chain; test_SPD_2_the_plan_shows_the_longest_dependency_chain; test_SPD_2_the_longest_chain_is_the_one_that_takes_the_most_runs,"The plan view shows the longest chain, and agent messages wake at once. Staffing enough seats is the Founder's (phase 7)"
+SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,partial,test_SPD_1_the_deliver_reference_project_finishes_at_the_speed_of_its_longest_chain; test_SPD_3_the_ceo_plans_at_once_and_a_slow_start_is_said_out_loud,Built. The slow-start flag is a chat line and a notice to the CEO until flags exist (phase 6)
+SPD-4,"Ship early, then improve",06-02-speed-SPD.md,5,yes,partial,test_SPD_4_SPD_6_no_visible_output_is_flagged_until_something_is_published,The no-visible-output flag is built as a chat line and a notice. The Founder drafting the first-usable-version requirement arrives in phase 7
 SPD-5,Questions never block,06-02-speed-SPD.md,6,yes,not started,,Moved from phase 5 (phase 5 plan): it needs question items
-SPD-6,Done means available,06-02-speed-SPD.md,5,yes,not started,,
+SPD-6,Done means available,06-02-speed-SPD.md,5,yes,done,test_SPD_4_SPD_6_no_visible_output_is_flagged_until_something_is_published,
 SPD-7,Explore is time-boxed,06-02-speed-SPD.md,5,yes,done,test_SPD_7_no_new_bet_in_the_final_fifth_of_the_time_box; test_scenario_explore_confirms_one_bet_and_kills_another,
-SPD-8,Speed is measured,06-02-speed-SPD.md,5,yes,not started,,
-SPD-9,No idle crew,06-02-speed-SPD.md,5,yes,not started,,
+SPD-8,Speed is measured,06-02-speed-SPD.md,5,yes,done,test_SPD_8_every_stretch_of_time_is_attributed,
+SPD-9,No idle crew,06-02-speed-SPD.md,5,yes,partial,test_SPD_9_a_seat_that_closes_nothing_is_said_out_loud,Built as a chat line and a notice to the CEO until flags exist (phase 6)
 LLM-1,Providers through one gateway,06-03-models-LLM.md,2,yes,done,test_LLM_1_the_provider_registry_is_data_and_covers_the_minimum_set,
 LLM-2,Model credentials,06-03-models-LLM.md,2,yes,partial,test_LLM_8_the_ceo_answers_on_a_real_provider_and_the_key_stays_in_the_server; test_LLM_2_a_credential_is_listed_by_name_and_its_value_is_never_shown,API-key credentials built. Subscription logins in phase 8
 LLM-3,The quality dial,06-03-models-LLM.md,2,yes,done,test_LLM_3_the_quality_dial_sets_class_and_effort_by_seat_kind,

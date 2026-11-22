@@ -129,6 +129,7 @@ class Gateway:
                     run_kind=run_kind,
                     calls_so_far=calls or 0,
                     on_delta=on_delta,
+                    run_id=run_id,
                 )
             else:
                 response = await outbound.call_model(

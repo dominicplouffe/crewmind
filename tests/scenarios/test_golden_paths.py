@@ -97,7 +97,18 @@ async def test_scenario_a_deliver_project_ships_and_completes(app: App, clock: F
     assert set(receipt["tokens"]) == {"input", "output", "cache_write", "cache_read", "counted"}
     assert receipt["reserve_drawn"] == 0
     assert receipt["commitment"]["kept"] is True
-    assert receipt["wall_clock_seconds"] >= receipt["time"]["running"] > 0
+    time = receipt["time"]
+    assert set(time["where"]) == {
+        "working",
+        "waiting on the chairman",
+        "waiting on a limit or the budget",
+        "waiting on a provider",
+        "reviewing",
+    }
+    assert 0 < sum(time["where"].values()) <= receipt["wall_clock_seconds"]
+    assert time["to_first_task_seconds"] is not None
+    assert time["to_first_deliverable_seconds"] is not None
+    assert time["to_done_seconds"] == receipt["wall_clock_seconds"]
     status = await app.ok("projects.status", crew.owner, project_id=crew.project)
     assert status["state"] == "completed"
     shown_again = await app.ok("projects.receipt", crew.owner, project_id=crew.project)
