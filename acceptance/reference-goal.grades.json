@@ -1,0 +1,76 @@
+{
+  "about": "The hand grade of reference-goal.md: every element present, with the line each grade rests on. The goal is ready.",
+  "ready": true,
+  "grades": [
+    {
+      "element": "finish_line",
+      "grade": "present",
+      "quote": "THE FINISH LINE is the printer's signed proof of the complete guide, held by the print shop and not by this project.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "beneficiary",
+      "grade": "present",
+      "quote": "The reader is a walker who has never used a field guide, not the chairman who commissioned it.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "standard",
+      "grade": "present",
+      "quote": "the brief is a subset of the standard, not the whole of it",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "anti_metrics",
+      "grade": "present",
+      "quote": "Pages drafted, birds researched and words written are not progress, and this project is not graded on them.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "method_constraints",
+      "grade": "present",
+      "quote": "a person who has not seen the entry is shown three photographs and must name the bird from the entry alone",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "stated_bias",
+      "grade": "present",
+      "quote": "A bias, not a rule: prefer drawings to photographs for the plates",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "quality_bar",
+      "grade": "present",
+      "quote": "The quality bar is that no entry sends a reader to the wrong bird, because a guide that is wrong once is not trusted again. The editor owns that bar",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "human_role",
+      "grade": "present",
+      "quote": "He will not write entries, choose plates or check facts; those are the project's.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "resource_posture",
+      "grade": "present",
+      "quote": "Spend carefully until the first ten entries pass the naming test, because the method is unproven until then.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "failure_deliverable",
+      "grade": "present",
+      "quote": "If the proof cannot be signed, what is owed instead is every entry that passed its naming test, bound as a shorter guide",
+      "reason": "",
+      "fix": ""
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "about": "The hand grade of raw-brief.md. It is not ready: three load-bearing elements are missing (finish_line, standard, anti_metrics) and a fourth, failure_deliverable; quality_bar is weak; resource_posture is missing but not load-bearing.",
+  "ready": false,
+  "missing": [
+    "finish_line",
+    "standard",
+    "anti_metrics",
+    "resource_posture",
+    "failure_deliverable"
+  ],
+  "weak": [
+    "quality_bar"
+  ],
+  "grades": [
+    {
+      "element": "finish_line",
+      "grade": "missing",
+      "quote": "",
+      "reason": "",
+      "fix": "Name the record that shows the guide is finished, and pick one the project does not write itself."
+    },
+    {
+      "element": "beneficiary",
+      "grade": "present",
+      "quote": "The reader is someone out walking who has never used a guide before.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "standard",
+      "grade": "missing",
+      "quote": "",
+      "reason": "",
+      "fix": "Name the kind of guide this is judged against, and say the brief is a subset of it."
+    },
+    {
+      "element": "anti_metrics",
+      "grade": "missing",
+      "quote": "",
+      "reason": "",
+      "fix": "Say what does not count as progress, such as pages drafted."
+    },
+    {
+      "element": "method_constraints",
+      "grade": "present",
+      "quote": "",
+      "reason": "The brief constrains no method, and nothing in it needs one.",
+      "fix": ""
+    },
+    {
+      "element": "stated_bias",
+      "grade": "present",
+      "quote": "Use drawings if you can, though photographs are fine where they are clearer.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "quality_bar",
+      "grade": "weak",
+      "quote": "be good enough for a beginner",
+      "reason": "",
+      "fix": "Say what good enough means, why, and who may hold an entry back."
+    },
+    {
+      "element": "human_role",
+      "grade": "present",
+      "quote": "I will answer questions about the valley but I do not have time to write any of it.",
+      "reason": "",
+      "fix": ""
+    },
+    {
+      "element": "resource_posture",
+      "grade": "missing",
+      "quote": "",
+      "reason": "",
+      "fix": "Say how freely to spend, why, and when that changes."
+    },
+    {
+      "element": "failure_deliverable",
+      "grade": "missing",
+      "quote": "",
+      "reason": "",
+      "fix": "Say what is owed if the guide cannot be finished."
+    }
+  ]
+}

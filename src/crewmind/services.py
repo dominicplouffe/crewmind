@@ -26,6 +26,9 @@ class Services:
     checks: CheckRunner = field(default_factory=ProcessCheckRunner)
     """What runs a task's pinned check (WRK-7)."""
     allow_agent_checks_unisolated: bool = False
+    wired: dict[str, Any] = field(default_factory=dict[str, Any])
+    """What is built after the services and needs them: the model gateway, under
+    `gateway`, for the few operations that make a platform model call (LLM-14)."""
     """Recall memory (MEM-2). The default keeps nothing on disk; a server uses Mem0."""
 
     @property

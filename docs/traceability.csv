@@ -169,21 +169,21 @@ MEM-5,Retrieval,06-11-memory-MEM.md,3,yes,done,test_MEM_4_facts_are_extracted_fr
 MEM-6,Visible and editable,06-11-memory-MEM.md,3,yes,done,test_MEM_6_a_forgotten_memory_is_gone_and_the_log_does_not_keep_it; test_MEM_6_pinning_moves_a_memory_into_exact_memory; web/e2e/listening.spec.ts: Memory panel,"The Memory panel shows pinned and recalled memory by scope, with search, edit, pin and forget"
 MEM-7,Nothing lives only in a session,06-11-memory-MEM.md,3,yes,partial,test_MEM_4_facts_are_extracted_from_finished_runs_and_recalled_later,"Notes, memories and pinned records are written through the agent API as they are made, and chat runs are extracted every N turns. The CEO plan as stored state arrives with planning"
 MEM-8,"Measured, not assumed",06-11-memory-MEM.md,3,yes,done,test_MEM_8_recall_accuracy_meets_the_recorded_baseline,"Recall in the top 3: 24 of 24 on SQLite, 23 of 24 on Postgres. Needs the model on disk; skips otherwise"
-FND-1,Chat,06-12-founder-FND.md,7,yes,not started,,
-FND-2,Tools,06-12-founder-FND.md,7,yes,not started,,
-FND-3,"Draft first, then interview",06-12-founder-FND.md,7,yes,not started,,
-FND-4,Rounds,06-12-founder-FND.md,7,yes,not started,,
-FND-5,Ledger,06-12-founder-FND.md,7,yes,not started,,
-FND-6,Goal,06-12-founder-FND.md,7,yes,not started,,
-FND-7,Goal grammar,06-12-founder-FND.md,7,yes,not started,,
-FND-8,Dates,06-12-founder-FND.md,7,yes,not started,,
-FND-9,Roster,06-12-founder-FND.md,7,yes,not started,,
-FND-10,Settings,06-12-founder-FND.md,7,yes,not started,,
-FND-11,Fire drill,06-12-founder-FND.md,7,yes,not started,,
-FND-12,Quick mode,06-12-founder-FND.md,7,yes,not started,,
-FND-13,After creation,06-12-founder-FND.md,7,yes,not started,,
-FND-14,Doctrine fingerprint,06-12-founder-FND.md,7,yes,not started,,
-FND-15,Grilling a document,06-12-founder-FND.md,7,yes,not started,,
+FND-1,Chat,06-12-founder-FND.md,7,yes,partial,test_FND_5_a_project_comes_only_from_a_confirmed_ledger,"The conversation is stored, resumable and becomes the project chat. Turns are published word by word, but no surface reads that stream yet; a document is attached as text only"
+FND-2,Tools,06-12-founder-FND.md,7,yes,done,test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule,
+FND-3,"Draft first, then interview",06-12-founder-FND.md,7,yes,done,test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing; test_FND_15_a_document_is_grilled_one_question_at_a_time_before_any_draft; test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule; test_FND_5_a_project_comes_only_from_a_confirmed_ledger,
+FND-4,Rounds,06-12-founder-FND.md,7,yes,done,test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule,
+FND-5,Ledger,06-12-founder-FND.md,7,yes,done,test_FND_15_a_document_is_grilled_one_question_at_a_time_before_any_draft; test_FND_5_a_project_comes_only_from_a_confirmed_ledger,
+FND-6,Goal,06-12-founder-FND.md,7,yes,done,test_FND_5_a_project_comes_only_from_a_confirmed_ledger; test_FND_7_a_grade_stands_only_on_lines_the_goal_holds,
+FND-7,Goal grammar,06-12-founder-FND.md,7,yes,partial,test_FND_7_a_grade_stands_only_on_lines_the_goal_holds,"The rubric, the checks on a grade and the verdict are built and attacked. How accurately a real model grades is not proven here: run crewmind founder eval with your own key"
+FND-8,Dates,06-12-founder-FND.md,7,yes,done,test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule,
+FND-9,Roster,06-12-founder-FND.md,7,yes,partial,test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule,"A plan adversary is required on Deliver and Operate, and the platform staffs the reviewer. Cutting to the smallest team is the model's judgement and is not checked"
+FND-10,Settings,06-12-founder-FND.md,7,yes,partial,test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule; test_FND_5_a_project_comes_only_from_a_confirmed_ledger,A setting needs its reason; the first requirement is added at creation and first bets go to the CEO. The budget is advised from install history; no crew carries an estimate yet (Q-013)
+FND-11,Fire drill,06-12-founder-FND.md,7,yes,partial,test_FND_5_a_project_comes_only_from_a_confirmed_ledger,A draft is not ready until it is rehearsed and reaches a first close. Acting on other findings is the model's judgement
+FND-12,Quick mode,06-12-founder-FND.md,7,yes,partial,test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing,Built and tested in-process. The 2-minute target is measured in part 7e
+FND-13,After creation,06-12-founder-FND.md,7,yes,partial,test_FND_5_a_project_comes_only_from_a_confirmed_ledger,Creation lists what is missing and whether it can start. The CLI prompts arrive in part 7e
+FND-14,Doctrine fingerprint,06-12-founder-FND.md,7,yes,partial,test_FND_5_a_project_comes_only_from_a_confirmed_ledger,The fingerprint is recorded on the project. The health finding on older projects arrives in part 7e
+FND-15,Grilling a document,06-12-founder-FND.md,7,yes,done,test_FND_15_a_document_is_grilled_one_question_at_a_time_before_any_draft,
 FND-16,Grilling in a running project,06-12-founder-FND.md,7,yes,not started,,
 RHS-1,Safe by construction,06-13-rehearsal-RHS.md,7,yes,done,test_RHS_1_a_rehearsal_spends_nothing_and_touches_nothing; test_RHS_1_the_drill_opens_no_socket_and_refuses_a_database_that_exists,
 RHS-2,Clock rules,06-13-rehearsal-RHS.md,7,yes,done,test_RHS_2_a_wait_on_the_clock_is_reported_at_its_real_length,
@@ -193,7 +193,7 @@ LIB-1,Role,06-14-library-LIB.md,7,yes,partial,test_LIB_1_a_role_names_no_model_a
 LIB-2,Crew,06-14-library-LIB.md,7,yes,partial,test_LIB_3_the_starter_library_covers_what_the_spec_names,17 crews load and are searchable. No crew has a reference estimate yet (Q-013)
 LIB-3,Libraries,06-14-library-LIB.md,7,yes,done,test_LIB_1_a_role_names_no_model_and_only_an_admin_changes_one; test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist; test_LIB_3_the_starter_library_covers_what_the_spec_names; test_LIB_3_the_packaged_library_is_a_copy_of_the_content_folder,
 LIB-4,Project spec,06-14-library-LIB.md,7,yes,partial,test_LIB_4_a_spec_never_holds_or_yields_a_secret; test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing,Every field is carried. Integrations and role credentials are stored and listed as missing; nothing uses them until phase 8
-LIB-5,One format,06-14-library-LIB.md,7,yes,partial,test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing; test_LIB_5_every_shipped_example_is_a_spec_that_creates_a_project,"Import, export, clone, check and rehearse use the one format. Grading arrives with part 7c"
+LIB-5,One format,06-14-library-LIB.md,7,yes,partial,test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing; test_LIB_5_every_shipped_example_is_a_spec_that_creates_a_project,"Import, export, clone, check, rehearse and grade. A goal is graded, not a whole spec"
 LIB-6,Agent Skills,06-14-library-LIB.md,8,later,not started,,
 INT-1,Signed webhooks,06-15-integrations-INT.md,8,later,not started,,
 INT-2,GitHub events,06-15-integrations-INT.md,8,later,not started,,

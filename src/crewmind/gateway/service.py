@@ -36,7 +36,8 @@ from crewmind.domain.models.service import (
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import HOLDABLE, Hold
 from crewmind.domain.secrets.store import SecretStore
-from crewmind.domain.settings.service import SettingsService
+from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.service import INSTALL_SUBJECT, SettingsService, Subject
 from crewmind.gateway import outbound
 from crewmind.gateway.litellm_provider import is_auth_error, is_transient_error
 from crewmind.gateway.mock import MockProvider
@@ -49,6 +50,9 @@ MODEL_CALL = "model call"
 
 
 GATEWAY_JOB = platform_job("gateway")
+
+
+FOUNDER = "founder"
 
 
 class Gateway:
@@ -267,6 +271,95 @@ class Gateway:
                 model=model,
             )
         return response.text
+
+    async def founder_call(
+        self,
+        request: CompletionRequest,
+        *,
+        purpose: str,
+        calls_so_far: int = 0,
+        on_delta: Callable[[str], None] | None = None,
+    ) -> CompletionResponse:
+        """A model call the Founder makes: drafting a project, or grading a goal (LLM-14,
+        FND-2, P3, P9).
+
+        It runs on the install's drafting credential (`founder.credential`) at
+        `founder.model_class`. It is metered like every call, against the install and no
+        project, so it counts against no project budget (INV-8)."""
+        install = Subject(Scope.INSTALL, INSTALL_SUBJECT)
+        async with self._sessions() as session:
+            name = str(await self._settings.get(session, install, "founder.credential"))
+            wanted = ModelClass(await self._settings.get(session, install, "founder.model_class"))
+            credential = await session.scalar(
+                select(ModelCredential).where(
+                    ModelCredential.name == name, ModelCredential.state == "active"
+                )
+            )
+            provider = providers()[MOCK]
+            model, key, base_url = f"mock-{wanted}", None, None
+            if credential is not None:
+                provider = provider_of(credential)
+                lineup = await lineup_of(session, credential)
+                actual = nearest_class(wanted, set(lineup))
+                if actual is None:
+                    raise Refusal(
+                        "no_model",
+                        f"The credential {credential.name} has no model the Founder can use.",
+                        rule=LLM_6.id,
+                        hint="Refresh the credential's lineup.",
+                    )
+                model, base_url = lineup[actual], credential.base_url
+                key = await self._secrets.reveal(session, (SECRET_OWNER, credential.id), "key")
+            credential_id = credential.id if credential else None
+        request = request.model_copy(
+            update={"system": f"{request.system}\n\n# How to write\n\n{output_standard()}"}
+        )
+        if provider.name == MOCK:
+            if not self.mock.has_script(FOUNDER, purpose):
+                raise Refusal(
+                    "no_founder_model",
+                    "No model is set for the Founder on this install.",
+                    rule=LLM_6.id,
+                    hint="An admin names a credential in the setting `founder.credential`.",
+                )
+            response = await self.mock.complete(
+                request,
+                seat_name=FOUNDER,
+                run_kind=purpose,
+                calls_so_far=calls_so_far,
+                on_delta=on_delta,
+            )
+        else:
+            response = await outbound.call_model(
+                provider,
+                request,
+                model=model,
+                api_key=key,
+                base_url=base_url,
+                effort=None,
+                on_delta=on_delta,
+            )
+        usage = Usage(**response.usage.model_dump())
+        async with self._sessions() as session, session.begin():
+            session.add(
+                LedgerLine(
+                    project_id=None,
+                    run_id=None,
+                    seat_id=None,
+                    credential_id=credential_id,
+                    kind="founder",
+                    unit="tokens",
+                    provider=provider.name,
+                    model=model,
+                    input_tokens=usage.input,
+                    output_tokens=usage.output,
+                    cache_write_tokens=usage.cache_write,
+                    cache_read_tokens=usage.cache_read,
+                    counted=usage.counted,
+                    at=self._clock(),
+                )
+            )
+        return response
 
     async def _failed(self, run_id: str, credential_id: str | None, error: Exception) -> None:
         """Account for a provider failure: transient ones feed the circuit breaker, and

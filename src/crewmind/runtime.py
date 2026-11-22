@@ -78,12 +78,14 @@ def build_runtime(
     )
     runs.provider_saturated = provider_is_saturated
     hub = StreamHub()
+    gateway = Gateway(sessions, services.settings, clock, mock, config.master_key_file, hub)
+    services.wired["gateway"] = gateway
     return Runtime(
         hub=hub,
         settings=services.settings,
         run_authenticator=RunAuthenticator(sessions),
         mock=mock,
-        gateway=Gateway(sessions, services.settings, clock, mock, config.master_key_file, hub),
+        gateway=gateway,
         config=config,
         engine=engine,
         sessions=sessions,

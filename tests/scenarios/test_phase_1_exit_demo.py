@@ -312,6 +312,12 @@ async def test_INV_21_every_write_operation_records_an_event(
 # Writes that change no governed state, so they record no event (INV-21), and one covered
 # by its own test.
 NO_EVENT = {
+    "founder.start": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.say": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.answer": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.accept_rest": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.create": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.quick": "asserted in test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing",
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",
     "chat.unfreeze": "asserted in test_MSG_9_two_agents_looping_in_a_thread_are_frozen",

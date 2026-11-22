@@ -25,6 +25,7 @@ from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
+from crewmind.jobs.founder import FounderWorker
 from crewmind.jobs.planning import PlanningJobs
 from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
@@ -152,6 +153,16 @@ def create_app(
                 ),
                 asyncio.create_task(
                     PlanningJobs(runtime.sessions, runtime.clock, runtime.services).run()
+                ),
+                asyncio.create_task(
+                    FounderWorker(
+                        runtime.sessions,
+                        runtime.clock,
+                        runtime.gateway,
+                        runtime.services,
+                        runtime.executor,
+                        runtime.hub,
+                    ).run()
                 ),
                 asyncio.create_task(
                     PlatformWorker(

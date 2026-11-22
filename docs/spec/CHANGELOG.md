@@ -18,6 +18,15 @@ Newest first. One line per change, citing the ids touched.
 - **RHS-2, RHS-3:** where the walk ends for each project type; estimates are to the first close.
 - **EXE-5:** runs queued at the same instant are leased in the order their seats were created.
 - **Appendix A:** `rehearsal.max_seconds`.
+- **FND-1:** where the conversation is kept before the project exists; a document is attached as text; refused tool calls are kept.
+- **FND-4:** who pays is looked up when there is one credential or none.
+- **FND-5:** what "ready" means; creating is confirming; an assumption never replaces words or an answer.
+- **FND-7:** what the platform checks in a grade; the verdict is computed.
+- **FND-8:** a goal with a date in its prose is refused.
+- **FND-12:** a quick draft is rehearsed; create and start are one step.
+- **FND-15:** what a long paste is; items quote the document; examples reach the CEO labelled.
+- **LLM-14, Appendix A:** `founder.credential`, `founder.model_class`, `grill.min_characters`.
+- **IF-1.2:** an operation called from inside another runs its own preparation step.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

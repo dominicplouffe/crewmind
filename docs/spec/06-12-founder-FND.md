@@ -2,7 +2,7 @@
 
 The Founder is a platform assistant whose only deliverable is a **project spec** (LIB-4). Its doctrine and the goal grammar are product content, kept as one copy served to the Founder, to MCP clients and to human authors.
 
-- **FND-1 Chat.** Drafting happens in the chat (CHAT-1), and the conversation becomes the project chat after creation. It is stored on the server and can be resumed from any surface. Each turn streams. Failures are recorded on the conversation, never lost.
+- **FND-1 Chat.** Drafting happens in the chat (CHAT-1), and the conversation becomes the project chat after creation. It is stored on the server and can be resumed from any surface. Each turn streams. Failures are recorded on the conversation, never lost. Before the project exists the conversation is kept as its own record; at creation its lines are copied into the project chat in order. A document is attached to it as text. Every tool call of the Founder that a rule refuses is kept on the conversation, with the rule.
 - **FND-2 Tools.** The Founder runs on the platform's drafting model (LLM-14), is metered like every model call but against the install's own account, so it counts against no project budget (INV-8), and has exactly these tools:
   - search roles and crews;
   - list credentials by name;
@@ -13,11 +13,11 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - ask questions;
   - propose a spec.
 - **FND-3 Draft first, then interview.** Every question carries a recommended answer, and those answers are the draft. A question is one decision, worded so "yes" accepts the recommendation. It offers 2–4 options and says what the answer changes. When more than one credential exists, who pays is asked and never pre-selected.
-- **FND-4 Rounds.** Decisions form a tree. By default the Founder asks one decision at a time: the next one whose prerequisites are settled, most load-bearing first. With `grill.pace` \[one at a time\] set to batch, it asks every ready decision in a round. Facts the Founder can look up, it looks up.
+- **FND-4 Rounds.** Decisions form a tree. By default the Founder asks one decision at a time: the next one whose prerequisites are settled, most load-bearing first. With `grill.pace` \[one at a time\] set to batch, it asks every ready decision in a round. Facts the Founder can look up, it looks up. Who pays is looked up, not asked, when the chairman has one credential or none.
   - **Roots:** finish line and the record that settles it; beneficiary and standard; project type; who pays; any date the outside world imposes.
   - **Branches:** budget; anti-metrics; the chairman's role; roster.
   - **Leaves:** quality; authority preset; failure deliverable; resource posture.
-- **FND-5 Ledger.** Every settled decision is kept and tagged by source: the chairman's words, an answer, or an assumption. Drafting is done when no unasked decision remains and no assumption would change the draft. The chairman confirms the ledger before creation.
+- **FND-5 Ledger.** Every settled decision is kept and tagged by source: the chairman's words, an answer, or an assumption. Drafting is done when no unasked decision remains and no assumption would change the draft. The chairman confirms the ledger before creation. A draft is ready when no question and no passage is open, every decision of the tree is in the ledger, the goal grades ready, and the draft as it stands has been rehearsed and reached its first close. Creating the project is the chairman confirming the ledger, and is refused before then. An assumption never replaces the chairman's words or an answer.
 - **FND-6 Goal.** The goal is prose written for the CEO, never a form. Every draft is graded against the goal grammar (FND-7) beside the turn. The grade opens the next turn, and missing elements become questions.
 - **FND-7 Goal grammar.** Ten elements, each graded present, weak or missing, with a quoted line and a named fix:
   1. finish line, plus a record the project does not write itself;
@@ -31,8 +31,8 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   9. resource posture, with a reason and a release condition;
   10. failure deliverable: what is owed if the finish line is missed.
 
-  Elements 1, 3, 4, 7 and 10 are load-bearing: missing any means "not ready". An element that does not apply is graded present with a reason; silence is not accepted. Grading is done by the Founder's model against a fixed rubric with quoted evidence. The rubric's accuracy is tested against reference goals (section 13).
-- **FND-8 Dates.** The Founder writes a date only when it is an outside fact (stored with a cited source) or a chairman target (stored as a target, not a pace). Otherwise there is no date. Dates never appear in goal prose, and phases never exist to fill calendar time.
+  Elements 1, 3, 4, 7 and 10 are load-bearing: missing any means "not ready". An element that does not apply is graded present with a reason; silence is not accepted. Grading is done by the Founder's model against a fixed rubric with quoted evidence. The platform checks the grade before it stands: each element is graded once; a quoted line must be in the goal; weak needs a quoted line; present needs a quoted line or the reason the element does not apply; weak and missing need a named fix. The verdict is computed from the grades, not taken from the model. The rubric's accuracy is tested against reference goals (section 13). 
+- **FND-8 Dates.** The Founder writes a date only when it is an outside fact (stored with a cited source) or a chairman target (stored as a target, not a pace). Otherwise there is no date. Dates never appear in goal prose, and phases never exist to fill calendar time. A proposed goal whose prose holds a calendar date is refused.
 - **FND-9 Roster.**
   - Derived from the goal: find matching roles and crews, then cut to the smallest team that can do the work in parallel. Cut for redundancy, never for timidity.
   - A plan-adversary seat is always staffed on Deliver and Operate. A reviewer seat is staffed whenever independent read is on.
@@ -42,13 +42,13 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - It drafts Deliver's first requirement as a first usable version (SPD-4), and Explore's bets with short windows (SPD-7).
   - Resource posture is written as a bias with a reason and a release condition, never as a rule that outranks the goal.
 - **FND-11 Fire drill.** The Founder rehearses (RHS) the draft before calling it ready, and acts on what the drill finds.
-- **FND-12 Quick mode.** On request, the Founder accepts all of its own recommendations and creates and starts the project in under 2 minutes (section 1.3).
+- **FND-12 Quick mode.** On request, the Founder accepts all of its own recommendations and creates and starts the project in under 2 minutes (section 1.3). A quick draft is still rehearsed before the project is created. Creating and starting are one step: if either fails, nothing is created and the conversation ends failed.
   - A quick project gets no data sources, secrets, email or integrations, and one credential pays every seat.
   - Status moves through drafting → creating → starting → started, or failed with nothing created.
   - The ledger goes into the CEO's first context pack.
 - **FND-13 After creation.** On every surface: prompt for each missing credential the roster declares, show the setup checklist, and offer to start only when nothing blocks it.
 - **FND-14 Doctrine fingerprint.** Each project records a fingerprint of the doctrine it was drafted under. Later doctrine fixes appear as health findings on older projects; they never silently rewrite or block them.
-- **FND-15 Grilling a document.** When the brief arrives as an upload or a long paste, the Founder grills it before drafting from it.
+- **FND-15 Grilling a document.** When the brief arrives as an upload or a long paste, the Founder grills it before drafting from it. A long paste is one of at least `grill.min_characters` \[1,500\]. Each extracted item quotes the document word for word, or it is refused. Passages marked as examples reach the CEO labelled as examples, with the ledger.
   - It extracts the document's content into a list: goals, requirements, constraints, numbers, dates, names, and anything that reads as an example.
   - It turns each of these into a question:
     - a contradiction inside the document;
