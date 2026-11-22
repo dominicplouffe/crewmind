@@ -154,6 +154,15 @@ class FakeClock:
 
 
 @pytest.fixture(autouse=True)
+def no_container_runtime_on_this_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The suite gives the same answers on a machine with Docker and on one without. A
+    test of the WRK-7 refusal names the socket it means."""
+    from crewmind.domain.work import checks
+
+    monkeypatch.setattr(checks, "CONTAINER_SOCKETS", ())
+
+
+@pytest.fixture(autouse=True)
 def fast_password_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Argon2 at its cheapest, so the suite stays fast. The algorithm is unchanged."""
     from argon2 import PasswordHasher

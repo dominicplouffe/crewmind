@@ -45,6 +45,12 @@ class Install:
             "CREWMIND_DATA_DIR": str(data_dir),
             "CREWMIND_PORT": str(self.port),
             "CREWMIND_API": self.url,
+            # The same on a machine with Docker and on one without: a test of container
+            # mode names it.
+            "CREWMIND_SANDBOX_MODE": "unisolated",
+            # A real server process cannot be told that this host has no container
+            # runtime, so it is told what an operator would tell it (WRK-7).
+            "CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED": "on",
         }
         self.env.pop("CREWMIND_DATABASE_URL", None)
         self.env.pop("CREWMIND_TOKEN", None)
@@ -140,7 +146,9 @@ async def events_over_mcp(install: Install, token: str, project: str) -> list[di
     http = httpx.AsyncClient(headers={"Authorization": f"Bearer {token}"})
     transport = streamable_http_client(f"{install.url}/mcp", http_client=http)  # pyright: ignore[reportArgumentType]
     async with Client(transport) as client:
-        result = await client.call_tool("record_list", {"project_id": project, "limit": 200})
+        # The whole list: by default an MCP tool answers with a summary (IF-5.7).
+        asked = {"project_id": project, "limit": 200, "detail": "full"}
+        result = await client.call_tool("record_list", asked)
     assert result.structured_content is not None
     return result.structured_content["items"]
 

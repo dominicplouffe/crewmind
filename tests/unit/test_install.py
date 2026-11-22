@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 
 import pytest
 
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.install.config import ConfigError, load_config
-from crewmind.domain.install.process import write_pid
+from crewmind.domain.install.operations import Finding
+from crewmind.domain.install.process import pid_file, running_server, write_pid
+from crewmind.runner import containers
 from crewmind.storage.engine import Database
 from tests.attack.test_install import environment
 from tests.support import App
@@ -82,7 +86,7 @@ async def test_NFR_5_doctor_gives_a_fix_for_every_finding(
         assert finding.ok or finding.fix, finding.check
 
     await app.host("install.setup")
-    write_pid(app.runtime.config.data_dir)
+    a_server_is_running(app.runtime.config.data_dir)
     healthy = await app.host("install.doctor")
     assert healthy.healthy is True
     app.runtime.config.master_key_file.chmod(0o644)
@@ -90,6 +94,79 @@ async def test_NFR_5_doctor_gives_a_fix_for_every_finding(
     key = next(f for f in loose.findings if f.check == "master key")
     assert not key.ok
     assert "chmod 600" in key.fix
+
+
+def a_server_is_running(data_dir: Path) -> None:
+    """Leave the pid file a running server would: one naming another live process."""
+    pid_file(data_dir).write_text(json.dumps({"pid": os.getppid(), "argv": []}))
+
+
+def test_IF_4_2_a_pid_file_left_by_a_killed_server_does_not_block_the_next_start(
+    tmp_path: Path,
+) -> None:
+    """IF-4.2, NFR-2: a server that died without clearing its pid file must not stop the
+    next one. In a container every server has the same pid, so a file naming this very
+    process is a leftover, not a running server."""
+    write_pid(tmp_path)
+    assert running_server(tmp_path) is None
+    a_server_is_running(tmp_path)
+    found = running_server(tmp_path)
+    assert found is not None
+    assert found["pid"] == os.getppid()
+
+
+class _Runtime:
+    """A container runtime as the doctor sees it: it answers, and holds some images."""
+
+    def __init__(self, images: list[str]) -> None:
+        self._images = images
+        self.images = self
+        self.containers = self
+
+    def ping(self) -> bool:
+        return True
+
+    def list(self, name: str) -> list[str]:
+        return [image for image in self._images if image == name]
+
+    def get(self, name: str) -> None:
+        raise LookupError(name)
+
+
+async def test_NFR_5_doctor_says_what_container_sandboxes_still_need(
+    app: App, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """NFR-5, EXE-12, P12: in container mode the doctor names what is missing, each with a
+    fix: a runtime that answers, the agent image, and an agent API address a container can
+    reach. In unisolated mode it says plainly that nothing is isolated."""
+    environment(app.runtime, monkeypatch)
+
+    async def sandbox() -> Finding:
+        report = await app.host("install.doctor")
+        return next(finding for finding in report.findings if finding.check == "sandbox")
+
+    plain = await sandbox()
+    assert (plain.ok, "no isolation" in plain.detail) == (True, True)
+
+    monkeypatch.setenv("CREWMIND_SANDBOX_MODE", "container")
+
+    def no_runtime() -> None:
+        raise ConnectionError("no socket")
+
+    monkeypatch.setattr(containers, "docker_client", no_runtime)
+    missing = await sandbox()
+    assert (missing.ok, "Start Docker" in (missing.fix or "")) == (False, True)
+
+    monkeypatch.setattr(containers, "docker_client", lambda: _Runtime([]))
+    unbuilt = await sandbox()
+    assert (unbuilt.ok, "deploy/agent.Dockerfile" in (unbuilt.fix or "")) == (False, True)
+
+    monkeypatch.setattr(containers, "docker_client", lambda: _Runtime(["crewmind-agent"]))
+    unreachable = await sandbox()
+    assert (unreachable.ok, "CREWMIND_AGENT_API_URL" in (unreachable.fix or "")) == (False, True)
+
+    monkeypatch.setenv("CREWMIND_AGENT_API_URL", "http://host.docker.internal:8420")
+    assert (await sandbox()).ok
 
 
 async def test_NFR_4_backup_and_restore_round_trip(
@@ -111,7 +188,7 @@ async def test_NFR_4_backup_and_restore_round_trip(
     app.runtime.config.master_key_file.write_text("damaged")
     assert len((await app.ok("projects.list", owner))["items"]) == 2
 
-    write_pid(app.runtime.config.data_dir)
+    a_server_is_running(app.runtime.config.data_dir)
     with pytest.raises(Refusal) as refused:
         await app.host("install.restore", archive=str(archive), confirm="restore")
     assert refused.value.envelope.code == "server_running"

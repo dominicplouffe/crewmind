@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
-import shutil
 import sys
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -107,11 +107,10 @@ async def setup(context: Context, payload: SetupInput) -> SetupReport:
     one, migrates, and creates the first admin with a setup link."""
     config = _config(payload.slim)
     steps = [f"Python {sys.version_info.major}.{sys.version_info.minor} found."]
-    docker = shutil.which("docker")
     steps.append(
-        "Docker found: agent runs will use containers."
-        if docker
-        else "Docker not found: needed from phase 2 to run agents in containers."
+        "Agents run in containers. `crewmind doctor` checks that they can."
+        if config.sandbox_mode == "container"
+        else "Agents run as plain processes of this user: for development only."
     )
     steps.extend(prepare(config))
     link: str | None = None
@@ -232,6 +231,54 @@ async def _check_server(config: Config) -> Finding:
     )
 
 
+def _container_findings(config: Config) -> tuple[bool, str, str | None]:
+    """Whether container sandboxes can run here: the runtime answers, the agent image is
+    built, and a container can reach the agent API (EXE-12)."""
+    from crewmind.runner import containers
+    from crewmind.runtime import SANDBOX_IMAGE
+
+    try:
+        client = containers.docker_client()
+        client.ping()
+    except Exception:
+        return (
+            False,
+            "Agents run in containers, and no container runtime answers.",
+            "Start Docker and make sure this user may use it.",
+        )
+    if not client.images.list(name=SANDBOX_IMAGE):
+        return (
+            False,
+            f"Agents run in containers, and the {SANDBOX_IMAGE} image is not built.",
+            f"Run `docker build -f deploy/agent.Dockerfile -t {SANDBOX_IMAGE} .` in the "
+            "source checkout, or install with `deploy/deploy_single_server.sh`.",
+        )
+    in_container = containers.own_container(client) is not None
+    if containers.is_loopback_url(config.agent_api) and not in_container:
+        return (
+            False,
+            f"Agents run in containers, and a container cannot reach {config.agent_api}: "
+            "that address is this machine's own.",
+            "Install with `deploy/deploy_single_server.sh`, or set CREWMIND_AGENT_API_URL to an "
+            "address containers can reach (on Docker Desktop, "
+            f"http://host.docker.internal:{config.port}).",
+        )
+    return True, f"Agents run in containers from the {SANDBOX_IMAGE} image.", None
+
+
+async def _check_sandbox(config: Config) -> Finding:
+    """EXE-12, P12: says which sandbox mode runs agents, and what it does not contain."""
+    if config.sandbox_mode == "container":
+        ok, detail, fix = await asyncio.to_thread(_container_findings, config)
+        return Finding(check="sandbox", ok=ok, detail=detail, fix=fix)
+    return Finding(
+        check="sandbox",
+        ok=True,
+        detail="Agents run as plain processes of this user, with no isolation: "
+        "for development only.",
+    )
+
+
 @operation(
     "install.doctor",
     summary="Check the whole install and print a fix for each finding.",
@@ -247,6 +294,13 @@ async def doctor(context: Context, payload: Empty) -> DoctorReport:
             check="configuration", ok=False, detail=str(error), fix="Fix the environment variable."
         )
         return DoctorReport(healthy=False, findings=[finding])
-    checks = [_check_data_dir, _check_master_key, _check_database, _check_server, *doctor_checks]
+    checks = [
+        _check_data_dir,
+        _check_master_key,
+        _check_database,
+        _check_server,
+        _check_sandbox,
+        *doctor_checks,
+    ]
     findings = [await check(config) for check in checks]
     return DoctorReport(healthy=all(finding.ok for finding in findings), findings=findings)

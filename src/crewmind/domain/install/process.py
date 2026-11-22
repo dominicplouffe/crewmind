@@ -30,10 +30,14 @@ def running_server(data_dir: Path) -> dict[str, object] | None:
     """The pid and arguments of the server running from this data directory, if any."""
     try:
         record = json.loads(pid_file(data_dir).read_text(encoding="utf-8"))
-        os.kill(int(record["pid"]), 0)
+        pid = int(record["pid"])
+        os.kill(pid, 0)
     except (OSError, ValueError, KeyError):
         return None
-    return record
+    # A file that names this very process was left by an earlier server that died without
+    # clearing it. In a container the server always has the same pid, so without this a
+    # killed container could never start again.
+    return None if pid == os.getpid() else record
 
 
 def require_stopped(data_dir: Path, action: str) -> None:

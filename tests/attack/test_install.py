@@ -18,6 +18,7 @@ def environment(runtime: Runtime, monkeypatch: pytest.MonkeyPatch) -> None:
     config = runtime.config
     monkeypatch.setenv("CREWMIND_DATA_DIR", str(config.data_dir))
     monkeypatch.setenv("CREWMIND_DATABASE_URL", config.database_url)
+    monkeypatch.setenv("CREWMIND_SANDBOX_MODE", config.sandbox_mode)
     config.data_dir.mkdir(parents=True, exist_ok=True)
 
 
