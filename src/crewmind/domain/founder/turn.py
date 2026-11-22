@@ -162,13 +162,16 @@ class FounderTurn:
                 drafting = await session.get(Drafting, drafting_id)
                 assert drafting is not None
                 reason = error.envelope.message if isinstance(error, Refusal) else str(error)
+                # P17, P18: say what fixes it. Sending again helps only when nothing is missing.
+                hint = error.envelope.hint if isinstance(error, Refusal) else None
+                after = f" {hint}" if hint else " Send your message again to retry."
                 drafting.turn, drafting.failure = m.FAILED_TURN, reason
                 drafting.turn_attempts += 1
                 state.say(
                     session,
                     drafting,
                     m.PLATFORM,
-                    f"The Founder could not answer: {reason} Send your message again to retry.",
+                    f"The Founder could not answer: {reason}{after}",
                     self._clock(),
                     {"kind": "failure"},
                 )

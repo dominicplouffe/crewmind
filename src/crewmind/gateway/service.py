@@ -320,7 +320,8 @@ class Gateway:
                     "no_founder_model",
                     "No model is set for the Founder on this install.",
                     rule=LLM_6.id,
-                    hint="An admin names a credential in the setting `founder.credential`.",
+                    hint="An admin sets the Founder's model in Settings, under Founder "
+                    "(`founder.credential`).",
                 )
             response = await self.mock.complete(
                 request,

@@ -520,3 +520,17 @@ async def test_FND_14_a_doctrine_fix_is_a_finding_on_an_older_project_and_change
     assert status["state"] == "running"
     assert await app.ok("projects.export", owner, project_id=project) == before
     assert (await app.ok("projects.status", owner, project_id=by_hand))["health"] == []
+
+
+async def test_FND_1_P17_a_founder_with_no_model_says_what_fixes_it(app: App) -> None:
+    """FND-1, P17, P18: when no model is set for the Founder, the conversation says so and
+    names the fix (Settings), instead of asking the person to send again, which cannot help.
+    The turn stays owed, so nothing is lost."""
+    owner = await app.person("owner@example.com")
+    started = await app.ok("founder.start", owner, brief=BRIEF)
+    await app.founder.tick()
+    shown = await app.ok("founder.show", owner, drafting_id=started["drafting_id"])
+    assert shown["failure"] == "No model is set for the Founder on this install."
+    line = shown["lines"][-1]["body"]
+    assert "Settings" in line
+    assert "Send your message again" not in line
