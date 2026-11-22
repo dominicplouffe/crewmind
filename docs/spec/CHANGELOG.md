@@ -2,6 +2,13 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.19 (22 Nov 2026): container mode proven on a real Docker host
+
+- **EXE-12:** a sandbox container runs as an unprivileged user with no capabilities: the server's own user, or user 10001 of the agent image when the server runs as root. The fixed number is stated here because it must match the image.
+- **EXE-12:** a server that is itself a container joins each project's network, and an idle project's network is removed. Docker has room for about 30 networks by default, so one network kept per project would stop new projects from running.
+- **NFR-2, NFR-3, NFR-4:** for a full server these are the shell scripts in `deploy/`, which call the server's own setup, backup and restore (ADR-0009). No requirement text changed.
+- **Open:** a slim install on a Linux host cannot yet run agents in containers, because a container cannot reach a server bound to 127.0.0.1 (Q-019).
+
 ## Revision 2.18 (22 Nov 2026): phase 7 plan answers
 
 - **FND-2:** Founder calls are metered against an install-level account and count against no project budget (R-31).

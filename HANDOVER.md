@@ -6,6 +6,7 @@ For whoever continues this build, person or coding agent. Everything needed is i
 
 - Phases 0 to 7 are built on the branch `claude/sharp-franklin-td8qhd`. There is no pull request and nothing is merged to the default branch.
 - Phase 7 is the v2.0 release candidate, with one condition: the Founder has only ever been driven by a scripted model. See "Before anything else".
+- Docker support was finished after phase 7 (22 Nov 2026): the agent image, container sandboxes and checks proven on a real daemon, and a Compose install with a TLS front, driven by shell scripts in `deploy/` (deploy, update, backup, restore, kill).
 - Next is phase 8 (`docs/PLAN.md`). No phase 8 plan is written.
 
 ## Read in this order
@@ -20,7 +21,8 @@ For whoever continues this build, person or coding agent. Everything needed is i
 
 1. **Run the Founder against a real model.** Set `founder.credential`, draft one real project, and run `crewmind founder eval` (the README has the commands). Record what you find in `docs/phases/phase-7-plan.md`.
 2. **The owner answers Q-012 to Q-018** in `docs/spec-questions.md` (v1 effort levels, crew estimates, dropped v1 settings, the reworded charters and doctrine, the new settings).
-3. **Copy `ci/github-actions.yml` to `.github/workflows/`** so both databases run on every push. CI has never run.
+3. **Copy `ci/github-actions.yml` to `.github/workflows/`** so both databases run on every push. CI has never run. It now builds the agent image first, so the container tests run there.
+4. **The owner answers Q-019:** how a slim install on Linux reaches its sandboxes.
 
 ## How each phase is done
 
@@ -48,6 +50,8 @@ For whoever continues this build, person or coding agent. Everything needed is i
 - **After adding or changing an operation:** regenerate `web/openapi.json` (`uv run python -m crewmind.surfaces.api.schema > web/openapi.json`) and `npm run gen:api`. Several catalog-walking tests then tell you what else to do: `test_INV_21_every_write_operation_records_an_event` (record an event, or list the operation in `NO_EVENT` with the test that asserts it), `test_INV_6_no_operation_output_carries_a_secret...`, `test_IF_5_2_every_person_operation_has_a_scope_or_a_stated_reason` (`src/crewmind/catalog/mcp_scopes.py`), and `test_P10_every_registered_rule_has_an_attack_test`.
 - **Never call a model with a database transaction open.** SQLite takes its write lock at the start of every transaction, so a model call that writes its ledger line from another session deadlocks. Use an operation's `prepare` step, or do the call between transactions.
 - **Library content has two copies:** edit `content/`, then run `uv run python scripts/sync_content.py`. A test fails if they differ.
+- **Container tests need Docker and the agent image:** `docker build -f deploy/agent.Dockerfile -t crewmind-agent .`, then `uv run pytest tests/acceptance/test_containers.py`. Without either they skip. Rebuild the image when `src/crewmind/runner/agent.py` changes: the image holds its own copy. The rest of the suite gives the same answers with or without Docker on the machine: a fixture hides the host's container socket, and acceptance installs name their sandbox mode.
+- **The Compose database must match the server image's Postgres client tools** (both 17 now): backup and restore use `pg_dump` and `pg_restore` from the server image, and a newer client cannot restore into an older server. The test suite still runs on Postgres 16.
 - **Tests must stay under 10 seconds each.** Start a real process only in `tests/acceptance/`. The rehearsal tests are the closest to the limit.
 - **The settings registry and Appendix A must match,** in the same order; a test compares them. Bump the registry's `version` when you add a setting.
 - **Web work was delegated to a sub-agent with a written brief** each phase, then checked by running lint, build, unit and browser tests. Nobody has looked at the pages by eye since phase 5.
@@ -61,3 +65,7 @@ For whoever continues this build, person or coding agent. Everything needed is i
 - Three tests failed once in phase 6 and passed on rerun, unexplained.
 - An answer of a single letter to a Founder question is always read as an option.
 - Refusal hints name CLI commands, and the web shows them as written.
+- The Compose install and its five scripts were each run by hand on Docker 29. No automated test starts them. The update script was run with `--no-pull` and with the image build replaced by a no-op, because the build session could not build without a proxy; a real pull and rebuild is untried.
+- A slim install on a Linux host cannot run agents in containers (Q-019).
+- With the Compose install's own certificate, a browser does not register the service worker until the certificate is trusted, so push alerts and the installable app need a real certificate or a trusted one.
+- The agent image is one fixed set of tools (Python, Node, git). A project cannot add to it.

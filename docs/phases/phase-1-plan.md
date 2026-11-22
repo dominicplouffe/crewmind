@@ -158,7 +158,7 @@ Built as planned, in the four increments. 53 operations, 12 tables, 24 registere
 Differences from this plan:
 
 - **Setup links:** the command is `crewmind accept --link <link>`, with the link as an option, not a bare argument.
-- **Compose bundle:** `deploy/compose.yaml` and `deploy/Dockerfile` ship, but `crewmind setup` does not start them, and they are untested: the build environment has no Docker daemon. Start the bundle with `docker compose` as its header shows.
+- **Compose bundle:** `deploy/deploy_single_server.sh` builds and starts it (22 Nov 2026): Postgres, the server, a TLS front, and the agent image. It was run end to end once by hand on Docker 29, with a browser sign-in on a non-localhost address and a scripted agent answering from a container. No automated test starts the bundle.
 - **Update:** the refusals (dirty checkout, package install) and the dry run are tested. The pull, sync and restart path has not been run for real.
 - **First admin:** created as invited with a setup link, not directly active. Section 7.8 was corrected (spec revision 2.5).
 - **Break-glass hand-on** may name a person who is not yet a member; they join as a co-chair first. Section 7.11 was extended (spec revision 2.5).

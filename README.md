@@ -36,17 +36,21 @@ uv sync
 uv run python -m crewmind.domain.memory.fetch_model
 ```
 
-Set up a slim install (one process, SQLite) and start it. `unisolated` runs agents as plain processes, which is fine for a first look on your own machine; the default, `container`, needs Docker.
+Set up a slim install (one process, SQLite) and start it. `unisolated` runs agents as plain processes with no isolation, which is fine for a first look on a machine you can lose. For agents in containers, use the server install below.
+
+```bash
+export CREWMIND_SANDBOX_MODE=unisolated
+```
 
 ```bash
 uv run crewmind setup --slim --admin-email you@example.com
 ```
 
 ```bash
-CREWMIND_SANDBOX_MODE=unisolated uv run crewmind up --slim
+uv run crewmind up --slim
 ```
 
-Open the setup link that `setup` printed, set a password, sign in at `http://127.0.0.1:8420`, and create a project.
+Open the setup link that `setup` printed, set a password, sign in at `http://127.0.0.1:8420`, and create a project. Use that exact address: the server refuses a browser session from any other, `http://localhost:8420` included.
 
 To get real answers, add a model credential in another terminal. The key is read from a file or standard input, never from the command line:
 
@@ -107,6 +111,50 @@ A project is one portable file, a spec. `crewmind projects export` writes it, `p
 ```bash
 uv run crewmind projects rehearse --project-id <id>
 ```
+
+## Install on a server
+
+The full server runs in Docker: Postgres, the server, a TLS front, and each agent run in a container of its own. It needs Docker with the Compose plugin, `openssl` and `curl`.
+
+```bash
+deploy/deploy_single_server.sh --admin-email you@example.com
+```
+
+That builds two images (several minutes the first time), starts everything, and prints a link where you set your password. By default it listens on this machine only, at `https://localhost`. To reach it from another machine, name the address to listen on:
+
+```bash
+deploy/deploy_single_server.sh --bind 192.168.1.50
+```
+
+People then sign in at `https://192.168.1.50`. Running the script again is safe: it keeps the address and never replaces a secret.
+
+| Script | What it does |
+| --- | --- |
+| `deploy/deploy_single_server.sh` | Install, or start again on the code that is checked out |
+| `deploy/update_single_server.sh` | Pull, back up, rebuild, restart. Refuses a checkout with local edits; `--dry-run` changes nothing |
+| `deploy/backup_single_server.sh` | One file with the database, the master key and the artifacts |
+| `deploy/restore_single_server.sh <file>` | Put a backup back. Saves what is there first, and asks you to type `restore` |
+| `deploy/kill_single_server.sh` | Stop and keep the data. `--wipe` also destroys the database, after you type `DESTROY` |
+
+Each takes `--help`.
+
+- **The address must match.** Sign in only at the address the script prints. The server refuses a browser session from any other.
+- **The certificate.** The TLS front signs its own certificate, so a browser asks you to accept it once. Until the certificate is trusted, push alerts and the installable app do not work. For a public host name, use `--bind 0.0.0.0 --public-url https://crew.example.com --tls you@example.com` and it gets a certificate from Let's Encrypt.
+- **Docker ignores `ufw`.** A port Docker publishes is open whatever the firewall says. The listen address is what keeps it private.
+- **Back up the master key.** It is `master.key` in the state directory (`/var/lib/crewmind` unless you pass `--state-root`). Without it no stored model key can be read. The backup script includes it.
+- **The `crewmind` command** runs inside the server:
+
+```bash
+docker compose -f deploy/compose.yaml exec server crewmind doctor
+```
+
+Model keys are read from a file or from standard input, so pipe one in:
+
+```bash
+docker compose -f deploy/compose.yaml exec -T server crewmind credentials add --name main --provider anthropic --key-stdin < ~/anthropic.key
+```
+
+[SECURITY.md](SECURITY.md) says what a container does and does not contain.
 
 ## Develop
 

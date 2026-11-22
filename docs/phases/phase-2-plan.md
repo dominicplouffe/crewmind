@@ -130,7 +130,7 @@ Phase 2 is built in its four parts. Of its 85 requirement ids, 61 are done, 20 a
 
 **Partial or not built.**
 
-- **Container sandboxes (EXE-12):** written, never run. The build environment has no Docker. `deploy/` is also untested.
+- **Container sandboxes (EXE-12):** proven on 22 Nov 2026 against Docker 29, after phase 7. The first real run found that the Docker SDK was not a dependency, the image did not exist, the search path hid the image's Python, a container could not reach the server, and a container had no user it could write the workspace as. All are fixed; `tests/acceptance/test_containers.py` covers them and skips without a daemon or the image. A slim install on a Linux host still cannot use container mode (Q-019).
 - **Warm chat sessions (MSG-11):** each reply is its own run in a new process. Reusing a warm process, and the restart rules, are not built.
 - **Spinning guard and stall watchdog (GOV-7, EXE-16):** need tasks. Asked to move to phase 4 (Q-005).
 - **Model health (LLM-10):** the smoke call only. No capability check, no daily model-list upkeep.

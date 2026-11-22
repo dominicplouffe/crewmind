@@ -176,7 +176,7 @@ Phase 4 is built in its four parts. Of its 23 requirement ids, 16 are done, 6 ar
 **Partial or not built.**
 
 - **WRK-10 (figures need a basis):** not built. Decision items arrive in phase 6; asked to move it there (Q-010).
-- **WRK-7:** checks run as processes with a clean environment, a memory limit and a timeout. The container version (no network, 1 CPU, 1 GB) is written and has never run: no Docker here.
+- **WRK-7:** checks run as processes with a clean environment, a memory limit and a timeout. The container version (no network, 1 CPU, 1 GB) was proven on 22 Nov 2026 (`test_WRK_7_a_check_container`).
 - **WRK-12:** the verifier and its network guard are tested against a local server only. Signed webhook evidence arrives with integrations.
 - **WRK-13:** the mistake report a failed audit owes arrives in phase 6.
 - **WRK-17:** browser-script watches arrive with the agent browser. The watch-failing flag is a chat line and a push alarm until flags exist.

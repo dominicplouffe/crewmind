@@ -46,6 +46,8 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --locked
       - run: uv run python -m crewmind.domain.memory.fetch_model
+      # The container tests skip without this image (EXE-12, WRK-7).
+      - run: docker build -f deploy/agent.Dockerfile -t crewmind-agent .
       - run: uv run pytest --db=${{ matrix.db }}
 
   web:
