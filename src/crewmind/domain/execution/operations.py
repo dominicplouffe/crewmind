@@ -19,6 +19,7 @@ from crewmind.domain.conversation import corrections
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.execution import roster, runs
 from crewmind.domain.execution.model import RunKind, TeamState
+from crewmind.domain.library import service as library
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.services import services_of
@@ -26,9 +27,13 @@ from crewmind.storage.models import LedgerLine, Role, Run, RunStep, Seat, Team, 
 
 
 class RoleItem(BaseModel):
+    slug: str
     name: str
     version: int
+    kind: str = Field(description="ceo, worker or reviewer.")
     seat_kind: str
+    category: str
+    domains: list[str]
     description: str
     tools: list[str]
 
@@ -52,15 +57,26 @@ class SeatItem(BaseModel):
     )
 
 
+class TeamRole(BaseModel):
+    team: str
+    role: str = Field(description="The role's slug.")
+    version: int = Field(description="The role version the team is pinned to.")
+    newest: int = Field(description="The newest version of that role.")
+
+
 class Roster(BaseModel):
     seats: list[SeatItem]
     teams: list[str]
+    team_roles: list[TeamRole] = Field(default_factory=list[TeamRole])
 
 
 class HireInput(ProjectRef):
     team: str = Field(min_length=1, max_length=60, description="A name for the team.")
     role: str = Field(description="The role its members take, from `roles list`.")
     members: int = Field(1, description="How many members.")
+    names: list[str] | None = Field(
+        default=None, description="A name for each member, instead of a count."
+    )
     stand_down_when: str | None = Field(
         default=None,
         max_length=40,
@@ -128,9 +144,23 @@ async def _roster(context: Context, project_id: str) -> Roster:
         .where(Seat.project_id == project_id)
         .order_by(Seat.created_at, Seat.name)
     )
-    teams = await context.session.scalars(
-        select(Team.name).where(Team.project_id == project_id).order_by(Team.name)
-    )
+    pinned = (
+        await context.session.execute(
+            select(Team, Role)
+            .join(Role, Role.id == Team.role_id)
+            .where(Team.project_id == project_id)
+            .order_by(Team.name)
+        )
+    ).all()
+    team_roles = [
+        TeamRole(
+            team=team.name,
+            role=role.slug,
+            version=role.version,
+            newest=(await library.role_named(context.session, role.slug)).version,
+        )
+        for team, role in pinned
+    ]
     heard = await corrections.listening(context.session, project_id)
     return Roster(
         seats=[
@@ -148,7 +178,8 @@ async def _roster(context: Context, project_id: str) -> Roster:
             )
             for seat, role, team in rows.all()
         ],
-        teams=list(teams),
+        teams=[entry.team for entry in team_roles],
+        team_roles=team_roles,
     )
 
 
@@ -162,17 +193,20 @@ async def _roster(context: Context, project_id: str) -> Roster:
 )
 async def list_roles(context: Context, payload: Empty) -> RoleList:
     await roster.ensure_starter_roles(context.session, context.now)
-    rows = await context.session.scalars(select(Role).order_by(Role.name, Role.version))
     return RoleList(
         items=[
             RoleItem(
+                slug=row.slug,
                 name=row.name,
                 version=row.version,
+                kind=row.seat_kind,
                 seat_kind=row.seat_kind,
+                category=row.category,
+                domains=[str(domain) for domain in row.domains],
                 description=row.description,
                 tools=[str(tool) for tool in row.tools],
             )
-            for row in rows
+            for row in await library.current_roles(context.session)
         ]
     )
 
@@ -204,9 +238,24 @@ async def hire_team(context: Context, payload: HireInput) -> Roster:
         name=payload.team,
         role_name=payload.role,
         members=payload.members,
+        names=payload.names,
         stand_down_when=payload.stand_down_when,
         caller=context.caller,
         now=context.now,
+    )
+    return await _roster(context, payload.project_id)
+
+
+@operation(
+    "roster.repin_team",
+    summary="Move a team to the newest version of its role.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def repin_team(context: Context, payload: TeamRef) -> Roster:
+    """LIB-1: a team keeps the role version it was hired from until it is re-pinned."""
+    await roster.repin_team(
+        context.session, view_of(context).project, payload.team, context.caller, context.now
     )
     return await _roster(context, payload.project_id)
 

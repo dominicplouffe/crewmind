@@ -22,22 +22,31 @@ from crewmind.storage.models.base import Base, SequenceId, UtcDateTime, new_id
 
 
 class Role(Base):
-    """A versioned agent template (LIB-1, minimal until the role library in phase 7)."""
+    """One version of an agent template (LIB-1). A team pins the version it was hired from."""
 
     __tablename__ = "roles"
-    __table_args__ = (UniqueConstraint("name", "version"),)
+    __table_args__ = (
+        UniqueConstraint("name", "version"),
+        UniqueConstraint("slug", "version", name="uq_roles_slug_version"),
+    )
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    slug: Mapped[str] = mapped_column(String(100), server_default="")
     name: Mapped[str] = mapped_column(String(100))
     version: Mapped[int] = mapped_column(Integer)
     seat_kind: Mapped[str] = mapped_column(String(16))
+    category: Mapped[str] = mapped_column(String(40), server_default="")
+    domains: Mapped[list[Any]] = mapped_column(JSON, server_default="[]")
     description: Mapped[str] = mapped_column(Text)
     charter: Mapped[str] = mapped_column(Text)
     tools: Mapped[list[Any]] = mapped_column(JSON)
+    skills: Mapped[list[Any]] = mapped_column(JSON, server_default="[]")
     credential_names: Mapped[list[Any]] = mapped_column(JSON)
     min_class: Mapped[str | None] = mapped_column(String(16))
     needs_vision: Mapped[bool] = mapped_column(default=False)
     needs_web: Mapped[bool] = mapped_column(default=False)
+    source: Mapped[str] = mapped_column(String(16), server_default="starter")
+    """starter (shipped with crewmind) or custom (imported, or embedded in a spec)."""
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 

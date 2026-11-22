@@ -41,6 +41,7 @@ from crewmind.storage.models.execution import (
     Team,
     Wake,
 )
+from crewmind.storage.models.library import Crew
 from crewmind.storage.models.models import (
     Lineup,
     ModelCredential,
@@ -100,6 +101,7 @@ __all__ = [
     "ClosedDecision",
     "Commitment",
     "Correction",
+    "Crew",
     "Cycle",
     "DecisionItem",
     "Directive",

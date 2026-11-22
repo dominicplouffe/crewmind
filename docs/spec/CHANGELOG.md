@@ -7,6 +7,9 @@ Newest first. One line per change, citing the ids touched.
 - **FND-2:** Founder calls are metered against an install-level account and count against no project budget (R-31).
 - **FND-12:** one quick-mode target, under 2 minutes (R-32).
 - **RHS-1:** rehearsal always runs on a fresh in-memory SQLite database; the code refuses any other (R-51).
+- **LIB-1:** a role states its seat kind (ceo, worker or reviewer); "can be the CEO" is the kind ceo. A role has a slug, and no two roles share a name. Web is a permission; a role that cannot run without web search says so separately.
+- **LIB-3:** anyone adds a role or a crew; only an admin changes one that exists, because every later project picks the change up. A shipped role whose text changes becomes its next version.
+- **LIB-2:** a crew's estimate may be empty; a team's first named member leads it.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 

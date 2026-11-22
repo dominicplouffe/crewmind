@@ -296,6 +296,8 @@ def sample_input(model: type[BaseModel], **known: Any) -> dict[str, Any]:
             values[name] = []
         elif "email" in name:
             values[name] = "someone@example.com"
+        elif any(getattr(part, "pattern", None) for part in field.metadata):
+            values[name] = "sample"
         else:
             values[name] = "a sample value, long enough"
     return values

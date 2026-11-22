@@ -280,6 +280,20 @@ async def test_INV_21_every_write_operation_records_an_event(
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
     await write("push.unsubscribe", alice, endpoint=browser)
+    role = {
+        "slug": "fact-checker", "name": "Fact checker", "kind": "reviewer", "category": "review",
+        "description": "Checks every claim against its source.", "tools": ["files", "web"],
+        "charter": "Check each claim against its source and say which do not hold.",
+    }  # fmt: skip
+    await write("roles.save", alice, **role)
+    await write(
+        "crews.save", alice, slug="check-it", name="Check it", outcome="A checked document.",
+        ceo_role="ceo", teams=[{"name": "Checks", "role": "fact-checker", "members": ["Fay"]}],
+    )  # fmt: skip
+    await write("roster.hire_team", alice, project_id=project, team="checks", role="fact-checker")
+    await write("roles.save", admin, **{**role, "charter": "Check each claim twice."})
+    await write("roster.repin_team", alice, project_id=project, team="checks")
+    await write("library.reload", admin)
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
     await write("auth.logout", alice)

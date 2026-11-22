@@ -2,14 +2,14 @@
 
 - **LIB-1 Role.** A versioned template:
   - name, category, domains and description;
-  - whether it can be the CEO;
+  - a slug, and its seat kind: ceo (it can be the CEO), worker or reviewer;
   - optional `min_class` and whether it needs vision;
   - tool permissions: files, shell, web, browser (EXE-17), data processing, A2A (INT-11); the skills it may use, pinned by version (LIB-6);
   - the credential names it receives, and nothing else;
   - its charter text.
 
-  A team pins a role version and can be re-pinned to the current one. Roles do not name models or effort levels.
-- **LIB-2 Crew.** A named, ready-made job with a team already on it: an outcome sentence, a CEO role, teams of role plus named members, and a reference estimate of runs and tokens.
+  A team pins a role version and can be re-pinned to the current one. Roles do not name models or effort levels. No two roles share a name. Anyone may add a role; only an admin changes one that exists, and the change is a new version.
+- **LIB-2 Crew.** A named, ready-made job with a team already on it: an outcome sentence, a CEO role, teams of role plus named members, and a reference estimate of runs and tokens, which may be empty until there are real runs to take it from. A team's first named member leads it.
 - **LIB-3 Libraries.** Libraries are loaded from and exported to files, and can be searched by the Founder and by MCP clients. Ship a starter library covering research, writing, engineering, data, design, review and adversary, and the plan adversary and gap reviewer.
 - **LIB-4 Project spec.** One portable document that describes a project completely:
   - name, goal and project type;

@@ -189,9 +189,9 @@ RHS-1,Safe by construction,06-13-rehearsal-RHS.md,7,yes,not started,,
 RHS-2,Clock rules,06-13-rehearsal-RHS.md,7,yes,not started,,
 RHS-3,Report contents:,06-13-rehearsal-RHS.md,7,yes,not started,,
 RHS-4,Surfaces,06-13-rehearsal-RHS.md,7,yes,not started,,
-LIB-1,Role,06-14-library-LIB.md,7,yes,not started,,
-LIB-2,Crew,06-14-library-LIB.md,7,yes,not started,,
-LIB-3,Libraries,06-14-library-LIB.md,7,yes,not started,,
+LIB-1,Role,06-14-library-LIB.md,7,yes,partial,test_LIB_1_a_role_names_no_model_and_only_an_admin_changes_one; test_LIB_1_a_team_keeps_its_role_version_until_it_is_repinned; test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist,"Roles are versioned, pinned by teams and re-pinned. Skills, browser and A2A permissions are fields that grant nothing until phase 8"
+LIB-2,Crew,06-14-library-LIB.md,7,yes,partial,test_LIB_3_the_starter_library_covers_what_the_spec_names,17 crews load and are searchable. No crew has a reference estimate yet (Q-013)
+LIB-3,Libraries,06-14-library-LIB.md,7,yes,done,test_LIB_1_a_role_names_no_model_and_only_an_admin_changes_one; test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist; test_LIB_3_the_starter_library_covers_what_the_spec_names; test_LIB_3_the_packaged_library_is_a_copy_of_the_content_folder,
 LIB-4,Project spec,06-14-library-LIB.md,7,yes,not started,,
 LIB-5,One format,06-14-library-LIB.md,7,yes,not started,,
 LIB-6,Agent Skills,06-14-library-LIB.md,8,later,not started,,
