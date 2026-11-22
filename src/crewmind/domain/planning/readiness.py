@@ -13,12 +13,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.caller import Caller, platform_job
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.budget import service as budget
-from crewmind.domain.planning.model import OPEN_SCOPE, REQUIREMENT_MACHINE, RequirementState
+from crewmind.domain.planning.model import (
+    OPEN_SCOPE,
+    REQUIREMENT_MACHINE,
+    BetState,
+    RequirementState,
+)
 from crewmind.domain.planning.rules import INV_18, INV_19
 from crewmind.domain.projects.model import ProjectType
 from crewmind.domain.settings.service import SettingsService
 from crewmind.storage.events import append_event, event_type
-from crewmind.storage.models import Project, Requirement, RequirementDependency, Task
+from crewmind.storage.models import Bet, Project, Requirement, RequirementDependency, Task
 
 R = RequirementState
 REQUIREMENT_CHANGED = event_type("requirement.state_changed", "A requirement changed state (7.2).")
@@ -139,15 +144,37 @@ async def check_task_scope(
     project: Project,
     *,
     requirement_id: int | None,
+    bet_id: int | None,
     parent: Task | None,
     now: datetime,
-) -> int | None:
-    """INV-18, INV-19, GOV-3: the requirement a new task serves, checked. A subtask serves
-    what its parent serves. Explore projects serve bets instead."""
-    if project.type == ProjectType.EXPLORE:
-        return None
+) -> tuple[int | None, int | None]:
+    """INV-18, INV-19, GOV-3: the requirement or bet a new task serves, checked, as
+    (requirement, bet). A subtask serves what its parent serves. An Explore task serves
+    an active bet; any other task serves a requirement that is ready for work."""
     if parent is not None:
-        requirement_id = parent.requirement_id
+        requirement_id, bet_id = parent.requirement_id, parent.bet_id
+    if project.type == ProjectType.EXPLORE:
+        if bet_id is None:
+            raise Refusal(
+                "task_needs_a_bet",
+                "In an Explore project a task serves an active bet. Name it with `bet_id`.",
+                rule=INV_18.id,
+                hint="Read the plan with agent_plan. Open a bet if none fits.",
+            )
+        bet = await session.get(Bet, bet_id)
+        if bet is None or bet.project_id != project.id:
+            raise Refusal(
+                "bet_not_found", f"There is no bet {bet_id} in this project.",
+                kind=RefusalKind.NOT_FOUND,
+            )  # fmt: skip
+        if bet.state != BetState.ACTIVE:
+            raise Refusal(
+                "bet_not_active",
+                f"Bet {bet.id} is {bet.state}. Work is created only under an active bet.",
+                rule=INV_18.id,
+                hint="Publish its finding, or open another bet.",
+            )
+        return None, bet.id
     if requirement_id is None:
         raise Refusal(
             "task_needs_a_requirement",
@@ -170,7 +197,7 @@ async def check_task_scope(
             rule=budget.GOV_3.id,
             hint="Finish what is in progress, or ask the chairman to raise the budget.",
         )
-    return requirement.id
+    return requirement.id, None
 
 
 async def task_claimed(session: AsyncSession, task: Task, now: datetime) -> None:

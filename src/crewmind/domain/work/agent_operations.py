@@ -60,6 +60,9 @@ class CreateInput(TaskInput):
         default=None,
         description="The accepted requirement this task serves (Deliver and Operate).",
     )
+    bet_id: int | None = Field(
+        default=None, description="The active bet this task serves (Explore)."
+    )
     team: str | None = Field(
         default=None, description="The team whose lead claims it. Leave out in a solo project."
     )
@@ -200,11 +203,12 @@ def _check_command(context: Context, payload: TaskInput) -> tuple[dict[str, str]
 async def _create(context: Context, view: AgentView, payload: TaskInput, **placed: Any) -> TaskItem:
     test_files, fingerprint = _check_command(context, payload)
     parent: Task | None = placed.pop("parent", None)
-    requirement_id = await readiness.check_task_scope(
+    requirement_id, bet_id = await readiness.check_task_scope(
         context.session,
         services_of(context).settings,
         view.project,
         requirement_id=placed.pop("requirement_id", None),
+        bet_id=placed.pop("bet_id", None),
         parent=parent,
         now=context.now,
     )
@@ -233,6 +237,7 @@ async def _create(context: Context, view: AgentView, payload: TaskInput, **place
         audience=payload.audience,
         serves=payload.serves,
         requirement_id=requirement_id,
+        bet_id=bet_id,
         not_before=payload.not_before,
         created_at=context.now,
         **placed,
@@ -273,7 +278,12 @@ async def create_task(context: Context, payload: CreateInput) -> TaskItem:
             hint="Give `team`. Only a project with no team leaves it out.",
         )
     return await _create(
-        context, view, payload, team_id=team_id, requirement_id=payload.requirement_id
+        context,
+        view,
+        payload,
+        team_id=team_id,
+        requirement_id=payload.requirement_id,
+        bet_id=payload.bet_id,
     )
 
 

@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.planning import acceptance, commitments, completion, standdown
+from crewmind.domain.planning import acceptance, bets, commitments, completion, standdown
 from crewmind.domain.planning.model import RequirementState, RequirementTest
 from crewmind.domain.planning.readiness import PLANNING_JOB
 from crewmind.domain.projects.model import ProjectState
@@ -65,6 +65,8 @@ class PlanningJobs:
                         continue
                     if project.state != ProjectState.RUNNING:
                         continue
+                    await bets.expire(session, project, now)
+                    await bets.close_time_box(session, settings, self._services.blobs, project, now)
                     await acceptance.start_checking(session, settings, project, now)
                     await standdown.stand_down_finished_teams(session, project, now)
                     await commitments.reproject(session, settings, project, now)

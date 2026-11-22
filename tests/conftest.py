@@ -192,3 +192,6 @@ async def runtime(migrated_url: str, tmp_path: Path, clock: FakeClock) -> AsyncI
 async def app(runtime: Runtime) -> App:
     """The product API on a fresh database, with helpers to act as different people."""
     return App(runtime)
+
+
+pytest_plugins = ["tests.site_support"]

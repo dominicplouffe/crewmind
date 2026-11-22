@@ -43,7 +43,7 @@ PRJ-3,Stop,06-01-projects-PRJ.md,1,yes,partial,tests/unit/test_state_machines.py
 PRJ-4,Deliver: ready and complete,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_6_a_completed_project_reopens_only_in_its_window; test_WRK_11_the_final_gap_review_blocks_readiness; test_scenario_a_deliver_project_ships_and_completes,"Ready, sign-off, auto-complete and the receipt are built. The receipt's time is running against held or paused until the time accounting (SPD-8)"
 PRJ-5,Ready projects spend nothing,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
 PRJ-6,Reopen,06-01-projects-PRJ.md,5,yes,done,test_PRJ_6_a_completed_project_reopens_only_in_its_window,
-PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,not started,,
+PRJ-7,Explore,06-01-projects-PRJ.md,5,yes,partial,test_PRJ_7_a_bet_expires_and_is_extended_once; test_SPD_7_no_new_bet_in_the_final_fifth_of_the_time_box; test_scenario_explore_confirms_one_bet_and_kills_another,"Bets, expiry, one extension, findings, the findings report and ending the project are built. Promote creates a draft Deliver project with the findings as its goal; the Founder refines it in phase 7"
 PRJ-8,Operate cycles,06-01-projects-PRJ.md,5,yes,not started,,
 PRJ-9,Clone and export,06-01-projects-PRJ.md,7,yes,not started,,Moved from phase 1 (spec review R-11): depends on LIB-4 or the Founder
 PRJ-10,Delete,06-01-projects-PRJ.md,1,yes,partial,tests/attack/test_projects.py; tests/unit/test_scheduler.py,"Two-step delete, grace and purge are built. The export offer arrives in phase 7; mailbox purge in phase 8"
@@ -53,7 +53,7 @@ SPD-3,Start immediately,06-02-speed-SPD.md,5,yes,not started,,
 SPD-4,"Ship early, then improve",06-02-speed-SPD.md,5,yes,not started,,
 SPD-5,Questions never block,06-02-speed-SPD.md,6,yes,not started,,Moved from phase 5 (phase 5 plan): it needs question items
 SPD-6,Done means available,06-02-speed-SPD.md,5,yes,not started,,
-SPD-7,Explore is time-boxed,06-02-speed-SPD.md,5,yes,not started,,
+SPD-7,Explore is time-boxed,06-02-speed-SPD.md,5,yes,done,test_SPD_7_no_new_bet_in_the_final_fifth_of_the_time_box; test_scenario_explore_confirms_one_bet_and_kills_another,
 SPD-8,Speed is measured,06-02-speed-SPD.md,5,yes,not started,,
 SPD-9,No idle crew,06-02-speed-SPD.md,5,yes,not started,,
 LLM-1,Providers through one gateway,06-03-models-LLM.md,2,yes,done,test_LLM_1_the_provider_registry_is_data_and_covers_the_minimum_set,

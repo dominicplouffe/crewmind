@@ -161,6 +161,19 @@ async def intervals_of(session: AsyncSession, project_id: str, now: datetime) ->
     return running_intervals(changes, now)
 
 
+async def started_at(session: AsyncSession, project_id: str) -> datetime | None:
+    """When the project first started running."""
+    rows = await session.execute(
+        select(Event.at, Event.after)
+        .where(Event.project_id == project_id, Event.type == PROJECT_STATE_CHANGED)
+        .order_by(Event.id)
+    )
+    for at, after in rows.all():
+        if (after or {}).get("state") == ProjectState.RUNNING:
+            return at
+    return None
+
+
 async def _work_runs(session: AsyncSession, project_id: str | None) -> list[tuple[datetime, float]]:
     wanted = select(Run.started_at, Run.ended_at).where(
         Run.kind == RunKind.WORK,

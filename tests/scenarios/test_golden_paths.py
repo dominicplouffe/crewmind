@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from tests.attack.delivery_support import set_states, view
-from tests.attack.work_support import Crew
+from crewmind.domain.planning import bets
+from crewmind.storage.models import Project
+from tests.attack.delivery_support import SOLO, set_states, view
+from tests.attack.work_support import OBSERVABLE, Crew
 from tests.conftest import FakeClock
+from tests.site_support import Site
 from tests.support import App
 
 PAGE = {
@@ -99,3 +102,65 @@ async def test_scenario_a_deliver_project_ships_and_completes(app: App, clock: F
     assert status["state"] == "completed"
     shown_again = await app.ok("projects.receipt", crew.owner, project_id=crew.project)
     assert shown_again["receipt"] == receipt
+
+
+async def test_scenario_explore_confirms_one_bet_and_kills_another(app: App, site: Site) -> None:
+    """Explore golden path (PRJ-7, SPD-7, WRK-12): the CEO opens two bets. One gets
+    outside evidence that the platform verifies, and is confirmed on it. The other is
+    killed. Each finding is published as an artifact. The chairman ends the project, the
+    platform assembles the findings report, and promoting it creates a draft Deliver
+    project whose goal carries the findings."""
+    crew = await Crew.start(app, type="explore", team=False, settings=SOLO)
+    second = await crew.open_bet(
+        statement="Agencies will switch from their current tool within a month.",
+        kill_condition="No agency agrees to a trial start date.",
+    )
+    task = await crew.ok("CEO", "agent.create_task", **OBSERVABLE | {"outside_evidence": True})
+    await crew.ok("CEO", "agent.claim_task", task_id=task["id"])
+    filed = await crew.ok(
+        "CEO", "agent.file_evidence", url=site.url(), task_id=task["id"],
+        quote="Order 4411 was delivered",
+    )  # fmt: skip
+    assert await app.work_jobs.verify_evidence() == 1
+
+    confirmed = await crew.ok(
+        "CEO", "agent.publish_finding", bet_id=crew.bet, result="confirmed",
+        text="A firm placed a paid order, shown on its public order page.",
+        evidence=[filed["id"]],
+    )  # fmt: skip
+    killed = await crew.ok(
+        "CEO", "agent.publish_finding", bet_id=second, result="killed",
+        text="None of the six agencies asked would name a trial start date.",
+    )  # fmt: skip
+    assert [bet["state"] for bet in killed["bets"]] == ["confirmed", "killed"]
+    assert confirmed["bets"][0]["finding"] == f"finding-bet-{crew.bet}.md"
+
+    await crew.finish_all()
+    ended = await app.ok("projects.end", crew.owner, project_id=crew.project)
+    receipt = ended["receipt"]
+    assert [(bet["id"], bet["state"]) for bet in receipt["bets"]] == [
+        (crew.bet, "confirmed"),
+        (second, "killed"),
+    ]
+    assert receipt["findings_report"] == "findings-report.md"
+    status = await app.ok("projects.status", crew.owner, project_id=crew.project)
+    assert status["state"] == "completed"
+    async with app.runtime.sessions() as session:
+        project = await session.get(Project, crew.project)
+        assert project is not None
+        report = await bets.report_text(session, app.runtime.services.blobs, project)
+    assert report is not None
+    assert f"## Bet {crew.bet}: confirmed" in report
+    assert f"## Bet {second}: killed" in report
+    assert "Order 4411 was delivered" in report
+
+    promoted = await app.ok("projects.promote", crew.owner, project_id=crew.project)
+    assert (promoted["type"], promoted["state"], promoted["your_role"]) == (
+        "deliver",
+        "draft",
+        "chairman",
+    )
+    async with app.runtime.sessions() as session:
+        draft = await session.get(Project, promoted["project_id"])
+        assert draft is not None
+        assert "A firm placed a paid order" in draft.goal

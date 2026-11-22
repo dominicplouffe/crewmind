@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.budget import service as budget
 from crewmind.domain.planning import (
+    bets,
     commitments,
     estimates,
     projection,
@@ -26,6 +27,7 @@ from crewmind.domain.projects.model import ProjectType
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import checks, tasks
 from crewmind.storage.models import (
+    Bet,
     Gap,
     GapReview,
     Project,
@@ -155,8 +157,27 @@ class GapView(BaseModel):
     requirement_id: int | None
 
 
+class BetView(BaseModel):
+    id: int
+    statement: str
+    kill_condition: str
+    kill_at: datetime
+    state: str = Field(description="active, expired, confirmed, killed or inconclusive.")
+    extended: bool
+    extension_reason: str | None
+    finding: str | None = Field(description="The artifact that holds its finding.")
+
+
+class TimeBoxView(BaseModel):
+    started_at: datetime
+    ends_at: datetime
+    new_bets_until: datetime = Field(description="No new bet opens in the final 20%.")
+
+
 class PlanView(BaseModel):
     requirements: list[RequirementItem]
+    bets: list[BetView]
+    time_box: TimeBoxView | None
     lowest_open_stage: int | None
     numbers: PlanNumbers
     pace: PaceView
@@ -257,6 +278,7 @@ async def plan_view(
     )
     return PlanView(
         requirements=[await item(session, row, graph, numbers.bias_multiplier) for row in rows],
+        **await explore_part(session, settings, project, now),
         lowest_open_stage=await readiness.lowest_open_stage(session, project.id),
         numbers=numbers,
         pace=PaceView(
@@ -331,6 +353,38 @@ async def plan_view(
         gap_review=review,
         note=note,
     )
+
+
+async def explore_part(
+    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
+) -> dict[str, Any]:
+    """The Explore side of the plan: bets and the time box."""
+    if project.type != ProjectType.EXPLORE:
+        return {"bets": [], "time_box": None}
+    rows = await session.scalars(select(Bet).where(Bet.project_id == project.id).order_by(Bet.id))
+    box = await bets.time_box(session, settings, project, now)
+    return {
+        "bets": [
+            BetView(
+                id=bet.id,
+                statement=bet.statement,
+                kill_condition=bet.kill_condition,
+                kill_at=bet.kill_at,
+                state=bet.state,
+                extended=bet.extended,
+                extension_reason=bet.extension_reason,
+                finding=bet.finding,
+            )
+            for bet in rows
+        ],
+        "time_box": None
+        if box is None
+        else TimeBoxView(
+            started_at=box[0],
+            ends_at=box[1],
+            new_bets_until=box[1] - (box[1] - box[0]) * bets.LAST_SHARE,
+        ),
+    }
 
 
 async def pin_files(project_id: str, payload: RequirementInput, services: Any) -> checks.Pinned:

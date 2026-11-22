@@ -73,3 +73,25 @@ COMMITMENT_MACHINE = StateMachine(
         ),
     ],
 )
+
+
+class BetState(StrEnum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    CONFIRMED = "confirmed"
+    KILLED = "killed"
+    INCONCLUSIVE = "inconclusive"
+
+
+B = BetState
+FINDINGS = (B.CONFIRMED, B.KILLED, B.INCONCLUSIVE)
+BET_MACHINE = StateMachine(
+    "bet",
+    "7.4",
+    [
+        (NEW, B.ACTIVE),
+        (B.ACTIVE, B.EXPIRED),
+        (B.EXPIRED, B.ACTIVE),
+        *((source, target) for source in (B.ACTIVE, B.EXPIRED) for target in FINDINGS),
+    ],
+)

@@ -10,6 +10,7 @@ Newest first. One line per change, citing the ids touched.
 - **GOV-10:** which draws count as the one draw.
 - **WRK-11:** when a filed gap review stays current; a waived gap's requirement leaves scope; what happens with no independent reviewer.
 - **PLN-9:** a short gap is worded in hours.
+- **PRJ-7:** how a bet's kill date is set; a confirmed finding cites verified evidence; what promote does before the Founder exists.
 
 ## Revision 2.15 (22 Nov 2026): phase 5 plan answers
 

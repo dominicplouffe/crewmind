@@ -24,6 +24,7 @@ class Crew:
         self.app, self.owner, self.project = app, owner, project
         self.workspace: Path = app.runtime.config.data_dir / "workspaces" / project
         self.requirement: int = 0
+        self.bet: int = 0
         self.run_hours: int = 0
         """When set, every finished run is made this long, so projections are exact."""
 
@@ -54,6 +55,8 @@ class Crew:
         crew.workspace.mkdir(parents=True, exist_ok=True)
         if type != "explore":
             crew.requirement = await crew.add_requirement()
+        else:
+            crew.bet = await crew.open_bet()
         if team:
             hired = await crew.call(
                 "CEO", "agent.hire_team", team="build", role="Generalist", members=2
@@ -108,8 +111,23 @@ class Crew:
         )
         return plan["requirements"][-1]["id"]
 
+    async def open_bet(self, **fields: Any) -> int:
+        """A bet the CEO opens, so Explore work has something to serve."""
+        plan = await self.ok(
+            "CEO",
+            "agent.open_bet",
+            **{
+                "statement": "Small firms will pay for the interview summaries.",
+                "kill_condition": "Fewer than three of ten firms say they would pay.",
+                **fields,
+            },
+        )
+        return plan["bets"][-1]["id"]
+
     def scope(self) -> dict[str, Any]:
         """What a new top-level task names as the scope it serves."""
+        if self.bet:
+            return {"bet_id": self.bet}
         return {} if not self.requirement else {"requirement_id": self.requirement}
 
     async def task(self, **fields: Any) -> dict[str, Any]:
