@@ -147,6 +147,13 @@ def test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process(install: Install) ->
     through the real CLI, the API and an MCP client. Secrets go in by standard input, the
     stored token file is private, and the server refuses a second copy on the same data."""
     project, events, token = demo(install)
+
+    def of_the_project(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """The chairman's own steps. The CEO's first planning run adds events of its own
+        while this test reads (SPD-3)."""
+        return [event for event in items if event["type"].startswith("project.")]
+
+    events = of_the_project(events)
     assert [event["type"] for event in events][-5:] == [
         "project.state_changed",
         "project.hold_added",
@@ -160,8 +167,8 @@ def test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process(install: Install) ->
         params={"project_id": project, "limit": 200},
         headers={"Authorization": f"Bearer {stored_token}"},
     )
-    assert api.json()["items"] == events
-    assert asyncio.run(events_over_mcp(install, token, project)) == events
+    assert of_the_project(api.json()["items"]) == events
+    assert of_the_project(asyncio.run(events_over_mcp(install, token, project))) == events
 
     assert ((install.data_dir / "cli.json").stat().st_mode & 0o077) == 0
     assert ((install.data_dir / "master.key").stat().st_mode & 0o077) == 0

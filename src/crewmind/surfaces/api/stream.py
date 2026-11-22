@@ -54,7 +54,7 @@ async def project_stream(
     idle = 0.0
     try:
         while stop is None or not stop.is_set():
-            sent = False
+            stored: list[str] = []
             async with executor.sessions() as session:
                 messages = await session.execute(
                     select(Message, Channel.name)
@@ -65,8 +65,7 @@ async def project_stream(
                 for message, channel_name in messages.all():
                     after_message = message.id
                     data = item(message, channel_name).model_dump(mode="json")
-                    yield sse("message", data, f"m{message.id}")
-                    sent = True
+                    stored.append(sse("message", data, f"m{message.id}"))
                 events = await session.scalars(
                     select(Event)
                     .where(
@@ -79,8 +78,15 @@ async def project_stream(
                 for event in events:
                     after_event = event.id
                     data = {"id": event.id, "type": event.type, "at": event.at.isoformat()}
-                    yield sse("change", data, f"e{event.id}")
-                    sent = True
+                    stored.append(sse("change", data, f"e{event.id}"))
+            # The words of a reply are published before the reply is stored. Whatever is
+            # waiting now is older than the rows just read, so it goes first.
+            while not queue.empty():
+                live = queue.get_nowait()
+                yield sse(str(live.get("type", "reply")), live)
+            for line in stored:
+                yield line
+            sent = bool(stored)
             try:
                 live = await asyncio.wait_for(queue.get(), timeout=POLL_SECONDS)
             except TimeoutError:

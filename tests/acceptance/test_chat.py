@@ -89,7 +89,8 @@ def test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process(
         assert reply["body"] == REPLY
         assert reply["reply_to"] == asked["id"]
         runs = wait_for(runs_now, all_finished, "finished run")
-        assert runs[0]["kind"] == "chat"
+        # Starting the project ran the CEO's first planning run too (SPD-3).
+        assert "chat" in [run["kind"] for run in runs]
         assert install.run("budget", "show", "--project-id", project)["spent"] > 0
 
         # MSG-11: the next reply comes from the same warm agent process.
