@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 import sqlalchemy
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ProgrammingError
 
 from crewmind.domain.install.config import Config
 from crewmind.runtime import Runtime, build_runtime
@@ -61,7 +62,7 @@ def _postgres_database(template: str | None = None) -> Generator[str]:
                 with admin.connect() as connection:
                     connection.execute(sqlalchemy.text(f'DROP DATABASE "{name}" WITH (FORCE)'))
                 break
-            except sqlalchemy.exc.ProgrammingError:
+            except ProgrammingError:
                 time.sleep(DROP_PAUSE_SECONDS)
         admin.dispose()
 
