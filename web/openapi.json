@@ -270,6 +270,185 @@
     "title": "ArtifactRef",
     "type": "object"
    },
+   "Attempt": {
+    "properties": {
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "by": {
+      "title": "By",
+      "type": "string"
+     },
+     "evidence": {
+      "title": "Evidence",
+      "type": "string"
+     },
+     "output": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Output"
+     },
+     "result": {
+      "description": "passed, failed, or not yet checked.",
+      "title": "Result",
+      "type": "string"
+     }
+    },
+    "required": [
+     "by",
+     "evidence",
+     "result",
+     "output",
+     "at"
+    ],
+    "title": "Attempt",
+    "type": "object"
+   },
+   "AuditItem": {
+    "properties": {
+     "evidence": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Evidence"
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expires At"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "label": {
+      "title": "Label",
+      "type": "string"
+     },
+     "task_id": {
+      "title": "Task Id",
+      "type": "integer"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     },
+     "verdict": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "passed, failed, not reviewed, or waiting for you.",
+      "title": "Verdict"
+     }
+    },
+    "required": [
+     "id",
+     "task_id",
+     "title",
+     "label",
+     "evidence",
+     "verdict",
+     "expires_at"
+    ],
+    "title": "AuditItem",
+    "type": "object"
+   },
+   "AuditList": {
+    "properties": {
+     "considered": {
+      "description": "Observable closes considered so far.",
+      "title": "Considered",
+      "type": "integer"
+     },
+     "drawn": {
+      "description": "How many of them were drawn for you.",
+      "title": "Drawn",
+      "type": "integer"
+     },
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/AuditItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items",
+     "considered",
+     "drawn"
+    ],
+    "title": "AuditList",
+    "type": "object"
+   },
+   "AuditVerdictInput": {
+    "properties": {
+     "audit_id": {
+      "description": "The sample's id, from `audits list`.",
+      "title": "Audit Id",
+      "type": "integer"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "maxLength": 2000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What you found.",
+      "title": "Note"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "verdict": {
+      "description": "passed or failed.",
+      "enum": [
+       "passed",
+       "failed"
+      ],
+      "title": "Verdict",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "audit_id",
+     "verdict"
+    ],
+    "title": "AuditVerdictInput",
+    "type": "object"
+   },
    "BaseModel": {
     "properties": {},
     "title": "BaseModel",
@@ -1311,6 +1490,116 @@
     "title": "EditInput",
     "type": "object"
    },
+   "EffectItem": {
+    "properties": {
+     "by": {
+      "title": "By",
+      "type": "string"
+     },
+     "declared_as": {
+      "description": "The idempotency key it was declared under.",
+      "title": "Declared As",
+      "type": "string"
+     },
+     "fire": {
+      "description": "Whether to go ahead. False means it was already declared: do not fire again.",
+      "title": "Fire",
+      "type": "boolean"
+     },
+     "fired": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Fired"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "launch": {
+      "title": "Launch",
+      "type": "boolean"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "watch": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "passing, failing or ended, for a launch.",
+      "title": "Watch"
+     },
+     "watch_result": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Watch Result"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "declared_as",
+     "what",
+     "launch",
+     "state",
+     "fired",
+     "outcome",
+     "by",
+     "watch",
+     "watch_result",
+     "fire"
+    ],
+    "title": "EffectItem",
+    "type": "object"
+   },
+   "EffectList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/EffectItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "EffectList",
+    "type": "object"
+   },
    "Effort": {
     "enum": [
      "low",
@@ -1459,6 +1748,80 @@
      "ref"
     ],
     "title": "Evidence",
+    "type": "object"
+   },
+   "EvidenceItem": {
+    "properties": {
+     "failure": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Failure"
+     },
+     "filed_by": {
+      "title": "Filed By",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "quote": {
+      "title": "Quote",
+      "type": "string"
+     },
+     "state": {
+      "description": "pending (counts for nothing yet), verified or failed.",
+      "title": "State",
+      "type": "string"
+     },
+     "task_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Task Id"
+     },
+     "url": {
+      "title": "Url",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "url",
+     "quote",
+     "task_id",
+     "state",
+     "failure",
+     "filed_by"
+    ],
+    "title": "EvidenceItem",
+    "type": "object"
+   },
+   "EvidenceList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/EvidenceItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "EvidenceList",
     "type": "object"
    },
    "ExampleInput": {
@@ -1929,6 +2292,26 @@
     ],
     "title": "Kind",
     "type": "string"
+   },
+   "LaunchRef": {
+    "properties": {
+     "effect_id": {
+      "description": "The launch's id, from `launches list`.",
+      "title": "Effect Id",
+      "type": "integer"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "effect_id"
+    ],
+    "title": "LaunchRef",
+    "type": "object"
    },
    "LinkOutput": {
     "properties": {
@@ -4119,6 +4502,314 @@
     "title": "SubscribeInput",
     "type": "object"
    },
+   "TaskDetail": {
+    "properties": {
+     "attempts": {
+      "items": {
+       "$ref": "#/components/schemas/Attempt"
+      },
+      "title": "Attempts",
+      "type": "array"
+     },
+     "audience": {
+      "title": "Audience",
+      "type": "string"
+     },
+     "author": {
+      "title": "Author",
+      "type": "string"
+     },
+     "check_output": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Check Output"
+     },
+     "claimant": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Claimant"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "completion_evidence": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Completion Evidence"
+     },
+     "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+     },
+     "failures": {
+      "title": "Failures",
+      "type": "integer"
+     },
+     "goal": {
+      "title": "Goal",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "label": {
+      "description": "verified, reviewed, self-reported, or not yet checked.",
+      "title": "Label",
+      "type": "string"
+     },
+     "outside_evidence": {
+      "title": "Outside Evidence",
+      "type": "boolean"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason"
+     },
+     "serves": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Serves"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "success_test": {
+      "title": "Success Test",
+      "type": "string"
+     },
+     "team": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Team"
+     },
+     "test_files": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Test Files",
+      "type": "array"
+     },
+     "test_kind": {
+      "title": "Test Kind",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "parent_id",
+     "title",
+     "goal",
+     "success_test",
+     "test_kind",
+     "state",
+     "label",
+     "team",
+     "claimant",
+     "failures",
+     "reason",
+     "check_output",
+     "author",
+     "audience",
+     "serves",
+     "outside_evidence",
+     "test_files",
+     "completion_evidence",
+     "attempts",
+     "created_at",
+     "closed_at"
+    ],
+    "title": "TaskDetail",
+    "type": "object"
+   },
+   "TaskItem": {
+    "properties": {
+     "check_output": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Check Output"
+     },
+     "claimant": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Claimant"
+     },
+     "failures": {
+      "title": "Failures",
+      "type": "integer"
+     },
+     "goal": {
+      "title": "Goal",
+      "type": "string"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "label": {
+      "description": "verified, reviewed, self-reported, or not yet checked.",
+      "title": "Label",
+      "type": "string"
+     },
+     "parent_id": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Parent Id"
+     },
+     "reason": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Reason"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "success_test": {
+      "title": "Success Test",
+      "type": "string"
+     },
+     "team": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Team"
+     },
+     "test_kind": {
+      "title": "Test Kind",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     }
+    },
+    "required": [
+     "id",
+     "parent_id",
+     "title",
+     "goal",
+     "success_test",
+     "test_kind",
+     "state",
+     "label",
+     "team",
+     "claimant",
+     "failures",
+     "reason",
+     "check_output"
+    ],
+    "title": "TaskItem",
+    "type": "object"
+   },
+   "TaskList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/TaskItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "TaskList",
+    "type": "object"
+   },
    "TeamRef": {
     "properties": {
      "project_id": {
@@ -5179,6 +5870,93 @@
     "summary": "List every version of an artifact, with its author and hash.",
     "tags": [
      "artifacts"
+    ]
+   }
+  },
+  "/v1/audits/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "audits.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AuditList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List the closes drawn for your audit, and how many were considered.",
+    "tags": [
+     "audits"
+    ]
+   }
+  },
+  "/v1/audits/settle": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "audits.settle",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AuditVerdictInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/AuditItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Pass or fail a close that was drawn for your audit.",
+    "tags": [
+     "audits"
     ]
    }
   },
@@ -6977,6 +7755,51 @@
     ]
    }
   },
+  "/v1/evidence/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "evidence.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EvidenceList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List the outside evidence agents have filed and whether it was verified.",
+    "tags": [
+     "evidence"
+    ]
+   }
+  },
   "/v1/examples/mark": {
    "post": {
     "description": "Requires: project_chair.",
@@ -7058,6 +7881,93 @@
     "summary": "Remove the example mark from a message.",
     "tags": [
      "examples"
+    ]
+   }
+  },
+  "/v1/launches/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "launches.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EffectList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List side effects and launches, with each launch's watch.",
+    "tags": [
+     "launches"
+    ]
+   }
+  },
+  "/v1/launches/retire": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "launches.retire",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LaunchRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/EffectItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Retire a launch. Its watch ends.",
+    "tags": [
+     "launches"
     ]
    }
   },
@@ -10360,6 +11270,137 @@
     "summary": "Show a project's settings and their current values.",
     "tags": [
      "settings"
+    ]
+   }
+  },
+  "/v1/tasks/list": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "tasks.list",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Only tasks in this state.",
+      "in": "query",
+      "name": "state",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Only tasks in this state.",
+       "title": "State"
+      }
+     },
+     {
+      "description": "Leave out closed tasks.",
+      "in": "query",
+      "name": "open_only",
+      "required": false,
+      "schema": {
+       "default": false,
+       "description": "Leave out closed tasks.",
+       "title": "Open Only",
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TaskList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List a project's tasks with their states and honest labels.",
+    "tags": [
+     "tasks"
+    ]
+   }
+  },
+  "/v1/tasks/show": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "tasks.show",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     },
+     {
+      "description": "The task's id.",
+      "in": "query",
+      "name": "task_id",
+      "required": true,
+      "schema": {
+       "description": "The task's id.",
+       "title": "Task Id",
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/TaskDetail"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one task: its test, its attempts and who checked it.",
+    "tags": [
+     "tasks"
     ]
    }
   },
