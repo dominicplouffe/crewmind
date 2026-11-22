@@ -152,3 +152,49 @@ None. The new rules guard verification, authority and side effects, and INV-2, I
 | The Board panel | **Built in this phase** |
 
 No open questions remain.
+
+## Outcome (22 Nov 2026)
+
+Phase 4 is built in its four parts. Of its 23 requirement ids, 16 are done, 6 are partial and 1 is not started; `docs/traceability.csv` has the tests and a note for each.
+
+**Exit demo, item by item.**
+
+| Item | Result |
+| --- | --- |
+| The rule-breaker scenario | Passes. A scripted agent tries to complete a task it does not hold, review it, kill it, overwrite a locked file, re-argue a closed decision, create its own task and write a standing order. Each call is refused, the fifth refusal ends the run and revokes its token, and nothing it wanted is reached. With a run token it also cannot do anything only the chairman may |
+| A test that passes before any work is refused | Passes, with the can't-fail list and missing test files |
+| A launch without a watch is refused | Passes |
+| (Added) A competent crew finishes a verified job | Passes in-process with no refusals, and as real processes: separate agent processes do the work and the server's own check closes it as verified |
+
+**What "done" means now.**
+
+- A task with a command test is done only when the platform's run of the pinned command exits 0. Rewriting the test file does not help: the check restores the pinned version in a copy of the workspace.
+- A task with an observable test is judged by a reviewer seat that neither did the work nor wrote the test.
+- A solo project with independent read off closes as "self-reported", and says so everywhere.
+- One in five observable closes (`audit.sample_rate`) is drawn for the chairman.
+
+**Partial or not built.**
+
+- **WRK-10 (figures need a basis):** not built. Decision items arrive in phase 6; asked to move it there (Q-010).
+- **WRK-7:** checks run as processes with a clean environment, a memory limit and a timeout. The container version (no network, 1 CPU, 1 GB) is written and has never run: no Docker here.
+- **WRK-12:** the verifier and its network guard are tested against a local server only. Signed webhook evidence arrives with integrations.
+- **WRK-13:** the mistake report a failed audit owes arrives in phase 6.
+- **WRK-17:** browser-script watches arrive with the agent browser. The watch-failing flag is a chat line and a push alarm until flags exist.
+- **WRK-1:** "the requirement it serves" is free text until phase 5.
+- **INV-1:** covered for what exists (settings, orders, decisions, corrections, verdicts on own work, locked files). Commitments, tool permissions, revenue lines and flags arrive later.
+- **Web:** the Evidence tab was only seen empty; subtask nesting, and several states and labels (checking, killed, closed unread, verified, self-reported), are unit-tested but were not driven in a browser. Alarm lines in the chat have no special style.
+
+**Things to know.**
+
+- **Every project now has a second agent, a Reviewer,** staffed by the platform because independent read is on by default (Q-009).
+- **A side effect can get stuck.** If the declaring run and all its retries die after declaring it, nothing can finish it and the chairman cannot retire it. Built to the letter of the spec; a fix is proposed in Q-011.
+- **With the mock provider, a solo CEO that creates a task is woken again to claim it** and replays its script. A real model would simply claim the task.
+
+**Found and fixed on the way.**
+
+- Words of a reply stopped with Esc could arrive late and bring the typing bubble back. This was the flaky browser test from phase 2.
+- Test database cleanup on Postgres could fail when a server background worker was in the database.
+
+**Tests.** 344 Python tests on SQLite in about 110 seconds and 345 on Postgres in about 150 seconds; 95 web unit tests; 41 browser tests in about 2.6 minutes.
+
+**Open questions for the owner:** Q-009 (the reviewer seat and what solo means), Q-010 (move WRK-10 to phase 6), Q-011 (side effects that can never be finished).
