@@ -7,7 +7,7 @@ output. Cache reads are recorded and shown but cost the budget nothing (ADR-0003
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -15,14 +15,16 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import platform_job
+from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import HOLDABLE, Hold, ProjectType
 from crewmind.domain.settings.registry import Scope
-from crewmind.domain.settings.service import SettingsService, Subject
+from crewmind.domain.settings.service import SettingsService, Subject, project_subject
 from crewmind.storage.events import append_event, event_type
 from crewmind.storage.models import LedgerLine, Project, ReserveDraw
 
@@ -194,6 +196,19 @@ async def _crossed(
             await conversation.platform_line(
                 session, project.id, text, now, detail={"kind": f"budget {name}"}
             )
+            if name == "wrap-up":
+                await items.file(
+                    session,
+                    settings,
+                    project,
+                    CHECKPOINT.name,
+                    filer=BUDGET_JOB,
+                    fields={"spent": after.spent, "budget": after.wall},
+                    recommendation="Raise the budget, or let the project land on what is left.",
+                    if_declined="The project wraps up within the remaining budget.",
+                    subject=("project", project.id),
+                    now=now,
+                )
             append_event(
                 session,
                 type=BUDGET_THRESHOLD,
@@ -206,6 +221,45 @@ async def _crossed(
     if after.at_wall and not before.at_wall:
         await reach_wall(session, settings, project, after, now)
 
+
+async def _checkpoint(done: items.Settling) -> None:
+    """GOV-3: the chairman raises the budget, or lets the project land. Landing changes
+    nothing: wrap-up mode already holds."""
+    if done.outcome != RAISE:
+        return
+    amount = done.values.get("amount")
+    current = int(await done.services.settings.get(done.session, _subject(done.project), TOKENS))
+    if amount is None or int(amount) <= current:
+        raise Refusal(
+            "not_a_raise",
+            f"`{TOKENS}` is {current:,}. Give a larger number as `amount`.",
+            rule=GOV_3.id,
+        )
+    await done.services.settings.change(
+        done.session,
+        await project_subject(done.session, done.project),
+        {TOKENS: int(amount)},
+        reason=f"Budget checkpoint {done.item.id}: raised by the chairman.",
+        caller=done.caller,
+        now=done.now,
+    )
+    await done.session.flush()
+    await follow_wall(done.session, done.services.settings, done.project, done.now)
+
+
+RAISE, LAND, TOKENS = "raise the budget", "land", "budget.tokens"
+CHECKPOINT = items.register(
+    items.Kind(
+        name="budget checkpoint",
+        filed_by="platform",
+        actions=(RAISE, LAND),
+        default=LAND,
+        window=timedelta(hours=24),
+        title=lambda f: f"Budget checkpoint: {f['spent']:,} of {f['budget']:,} tokens used",
+        apply=_checkpoint,
+        positive=(RAISE,),
+    )
+)
 
 wall_hooks: list[Any] = []
 """Called as `(session, settings, project, now)` when spend reaches the wall. One that

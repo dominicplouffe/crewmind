@@ -241,6 +241,10 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write(
         "decisions.answer", alice, project_id=paid, request_id=asked.json()["id"], approve=False
     )
+    filed = (await app.ok("items.list", alice, project_id=paid, open_only=False))["items"]
+    await write(
+        "items.note", alice, project_id=paid, item_id=filed[0]["id"], note="Asked and answered."
+    )
     await agent_call(app, live.token, "agent.post_message", body="Here is my answer.")
     fixed = await write("corrections.record", alice, project_id=paid, words="Not that.")
     await write("corrections.remove", alice, project_id=paid, correction_id=fixed["id"])
@@ -309,6 +313,8 @@ NO_EVENT = {
     "projects.promote": "asserted in test_scenario_explore_confirms_one_bet_and_kills_another",
     "cycles.set_due": "asserted in test_PRJ_8_a_cycle_closes_completed_missed_or_skipped",
     "projects.complete": "asserted in test_scenario_operate_meets_a_recurring_requirement",
+    "items.decide": "asserted in test_INV_17_an_unanswered_item_resolves_to_its_declared_default",
+    "items.extend": "asserted in test_HUM_3_only_an_open_approval_is_extended",
     "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",

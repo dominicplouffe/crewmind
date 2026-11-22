@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.integrations import push
@@ -152,13 +153,29 @@ async def propose(
     await session.flush()
     _move(session, commitment, C.PROPOSED, actor, now, {"projection": pace.projection.text()})
     if not await authority.ceo_holds(session, settings, project, "date"):
+        item = await items.file(
+            session,
+            settings,
+            project,
+            "proposed commitment",
+            filer=actor.caller,
+            fields={
+                "commitment_id": commitment.id,
+                "projected": pace.projection.at.strftime("%d %b %Y %H:%M UTC"),
+            },
+            recommendation="Accept the commitment at the platform's projection.",
+            if_declined="The project carries on with no commitment.",
+            subject=("commitment", str(commitment.id)),
+            now=now,
+            announce=False,
+        )
         await conversation.platform_line(
             session,
             project.id,
             f"The CEO proposes a commitment at the projection: {pace.projection.text()}. "
             "Accept it, choose a later date, or decline it in the plan.",
             now,
-            detail={"kind": "commitment proposed", "commitment": commitment.id},
+            detail={"kind": "decision item", "item": item.id, "item_kind": item.kind},
         )
     return commitment
 
@@ -218,6 +235,10 @@ async def accept(
     )
     commitment.settled_at = now
     _move(session, commitment, C.ACCEPTED, actor, now, {"chosen": date is not None})
+    await items.settle(
+        session, "proposed commitment", ("commitment", str(commitment.id)), "accept",
+        actor.caller, now,
+    )  # fmt: skip
     await _tell_ceo(
         session,
         project,
@@ -248,6 +269,10 @@ async def decline(
         )
     commitment.reason, commitment.settled_at = reason.strip(), now
     _move(session, commitment, C.DECLINED, actor, now, {"reason": reason.strip()})
+    await items.settle(
+        session, "proposed commitment", ("commitment", str(commitment.id)), "decline",
+        actor.caller, now,
+    )  # fmt: skip
     await _tell_ceo(session, project, f"The commitment was declined: {reason.strip()}", now)
     return commitment
 

@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.caller import Caller
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices, roster
 from crewmind.domain.execution.model import SeatKind, SeatState
 from crewmind.domain.execution.roster import ceo_of
@@ -27,6 +28,8 @@ R = RequirementState
 ESCALATE_AFTER = 3  # PLN-10: escalation to the CEO once after 3 failures
 NOTE_MIN_CHARACTERS = 10  # PLN-10: a rejection needs a note
 PASSED, FAILED = "passed", "failed"
+HANDED_OVER = "to a reviewer"
+"""A requirement whose verdict passed from the chairman to a reviewer seat (HUM-2)."""
 REVIEWER, CHAIRMAN = "reviewer", "chairman"
 
 
@@ -98,12 +101,56 @@ async def _ask_for_verdict(
             urgent=True,
         )
         return
+    item = await items.file(
+        session,
+        settings,
+        project,
+        "verdict",
+        filer=PLANNING_JOB,
+        fields={"requirement_id": requirement.id, "success_test": requirement.success_test},
+        recommendation="Look at the work and pass or reject the requirement.",
+        if_declined="A rejection sends it back to in progress, with your note.",
+        subject=("requirement", str(requirement.id)),
+        now=now,
+        announce=False,
+    )
     await conversation.platform_line(
         session,
         project.id,
-        f"{ask}\nPass or reject it in the plan.",
+        f"{ask}\nPass or reject it. Unanswered for 72 hours, it goes to a reviewer seat.",
         now,
-        detail={"kind": "verdict needed", "requirement": requirement.id},
+        detail={"kind": "decision item", "item": item.id, "item_kind": item.kind},
+    )
+
+
+async def hand_to_reviewer(
+    session: AsyncSession, project: Project, requirement: Requirement, now: datetime
+) -> None:
+    """HUM-2: a verdict the chairman did not give by its deadline passes to an independent
+    reviewer seat."""
+    await roster.ensure_reviewer(session, project, now)
+    reviewer = await session.scalar(
+        select(Seat)
+        .where(
+            Seat.project_id == project.id,
+            Seat.kind == SeatKind.REVIEWER,
+            Seat.state == SeatState.ACTIVE,
+        )
+        .order_by(Seat.created_at, Seat.name)
+        .limit(1)
+    )
+    assert reviewer is not None
+    requirement.ruling = HANDED_OVER
+    notices.notify(
+        session,
+        project.id,
+        reviewer.id,
+        "verdict needed",
+        f"The chairman did not rule on requirement {requirement.id} in time, so the "
+        f"verdict is yours: {requirement.text}\nIt is met when: {requirement.success_test}\n"
+        f"Give it with agent_rule_requirement (requirement_id={requirement.id}).",
+        now,
+        urgent=True,
     )
 
 
@@ -222,7 +269,12 @@ async def rule(
             "on an observable requirement in checking.",
             rule=PLN_10.id,
         )
-    if holder != CHAIRMAN and await verdict_holder(session, settings, project) != holder:
+    handed_over = requirement.ruling == HANDED_OVER
+    if (
+        holder != CHAIRMAN
+        and not handed_over
+        and await verdict_holder(session, settings, project) != holder
+    ):
         raise Refusal(
             "verdict_is_the_chairmans",
             "In this project the chairman gives the verdict on requirements "
@@ -236,4 +288,8 @@ async def rule(
             "what is missing.",
             rule=PLN_10.id,
         )
+    await items.settle(
+        session, "verdict", ("requirement", str(requirement.id)),
+        "pass" if passed else "reject", by, now,
+    )  # fmt: skip
     await settle(session, project, requirement, passed, (note or "").strip() or None, now, by=by)

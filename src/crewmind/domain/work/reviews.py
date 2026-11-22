@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Caller
 from crewmind.catalog.rules import Rule, rules
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices, roster
 from crewmind.domain.execution.model import SeatKind, SeatState
 from crewmind.domain.settings.service import SettingsService
@@ -50,15 +51,61 @@ async def consider_for_audit(
         return
     values = await settings.effective(session, tasks.subject(project))
     drawn = secrets.randbelow(PERCENT) < int(values["audit.sample_rate"])
-    session.add(
-        AuditSample(
-            task_id=task.id,
-            project_id=project.id,
-            drawn=drawn,
-            considered_at=now,
-            expires_at=now + timedelta(seconds=int(values["audit.window"])) if drawn else None,
-        )
+    sample = AuditSample(
+        task_id=task.id,
+        project_id=project.id,
+        drawn=drawn,
+        considered_at=now,
+        expires_at=now + timedelta(seconds=int(values["audit.window"])) if drawn else None,
     )
+    session.add(sample)
+    if not drawn:
+        return
+    await session.flush()
+    await items.file(
+        session,
+        settings,
+        project,
+        AUDIT.name,
+        filer=tasks.WORK_JOB,
+        fields={"audit_id": sample.id, "task_id": task.id, "label": task.label},
+        recommendation="Open the work this task closed on and pass or fail it.",
+        if_declined="A failed sample reopens nothing; the CEO is told to find what went wrong.",
+        subject=("audit_sample", str(sample.id)),
+        now=now,
+    )
+
+
+PASSED, FAILED, NOT_REVIEWED = "passed", "failed", "not reviewed"
+
+
+async def _audit(done: items.Settling) -> None:
+    """WRK-13: the chairman's verdict goes through the audit operation; at the deadline
+    the sample expires as not reviewed."""
+    if done.outcome in (PASSED, FAILED) and done.call is not None:
+        await done.call(
+            "audits.settle",
+            audit_id=int(done.item.fields["audit_id"]),
+            verdict=done.outcome,
+            note=done.note,
+        )
+        return
+    from crewmind.domain.work import operations
+
+    await operations.expire_audits(done.session, done.project, done.now)
+
+
+AUDIT = items.register(
+    items.Kind(
+        name="audit sample",
+        filed_by="platform",
+        actions=(PASSED, FAILED),
+        default=NOT_REVIEWED,
+        window="audit.window",
+        title=lambda f: f"Audit sample: task {f['task_id']}, closed as {f['label']}",
+        apply=_audit,
+    )
+)
 
 
 async def request(

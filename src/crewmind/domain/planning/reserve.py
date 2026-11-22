@@ -13,6 +13,7 @@ from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.planning import authority, estimates
@@ -203,13 +204,26 @@ async def draw(
     if held_by_ceo:
         await _drawn(session, settings, project, row, now)
     else:
+        item = await items.file(
+            session,
+            settings,
+            project,
+            "reserve draw",
+            filer=actor.caller,
+            fields={"draw_id": row.id, "tokens": row.tokens, "reason": row.reason},
+            recommendation="Approve the draw so the nearly finished scope can be finished.",
+            if_declined="Nothing is drawn. At the budget wall the project pauses.",
+            subject=("reserve_draw", str(row.id)),
+            now=now,
+            announce=False,
+        )
         await conversation.platform_line(
             session,
             project.id,
             f"The CEO asks to draw the CEO reserve of {row.tokens:,} tokens: {row.reason} "
-            f"{row.arithmetic} Approve or deny it in the plan. Unanswered, it stays denied.",
+            f"{row.arithmetic} Approve or deny it. Unanswered for 24 hours, it is denied.",
             now,
-            detail={"kind": "reserve asked", "draw": row.id},
+            detail={"kind": "decision item", "item": item.id, "item_kind": item.kind},
         )
     return row
 
@@ -275,6 +289,10 @@ async def answer(
         raise Refusal("draw_not_waiting", f"This draw is {row.state}, not waiting for an answer.")
     row.state, row.settled_at = (DRAWN if approve else DENIED), now
     _record(session, row, actor, now)
+    await items.settle(
+        session, "reserve draw", ("reserve_draw", str(row.id)),
+        "approve" if approve else "deny", actor.caller, now,
+    )  # fmt: skip
     ceo = await ceo_of(session, project.id)
     word = "approved" if approve else "denied"
     notices.notify(

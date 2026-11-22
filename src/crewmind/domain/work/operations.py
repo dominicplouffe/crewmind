@@ -16,6 +16,7 @@ from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.projects.operations import ProjectRef
@@ -218,6 +219,10 @@ async def settle_audit(context: Context, payload: AuditVerdictInput) -> AuditIte
             hint="Each sample is judged once.",
         )
     sample.verdict, sample.note = payload.verdict, payload.note
+    await items.settle(
+        context.session, "audit sample", ("audit_sample", str(sample.id)), payload.verdict,
+        context.caller, context.now,
+    )  # fmt: skip
     task = await context.session.get(Task, sample.task_id)
     assert task is not None
     context.record(
@@ -256,6 +261,10 @@ async def expire_audits(session: AsyncSession, project: Project, now: datetime) 
     )
     for sample in rows:
         sample.verdict = NOT_REVIEWED
+        await items.settle(
+            session, "audit sample", ("audit_sample", str(sample.id)), NOT_REVIEWED,
+            tasks.WORK_JOB, now,
+        )  # fmt: skip
         append_event(
             session,
             type=AUDIT_SETTLED,

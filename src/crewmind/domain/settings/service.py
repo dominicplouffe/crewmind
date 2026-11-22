@@ -79,6 +79,23 @@ class Subject:
 Constraint = Callable[[Mapping[str, SettingValue], Subject], str | None]
 
 
+async def project_subject(session: AsyncSession, project: Any) -> Subject:
+    """The project as the subject of a settings change. It is solo when no lead or worker
+    seat is active, the only case where independent read may be off (WRK-9)."""
+    from crewmind.storage.models import Seat
+
+    doing_work = await session.scalar(
+        select(Seat.id)
+        .where(
+            Seat.project_id == project.id,
+            Seat.state == "active",
+            Seat.kind.in_(["lead", "worker"]),
+        )
+        .limit(1)
+    )
+    return Subject(Scope.PROJECT, project.id, project.type, solo=doing_work is None)
+
+
 def _warn_before_wrapup(values: Mapping[str, SettingValue], _: Subject) -> str | None:
     warn, wrapup = values.get("budget.warn_at"), values.get("budget.wrapup_at")
     if isinstance(warn, int) and isinstance(wrapup, int) and warn >= wrapup:

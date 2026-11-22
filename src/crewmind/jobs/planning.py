@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
+from crewmind.domain.decisions import asks, items
 from crewmind.domain.planning import (
     acceptance,
     bets,
@@ -95,8 +96,10 @@ class PlanningJobs:
                     now = self._clock()
                     settings = self._services.settings
                     await speed.account(session, settings, project, now)
+                    await asks.remind(session, project, now)
+                    await items.apply_defaults(session, self._services, project, now)
+                    await asks.archive_heads_ups(session, project, now)
                     if project.state == ProjectState.READY:
-                        await completion.auto_complete(session, settings, project, now)
                         continue
                     await cycles.roll(session, settings, project, now)
                     if project.state != ProjectState.RUNNING:

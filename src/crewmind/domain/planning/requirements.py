@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.planning import authority, estimates, graph, readiness
@@ -183,13 +184,30 @@ async def propose(
     await _check_new_scope(session, settings, project, now)
     requirement = await _create(session, project, actor, new, R.PROPOSED, now)
     if not await authority.ceo_holds(session, settings, project, "accept_scope"):
+        item = await items.file(
+            session,
+            settings,
+            project,
+            "proposed scope",
+            filer=actor.caller,
+            fields={
+                "requirement_id": requirement.id,
+                "estimate_runs": requirement.estimate_runs,
+                "text": requirement.text,
+            },
+            recommendation=f"Accept requirement {requirement.id} into scope.",
+            if_declined="The requirement is declined and no work is created for it.",
+            subject=("requirement", str(requirement.id)),
+            now=now,
+            announce=False,
+        )
         await conversation.platform_line(
             session,
             project.id,
             f"The CEO proposes requirement {requirement.id}: {requirement.text} "
             f"(estimate {requirement.estimate_runs} runs). Accept or decline it in the plan.",
             now,
-            detail={"kind": "requirement proposed", "requirement": requirement.id},
+            detail={"kind": "decision item", "item": item.id, "item_kind": item.kind},
         )
     return requirement
 
@@ -282,6 +300,9 @@ async def accept(
         )
     requirement.accepted_at = now
     move(session, requirement, R.ACCEPTED, actor.caller, now, {"fits": fit.fits})
+    await items.settle(
+        session, "proposed scope", ("requirement", str(requirement.id)), "accept", actor.caller, now
+    )
     if actor.is_chairman:
         ceo = await ceo_of(session, project.id)
         notices.notify(
@@ -311,6 +332,14 @@ async def decline(
     _reason(reason)
     requirement.reason = reason.strip()
     move(session, requirement, R.DECLINED, actor.caller, now, {"reason": reason.strip()})
+    await items.settle(
+        session,
+        "proposed scope",
+        ("requirement", str(requirement.id)),
+        "decline",
+        actor.caller,
+        now,
+    )
     if actor.is_chairman:
         ceo = await ceo_of(session, project.id)
         notices.notify(

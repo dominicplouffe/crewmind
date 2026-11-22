@@ -16,6 +16,7 @@ from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.artifacts.service import Kind
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices, roster, runs
 from crewmind.domain.execution.model import RunKind, SeatKind, SeatState
 from crewmind.domain.execution.roster import ceo_of
@@ -322,6 +323,9 @@ async def follow_scope(
         .where(Requirement.project_id == project.id, Requirement.state.in_(OPEN_SCOPE))
     )
     if still_open:
+        await items.close_quietly(
+            session, "delivery sign-off", ("project", project.id), now, "scope changed"
+        )
         lifecycle.move(
             session, project, ProjectState.RUNNING, caller=PLANNING_JOB, now=now,
             detail={"why": "scope was added or reopened"},
@@ -381,13 +385,31 @@ async def become_ready(
         if after
         else "It stays ready until you sign it off."
     )
+    item = await items.file(
+        session,
+        settings,
+        project,
+        "delivery sign-off",
+        filer=PLANNING_JOB,
+        fields={"deliverables": names},
+        recommendation="Open the deliverables, then sign the project off.",
+        if_declined="The project stays ready until you sign it off or add scope.",
+        subject=("project", project.id),
+        now=now,
+        announce=False,
+    )
     await conversation.platform_line(
         session,
         project.id,
         f"The project is ready: every requirement is met. Deliverables: {listed}. Sign it "
         f"off to complete it. {closing}",
         now,
-        detail={"kind": "project ready", "deliverables": names},
+        detail={
+            "kind": "decision item",
+            "item": item.id,
+            "item_kind": item.kind,
+            "deliverables": names,
+        },
     )
     return True
 
@@ -470,6 +492,9 @@ async def complete(
 ) -> dict[str, Any]:
     """Complete a project and write its receipt."""
     await commitments.reproject(session, settings, project, now)
+    await items.settle(
+        session, "delivery sign-off", ("project", project.id), "sign off", caller, now
+    )
     written = await receipt(session, settings, project, now)
     for part in receipt_parts:
         await part(session, settings, project, now, written)
@@ -505,22 +530,6 @@ async def sign_off(
             f"The project is {project.state}. A Deliver project is signed off once it is ready.",
         )
     return await complete(session, settings, project, actor.caller, now, why="signed off")
-
-
-async def auto_complete(
-    session: AsyncSession, settings: SettingsService, project: Project, now: datetime
-) -> bool:
-    """PRJ-4: a ready project completes after `completion.auto_after`; 0 turns this off."""
-    if project.state != ProjectState.READY:
-        return False
-    after = int(await settings.get(session, authority.subject(project), "completion.auto_after"))
-    since = await entered(session, project.id, ProjectState.READY)
-    if not after or since is None or now - since < timedelta(seconds=after):
-        return False
-    await complete(
-        session, settings, project, PLANNING_JOB, now, why="nobody changed scope after it was ready"
-    )
-    return True
 
 
 async def receipt_of(session: AsyncSession, project_id: str) -> dict[str, Any] | None:

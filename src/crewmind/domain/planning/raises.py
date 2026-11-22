@@ -12,11 +12,12 @@ from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import items
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.planning import authority, projection
 from crewmind.domain.planning.authority import Actor
-from crewmind.domain.settings.service import SettingsService
+from crewmind.domain.settings.service import SettingsService, project_subject
 from crewmind.storage.events import append_event, event_type
 from crewmind.storage.models import Project, RaiseRequest
 
@@ -104,13 +105,27 @@ async def request(
     session.add(row)
     await session.flush()
     _record(session, row, actor, now)
+    item = await items.file(
+        session,
+        settings,
+        project,
+        "approval: capacity",
+        filer=actor.caller,
+        fields={"request_id": row.id, "what": what, "amount": amount},
+        recommendation=f"Raise the {what} to {amount:,}.",
+        if_declined=row.if_declined,
+        basis={"kind": "command", "ref": f"The platform's own arithmetic: {arithmetic}"},
+        subject=("raise_request", str(row.id)),
+        now=now,
+        announce=False,
+    )
     await conversation.platform_line(
         session,
         project.id,
         f"The CEO asks for a higher {what}: {arithmetic} If declined: {row.if_declined} "
-        "Approve it, grant a different number, or decline it in the plan.",
+        "Approve it, grant a different number, or decline it.",
         now,
-        detail={"kind": "raise asked", "request": row.id},
+        detail={"kind": "decision item", "item": item.id, "item_kind": item.kind},
     )
     return row
 
@@ -156,6 +171,10 @@ async def answer(
     if not approve:
         row.state = DECLINED
         _record(session, row, actor, now)
+        await items.settle(
+            session, "approval: capacity", ("raise_request", str(row.id)), "deny",
+            actor.caller, now,
+        )  # fmt: skip
         notices.notify(
             session, project.id, ceo.id, "raise declined",
             f"The chairman declined the {row.what} raise. You said that then: {row.if_declined}",
@@ -174,7 +193,7 @@ async def answer(
         )
     await settings.change(
         session,
-        authority.subject(project),
+        await project_subject(session, project),
         {name: granted},
         reason=f"Raise request {row.id} approved: {row.arithmetic}",
         caller=actor.caller,
@@ -182,6 +201,10 @@ async def answer(
     )
     row.state, row.granted = APPROVED, granted
     _record(session, row, actor, now)
+    await items.settle(
+        session, "approval: capacity", ("raise_request", str(row.id)), "approve",
+        actor.caller, now,
+    )  # fmt: skip
     notices.notify(
         session, project.id, ceo.id, "raise approved",
         f"The chairman approved the {row.what} raise: `{name}` is now {granted:,}.",

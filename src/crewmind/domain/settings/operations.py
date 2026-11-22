@@ -16,9 +16,9 @@ from crewmind.catalog.pagination import PageRequest, fetch_page
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.domain.settings.registry import Scope, SettingType
-from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
+from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject, project_subject
 from crewmind.services import services_of
-from crewmind.storage.models import Seat, SettingValue
+from crewmind.storage.models import SettingValue
 
 Changes = dict[str, int | float | bool | str]
 
@@ -93,17 +93,7 @@ class Registry(BaseModel):
 async def _project_subject(context: Context) -> Subject:
     """The project as a settings subject. It is solo when no lead or worker seat is active,
     which is the only case where independent read may be turned off (WRK-9)."""
-    project = view_of(context).project
-    doing_work = await context.session.scalar(
-        select(Seat.id)
-        .where(
-            Seat.project_id == project.id,
-            Seat.state == "active",
-            Seat.kind.in_(["lead", "worker"]),
-        )
-        .limit(1)
-    )
-    return Subject(Scope.PROJECT, project.id, project.type, solo=doing_work is None)
+    return await project_subject(context.session, view_of(context).project)
 
 
 async def _view(context: Context, subject: Subject) -> SettingsView:

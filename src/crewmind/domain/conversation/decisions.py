@@ -20,6 +20,7 @@ from crewmind.catalog.rules import Rule, rules
 from crewmind.catalog.state_machine import NEW, StateMachine
 from crewmind.domain.conversation import service
 from crewmind.domain.conversation.service import Author
+from crewmind.domain.decisions import items
 from crewmind.domain.execution.agent import agent_of
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.memory import pinned
@@ -28,7 +29,7 @@ from crewmind.domain.projects.operations import ProjectRef
 from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import Subject
 from crewmind.services import services_of
-from crewmind.storage.events import event_type
+from crewmind.storage.events import append_event, event_type
 from crewmind.storage.models import (
     Artifact,
     ArtifactVersion,
@@ -375,13 +376,32 @@ async def request_reopen(context: Context, payload: RequestInput) -> RequestItem
         after={"decision": row.id, "by": view.seat.name},
     )
     links = ", ".join(f"{item.kind} {item.ref}" for item in payload.evidence)
+    filed = await items.file(
+        context.session,
+        services_of(context).settings,
+        view.project,
+        REOPEN.name,
+        filer=context.caller,
+        fields={"request_id": request.id, "decision_id": row.id, "reason": payload.reason},
+        recommendation="Reopen the decision only if the new evidence changes the picture.",
+        if_declined="The ruling stands and the agent works within it.",
+        subject=("reopen_request", str(request.id)),
+        now=context.now,
+        announce=False,
+    )
     await service.platform_line(
         context.session,
         view.project.id,
         f"{view.seat.name} asks to reopen decision {row.id} ({row.topic}): {payload.reason}\n"
         f"New evidence: {links}. Answer with `decisions answer`. The ruling stands until you do.",
         context.now,
-        detail={"kind": "reopen request", "request": request.id, "decision": row.id},
+        detail={
+            "kind": "decision item",
+            "item": filed.id,
+            "item_kind": filed.kind,
+            "request": request.id,
+            "decision": row.id,
+        },
     )
     return _request_item(request, view.seat.name)
 
@@ -440,6 +460,10 @@ async def answer(context: Context, payload: AnswerInput) -> DecisionItem:
             hint="If you have changed your mind, reopen it yourself with `decisions reopen`.",
         )
     request.approved, request.answered_at = payload.approve, context.now
+    await items.settle(
+        context.session, REOPEN.name, ("reopen_request", str(request.id)),
+        "approve" if payload.approve else "deny", context.caller, context.now,
+    )  # fmt: skip
     context.record(
         REOPEN_ANSWERED,
         subject=("reopen_request", str(request.id)),
@@ -460,3 +484,42 @@ async def answer(context: Context, payload: AnswerInput) -> DecisionItem:
         detail={"kind": "reopen answered", "decision": row.id, "approved": payload.approve},
     )
     return _item(row)
+
+
+async def _reopen(done: items.Settling) -> None:
+    """INV-26, HUM-2: the chairman's answer goes through the answer operation; at the
+    deadline the request is denied and the ruling stands."""
+    request_id = int(done.item.fields["request_id"])
+    if done.call is not None:
+        await done.call(
+            "decisions.answer", request_id=request_id, approve=done.outcome == "approve"
+        )
+        return
+    request = await done.session.get(ReopenRequest, request_id)
+    if request is None or request.approved is not None:
+        return
+    request.approved, request.answered_at = False, done.now
+    append_event(
+        done.session,
+        type=REOPEN_ANSWERED,
+        caller=done.caller,
+        at=done.now,
+        subject=("reopen_request", str(request.id)),
+        project_id=request.project_id,
+        after={"approved": False},
+        detail={"default": True},
+    )
+
+
+REOPEN = items.register(
+    items.Kind(
+        name="reopen request",
+        filed_by="agent",
+        actions=("approve", "deny"),
+        default="deny",
+        window=timedelta(days=7),
+        title=lambda f: f"Request to reopen decision {f['decision_id']}",
+        apply=_reopen,
+        positive=("approve",),
+    )
+)
