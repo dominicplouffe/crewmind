@@ -18,12 +18,13 @@ from crewmind.domain.conversation import directives, sessions
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.conversation.service import Author, MessageKind
 from crewmind.domain.execution import notices, runs
+from crewmind.domain.execution.heartbeat import next_heartbeat
 from crewmind.domain.execution.model import OPEN_STATES, RunKind, RunState, SeatKind, SeatState
 from crewmind.domain.projects.model import ProjectState
 from crewmind.domain.settings.service import SettingsService
 from crewmind.jobs.nudge import nudge, pause
 from crewmind.storage.events import newest_event_id
-from crewmind.storage.models import Event, Message, Project, Run, Seat, Wake
+from crewmind.storage.models import Message, Project, Run, Seat, Wake
 
 logger = logging.getLogger(__name__)
 
@@ -31,27 +32,6 @@ TICK = timedelta(seconds=2)  # section 10: the dispatcher runs every 2 s
 STATUS_AFTER = timedelta(seconds=45)
 """INV-24 allows 60 seconds. The status is posted at 45 so that it lands inside the limit."""
 WAKE_WINDOW = timedelta(hours=1)
-
-
-async def next_heartbeat(
-    session: AsyncSession, settings: SettingsService, project: Project, seat: Seat
-) -> tuple[datetime, bool]:
-    """EXE-2, HUM-12: when the CEO's safety-net heartbeat is next due, and whether it will
-    fire: it skips when the event log shows no change since the last CEO run."""
-    every = timedelta(
-        seconds=int(await settings.get(session, runs.subject(project), "heartbeat.every"))
-    )
-    last = await session.scalar(
-        select(func.max(Run.queued_at)).where(Run.seat_id == seat.id, Run.kind == RunKind.WORK)
-    )
-    changed = (
-        select(func.count())
-        .select_from(Event)
-        .where(Event.project_id == project.id, Event.type.not_like("run.%"))
-    )
-    if last is not None:
-        changed = changed.where(Event.at > last)
-    return (last or project.created_at) + every, bool(await session.scalar(changed))
 
 
 async def _work_reasons(
@@ -70,6 +50,27 @@ async def _work_reasons(
         if now >= due and fires:
             reasons.append("heartbeat")
     return reasons
+
+
+async def _ran_without_reply(session: AsyncSession, seat: Seat, message: Message) -> bool:
+    """Whether a chat run for this message already finished and left it unanswered. Such
+    a message gets a platform status instead of the same run again (INV-24)."""
+    rows = await session.execute(
+        select(Wake.reasons)
+        .join(Run, Run.wake_id == Wake.id)
+        .where(
+            Run.seat_id == seat.id,
+            Run.kind == RunKind.CHAT,
+            Run.state == RunState.FINISHED,
+        )
+        .order_by(Run.queued_at.desc())
+        .limit(RECENT_CHAT_RUNS)
+    )
+    asked = f"message {message.id} from a person"
+    return any(asked in (reasons or []) for (reasons,) in rows.all())
+
+
+RECENT_CHAT_RUNS = 10  # how far back a finished chat run is looked for
 
 
 async def wake_limit_reached(
@@ -168,7 +169,16 @@ async def dispatch(
                 await runs.queue(session, seat, RunKind.WORK, reasons, now)
         if RunKind.CHAT in allowed and not await runs.has_open_run(session, seat.id, RunKind.CHAT):
             waiting = await conversation.unanswered_from_people(session, seat)
-            if waiting and await sessions.on_message(session, project, seat, waiting[0], now):
+            if waiting and await _ran_without_reply(session, seat, waiting[0]):
+                await conversation.platform_line(
+                    session,
+                    project.id,
+                    f"{seat.name} ran and gave no reply to this message. Ask again in other words.",
+                    now,
+                    reply_to=waiting[0].id,
+                    detail={"kind": conversation.NO_REPLY},
+                )
+            elif waiting and await sessions.on_message(session, project, seat, waiting[0], now):
                 await runs.queue(
                     session, seat, RunKind.CHAT, [f"message {waiting[0].id} from a person"], now
                 )

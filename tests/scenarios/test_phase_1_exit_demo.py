@@ -316,6 +316,8 @@ NO_EVENT = {
     "items.decide": "asserted in test_INV_17_an_unanswered_item_resolves_to_its_declared_default",
     "items.extend": "asserted in test_HUM_3_only_an_open_approval_is_extended",
     "reviews.lever": "asserted in test_HUM_9_a_status_review_is_frozen",
+    "items.snooze": "asserted in test_HUM_10_the_desk_is_one_list_and_a_snooze_cannot_outlast",
+    "chat.opened": "asserted in test_HUM_11_the_brief_and_the_away_summary_agree",
     "requirements.accept": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.decline": "asserted in test_PLN_1_the_chairman_accepts_scope_when_they_hold_it",
     "requirements.rule": "asserted in test_PLN_10_only_the_platform_writes_met",

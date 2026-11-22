@@ -12,11 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.domain.artifacts.service import Kind
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.decisions import desk
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.model import RunKind, RunState, SeatKind, SeatState
 from crewmind.domain.execution.roster import ceo_of
 from crewmind.domain.planning import (
-    acceptance,
     authority,
     completion,
     estimates,
@@ -24,7 +24,7 @@ from crewmind.domain.planning import (
     projection,
 )
 from crewmind.domain.planning import requirements as scope
-from crewmind.domain.planning.model import OPEN_SCOPE, RequirementState, RequirementTest
+from crewmind.domain.planning.model import OPEN_SCOPE, RequirementState
 from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import HOLDABLE, Hold, ProjectState, ProjectType
 from crewmind.domain.settings.service import SettingsService
@@ -33,12 +33,9 @@ from crewmind.domain.work.model import TaskState
 from crewmind.storage.models import (
     Artifact,
     ArtifactVersion,
-    Commitment,
     Project,
     ProjectGuard,
-    RaiseRequest,
     Requirement,
-    ReserveDraw,
     Review,
     Run,
     Seat,
@@ -111,32 +108,8 @@ async def _count(session: AsyncSession, statement: Any) -> int:
 async def _waits_on_chairman(
     session: AsyncSession, settings: SettingsService, project: Project
 ) -> bool:
-    """Whether something only the chairman can answer is open."""
-    if project.state == ProjectState.READY:
-        return True
-    pending = [
-        select(func.count())
-        .select_from(Requirement)
-        .where(
-            Requirement.project_id == project.id,
-            Requirement.state == RequirementState.CHECKING,
-            Requirement.test_kind == RequirementTest.OBSERVABLE,
-        ),
-        select(func.count())
-        .select_from(Commitment)
-        .where(Commitment.project_id == project.id, Commitment.state == "proposed"),
-        select(func.count())
-        .select_from(ReserveDraw)
-        .where(ReserveDraw.project_id == project.id, ReserveDraw.state == "requested"),
-        select(func.count())
-        .select_from(RaiseRequest)
-        .where(RaiseRequest.project_id == project.id, RaiseRequest.state == "pending"),
-    ]
-    values = [await _count(session, statement) for statement in pending]
-    if any(values[1:]):
-        return True
-    holder = await acceptance.verdict_holder(session, settings, project)
-    return bool(values[0]) and holder == acceptance.CHAIRMAN
+    """HUM-10: the desk's definition of waiting on the chairman, and a ready project."""
+    return project.state == ProjectState.READY or await desk.waits(session, project)
 
 
 async def where_now(session: AsyncSession, settings: SettingsService, project: Project) -> str:

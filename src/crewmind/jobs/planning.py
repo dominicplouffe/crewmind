@@ -14,7 +14,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.decisions import asks, flags, items, reviews
+from crewmind.domain.decisions import asks, brief, flags, items, reviews
+from crewmind.domain.integrations import alerts
 from crewmind.domain.planning import (
     acceptance,
     bets,
@@ -52,6 +53,13 @@ class PlanningJobs:
         await self.per_project()
         await self.run_requirement_tests()
         await self.read_metrics()
+        await self.send_briefs()
+
+    async def send_briefs(self) -> int:
+        """HUM-11: each person's daily brief, once per local day, at 0 tokens."""
+        async with self._sessions() as session, session.begin():
+            built = await brief.send_due(session, self._services.settings, self._clock())
+            return len(built)
 
     async def read_metrics(self) -> int:
         """PLN-11: read every metric that is due, through the fetch guard, with no
@@ -96,6 +104,7 @@ class PlanningJobs:
                     now = self._clock()
                     settings = self._services.settings
                     await speed.account(session, settings, project, now)
+                    await alerts.chase(session, project, now)
                     await asks.remind(session, project, now)
                     await items.apply_defaults(session, self._services, project, now)
                     await asks.archive_heads_ups(session, project, now)

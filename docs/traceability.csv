@@ -31,7 +31,7 @@ CHAT-11,Answer the question asked,05-chat.md,3,yes,done,test_MSG_6_a_correction_
 CHAT-12,Listening score,05-chat.md,3,yes,partial,test_scenario_a_question_answered_sideways_is_asked_again; web/e2e/listening.spec.ts: listening score,"Corrections per 100 replies on each seat card. The daily brief, the run health report and the rising-score flag arrive with HUM-6 and phase 6"
 CHAT-13,Brevity,05-chat.md,3,yes,done,test_scenario_a_wordy_reply_is_rewritten_once,
 CHAT-14,Threads and search,05-chat.md,2,yes,partial,test_CHAT_14_search_header_and_feed,Search over messages and file names. Memory search arrives in phase 3
-CHAT-15,Since you were away,05-chat.md,6,yes,not started,,
+CHAT-15,Since you were away,05-chat.md,6,yes,done,test_HUM_11_the_brief_and_the_away_summary_agree_with_the_event_log,
 CHAT-16,Artifact previews,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""upload files and preview them..."", ""attach by drag-and-drop and by paste...""; web/src/lib/csv.test.ts; web/src/panels/Compare.test.tsx","Markdown, text, code, images, CSV, sandboxed HTML and compare tested. PDF, audio and video use the browser players and are only checked for the right element. Spreadsheet (xlsx) preview not built"
 CHAT-17,Multi-person,05-chat.md,2,yes,done,test_CHAT_14_search_header_and_feed,
 CHAT-18,Always-visible header,05-chat.md,2,yes,partial,"web/e2e/app.spec.ts: ""create and start a project"", ""/hold changes the header and /resume changes it back""; test_CHAT_14_search_header_and_feed","Now, budget, state and holds shown. Next and Waiting on you fill in with the agenda and the desk (phases 3 and 4)"
@@ -141,9 +141,9 @@ HUM-6,Flags,06-09-decisions-HUM.md,6,yes,partial,test_HUM_6_a_state_flag_closes_
 HUM-7,Assists,06-09-decisions-HUM.md,6,yes,done,test_HUM_7_an_assist_holds_one_task_and_nothing_else,
 HUM-8,Mistake reports,06-09-decisions-HUM.md,6,yes,done,test_HUM_8_the_ceo_owes_a_mistake_report_and_files_it_once,
 HUM-9,Status reviews,06-09-decisions-HUM.md,6,yes,partial,test_HUM_9_a_status_review_is_frozen,Built. A lever records the decision with its reason; the change itself is made with its own operation
-HUM-10,Desk,06-09-decisions-HUM.md,6,yes,not started,,
-HUM-11,Daily brief,06-09-decisions-HUM.md,6,yes,not started,,
-HUM-12,Agenda,06-09-decisions-HUM.md,6,yes,not started,,
+HUM-10,Desk,06-09-decisions-HUM.md,6,yes,done,test_HUM_10_the_desk_is_one_list_and_a_snooze_cannot_outlast_a_deadline,
+HUM-11,Daily brief,06-09-decisions-HUM.md,6,yes,partial,test_HUM_11_the_brief_and_the_away_summary_agree_with_the_event_log; test_HUM_11_the_daily_brief_is_built_once_per_local_day,Built and shown in the app with a browser push. Email delivery waits for mail (phase 8)
+HUM-12,Agenda,06-09-decisions-HUM.md,6,yes,done,test_INV_22_the_agendas_next_wake_is_the_dispatchers,
 EXE-1,Roster,06-10-execution-EXE.md,2,yes,done,test_EXE_1_the_roster_is_one_ceo_plus_teams_within_the_limit,
 EXE-2,Wake triggers,06-10-execution-EXE.md,2,yes,done,test_EXE_2_agents_wake_only_on_triggers_and_within_the_wake_limit,
 EXE-3,Run kinds and limits,06-10-execution-EXE.md,2,yes,done,test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_limit,
@@ -201,7 +201,7 @@ INT-3,Generic signed events,06-15-integrations-INT.md,8,later,not started,,
 INT-4,Data sources,06-15-integrations-INT.md,8,later,not started,,
 INT-5,Slack: one channel per project,06-15-integrations-INT.md,8,later,not started,,
 INT-6,Email: a mailbox per project,06-15-integrations-INT.md,8,later,not started,,
-INT-7,Alerts,06-15-integrations-INT.md,6,yes,not started,,"Email rules (grace, daily cap) wait for mail in phase 8 (owner, phase 6 plan)"
+INT-7,Alerts,06-15-integrations-INT.md,6,yes,partial,test_HUM_11_the_daily_brief_is_built_once_per_local_day; test_INT_7_the_alert_level_decides_what_is_pushed,Alert levels and the chase of proposals are built for browser push. The email grace period and daily cap wait for mail (phase 8); Slack is phase 8
 INT-8,Web search,06-15-integrations-INT.md,2,yes,done,test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_limit,moved to phase 2: agents need web search early; Brave Search API first
 INT-9,Code repository,06-15-integrations-INT.md,8,later,not started,,
 INT-10,"Agents on email, and external agents",06-15-integrations-INT.md,8,later,not started,,
@@ -234,7 +234,7 @@ INV-18,Proposed scope never has work against it; no task exists under a requi,08
 INV-19,"The requirement graph is always acyclic, and where stages are used, wo",08-invariants-INV.md,5,yes,done,test_INV_19_a_dependency_loop_is_refused_and_named_and_stages_go_in_order; test_INV_18_INV_19_any_sequence_of_scope_changes_keeps_work_under_ready_scope; test_INV_19_any_sequence_of_edges_leaves_the_graph_acyclic,
 INV-20,"A held, paused, stopped, ready or completed project changes no work st",08-invariants-INV.md,2,yes,done,test_INV_4_a_hold_revokes_work_run_tokens_at_once; test_INV_20_a_directive_on_a_held_project_waits_until_it_resumes; test_CHAT_3_a_stopped_or_held_project_answers_honestly,
 INV-21,"Every state change appears in the event log with its actor (person, pe",08-invariants-INV.md,1,yes,done,tests/scenarios/test_phase_1_exit_demo.py; tests/unit/test_execute.py,
-INV-22,The agenda's next wake equals the dispatcher's next wake.,08-invariants-INV.md,6,yes,not started,,
+INV-22,The agenda's next wake equals the dispatcher's next wake.,08-invariants-INV.md,6,yes,done,test_INV_22_the_agendas_next_wake_is_the_dispatchers,
 INV-23,"A chat run changes no state except posting, writing its own memory not",08-invariants-INV.md,3,yes,done,test_INV_23_a_chat_run_changes_no_state; test_CHAT_7_an_action_card_does_nothing_until_the_chairman_accepts_it; test_MEM_1_an_agents_notes_are_its_own_and_stay_within_the_cap; test_MEM_3_an_agent_reads_and_writes_only_its_own_scopes; test_scenario_chat_words_change_nothing_without_a_directive,
 INV-24,Every chairman message receives an agent reply or a platform status wi,08-invariants-INV.md,2,yes,done,test_MSG_1_a_reply_longer_than_a_message_is_cut_and_still_answers; test_INV_24_a_message_gets_a_reply_or_a_status_within_60_seconds,
 INV-25,"Every active standing order, closed decision and correction that conce",08-invariants-INV.md,3,yes,done,test_INV_25_every_pinned_record_is_in_the_pack_word_for_word; test_MSG_4_only_the_chairman_makes_an_order_binding; test_MSG_6_a_correction_is_pinned_for_the_agent_and_the_ceo; test_scenario_a_standing_order_is_in_front_of_every_later_run,

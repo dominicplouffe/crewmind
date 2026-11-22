@@ -17,8 +17,10 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.integrations import push
+from crewmind.domain.integrations import alerts, push
 from crewmind.domain.secrets.store import SecretStore
+from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.service import Subject
 from crewmind.gateway import outbound
 from crewmind.services import Services
 from crewmind.storage.models import Alarm, Membership, PushSubscription
@@ -99,11 +101,20 @@ class AlarmSender:
         return accepted
 
     async def _delivery(self, session: AsyncSession, alarm: Alarm) -> _Delivery:
-        rows = await session.scalars(
+        found = await session.scalars(
             select(PushSubscription)
             .join(Membership, Membership.person_id == PushSubscription.person_id)
             .where(Membership.project_id == alarm.project_id, Membership.state == "member")
         )
+        rows: list[PushSubscription] = []
+        for row in found:
+            if alarm.person_id is not None and row.person_id != alarm.person_id:
+                continue
+            level = await self._services.settings.get(
+                session, Subject(Scope.PERSON, row.person_id), "alerts.level"
+            )
+            if alerts.wants(str(level), alarm.level):
+                rows.append(row)
         return _Delivery(
             alarm.id,
             alarm.project_id,

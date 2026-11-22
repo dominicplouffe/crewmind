@@ -47,7 +47,7 @@ items.register(
 )
 
 
-async def _reviews(session: AsyncSession, project_id: str) -> list[DecisionItem]:
+async def all_reviews(session: AsyncSession, project_id: str) -> list[DecisionItem]:
     rows = await session.scalars(
         select(DecisionItem)
         .where(DecisionItem.project_id == project_id, DecisionItem.kind == REVIEW)
@@ -116,7 +116,7 @@ async def build(
 ) -> DecisionItem:
     """HUM-9: build a review at 0 tokens, beside the previous review's levers. It is
     built even with an empty board or a spent budget."""
-    earlier = await _reviews(session, project.id)
+    earlier = await all_reviews(session, project.id)
     previous = earlier[-1] if earlier else None
     numbers = await snapshot(
         session, settings, project, previous.opened_at if previous else None, now
@@ -165,7 +165,7 @@ async def build_if_due(
     values = await settings.effective(session, authority.subject(project))
     if project.type == "operate" and values.get("cycle.period") in CYCLE_PERIODS:
         return None
-    earlier = await _reviews(session, project.id)
+    earlier = await all_reviews(session, project.id)
     last = earlier[-1].opened_at if earlier else await projection.started_at(session, project.id)
     every = timedelta(seconds=int(values["review.every"]))
     if last is None or now - last < every:

@@ -267,6 +267,9 @@ async def unanswered_from_people(session: AsyncSession, seat: Seat) -> list[Mess
 
 
 REPLY_STOPPED = "reply stopped"
+NO_REPLY = "no reply"
+"""A chat run finished without answering. The platform says so once, and the message is
+not answered again unasked (INV-24)."""
 
 
 async def _stopped_replies(session: AsyncSession, target: Channel) -> set[int]:
@@ -281,7 +284,8 @@ async def _stopped_replies(session: AsyncSession, target: Channel) -> set[int]:
     return {
         line.reply_to
         for line in lines
-        if line.reply_to is not None and (line.detail or {}).get("kind") == REPLY_STOPPED
+        if line.reply_to is not None
+        and (line.detail or {}).get("kind") in (REPLY_STOPPED, NO_REPLY)
     }
 
 

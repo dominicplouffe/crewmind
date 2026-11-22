@@ -8,50 +8,16 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway import outbound
-from crewmind.jobs.alarms import AlarmSender
 from crewmind.storage.models import PushSubscription, StoredSecret
 from tests.attack.harness import assert_refused
 from tests.attack.test_budget import BIG
+from tests.push_support import BROWSER, FakePushService, sender
 from tests.support import App, running_project, wake
-
-BROWSER = {
-    "endpoint": "https://fcm.googleapis.com/fcm/send/abc123",
-    "p256dh": "BPublicValueFromTheBrowser",
-    "auth": "sharedValue",
-}
-
 
 OVER_THE_WALL: list[dict[str, Any]] = [
     {"text": "working", "tools": [{"name": "agent_whoami"}], "usage": BIG},
     {"text": "more", "usage": BIG},
 ]
-
-
-class FakePushService:
-    def __init__(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        self.sent: list[dict[str, Any]] = []
-        self.gone = False
-        monkeypatch.setattr(outbound, "web_push", self.push)
-
-    async def push(
-        self, subscription: dict[str, Any], payload: str, signing_value: str, sender: str
-    ) -> bool:
-        self.sent.append(
-            {"to": subscription["endpoint"], "signing": signing_value, **json.loads(payload)}
-        )
-        return not self.gone
-
-
-@pytest.fixture
-def service(app: App, monkeypatch: pytest.MonkeyPatch) -> FakePushService:
-    ensure_master_key(app.runtime.config.master_key_file)
-    return FakePushService(monkeypatch)
-
-
-def sender(app: App) -> AlarmSender:
-    return AlarmSender(app.runtime.sessions, app.runtime.clock, app.runtime.services)
 
 
 @pytest.mark.attack("CHAT-20")
@@ -89,6 +55,7 @@ async def test_CHAT_20_alarm_reaches_only_the_projects_people_and_no_secret_leav
     subscription."""
     owner = await app.person("owner@example.com")
     outsider = await app.person("outsider@example.com")
+    await app.ok("settings.change_mine", owner, changes={"alerts.level": "alarms_only"})
     identity = await app.ok("push.public_key", owner)
     assert identity == await app.ok("push.public_key", outsider)
     assert (await app.ok("push.subscribe", owner, **BROWSER))["browsers"] == 1
@@ -132,6 +99,7 @@ async def test_CHAT_20_a_subscription_the_push_service_dropped_is_removed(
     """CHAT-20, BG-3: when the push service says a browser is gone, its subscription is
     deleted, and the alarm is still marked sent."""
     owner = await app.person("owner@example.com")
+    await app.ok("settings.change_mine", owner, changes={"alerts.level": "alarms_only"})
     await app.ok("push.public_key", owner)
     await app.ok("push.subscribe", owner, **BROWSER)
     project = await running_project(app, owner, **{"budget.tokens": 1_000_000})

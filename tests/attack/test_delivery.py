@@ -140,7 +140,8 @@ async def test_PLN_7_PLN_8_an_at_risk_commitment_freezes_new_scope(
     crew.owner = await app.login(crew.owner.email)
     assert (await view(crew))["commitment"]["state"] == "breached"
     async with app.runtime.sessions() as session:
-        assert await session.scalar(select(func.count()).select_from(Alarm)) == 1
+        alarms = select(func.count()).select_from(Alarm).where(Alarm.level == "alarm")
+        assert await session.scalar(alarms) == 1
     moved = await app.ok(
         "commitments.move", crew.owner, project_id=crew.project,
         date=(app.runtime.clock() + timedelta(days=60)).isoformat(),

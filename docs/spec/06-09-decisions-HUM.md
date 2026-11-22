@@ -75,6 +75,8 @@
   - the prevention, which is saved as a pinned lesson (MEM-1).
 
   A filed report cannot be edited.
+
+  The cost is the tokens of the run that wrote the corrected reply, of the runs that changed the audited task, or of everything spent since the breached commitment was accepted.
 - **HUM-9 Status reviews.**
   - The platform builds one every `review.every` \[7 days\], or at the cycle roll for Operate projects with weekly or longer cycles. It costs 0 tokens, even with an empty board or a spent budget.
   - It holds a frozen snapshot of the numbers beside the previous review's decisions and what they bought.
@@ -82,7 +84,8 @@
   - The chairman has six levers, each recorded with a reason: cut, add, reword, move the date, raise the budget, accept the slip.
   - A green review (nothing at risk, no failed audit, within budget) closes itself after 24 hours.
   - Reviews never block work.
-- **HUM-10 Desk.** One definition of "waiting on you" used everywhere: pending approvals, open questions, proposed scope, owed verdicts, an unaccepted commitment, a delivery awaiting sign-off, expired bets, frozen threads, budget checkpoints. Snoozing is per person and cannot outlast the item's deadline; an item with no deadline returns within 7 days.
+  - A lever records the chairman's decision and reason on the review; the change itself is made with its own operation. A review on which a lever was used no longer closes itself. Green also means no flag is open.
+- **HUM-10 Desk.** One definition of "waiting on you" used everywhere: pending approvals, open questions, proposed scope, owed verdicts, an unaccepted commitment, a delivery awaiting sign-off, expired bets, frozen threads, budget checkpoints. Snoozing is per person and cannot outlast the item's deadline; an item with no deadline returns within 7 days. Flags, heads-ups, status reviews and mistake reports are not on the desk: they are in the brief.
 - **HUM-11 Daily brief.**
   - Built from the record at 0 tokens and sent once per local day at `brief.time` \[08:00\] in the person's `person.timezone` for running, held and paused projects. It is on by default.
   - Sections:
@@ -92,6 +95,7 @@
     - what decided itself (expired approvals, lapsed questions, auto-completion, cycle rolls, pauses);
     - what happens next.
   - It separates requirements settled from tasks closed.
+  - Until mail exists (phase 8) the brief is shown in the app and announced by a browser push. A person with no running, held or paused project gets none.
   - Scheduled reports are platform jobs that fire on time. If an agent narrative is late, the report goes out without it and says so.
 - **HUM-12 Agenda.** The next `agenda.days` \[14\] days (at most 90), at 0 tokens, in the project's timezone:
   - heartbeats and when they will skip;

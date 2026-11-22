@@ -26,6 +26,7 @@
   - A purchase that would push committed spend past the cap is refused, and no approval overrides that.
   - A purchase at or above the threshold needs an approved spend item covering the amount.
   - After 3 approvals in 90 days with no denial, the system offers to raise the threshold. It never raises it on its own.
+  - Until a purchasing integration exists, an agent declares each purchase before making it; the cap and the threshold are enforced on that declaration. A cancelled purchase stops counting.
   - Purchases are side effects (WRK-16).
 - **GOV-9 Arithmetic in every refusal.** Every budget, cap or limit refusal states the numbers involved, the rule id and when it lifts.
 - **GOV-10 CEO reserve.** Like a real CEO, the CEO has latitude over a slice of the budget, to finish work that is nearly done without stopping to ask.

@@ -194,4 +194,4 @@ async def app(runtime: Runtime) -> App:
     return App(runtime)
 
 
-pytest_plugins = ["tests.site_support"]
+pytest_plugins = ["tests.site_support", "tests.push_support"]

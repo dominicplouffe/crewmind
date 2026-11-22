@@ -8,6 +8,12 @@ Newest first. One line per change, citing the ids touched.
 - **HUM-6:** each flag kind is marked state or event (R-47).
 - **IF-5.6, IF-5.2:** approving a skill version is human-only; reopen, complete and edit memory join the steer scope (R-33).
 - **INV-22:** only time-based wakes are compared (R-48).
+- **HUM-8:** how a mistake's cost is computed.
+- **HUM-9:** what a lever does; green also means no open flag.
+- **HUM-10:** what is not on the desk.
+- **HUM-11:** how the brief is delivered before mail exists.
+- **INV-24:** a chat run that gives no reply is answered by a platform status, not run again.
+- **GOV-8:** purchases are declared until a purchasing integration exists.
 - **INT-6, INT-7:** the install's outbound mail account moves to phase 8 with project mailboxes; until then alerts and briefs go by browser push and in the app (owner).
 
 ## Revision 2.16 (22 Nov 2026): phase 5 build

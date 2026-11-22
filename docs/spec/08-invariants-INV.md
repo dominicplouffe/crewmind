@@ -49,6 +49,6 @@ These must hold at all times, under any sequence of API calls, crashes and retri
 **Conversation**
 
 - **INV-23** A chat run changes no state except posting, writing its own memory notes, and carrying out a directive it cites (CHAT-6, MSG-3).
-- **INV-24** Every chairman message receives an agent reply or a platform status within 60 seconds (P17, CHAT-3).
+- **INV-24** Every chairman message receives an agent reply or a platform status within 60 seconds (P17, CHAT-3). A chat run that finishes without replying is not queued again for the same message: the platform says once that no reply came.
 - **INV-25** Every active standing order, closed decision and correction that concerns an agent is present, verbatim, in every context pack that agent receives (P16, MEM-1).
 - **INV-26** A closed decision is reopened only by the chairman, or by a reopen request that links evidence newer than the decision (MSG-5).
