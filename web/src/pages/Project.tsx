@@ -38,6 +38,7 @@ import { WorkView } from "../project/WorkView";
 import { usePaletteItems } from "../shell/palette";
 import { useGoShortcuts } from "../shell/useKeySequence";
 import { t } from "../strings";
+import { Skeleton } from "../ui/Skeleton";
 import { projectLayout, shell } from "../strings.shell";
 
 function tabOf(value: string | undefined): ProjectTab {
@@ -306,9 +307,14 @@ export function Project(): JSX.Element {
               </p>
             ) : null}
             <AwayNote projectId={projectId} />
-            {mine.length > 0 ? (
+            {needs.loaded && mine.length > 0 ? (
               <NeedsStack projectId={projectId} entries={mine} onChanged={items.onChanged} onOpenAll={() => setNeedsOpen(true)} />
             ) : null}
+            {!needs.loaded && !needs.error ? (
+              <div className="chat-loading">
+                <Skeleton lines={4} block />
+              </div>
+            ) : (
             <MessageList
               state={state}
               roles={roles}
@@ -319,6 +325,7 @@ export function Project(): JSX.Element {
               onInterrupt={() => void actions.interrupt()}
               onEarlier={actions.loadEarlier}
             />
+            )}
             {dragging ? <p className="drop-hint">{t.composer.dropHint}</p> : null}
             <Composer
               ref={composer}

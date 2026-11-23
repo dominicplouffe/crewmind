@@ -422,7 +422,8 @@
   .project-titlebar { min-height: 2.5rem; }
 }
 /* A decision card in the chat loads its item after the message: hold about its usual height. */
-.message .item-card.is-loading { min-height: 26rem; }
+.message .dcard.is-loading { min-height: 10rem; }
 @media (max-width: 599px) {
-  .message .item-card.is-loading { min-height: 32rem; }
+  .message .dcard.is-loading { min-height: 13rem; }
 }
+.chat-loading { flex: 1; padding: var(--space-6); max-width: var(--reading-max); width: 100%; margin: 0 auto; }

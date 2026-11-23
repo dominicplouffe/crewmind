@@ -14,9 +14,11 @@ Sidebar (desktop) / tab bar (phone)
 │     └── While you were away  the daily brief, folded
 ├── Projects                   every project as a card; start one (Founder or form)
 │     └── <Project>
-│           ├── Chat           the conversation (default) + rail: needs you, crew, budget
-│           ├── Overview       goal & progress, budget burn & projection, crew, timeline, latest deliverables
-│           ├── Work           Plan | Board
+│           ├── Chat           the conversation (default), the most urgent decisions pinned above it,
+│           │                  and a rail: who is doing what now, just delivered, budget, next
+│           ├── Overview       a headline sentence, what is blocked, who is doing what, progress per
+│           │                  requirement, budget burn, crew, a timeline of what matters, latest files
+│           ├── Work           requirements, then the board; plan details folded below
 │           ├── Crew           org view; agent sheet: model, runs, files, "Message"
 │           ├── Deliverables   gallery with inline previews; file sheet with versions and compare
 │           └── More ▾         Activity · Search · Budget · Runs · Memory · Models · Settings

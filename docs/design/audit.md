@@ -1,5 +1,26 @@
 # Audit: the redesign, checked
 
+## Second pass (23 Nov 2026)
+
+The first pass was judged against a near-empty project. The second was designed and checked against a busy one, seeded by `npm run demo` (web/README.md): five agents in three teams, tasks done, in review, in progress and blocked, five delivered files, about 60% of the budget spent, and a spend approval, a question and proposed scope waiting. Screenshots: `screenshots/pass2-*`.
+
+| What was wrong after pass one | What changed |
+| --- | --- |
+| One decision filled a screen; titles read "Question about other", "Spend 15.00 USD" | One compact card everywhere: the ask in plain words ("Answer a question", "Approve spending $15.00?"), the agent's words as plain text, who asks and when it is due on one line, one-click primary action; the rest behind Details. Headlines for all 18 item kinds are table-tested. |
+| A heads-up looked like a decision ("The CEO asks") | A quiet note with Acknowledge. |
+| The same decisions appeared three times on the project page | Header count, then the most urgent two pinned above the chat (one on a phone); the rail no longer lists them. |
+| Home showed one giant card | The answer first ("3 decisions wait on you, the soonest in 24 hours"), decisions grouped by urgency, J/K to move, project cards with requirements, crew and budget. |
+| Timeline of internals ("Chat session 1 is now warm", "Item 7 is now open") | A timeline of what a chairman cares about, with tasks named, bursts merged and days grouped. |
+| "Projected to finish in about 1 s"; five identical axis labels | Projections say what is known; time ticks never repeat and follow the span. |
+| Everyone "Idle since…" | Each agent's line comes from the tasks it holds: working on, holding, waiting for review, blocked with the reason. Teams side by side in an org view. |
+| Work was a list of requirement forms | Requirements as compact rows with progress and owners, then a kanban board; the rest of the plan folded below. |
+| "Good evening, Admin" | ACC-8: a person sets their own name (Settings, first-run setup). |
+| No signature moment | The crew assembles around the mark once, after the Founder starts a project. |
+
+**Checks after pass two.** Python: 492 passed on SQLite and on Postgres. Web: 617 unit tests; 62 browser tests including axe (WCAG 2.2 A/AA) in both themes and a 390 px run, plus a scan of the crew-assembled dialog. Layout shift on a throttled phone: Home 0.01, Overview 0, Work 0, Deliverables 0; chat 0.02 on a desktop and 0.05–0.2 on a phone, depending on when each decision card's item arrives (fix: API proposal A-18).
+
+## First pass
+
 Run on 22 Nov 2026 against a mock-model server with a scripted crew (a Deliver project whose CEO proposed two requirements). Screenshots are in [screenshots/](screenshots/): `before-*` were taken before any change, `after-*` at the end, at 1440 px and 390 px, light and dark.
 
 ## Acceptance criteria

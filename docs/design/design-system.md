@@ -91,7 +91,12 @@ Named animations: `pop-in` (menus, palette), `rise-in` (cards entering), `sheet-
 | Badge, count | `.badge`, `.count` | Counts are tabular; a zero count is hidden, not shown as "0". |
 | Status pill | `ui/Status.tsx` `Pill` | Dot plus word; tone is never the only signal. |
 | Avatar | `ui/Avatar.tsx` | Agents are rounded squares, people circles; hue from the name; optional status dot. |
-| Inbox item / decision card | `home/InboxItem.tsx`, `desk/ItemCard.tsx` | Urgency edge, the ask, who asks, deadline in words, if-you-do-nothing, actions. |
+| Decision card | `desk/ItemCard.tsx`, `desk/headline.ts` | One card for every decision, everywhere. Leads with the ask in plain words ("Add to scope?", "Approve spending $15.00 a month?"), then the agent's own words as plain text, then who asks, the deadline in words and the size on one line, then the primary action. Recommendation, if-you-do-nothing, fields, notes and set-aside wait behind Details. `slim` is the one-line form; a settled card folds to one line. |
+| Inbox | `home/InboxItem.tsx`, `home/logic.ts` | Decision cards grouped by urgency (Overdue, Next 24 hours, This week, Later); J and K move between them. |
+| Needs stack | `project/NeedsStack.tsx` | The most urgent decisions pinned above the conversation (two on a desktop, one on a phone), "+N more" opens the rest. |
+| Note | `desk/ItemNote.tsx` | A heads-up or flag in the chat: an icon, who, their words as plain text, Acknowledge. Never a card. |
+| Board | `panels/board/Kanban.tsx` | Ready, In progress, In review, Blocked (with the reason), Done; columns snap sideways on a phone. |
+| Crew assembled | `crew/CrewAssembled.tsx` | The signature moment: the crew gathers around the mark once, after the Founder starts a project or on the first visit to Crew. A still card under reduced motion. |
 | Agent card | `crew/` | Avatar, name, role, status, what it is doing now. |
 | Progress | `ui/Progress.tsx` `SegmentBar`, `Meter` | Always paired with a text legend or label. |
 | Burn chart | `overview/BurnChart.tsx` | SVG, labelled, with a text summary and a data table for screen readers. |

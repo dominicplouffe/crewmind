@@ -4,7 +4,7 @@
  * the full list. The entries are the one desk list every count reads.
  */
 import { ArrowRight, Hourglass, Inbox } from "lucide-react";
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { ItemCard } from "../desk/ItemCard";
 import { fromNow } from "../lib/humanize";
 import { byPriority, urgencyOf, type DeskEntry } from "../needs/summary";
@@ -44,9 +44,10 @@ function PlainRow({ entry, onOpenAll }: { entry: DeskEntry; onOpenAll(): void })
 
 export function NeedsStack({ projectId, entries, onChanged, onOpenAll }: Props): JSX.Element | null {
   const id = useId();
+  const narrow = useNarrow();
   if (entries.length === 0) return null;
   const sorted = [...entries].sort(byPriority);
-  const shown = sorted.slice(0, SHOWN);
+  const shown = sorted.slice(0, narrow ? 1 : SHOWN);
   const rest = sorted.length - shown.length;
   const words = home.stack;
   return (
@@ -75,4 +76,19 @@ export function NeedsStack({ projectId, entries, onChanged, onOpenAll }: Props):
       </ul>
     </section>
   );
+}
+
+/** On a phone the stack shows only the most urgent decision, so the conversation keeps the room. */
+const NARROW = "(max-width: 599px)";
+
+function useNarrow(): boolean {
+  const [narrow, setNarrow] = useState(() => window.matchMedia?.(NARROW).matches ?? false);
+  useEffect(() => {
+    const media = window.matchMedia?.(NARROW);
+    if (!media) return;
+    const follow = (): void => setNarrow(media.matches);
+    media.addEventListener("change", follow);
+    return () => media.removeEventListener("change", follow);
+  }, []);
+  return narrow;
 }

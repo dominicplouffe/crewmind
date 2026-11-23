@@ -142,6 +142,16 @@ export function WorkView({ projectId, changes, onChanged }: Props): JSX.Element 
     requestAnimationFrame(() => document.getElementById("work-details")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   };
 
+  // The page appears in one pass once its data has answered, so the board never jumps.
+  if ([plan, status, tasks].some((load) => load.data === undefined && !load.error)) {
+    return (
+      <div className="work-view work" data-testid="work-view" aria-busy="true">
+        <Skeleton lines={3} block />
+        <Skeleton lines={2} block />
+      </div>
+    );
+  }
+
   return (
     <div className="work-view work" data-testid="work-view">
       <section className="work-section" aria-labelledby="work-reqs-title">

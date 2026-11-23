@@ -12,6 +12,7 @@ import { CrewStrip } from "../crew/CrewStrip";
 import { DeliverableCard } from "../deliverables/DeliverableCard";
 import { arrange, authorKind, defaultScope } from "../deliverables/logic";
 import { useLoad } from "../lib/useLoad";
+import { Skeleton } from "../ui/Skeleton";
 import { AgentText } from "../panels/board/parts";
 import { story } from "../strings.overview";
 import { Meter, SegmentBar } from "../ui/Progress";
@@ -320,6 +321,17 @@ export function ProjectOverview({ projectId, changes, header, onTab, onPanel, on
       </Load>
     </Section>
   );
+
+  // The page appears in one pass once its data has answered, so sections never push each other.
+  const loads = [status, plan, budget, tasks, items, feed, files, roster];
+  if (loads.some((load) => load.data === undefined && !load.error)) {
+    return (
+      <div className="overview" data-testid="project-overview" aria-busy="true">
+        <Skeleton lines={2} block />
+        <Skeleton lines={4} block />
+      </div>
+    );
+  }
 
   return (
     <div className="overview" data-testid="project-overview">
