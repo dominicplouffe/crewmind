@@ -23,6 +23,10 @@ Receive = Callable[[], Awaitable[MutableMapping[str, Any]]]
 Send = Callable[[MutableMapping[str, Any]], Awaitable[None]]
 
 
+created: list[str] = []
+"""Titles the test server's create_post was called with, so a test can count real calls."""
+
+
 def build_server(version: str = "1.0", extra_tool: bool = False) -> MCPServer:
     server = MCPServer("blog tools", version=version)
 
@@ -34,7 +38,13 @@ def build_server(version: str = "1.0", extra_tool: bool = False) -> MCPServer:
     @server.tool()
     def create_post(title: str) -> str:
         """Create a post."""
+        created.append(title)
         return f"created {title}"
+
+    @server.tool(annotations=ToolAnnotations(read_only_hint=True))
+    def export_posts() -> str:
+        """Export every post as text."""
+        return "x" * 10_000
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True, destructive_hint=True))
     def wipe() -> str:

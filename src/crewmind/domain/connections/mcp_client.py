@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import ipaddress
+import json
 import socket
 from collections.abc import Callable
 from contextlib import AbstractAsyncContextManager
@@ -291,3 +292,72 @@ def _reason(error: BaseException) -> str:
         return "it could not be reached"
     kind = str(getattr(type(error), "__name__", "error"))
     return f"it did not answer as an MCP server ({kind})"
+
+
+@dataclass(frozen=True)
+class CallResult:
+    """What a tool answered, as text cut to size (CON-13). Untrusted input (P4)."""
+
+    is_error: bool
+    text: str
+    size: int
+    cut: bool
+
+
+def _result_text(result: Any) -> str:
+    """The answer as text: its text parts, else its structured content as JSON."""
+    parts: list[str] = []
+    blocks: list[object] = list(getattr(result, "content", None) or [])
+    for block in blocks:
+        text = getattr(block, "text", None)
+        if isinstance(text, str):
+            parts.append(text)
+        else:
+            parts.append(f"[{getattr(block, 'type', 'content')} not shown]")
+    structured = getattr(result, "structured_content", None)
+    if not parts and structured is not None:
+        parts.append(json.dumps(structured, default=str))
+    return "\n".join(parts)
+
+
+async def call_tool(
+    url: str,
+    headers: dict[str, str],
+    tool: str,
+    arguments: dict[str, Any],
+    *,
+    private_allowed: bool,
+    seconds: float,
+    transport: str | None,
+    most_bytes: int,
+) -> CallResult:
+    """CON-13: one tool call, with the time limit; the answer cut to `most_bytes` with the
+    cut marked. An error the tool reports is a result, not a failure of the server."""
+    kind = transport or STREAMABLE
+    http = client_factory[0](headers, private_allowed, seconds)
+    statuses = _Statuses()
+    http.event_hooks["response"].append(statuses.seen)
+    try:
+        async with contextlib.AsyncExitStack() as stack:
+            if kind == STREAMABLE:
+                await stack.enter_async_context(http)
+            client = await stack.enter_async_context(
+                Client(_transport(kind, url, http), read_timeout_seconds=seconds)
+            )
+            result = await asyncio.wait_for(client.call_tool(tool, arguments), seconds)
+    except TimeoutError:
+        raise Unreachable(f"it did not answer within {int(seconds)} seconds") from None
+    except Exception as error:
+        refused = [status for status in statuses if status in (401, 403)]
+        if refused:
+            raise Unreachable(f"it refused the sign-in (HTTP {refused[0]})", refused=True) from None
+        raise Unreachable(_reason(error)) from None
+    finally:
+        await http.aclose()
+    text = _result_text(result)
+    data = text.encode()
+    cut = len(data) > most_bytes
+    if cut:
+        note = f"\n[cut here: the answer had {len(data)} bytes; the first {most_bytes} are shown]"
+        text = data[:most_bytes].decode("utf-8", "ignore") + note
+    return CallResult(bool(getattr(result, "is_error", False)), text, len(data), cut)

@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.28 (23 Nov 2026): connections, part 7B.6
+
+- **CON-13:** a changing tool's idempotency key is made from the server, the tool and its arguments, so the same change is made once per project; chat runs cannot use changing tools.
+- **CON-14:** an approved tool request allows the tool (never through a model client); an approved connection request becomes a need listed with Add, holding nobody.
+
 ## Revision 2.27 (23 Nov 2026): connections, part 7B.4
 
 - **CON-15, IF-5.6:** adding any MCP server and allowing any tool are human-only, not only command servers and changing tools: a model client could otherwise give agents new reach. Testing a server with a value and choosing where a secret is sent are human-only too.

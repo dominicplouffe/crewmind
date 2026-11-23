@@ -9,7 +9,8 @@ from __future__ import annotations
 import inspect
 import logging
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, cast
+from urllib.parse import quote
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -21,13 +22,14 @@ from crewmind.catalog.operation import Operation
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog
 from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.domain.connections import mcp_calls
 from crewmind.domain.connections.delivery import Masker
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway.protocol import CompletionRequest, ToolSpec
 from crewmind.gateway.service import Gateway
-from crewmind.storage.models import RunStep
+from crewmind.storage.models import Run, RunStep
 
 Masks = Callable[[str], Awaitable[Masker]]
 """A run's masker (CON-8): `model(payload)` returns the payload with given secrets masked."""
@@ -37,7 +39,9 @@ logger = logging.getLogger(__name__)
 AGENT_PREFIX = "/agent/v1"
 GATEWAY_PATH = "/gateway/v1/complete"
 TOOL_CALL = "tool call"
-HARNESS_ONLY = frozenset({"agent.context", "agent.environment"})
+HARNESS_ONLY = frozenset({"agent.context", "agent.environment", "agent.call_mcp_tool"})
+MCP_CALL = "agent.call_mcp_tool"
+MCP_PREFIX = f"{AGENT_PREFIX}/mcp"
 """Agent API calls the harness makes itself, never offered to the model as tools."""
 
 
@@ -142,7 +146,8 @@ def add_agent_api(
         )
 
     async def tools(request: Request) -> ToolList:
-        """The tools this run's agent may call, as the model sees them."""
+        """The tools this run's agent may call, as the model sees them: the catalog's agent
+        operations, then the allowed tools of the MCP servers granted to its role (CON-13)."""
         caller = await authenticator.authenticate(bearer(request))
         offered = [
             operation
@@ -150,7 +155,7 @@ def add_agent_api(
             if operation.name not in HARNESS_ONLY
             and not (operation.authority.value == "agent_ceo" and caller.seat_kind != "ceo")
         ]
-        return ToolList(
+        listed = ToolList(
             tools=[
                 ToolSpec(
                     name=tool_name(operation.name),
@@ -161,6 +166,22 @@ def add_agent_api(
             ],
             paths={tool_name(operation.name): route_path(operation.name) for operation in offered},
         )
+        assert caller.run_id is not None
+        async with executor.sessions() as session:
+            run = await session.get(Run, caller.run_id)
+            mcp_tools = await mcp_calls.offered(session, run) if run is not None else []
+        for item in mcp_tools:
+            listed.tools.append(
+                ToolSpec(
+                    name=item.name,
+                    description=f"[MCP server {item.connection.name}] {item.tool.description}",
+                    input_schema=item.tool.input_schema or {"type": "object", "properties": {}},
+                )
+            )
+            listed.paths[item.name] = (
+                f"{MCP_PREFIX}/{item.connection.id}/{quote(item.tool.name, safe='')}"
+            )
+        return listed
 
     async def complete(request: Request, payload: CompletionRequest) -> JSONResponse:
         """The model gateway. A refusal here is the per-run cap (GOV-6). The request is
@@ -185,6 +206,28 @@ def add_agent_api(
             )
         return JSONResponse(response.model_dump(mode="json"))
 
+    if MCP_CALL in catalog:
+        call = _endpoint(catalog.get(MCP_CALL), executor, authenticator, settings, masks)
+
+        async def mcp_tool(request: Request, server: str, tool: str) -> JSONResponse:
+            """CON-13: an MCP tool call as the model makes it, adapted to agent.call_mcp_tool. The
+            body is the tool's own arguments."""
+            try:
+                body = await request.json()
+            except ValueError:
+                body = {}
+            arguments: dict[str, Any] = (
+                {str(key): value for key, value in cast(dict[Any, Any], body).items()}
+                if isinstance(body, dict)
+                else {}
+            )
+            payload = mcp_calls.CallInput(server=server, tool=tool, arguments=arguments)
+            return await call(request, payload)
+
+        router.add_api_route(
+            f"{MCP_PREFIX}/{{server}}/{{tool}}", mcp_tool, methods=["POST"], include_in_schema=False
+        )
+
     router.add_api_route(f"{AGENT_PREFIX}/tools", tools, methods=["GET"], include_in_schema=False)
     router.add_api_route(GATEWAY_PATH, complete, methods=["POST"], include_in_schema=False)
 
@@ -193,7 +236,12 @@ def exposed_operations(app: FastAPI) -> set[str]:
     """The operation names the agent API actually serves."""
     names: set[str] = set()
     for route in app.routes:
-        if isinstance(route, APIRoute) and route.path.startswith(f"{AGENT_PREFIX}/"):
+        if (
+            isinstance(route, APIRoute)
+            and route.path.startswith(f"{AGENT_PREFIX}/")
+            # MCP tool calls are adapted to agent.call_mcp_tool, which has its own route.
+            and not route.path.startswith(f"{MCP_PREFIX}/")
+        ):
             name = route.path.removeprefix(f"{AGENT_PREFIX}/").replace("/", ".")
             if name != "tools":
                 names.add(name)
