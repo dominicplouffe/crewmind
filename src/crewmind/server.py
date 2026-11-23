@@ -42,6 +42,7 @@ from crewmind.runtime import SANDBOX_IMAGE, Runtime
 from crewmind.storage.migrate import alembic_config
 from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import STATUS_BY_KIND, build_api
+from crewmind.surfaces.api.connection_routes import add_connection_routes
 from crewmind.surfaces.api.drafting_stream import add_drafting_stream_route
 from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.api.stream import add_stream_route
@@ -250,6 +251,7 @@ def create_app(
         runtime.masker,
     )
     add_file_routes(app, runtime.executor, runtime.authenticator, runtime.services)
+    add_connection_routes(app, runtime.executor, runtime.authenticator)
     add_oauth_routes(app, runtime.executor, runtime.config.base_url)
     add_stream_route(app, runtime.executor, runtime.authenticator, runtime.hub)
     add_drafting_stream_route(app, runtime.executor, runtime.authenticator, runtime.hub)

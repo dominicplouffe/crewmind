@@ -4,10 +4,13 @@ and allowing a tool are the person's own (IF-5.6)."""
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field, SecretStr
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from crewmind.catalog.caller import Authority
+from crewmind.catalog.caller import Authority, Caller
 from crewmind.catalog.define import operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
@@ -20,7 +23,8 @@ from crewmind.domain.connections.item_operations import (
     record_added,
 )
 from crewmind.domain.connections.mcp import AuthKind, Permission, ServerState
-from crewmind.domain.connections.mcp_client import CON_9, Unreachable, check_url, probe
+from crewmind.domain.connections.mcp_client import CON_9, Probe, Unreachable, check_url, probe
+from crewmind.domain.connections.mcp_sign_in import fresh_headers
 from crewmind.domain.connections.model import Kind, check_header_name
 from crewmind.domain.connections.views import ConnectionView, item_view
 from crewmind.domain.secrets.store import SecretStore
@@ -204,6 +208,27 @@ async def _server(
     return item, server
 
 
+async def probe_signed_in(
+    session: AsyncSession, store: SecretStore, server: McpServer, item: Connection, now: datetime,
+    caller: Caller, seconds: float, most: int,
+) -> Probe:  # fmt: skip
+    """CON-10: a probe with fresh sign-in headers; after a refused sign-in, an OAuth server's
+    tokens are refreshed once and the probe tried again."""
+    for attempt in range(2):
+        headers = await fresh_headers(
+            session, store, server, item, now, caller, seconds=seconds, force=attempt > 0
+        )
+        try:
+            return await probe(
+                server.url or "", headers, private_allowed=server.private_allowed,
+                seconds=seconds, description_max=most, transport=server.transport,
+            )  # fmt: skip
+        except Unreachable as error:
+            if not (error.refused and server.auth_kind == AuthKind.OAUTH and attempt == 0):
+                raise
+    raise AssertionError("unreachable")
+
+
 @operation(
     "connections.test_mcp",
     summary="Test an MCP server again and read its tools; new tools start by their kind.",
@@ -220,13 +245,11 @@ async def test_mcp(context: Context, payload: ConnectionRef) -> ConnectionView:
             hint="Sign in from its card in Connections.",
         )  # fmt: skip
     store = SecretStore(services_of(context).master_key_file)
-    headers = await mcp.headers_for(context.session, store, server)
     seconds, most = await _limits(context, payload.project_id)
     try:
-        found = await probe(
-            server.url or "", headers, private_allowed=server.private_allowed, seconds=seconds,
-            description_max=most, transport=server.transport,
-        )  # fmt: skip
+        found = await probe_signed_in(
+            context.session, store, server, item, context.now, context.caller, seconds, most
+        )
     except Unreachable as error:
         mcp.failed(context.session, server, item, str(error), context.now, context.caller)
         context.record(

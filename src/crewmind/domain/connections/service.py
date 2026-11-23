@@ -7,13 +7,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Caller
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.accounts.model import ProjectRole
 from crewmind.domain.connections import holds, needs
+from crewmind.domain.connections.mcp import ServerState
 from crewmind.domain.connections.model import (
     ALL_ROLES,
     CON_1,
@@ -34,6 +35,7 @@ from crewmind.domain.settings.service import INSTALL_SUBJECT, SettingsService, S
 from crewmind.storage.models import (
     Connection,
     ConnectionSecret,
+    McpServer,
     Project,
     ProjectConnection,
     ProjectNeed,
@@ -312,11 +314,14 @@ async def met_by_connection(session: AsyncSession, project: Project, need: Proje
     rows = await session.execute(
         select(ProjectConnection.roles)
         .join(Connection, Connection.id == ProjectConnection.connection_id)
+        .outerjoin(McpServer, McpServer.connection_id == Connection.id)
         .where(
             ProjectConnection.project_id == project.id,
             Connection.kind == need.kind,
             Connection.name_key == need.name.lower(),
             Connection.state == ConnectionState.ACTIVE,
+            # CON-14: a server waiting for someone to sign in meets nothing yet.
+            or_(McpServer.state.is_(None), McpServer.state != ServerState.NEEDS_SIGN_IN),
         )
     )
     wanted = set(need.roles or [])

@@ -27,6 +27,7 @@ from crewmind.runner.supervisor import Runner
 from crewmind.runtime import Runtime
 from crewmind.surfaces.agent_api.app import add_agent_api
 from crewmind.surfaces.api.app import build_api, route_method, route_path
+from crewmind.surfaces.api.connection_routes import add_connection_routes
 from crewmind.surfaces.api.files import add_file_routes
 from crewmind.surfaces.cli.invoke import HttpInvoker
 from crewmind.surfaces.mcp.oauth_routes import add_oauth_routes
@@ -62,6 +63,7 @@ class App:
             runtime.masker,
         )
         add_file_routes(self.api, runtime.executor, runtime.authenticator, runtime.services)
+        add_connection_routes(self.api, runtime.executor, runtime.authenticator)
         add_oauth_routes(self.api, runtime.executor, runtime.config.base_url)
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)

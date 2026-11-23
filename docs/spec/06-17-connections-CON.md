@@ -54,7 +54,9 @@ A project reaches the outside world through its connections: secrets, variables 
 - **CON-10 MCP OAuth.**
   - Follows the MCP authorization specification: the server's protected-resource metadata, then its authorization server's metadata; dynamic client registration where offered, otherwise a client id (and secret) the person pastes; authorization code with PKCE S256; a single-use `state` bound to the person's browser session; the resource indicator for audience binding.
   - The callback is at the install's public https address, so OAuth needs one; the form says so when it is missing.
-  - Access and refresh tokens are secrets. They are refreshed before expiry and after a 401, and a rotated refresh token replaces the old one.
+  - A sign-in not finished within ten minutes is gone, and its state works once, for the person and browser session that started it.
+  - Access and refresh tokens are secrets. They are refreshed a minute before expiry and after a 401, and a rotated refresh token replaces the old one.
+  - A server waiting for sign-in meets no need, so the seats that depend on it are held (CON-14).
   - A refused refresh marks the server as needing sign-in and raises one alarm with a way to sign in again. Calls meanwhile return a plain reason to the agent.
   - The tokens act as the signed-in person's account at that provider; the form says so before sign-in.
 - **CON-11 MCP servers started from a command.**

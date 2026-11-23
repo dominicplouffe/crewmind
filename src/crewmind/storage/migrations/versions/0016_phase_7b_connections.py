@@ -79,6 +79,22 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("connection_id"),
     )
     op.create_table(
+        "mcp_sign_ins",
+        sa.Column("id", sa.String(length=64), nullable=False),
+        sa.Column("connection_id", sa.String(length=32), nullable=False),
+        sa.Column("person_id", sa.String(length=32), nullable=False),
+        sa.Column("session_id", sa.String(length=64), nullable=False),
+        sa.Column("return_to", sa.String(length=300), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    with op.batch_alter_table("mcp_sign_ins", schema=None) as batch_op:
+        batch_op.create_index(
+            batch_op.f("ix_mcp_sign_ins_connection_id"), ["connection_id"], unique=False
+        )
+
+    op.create_table(
         "mcp_tools",
         sa.Column("id", sa.String(length=32), nullable=False),
         sa.Column("server_id", sa.String(length=32), nullable=False),
