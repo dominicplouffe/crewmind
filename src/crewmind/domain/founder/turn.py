@@ -19,6 +19,9 @@ from crewmind.domain.founder import grammar, tree
 from crewmind.domain.founder import model as m
 from crewmind.domain.founder.grammar import Grade
 from crewmind.domain.founder.tools import TOOL_SPECS, NeedsGrade, Toolbox
+from crewmind.domain.library import service as library
+from crewmind.domain.settings.registry import Scope
+from crewmind.domain.settings.service import Subject
 from crewmind.gateway.protocol import CompletionRequest, ToolCall, Turn
 from crewmind.gateway.service import Gateway
 from crewmind.services import Services
@@ -54,6 +57,8 @@ def working_on(call: ToolCall) -> str:
 
 
 CONTEXT_OPERATION = "founder.say"
+ROLE_WORDS = 160
+"""How much of a role's description the Founder is shown in its list of roles."""
 
 ROLE = """You are the Founder: a platform assistant whose only deliverable is a project spec.
 You never do the work the chairman describes, and you never write any part of it. You set
@@ -117,7 +122,15 @@ class FounderTurn:
         entries = await state.ledger(session, drafting.id)
         done = {entry.settles for entry in entries}
         waiting = await state.open_items(session, drafting.id)
-        following = tree.next_one(done)
+        pace = await self._services.settings.get(
+            session, Subject(Scope.PERSON, drafting.person_id), "grill.pace"
+        )
+        ready = tree.ready(done)[: None if pace == "batch" else 1]
+        asking = (
+            "Decisions to ask now, all of them in one call of `ask`, one question each: "
+            if pace == "batch"
+            else "Next decision to ask: "
+        )
         missing = await state.not_ready_because(session, drafting)
         lines = [
             "# Where the interview stands",
@@ -125,10 +138,11 @@ class FounderTurn:
             + ("; ".join(f"{e.settles} = {e.value} ({e.source})" for e in entries) or "nothing"),
             "Open passages of the document: "
             + (", ".join(f"item:{item.id} ({item.problem})" for item in waiting) or "none"),
-            f"Next decision to ask: {following.key if following else 'none'}",
+            asking + (", ".join(decision.key for decision in ready) or "none"),
             "Grade of the current goal: " + str((drafting.grade or {}).get("summary", "none")),
             "Not ready because: " + (" ".join(missing) or "nothing; it is ready"),
         ]
+        lines += await self._known(session, drafting)
         if drafting.quick:
             lines.append(
                 "This is quick mode: ask nothing. Decide everything yourself, propose the "
@@ -143,6 +157,38 @@ class FounderTurn:
                 "you draft."
             )
         return "\n\n".join([ROLE, state.doctrine_text(), "\n".join(lines)])
+
+    async def _known(self, session: AsyncSession, drafting: Drafting) -> list[str]:
+        """What the Founder would otherwise look up or write again on every turn: the role
+        library, and its own draft. A turn starts from nothing but this prompt and the
+        conversation, so what is not here is redone, at the chairman's expense in time."""
+        await library.load_starter(session, self._clock())
+        roles = await library.current_roles(session)
+        known = [
+            "",
+            "# The role library",
+            "A team's `role` is one of these slugs. Search only for what is not here.",
+            *(
+                f"- {role.slug} ({role.seat_kind}): {role.description[:ROLE_WORDS]}"
+                for role in roles
+            ),
+            "",
+            "# The current draft",
+        ]
+        if drafting.draft is None:
+            known.append(
+                "There is none yet. In this turn: look up what you need, call propose_spec "
+                "once with the whole spec, then ask."
+            )
+        else:
+            known += [
+                json.dumps(drafting.draft, ensure_ascii=False),
+                "This draft is kept. Do not write it again. When an answer changes it, call "
+                "propose_spec with `changes`: only the fields of the spec that differ, and "
+                "any decision whose value changed. When an answer changes nothing in it, "
+                "go straight to the next questions.",
+            ]
+        return known
 
     async def _history(self, session: AsyncSession, drafting: Drafting) -> list[Turn]:
         turns: list[Turn] = []

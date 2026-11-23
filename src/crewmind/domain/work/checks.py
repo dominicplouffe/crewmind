@@ -86,6 +86,29 @@ async def pin_and_run(
     return Pinned(files, missing, await runner.run(workspace, command, files, seconds))
 
 
+def changed_by_the_work(workspace: Path, test_files: dict[str, str]) -> list[str]:
+    """The pinned test files whose contents in the workspace are no longer the pinned ones
+    (WRK-5). The check puts each one back before it runs, so work done in one of them is
+    never what the check sees."""
+    changed: list[str] = []
+    for name, pinned_hash in sorted(test_files.items()):
+        file = workspace / name
+        if not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != pinned_hash:
+            changed.append(name)
+    return changed
+
+
+def pinned_file_note(names: list[str]) -> str:
+    """What the worker and the task's author are told when the work is in a pinned file."""
+    listed = ", ".join(names)
+    return (
+        f"The check puts the pinned test files back before it runs, and the work changed "
+        f"{listed}. Work done in a pinned test file is never seen by the check, so this task "
+        "cannot pass as it is written. Its author must issue it again without pinning "
+        f"{'that file' if len(names) == 1 else 'those files'}.\n"
+    )
+
+
 def stored(pinned: Pinned, blobs: Any) -> dict[str, str]:
     """Keep the pinned files' contents, by hash, so every later check can restore them."""
     return {name: blobs.put(content) for name, content in pinned.files.items()}

@@ -30,6 +30,11 @@ def codes(view: dict[str, Any]) -> list[str]:
     return [hit["code"] for hit in view["rules_hit"]]
 
 
+async def one_at_a_time(app: App, owner: Any) -> None:
+    """Ask for the interview one decision at a time. The default is a round at a time."""
+    await app.ok("settings.change_mine", owner, changes={"grill.pace": "one_at_a_time"})
+
+
 @pytest.mark.attack("FND-3")
 @pytest.mark.attack("FND-4")
 @pytest.mark.attack("FND-8")
@@ -50,6 +55,7 @@ async def test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule(app: A
          "rehearse_spec", "ask", "propose_spec"]
     )  # fmt: skip
     owner = await app.person("owner@example.com")
+    await one_at_a_time(app, owner)
     await credential(app, owner, "main")
     await credential(app, owner, "spare")
     dated = GOAL + " Finish by 31 December 2027."
@@ -110,6 +116,7 @@ async def test_FND_5_a_project_comes_only_from_a_confirmed_ledger(app: App) -> N
     the chairman creates the project, which gets the conversation as its chat, the first
     requirement, the doctrine's fingerprint, and the ledger in the CEO's first pack."""
     owner = await app.person("owner@example.com")
+    await one_at_a_time(app, owner)
     await credential(app, owner, "main")
     decided = {**DECISIONS, "chairman_role": {"value": "Answers questions.", "quote": ROLE_WORDS}}
     script(
@@ -130,8 +137,10 @@ async def test_FND_5_a_project_comes_only_from_a_confirmed_ledger(app: App) -> N
     assert shown["draft"]["name"] == SPEC["name"]
     sources = {entry["settles"]: entry["source"] for entry in shown["ledger"]}
     assert sources == {"who_pays": "assumption", "chairman_role": "words"}
-    assert (shown["ready"], shown["rehearsal"]) == (False, None)
-    assert any("has not been rehearsed" in line for line in shown["not_ready_because"])
+    # FND-11: a draft is rehearsed as soon as it is kept; nobody has to ask for it.
+    assert shown["ready"] is False
+    assert shown["rehearsal"] is not None
+    assert not any("has not been rehearsed" in line for line in shown["not_ready_because"])
     assert any("Not yet decided" in line for line in shown["not_ready_because"])
 
     first = shown["questions"][0]
@@ -221,6 +230,7 @@ async def test_FND_15_a_document_is_grilled_one_question_at_a_time_before_any_dr
     ]
     example = ["It is an example", "It is a hard limit"]
     owner = await app.person("owner@example.com")
+    await one_at_a_time(app, owner)
     await credential(app, owner, "main")
     script(
         app,
@@ -591,3 +601,71 @@ async def test_FND_1_a_refused_draft_names_every_problem_at_once_and_the_turn_ne
     assert (last["author"], last["detail"]["kind"]) == ("platform", "out of steps")
     assert "goal" in last["body"]
     assert shown["waiting_for"] == "you"
+
+
+async def test_FND_4_a_round_of_questions_is_asked_and_answered_as_a_whole(app: App) -> None:
+    """FND-4: by default the Founder asks every ready decision in one round. It takes its
+    next turn after the last answer of the round, not after each. Once a draft exists it
+    sends only what changed, the unchanged goal is not graded again, and each draft is
+    rehearsed as it is kept."""
+    owner = await app.person("owner@example.com")
+    await credential(app, owner, "main")
+    roots = ["finish_line", "beneficiary_standard", "project_type", "outside_date"]
+    script(
+        app,
+        propose(),
+        tool("ask", questions=[question(key) for key in roots]),
+        {"text": "Four things to settle first."},
+        tool("propose_spec", changes={"name": "Hollin Valley birds"}),
+        {"text": "Renamed."},
+    )
+    started = await app.ok("founder.start", owner, brief=BRIEF)
+    ref = {"drafting_id": started["drafting_id"]}
+    assert await app.founder.tick() == 1
+    shown = await app.ok("founder.show", owner, **ref)
+    assert [q["settles"] for q in shown["questions"]] == roots
+    assert shown["rules_hit"] == []
+    assert "not been rehearsed" not in " ".join(shown["not_ready_because"])
+
+    async def founder_calls() -> int:
+        from sqlalchemy import func, select
+
+        from crewmind.storage.models import LedgerLine
+
+        async with app.runtime.sessions() as session:
+            counted = select(func.count()).select_from(LedgerLine)
+            return int(await session.scalar(counted.where(LedgerLine.kind == "founder")) or 0)
+
+    before = await founder_calls()
+
+    for asked in shown["questions"][:-1]:
+        await app.ok("founder.answer", owner, **ref, question_id=asked["id"], answer="")
+        assert await app.founder.tick() == 0
+    await app.ok(
+        "founder.answer", owner, **ref, question_id=shown["questions"][-1]["id"], answer=""
+    )
+    assert await app.founder.tick() == 1
+
+    after = await app.ok("founder.show", owner, **ref)
+    assert after["rules_hit"] == []
+    assert after["draft"]["name"] == "Hollin Valley birds"
+    assert after["draft"]["teams"] == shown["draft"]["teams"]
+    # Two calls: the change, and the words that follow it. No call graded the same goal again.
+    assert await founder_calls() == before + 2
+
+
+def test_FND_2_misplaced_fields_are_put_right_not_refused() -> None:
+    """FND-2: a spec's fields given beside `spec`, or what belongs beside the spec given
+    inside it, is one input either way. Nothing is added and nothing is dropped."""
+    from crewmind.domain.founder.shape import arranged, changed
+
+    fields = {"name", "goal", "type", "teams"}
+    flat = arranged({"name": "A", "goal": "G", "type": "deliver", "decisions": {}}, fields)
+    assert flat == {"spec": {"name": "A", "goal": "G", "type": "deliver"}, "decisions": {}}
+    nested = arranged({"spec": {"name": "A", "reasons": {"quality": "why"}}}, fields)
+    assert nested == {"spec": {"name": "A"}, "reasons": {"quality": "why"}}
+    patch = arranged({"changes": {"name": "B"}, "goal": "H"}, fields)
+    assert patch == {"changes": {"name": "B", "goal": "H"}}
+    assert changed({"name": "A", "quality": "best"}, {"name": "B", "quality": None}) == {
+        "name": "B"
+    }

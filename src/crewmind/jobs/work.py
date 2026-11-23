@@ -8,6 +8,7 @@ check again: a check changes nothing, so running it twice is safe.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import timedelta
 from urllib.parse import urlsplit
@@ -16,7 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
-from crewmind.domain.execution import roster
+from crewmind.domain.execution import notices, roster
 from crewmind.domain.work import board, checks, fetch, outside, reviews, tasks
 from crewmind.domain.work import operations as work_operations
 from crewmind.domain.work.model import Label, TaskState, WatchState
@@ -167,11 +168,33 @@ class WorkJobs:
             except Exception as error:
                 logger.exception("the check of task %s could not run", task.id)
                 result = checks.CheckResult(False, f"The check could not run: {error}")
+            overwritten = (
+                []
+                if result.passed
+                else await asyncio.to_thread(
+                    checks.changed_by_the_work, workspace, dict(task.test_files or {})
+                )
+            )
+            if overwritten:
+                # WRK-5, WRK-8: say why this can never pass, so nobody tries it again blind.
+                note = checks.pinned_file_note(overwritten)
+                result = checks.CheckResult(False, note + result.output)
             async with self._sessions() as session, session.begin():
                 row = await session.get(Task, task.id)
                 if row is None or row.state != TaskState.CHECKING:
                     continue
                 now = self._clock()
+                if overwritten:
+                    ceo = await tasks.ceo_of(session, row.project_id)
+                    notices.notify(
+                        session,
+                        row.project_id,
+                        ceo.id,
+                        "task cannot pass",
+                        f"Task {row.id} ({row.title}): {checks.pinned_file_note(overwritten)}",
+                        now,
+                        urgent=True,
+                    )
                 if result.passed:
                     await tasks.passed(
                         session, row, Label.VERIFIED, result.output, now, tasks.WORK_JOB

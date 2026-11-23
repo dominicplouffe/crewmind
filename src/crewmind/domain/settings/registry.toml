@@ -2,7 +2,7 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
-version = "2.6"
+version = "2.7"
 
 [settings."quality"]
 type = "enum"
@@ -695,10 +695,10 @@ spec_range = "50–100%"
 [settings."grill.pace"]
 type = "enum"
 scope = "person"
-default = "one_at_a_time"
+default = "batch"
 choices = ["one_at_a_time", "batch"]
 used_by = ["FND-4", "FND-15", "FND-16"]
-spec_default = "one at a time"
+spec_default = "batch"
 spec_range = "one at a time, batch"
 
 [settings."grill.min_characters"]

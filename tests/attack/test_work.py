@@ -621,3 +621,35 @@ async def test_GOV_7_spinning_drops_concurrency_to_one_until_something_changes(a
     await crew.finish("CEO")
     await app.work_jobs.keep_work_moving()
     assert (await spinning_lines(), await limit()) == (1, 4)
+
+
+@pytest.mark.attack("WRK-5")
+async def test_WRK_5_work_done_in_a_pinned_test_file_is_named_as_the_reason_it_cannot_pass(
+    app: App,
+) -> None:
+    """WRK-5, WRK-8: a task whose author pinned the very file the work must change can
+    never pass, because every check puts the pinned file back. The failed check says so in
+    plain words to the worker, and the CEO is told at once, so nobody tries it again blind."""
+    from sqlalchemy import select
+
+    from crewmind.storage.models import Notice
+
+    crew = await Crew.start(app)
+    crew.write("tool.sh", "exit 1\n")
+    pinned = {**COMMAND, "success_test": "test -f tool.sh && sh tool.sh", "test_files": ["tool.sh"]}
+    made = await crew.ok("CEO", "agent.create_task", **pinned, team="build")
+    await crew.ok("build-1", "agent.claim_task", task_id=made["id"])
+    crew.write("tool.sh", "exit 0\n")
+    await crew.ok(
+        "build-1", "agent.complete_task", task_id=made["id"], evidence="tool.sh now exits 0."
+    )
+    await app.work_jobs.run_checks()
+
+    task = await crew.show(made["id"])
+    assert (task["state"], task["failures"]) == ("ready", 1)
+    assert task["check_output"].startswith("The check puts the pinned test files back")
+    assert "tool.sh" in task["check_output"]
+    async with app.runtime.sessions() as session:
+        told = list(await session.scalars(select(Notice).where(Notice.kind == "task cannot pass")))
+    assert len(told) == 1
+    assert told[0].urgent is True

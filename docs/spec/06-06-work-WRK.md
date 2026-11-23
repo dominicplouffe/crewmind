@@ -32,6 +32,7 @@
   - If it already passes, creation is refused: "this test passes before any work".
   - Commands that cannot fail are refused from a fixed list: `true`, `:`, `exit 0`, and a bare `echo` or `printf`. The run on the current workspace catches every other command that always passes.
   - Every later check runs the pinned command against the pinned test files, so the claimant cannot weaken the test by editing it.
+  - Test files are the files that are the test, never a file the work is to write or change. When a check fails and the workspace's copy of a pinned test file differs from the pinned one, the check's output says that work in a pinned file can never pass, and the CEO is told at once.
 - **WRK-6 Complete.**
   - Only the claimant completes, and only once no subtasks are open.
   - Evidence must be at least 10 non-blank characters ("'Done' is not evidence. Quote the output.").
