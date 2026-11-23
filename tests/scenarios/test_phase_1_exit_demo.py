@@ -331,6 +331,9 @@ NO_EVENT = {
     "founder.answer": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
     "founder.accept_rest": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
     "founder.create": "asserted in test_FND_5_a_project_comes_only_from_a_confirmed_ledger",
+    "founder.discard": (
+        "asserted in test_7_19_a_draft_is_discarded_only_by_the_person_who_started_it"
+    ),
     "founder.quick": "asserted in test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing",
     "chat.mark_read": "a person's own read position",
     "uploads.begin": "an upload in progress is not yet an artifact",

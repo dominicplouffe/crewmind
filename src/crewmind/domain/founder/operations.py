@@ -396,6 +396,29 @@ async def accept_rest(context: Context, payload: DraftingRef) -> DraftingView:
     return await view(context, drafting)
 
 
+@operation(
+    "founder.discard",
+    summary="Discard a drafting conversation you no longer want. No project comes of it.",
+    authority=Authority.PERSON,
+    reversibility=Reversibility.IRREVERSIBLE,
+)
+async def discard(context: Context, payload: DraftingRef) -> DraftingView:
+    """7.19, FND-1: the person who started a draft may drop it. It leaves the list of
+    unfinished drafts and takes no further turn. The conversation is kept in the record."""
+    drafting = await state.get(context.session, payload.drafting_id, context.caller.actor_id)
+    _drafting_only(drafting)
+    DRAFTING_MACHINE.check(D.DRAFTING, D.DISCARDED)
+    drafting.state, drafting.turn = D.DISCARDED, m.IDLE
+    drafting.updated_at = context.now
+    context.record(
+        DRAFTING_CHANGED,
+        subject=("drafting", drafting.id),
+        before={"state": D.DRAFTING},
+        after={"state": D.DISCARDED},
+    )
+    return await view(context, drafting)
+
+
 class GoalInput(BaseModel):
     goal: str = Field(min_length=1, max_length=BRIEF_MAX, description="The goal, in prose.")
 

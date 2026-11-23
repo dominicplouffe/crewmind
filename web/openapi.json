@@ -13489,6 +13489,48 @@
     ]
    }
   },
+  "/v1/founder/discard": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "founder.discard",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DraftingRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DraftingView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Discard a drafting conversation you no longer want. No project comes of it.",
+    "tags": [
+     "founder"
+    ]
+   }
+  },
   "/v1/founder/list": {
    "get": {
     "description": "Requires: person.",
