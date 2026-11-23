@@ -42,7 +42,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - Names are letters, digits and underscores. Names that change how programs run are refused: `CREWMIND_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`.
   - The context pack names each one, its description and its variable, never its value.
 - **CON-8 Masking.**
-  - For each live run the platform holds the values it gave to the agent. Every place agent text enters the platform (every agent API call and every model request, before anything reads them, and the workspace snapshot) replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
+  - For each live run the platform holds the values it gave to the agent, and the values sent for it (CON-6) with the headers they travel in, because a site may echo what it received. Every place agent text enters the platform (every agent API call and every model request, before anything reads them, and the workspace snapshot) replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
   - A workspace file that held a value is stored masked, and the chairman is told once, naming the file and the secret.
   - Masking stops crewmind storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
 - **CON-9 Remote MCP servers.**
@@ -84,7 +84,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
 - **CON-15 Surfaces.**
   - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
-  - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets.
+  - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets. It ships in `content/mcp-servers/`; an admin edits it for an install with files of the same shape in the data directory's `mcp-servers/` folder, which replace a shipped entry by its slug or hide it.
   - Human-only (IF-5.6): creating or replacing a value, choosing where a secret is sent, testing a server with a value, OAuth sign-in, adding any MCP server, allowing any tool, deleting a connection. MCP clients see names, kinds and health, and may deny a tool.
   - Values are typed only into fields that are never pre-filled, are cleared after saving, and are never put in a URL or browser storage.
 - **CON-16 Records and errors.**

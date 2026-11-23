@@ -9,7 +9,7 @@ ROOT = Path(__file__).parents[1]
 PACKAGED = ROOT / "src" / "crewmind" / "content" / "library"
 
 if __name__ == "__main__":
-    for folder in ("roles", "crews"):
+    for folder in ("roles", "crews", "mcp-servers"):
         shutil.rmtree(PACKAGED / folder, ignore_errors=True)
         shutil.copytree(ROOT / "content" / folder, PACKAGED / folder)
         print(f"{folder}: {len(list((PACKAGED / folder).glob('*.json')))} files")

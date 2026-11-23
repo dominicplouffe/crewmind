@@ -1,0 +1,10 @@
+{
+  "slug": "linear",
+  "name": "linear",
+  "title": "Linear",
+  "description": "Issues, projects and comments in Linear.",
+  "kind": "remote",
+  "url": "https://mcp.linear.app/mcp",
+  "auth_kind": "oauth",
+  "docs": "https://linear.app/docs/mcp"
+}

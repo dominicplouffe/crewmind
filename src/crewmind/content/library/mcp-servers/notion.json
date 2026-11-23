@@ -1,0 +1,10 @@
+{
+  "slug": "notion",
+  "name": "notion",
+  "title": "Notion",
+  "description": "Pages and databases in a Notion workspace.",
+  "kind": "remote",
+  "url": "https://mcp.notion.com/mcp",
+  "auth_kind": "oauth",
+  "docs": "https://developers.notion.com/docs/mcp"
+}

@@ -155,3 +155,33 @@ describe("McpTools (CON-12, INT-4)", () => {
     await waitFor(() => expect(calls.at(-1)?.body).toMatchObject({ tool: "create_post" }));
   });
 });
+
+describe("PresetPicker (CON-15)", () => {
+  it("fills in a known server and says which secret to create", async () => {
+    answers["/v1/connections/presets"] = {
+      presets: [
+        {
+          slug: "github",
+          name: "github",
+          title: "GitHub",
+          description: "Issues and pull requests.",
+          kind: "remote",
+          url: "https://api.githubcopilot.com/mcp/",
+          auth_kind: "bearer",
+          header_name: null,
+          value_needed: { name: "github-token", description: "A fine-grained token." },
+          command: null,
+          environment: [],
+          docs: "https://github.com/github/github-mcp-server",
+          hidden: false,
+        },
+      ],
+    };
+    render(<AddMcpSheet context={{ mode: "settings", scope: "person" }} onClose={vi.fn()} onSaved={vi.fn()} />);
+    await userEvent.selectOptions(await screen.findByLabelText("Start from a known server"), "github");
+    expect((screen.getByLabelText("Address") as HTMLInputElement).value).toBe("https://api.githubcopilot.com/mcp/");
+    expect((screen.getByLabelText("Name", { exact: true }) as HTMLInputElement).value).toBe("github");
+    expect(screen.getByLabelText("Token", { exact: true })).toBeTruthy();
+    expect(within(screen.getByTestId("preset-note")).getByText("You need: A fine-grained token.")).toBeTruthy();
+  });
+});

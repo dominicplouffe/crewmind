@@ -1,0 +1,9 @@
+{
+  "slug": "fetch",
+  "name": "fetch",
+  "title": "Fetch",
+  "description": "Fetches a web page and returns it as markdown.",
+  "kind": "command",
+  "command": "uvx mcp-server-fetch",
+  "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch"
+}

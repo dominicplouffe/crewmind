@@ -130,8 +130,11 @@ class Masker:
     forms: list[tuple[str, str]] = field(default_factory=list[tuple[str, str]])
 
     @classmethod
-    def of(cls, given: Iterable[Given]) -> Masker:
+    def of(cls, given: Iterable[Given], sent: Iterable[tuple[str, str]] = ()) -> Masker:
+        """Every given secret, and every value sent for the run (name, value): a site may
+        echo the header it received, and that text must not reach the model either."""
         pairs = {(form, item.name) for item in given if item.secret for form in _forms(item.value)}
+        pairs |= {(form, name) for name, value in sent for form in _forms(value)}
         # Longest first, so a value inside one of its own encodings is never half replaced.
         masker = cls(sorted(pairs, key=lambda pair: -len(pair[0])))
         known.remember(masker.forms)
@@ -219,7 +222,16 @@ async def masker_for_run(session: AsyncSession, store: SecretStore, run_id: str)
     run = await session.get(Run, run_id)
     if run is None:
         return Masker()
-    return Masker.of(await given_for_run(session, store, run))
+    return await masker_of(session, store, run)
+
+
+async def masker_of(session: AsyncSession, store: SecretStore, run: Run) -> Masker:
+    """CON-8: what the run is given, and what is sent for it (CON-6)."""
+    from crewmind.domain.connections import sending
+
+    return Masker.of(
+        await given_for_run(session, store, run), await sending.sent_values(session, store, run)
+    )
 
 
 class KnownValues:

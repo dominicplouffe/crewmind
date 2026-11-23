@@ -7235,6 +7235,176 @@
     "title": "PreferenceRef",
     "type": "object"
    },
+   "Preset": {
+    "additionalProperties": false,
+    "description": "CON-15: the address or command, the auth kind and the secrets a server needs.",
+    "properties": {
+     "auth_kind": {
+      "$ref": "#/components/schemas/AuthKind",
+      "default": "none"
+     },
+     "command": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Command"
+     },
+     "description": {
+      "title": "Description",
+      "type": "string"
+     },
+     "docs": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The server's own instructions.",
+      "title": "Docs"
+     },
+     "environment": {
+      "description": "The variables a command server needs, each filled by a secret you add.",
+      "items": {
+       "$ref": "#/components/schemas/PresetVariable"
+      },
+      "title": "Environment",
+      "type": "array"
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Header Name"
+     },
+     "hidden": {
+      "default": false,
+      "title": "Hidden",
+      "type": "boolean"
+     },
+     "kind": {
+      "enum": [
+       "remote",
+       "command"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "description": "The connection name the form suggests.",
+      "title": "Name",
+      "type": "string"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     },
+     "title": {
+      "title": "Title",
+      "type": "string"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Url"
+     },
+     "value_needed": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/PresetValue"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The token or header value a remote server needs: what to call it and what to create at the provider. Never the value itself."
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "title",
+     "description",
+     "kind"
+    ],
+    "title": "Preset",
+    "type": "object"
+   },
+   "PresetList": {
+    "properties": {
+     "presets": {
+      "items": {
+       "$ref": "#/components/schemas/Preset"
+      },
+      "title": "Presets",
+      "type": "array"
+     }
+    },
+    "required": [
+     "presets"
+    ],
+    "title": "PresetList",
+    "type": "object"
+   },
+   "PresetValue": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "description": "What to create at the provider, and with what access.",
+      "title": "Description",
+      "type": "string"
+     },
+     "name": {
+      "description": "The name to give the secret, such as github-token.",
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "description"
+    ],
+    "title": "PresetValue",
+    "type": "object"
+   },
+   "PresetVariable": {
+    "additionalProperties": false,
+    "properties": {
+     "description": {
+      "title": "Description",
+      "type": "string"
+     },
+     "env": {
+      "description": "The environment variable the command server reads.",
+      "title": "Env",
+      "type": "string"
+     }
+    },
+    "required": [
+     "env",
+     "description"
+    ],
+    "title": "PresetVariable",
+    "type": "object"
+   },
    "ProbeView": {
     "properties": {
      "server_name": {
@@ -14961,6 +15131,28 @@
      }
     },
     "summary": "List the secrets, variables and MCP servers you can use. Values are never shown.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/presets": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "connections.presets",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/PresetList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List well-known MCP servers, to fill in the add form.",
     "tags": [
      "connections"
     ]

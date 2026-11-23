@@ -1231,6 +1231,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List well-known MCP servers, to fill in the add form.
+         * @description Requires: person.
+         */
+        get: operations["connections.presets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/connections/replace_secret": {
         parameters: {
             query?: never;
@@ -8034,6 +8054,81 @@ export interface components {
              */
             memory_id: string;
         };
+        /**
+         * Preset
+         * @description CON-15: the address or command, the auth kind and the secrets a server needs.
+         */
+        Preset: {
+            /** @default none */
+            auth_kind?: components["schemas"]["AuthKind"];
+            /** Command */
+            command?: string | null;
+            /** Description */
+            description: string;
+            /**
+             * Docs
+             * @description The server's own instructions.
+             */
+            docs?: string | null;
+            /**
+             * Environment
+             * @description The variables a command server needs, each filled by a secret you add.
+             */
+            environment?: components["schemas"]["PresetVariable"][];
+            /** Header Name */
+            header_name?: string | null;
+            /**
+             * Hidden
+             * @default false
+             */
+            hidden?: boolean;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "remote" | "command";
+            /**
+             * Name
+             * @description The connection name the form suggests.
+             */
+            name: string;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+            /** Url */
+            url?: string | null;
+            /** @description The token or header value a remote server needs: what to call it and what to create at the provider. Never the value itself. */
+            value_needed?: components["schemas"]["PresetValue"] | null;
+        };
+        /** PresetList */
+        PresetList: {
+            /** Presets */
+            presets: components["schemas"]["Preset"][];
+        };
+        /** PresetValue */
+        PresetValue: {
+            /**
+             * Description
+             * @description What to create at the provider, and with what access.
+             */
+            description: string;
+            /**
+             * Name
+             * @description The name to give the secret, such as github-token.
+             */
+            name: string;
+        };
+        /** PresetVariable */
+        PresetVariable: {
+            /** Description */
+            description: string;
+            /**
+             * Env
+             * @description The environment variable the command server reads.
+             */
+            env: string;
+        };
         /** ProbeView */
         ProbeView: {
             /** Server Name */
@@ -12091,6 +12186,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresetList"];
                 };
             };
         };

@@ -57,7 +57,8 @@ async def environment(context: Context, payload: Empty) -> RunEnvironment:
     view = await agent_of(context)
     store = SecretStore(services_of(context).master_key_file)
     given = await delivery.given_for_run(context.session, store, view.run)
-    delivery.given_runs.remember(view.run.id, delivery.Masker.of(given))
+    sent = await sending.sent_values(context.session, store, view.run)
+    delivery.given_runs.remember(view.run.id, delivery.Masker.of(given, sent))
     if given:
         context.session.add(
             RunStep(

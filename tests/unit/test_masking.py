@@ -55,3 +55,18 @@ def test_CON_8_no_value_survives_masking(value: str) -> None:
     """CON-8: whatever the value, it does not appear in the masked text."""
     mask = masker(("s", value))
     assert value not in mask.text(f"<{value}>{value}")
+
+
+def test_CON_8_a_value_sent_for_the_run_is_masked_when_a_site_echoes_it() -> None:
+    """CON-8, CON-6: a site that echoes the header it received cannot carry the value to
+    the model: the raw value and its header forms are all masked."""
+    pair = f"dom:{VALUE}"
+    header = "Basic " + base64.b64encode(pair.encode()).decode()
+    sent = [("wordpress", header), ("wordpress", header.split(" ")[1]), ("wordpress", pair),
+            ("wordpress", VALUE)]  # fmt: skip
+    mask = Masker.of([], sent)
+    echoed = f'{{"authorization": "{header}", "user": "{pair}"}}'
+    masked = mask.text(echoed)
+    assert VALUE not in masked
+    assert header.split(" ")[1] not in masked
+    assert "[secret: wordpress]" in masked
