@@ -2,6 +2,10 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.29 (23 Nov 2026): connections, part 7B.5
+
+- **CON-11:** a command server is tested before it is saved, in a server started for the test and stopped after it; its variables name secrets or variables the person can see, read when it starts; it serves one call at a time.
+
 ## Revision 2.28 (23 Nov 2026): connections, part 7B.6
 
 - **CON-13:** a changing tool's idempotency key is made from the server, the tool and its arguments, so the same change is made once per project; chat runs cannot use changing tools.

@@ -75,6 +75,9 @@ def upgrade() -> None:
         sa.Column("last_error", sa.String(length=500), nullable=True),
         sa.Column("tools_refreshed_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("oauth", sa.JSON(), server_default="{}", nullable=False),
+        sa.Column("command", sa.JSON(), server_default="[]", nullable=False),
+        sa.Column("image", sa.String(length=300), nullable=True),
+        sa.Column("environment", sa.JSON(), server_default="{}", nullable=False),
         sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("connection_id"),
     )

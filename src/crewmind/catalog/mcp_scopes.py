@@ -19,6 +19,7 @@ HUMAN_ONLY: dict[str, str] = {
     "connections.change_secret": "choosing where a secret is sent (CON-15)",
     "connections.delete": "deleting a connection (CON-15)",
     "connections.add_mcp_server": "adding an MCP server (CON-15)",
+    "connections.add_command_mcp_server": "adding an MCP server started from a command (CON-11)",
     "connections.test_mcp_server": "creating a credential value",
     "connections.allow_tool": "allowing a tool (IF-5.6)",
     "connections.sign_in": "signing in to an MCP server (CON-10)",

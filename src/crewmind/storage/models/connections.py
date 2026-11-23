@@ -137,6 +137,11 @@ class McpServer(Base):
     tools_refreshed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     oauth: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, server_default="{}")
     """OAuth endpoints, client id, scopes, resource and token expiry; never a token."""
+    command: Mapped[list[Any]] = mapped_column(JSON, default=list, server_default="[]")
+    """For a command server: the command and its arguments (CON-11)."""
+    image: Mapped[str | None] = mapped_column(String(300))
+    environment: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, server_default="{}")
+    """For a command server: each environment variable and the connection that fills it."""
 
 
 class McpTool(Base):
