@@ -577,11 +577,11 @@ async def test_FND_1_a_refused_draft_names_every_problem_at_once_and_the_turn_ne
         assert field in refused["message"], field
     assert len(shown["rules_hit"]) == CALLS_MOST
 
-    told = []
+    told: list[str] = []
     while not watching.empty():
-        told.append(watching.get_nowait().get("working"))
+        told.append(str(watching.get_nowait().get("working")))
     assert told[:2] == ["Thinking", "Writing the draft"]
-    assert any(step and step.startswith("A step was not accepted") for step in told)
+    assert any(step.startswith("A step was not accepted") for step in told)
 
     last = shown["lines"][-1]
     assert (last["author"], last["detail"]["kind"]) == ("platform", "out of steps")
