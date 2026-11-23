@@ -19,6 +19,13 @@ e2e/start-backend.sh 8433 /tmp/crewmind-dev   # prints when ready; setup link is
 e2e/stop-backend.sh /tmp/crewmind-dev
 ```
 
+To see the app with a crew at work, seed a busy demo project on that throwaway server (five agents,
+tasks in every state, delivered files, half the budget spent, decisions waiting):
+
+```bash
+npm run demo -- http://127.0.0.1:8433 /tmp/crewmind-dev
+```
+
 ## Build
 
 ```bash
