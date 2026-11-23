@@ -5282,6 +5282,28 @@ export interface components {
              */
             project_id: string;
         };
+        /**
+         * DecisionView
+         * @description One decision of the tree and where it stands (FND-4, FND-5).
+         */
+        DecisionView: {
+            /** Key */
+            key: string;
+            /**
+             * Level
+             * @description root, branch or leaf: the order decisions are settled in.
+             */
+            level: string;
+            /** Source */
+            source: string | null;
+            /**
+             * State
+             * @description settled, asked (waiting for your answer) or open.
+             */
+            state: string;
+            /** Value */
+            value: string | null;
+        };
         /** Definition */
         Definition: {
             /** Allowed */
@@ -5430,6 +5452,11 @@ export interface components {
         };
         /** DraftingView */
         DraftingView: {
+            /**
+             * Decisions
+             * @description Every decision a project rests on, in the order they are asked.
+             */
+            decisions: components["schemas"]["DecisionView"][];
             /**
              * Draft
              * @description The proposed project spec.

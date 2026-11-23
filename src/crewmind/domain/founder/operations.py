@@ -18,6 +18,7 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.founder import drafting as state
 from crewmind.domain.founder import model as m
+from crewmind.domain.founder import tree
 from crewmind.domain.founder.grammar import Grade
 from crewmind.domain.founder.model import DRAFTING_MACHINE, D
 from crewmind.domain.founder.turn import grade_goal
@@ -102,6 +103,16 @@ class LedgerLine(BaseModel):
     passage: str | None
 
 
+class DecisionView(BaseModel):
+    """One decision of the tree and where it stands (FND-4, FND-5)."""
+
+    key: str
+    level: str = Field(description="root, branch or leaf: the order decisions are settled in.")
+    state: str = Field(description="settled, asked (waiting for your answer) or open.")
+    value: str | None
+    source: str | None
+
+
 class DraftingView(BaseModel):
     drafting_id: str
     state: str
@@ -111,6 +122,9 @@ class DraftingView(BaseModel):
     lines: list[Line]
     questions: list[QuestionView] = Field(description="Questions waiting for your answer.")
     ledger: list[LedgerLine]
+    decisions: list[DecisionView] = Field(
+        description="Every decision a project rests on, in the order they are asked."
+    )
     draft: dict[str, Any] | None = Field(description="The proposed project spec.")
     grade: dict[str, Any] | None
     rehearsal: str | None = Field(description="The verdict of the rehearsal of this draft.")
@@ -156,6 +170,21 @@ async def view(context: Context, drafting: Drafting) -> DraftingView:
     rehearsed = drafting.draft is not None and drafting.rehearsed_draft == state.fingerprint(
         drafting.draft
     )
+    entries = await state.ledger(session, drafting.id)
+    settled = {entry.settles: entry for entry in entries}
+    asked = {question.settles for question in questions}
+    decisions = [
+        DecisionView(
+            key=decision.key,
+            level=decision.level,
+            state="settled"
+            if decision.key in settled
+            else ("asked" if decision.key in asked else "open"),
+            value=settled[decision.key].value if decision.key in settled else None,
+            source=settled[decision.key].source if decision.key in settled else None,
+        )
+        for decision in tree.TREE
+    ]
     return DraftingView(
         drafting_id=drafting.id,
         state=drafting.state,
@@ -184,8 +213,9 @@ async def view(context: Context, drafting: Drafting) -> DraftingView:
                 source=entry.source,
                 passage=entry.passage,
             )
-            for entry in await state.ledger(session, drafting.id)
+            for entry in entries
         ],
+        decisions=decisions,
         draft=(drafting.draft or {}).get("spec"),
         grade=drafting.grade,
         rehearsal=(drafting.rehearsal or {}).get("verdict") if rehearsed else None,

@@ -46,6 +46,7 @@ function view(extra: Partial<Drafting> = {}): Drafting {
     ready: false,
     not_ready_because: [],
     rules_hit: [],
+    decisions: [],
     project_id: null,
     ...extra,
   };

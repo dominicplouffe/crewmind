@@ -14,6 +14,27 @@ export type LedgerLine = Schemas["LedgerLine"];
 export type Grade = Schemas["Grade"];
 export type ElementGrade = Schemas["ElementGrade"];
 export type DraftingItem = Schemas["DraftingItem"];
+export type Decision = Schemas["DecisionView"];
+
+/** How many of the decisions are settled, for the progress line. */
+export function settledCount(decisions: Decision[]): number {
+  return decisions.filter((decision) => decision.state === "settled").length;
+}
+
+export type StepName = "describe" | "decide" | "review" | "create";
+export const STEPS: StepName[] = ["describe", "decide", "review", "create"];
+
+/** Which step of drafting the person is on: a display of the server's own state, not a rule. */
+export function stepOf(view: Drafting, reviewing: boolean): StepName {
+  if (view.state === "created" || view.state === "started") return "create";
+  if (view.ready) return reviewing ? "review" : "decide";
+  return view.draft ? "decide" : "describe";
+}
+
+/** The first choice shown for a question: its recommended option, or none when there is none. */
+export function firstChoice(question: Question): Choice | null {
+  return question.recommended === null ? null : { kind: "option", index: question.recommended };
+}
 
 /** The server reads one letter as "that option". A question offers at most four. */
 const LETTERS = "abcd";

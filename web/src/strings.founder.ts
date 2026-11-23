@@ -72,6 +72,20 @@ export const founder = {
     failureNext: "Send your message again to try once more.",
     message: "Message to the Founder",
     placeholder: "Say more, or correct the draft",
+    composer: {
+      open: {
+        label: "Message to the Founder",
+        hint: "It is your turn. Ask for a change to the draft, or add something you left out. Enter sends.",
+      },
+      questions: {
+        label: "Say something else instead",
+        hint: "None of the answers fit, or you want to change direction? Write it here. It is sent on its own, without the answers above.",
+      },
+      working: {
+        label: "Message to the Founder",
+        hint: "The Founder is working. You can write again as soon as it has answered.",
+      },
+    } as Record<string, { label: string; hint: string }>,
     send: "Send",
     sending: "Sending…",
     sendHint: "Enter sends. Shift+Enter starts a new line.",
@@ -91,6 +105,18 @@ export const founder = {
     enterHint: "Press Enter to use the recommended answer.",
     noRecommendation: "The Founder recommends nothing here. Choose one.",
     busy: "Sending your answer…",
+    roundTitle: (count: number): string =>
+      count === 1 ? "The Founder asks one thing" : `The Founder asks ${count} things`,
+    roundIntro:
+      "Each one already has the Founder's recommended answer selected. Change the ones you disagree with, then send them all together.",
+    position: (index: number, count: number): string => `${index} of ${count}`,
+    ownChoice: "Something else:",
+    ownPlaceholder: "Your answer, in your own words",
+    choose: "Choose an answer",
+    submit: (count: number): string => (count === 1 ? "Send my answer" : `Send all ${count} answers`),
+    submitting: "Sending…",
+    unanswered: (count: number): string =>
+      count === 1 ? "One question still needs an answer." : `${count} questions still need an answer.`,
   },
   rest: {
     action: "Use your recommendations for the rest",
@@ -98,6 +124,44 @@ export const founder = {
     explain:
       "The Founder answers every open question, and every decision not yet made, with its own recommendation. Each one is recorded as an assumption, not as your answer.",
     confirm: "Yes, use its recommendations",
+  },
+  steps: {
+    label: "Where this draft stands",
+    names: { describe: "Describe", decide: "Decide", review: "Review", create: "Create" } as Record<string, string>,
+    status: { done: "done", now: "you are here", todo: "not yet" } as Record<string, string>,
+  },
+  decide: {
+    title: "Decisions",
+    progress: (settled: number, total: number): string => `${settled} of ${total} settled`,
+    progressLabel: "Decisions settled",
+    intro: "A project rests on these. The Founder asks them in order.",
+    state: { settled: "Settled", asked: "Waiting for your answer", open: "Not asked yet" } as Record<string, string>,
+    askedNow: "Being asked now",
+    notYet: "Not asked yet",
+    fromDocument: "From your document",
+  },
+  draftRail: {
+    title: "The draft",
+    project: "Project",
+    crew: "Crew",
+    seats: (count: number): string => plural(count, "agent", "agents"),
+    goal: "Goal",
+    goalShow: "Read the goal",
+    gradeShow: "See how the goal was graded",
+    settingsShow: (count: number): string => `${plural(count, "setting", "settings")} changed from the default`,
+    redone: (count: number): string => `${plural(count, "step", "steps")} the Founder had to redo`,
+  },
+  review: {
+    title: (name: string): string => (name ? `Review “${name}”` : "Review the draft"),
+    lead: "This is what will be created. Nothing runs and nothing is spent until you start the project.",
+    back: "Back to the conversation",
+    readyTitle: "Everything is decided.",
+    readyIntro: "Look over the whole draft on one screen, then create the project.",
+    go: "Review and create",
+    notReadyTitle: "This draft is not ready to review yet.",
+    decisions: "What was decided",
+    decisionCols: { what: "Decision", value: "Decided", source: "From" },
+    createNote: "Creating the project confirms every decision above.",
   },
   side: {
     ledger: "Ledger",

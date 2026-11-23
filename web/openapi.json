@@ -2267,6 +2267,56 @@
     "title": "DecisionRef",
     "type": "object"
    },
+   "DecisionView": {
+    "description": "One decision of the tree and where it stands (FND-4, FND-5).",
+    "properties": {
+     "key": {
+      "title": "Key",
+      "type": "string"
+     },
+     "level": {
+      "description": "root, branch or leaf: the order decisions are settled in.",
+      "title": "Level",
+      "type": "string"
+     },
+     "source": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Source"
+     },
+     "state": {
+      "description": "settled, asked (waiting for your answer) or open.",
+      "title": "State",
+      "type": "string"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Value"
+     }
+    },
+    "required": [
+     "key",
+     "level",
+     "state",
+     "value",
+     "source"
+    ],
+    "title": "DecisionView",
+    "type": "object"
+   },
    "Definition": {
     "properties": {
      "allowed": {
@@ -2602,6 +2652,14 @@
    },
    "DraftingView": {
     "properties": {
+     "decisions": {
+      "description": "Every decision a project rests on, in the order they are asked.",
+      "items": {
+       "$ref": "#/components/schemas/DecisionView"
+      },
+      "title": "Decisions",
+      "type": "array"
+     },
      "draft": {
       "anyOf": [
        {
@@ -2730,6 +2788,7 @@
      "lines",
      "questions",
      "ledger",
+     "decisions",
      "draft",
      "grade",
      "rehearsal",
