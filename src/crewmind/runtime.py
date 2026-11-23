@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock, Executor, utc_now
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.domain.accounts.credentials import Authenticator
+from crewmind.domain.connections.delivery import Masker, masker_for_run
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.install.config import Config, load_config
@@ -16,6 +17,7 @@ from crewmind.domain.memory import recall
 from crewmind.domain.memory.engine import InProcessEngine, Mem0Engine
 from crewmind.domain.models.service import SeatResolver, provider_is_saturated
 from crewmind.domain.projects.access import MembershipAccess
+from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.service import SettingsService
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.service import Gateway
@@ -40,6 +42,13 @@ class Runtime:
     mock: MockProvider
     gateway: Gateway
     hub: StreamHub
+
+    async def masker(self, run_id: str) -> Masker:
+        """The masking of one run's given secrets (CON-8)."""
+        if not self.config.master_key_file.exists():
+            return Masker()
+        async with self.sessions() as session, session.begin():
+            return await masker_for_run(session, SecretStore(self.config.master_key_file), run_id)
 
     async def close(self) -> None:
         await self.engine.dispose()

@@ -21,6 +21,7 @@ from crewmind.catalog.operation import Operation
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.registry import Catalog
 from crewmind.catalog.surfaces import Surface, exposed_on
+from crewmind.domain.connections.delivery import Masker
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.settings.service import SettingsService
@@ -28,12 +29,17 @@ from crewmind.gateway.protocol import CompletionRequest, HarnessReport, ToolSpec
 from crewmind.gateway.service import Gateway
 from crewmind.storage.models import RunStep
 
+Masks = Callable[[str], Awaitable[Masker]]
+"""A run's masker (CON-8): `model(payload)` returns the payload with given secrets masked."""
+
 logger = logging.getLogger(__name__)
 
 AGENT_PREFIX = "/agent/v1"
 GATEWAY_PATH = "/gateway/v1/complete"
 REPORT_PATH = "/gateway/v1/report"
 TOOL_CALL = "tool call"
+HARNESS_ONLY = frozenset({"agent.context", "agent.environment"})
+"""Agent API calls the harness makes itself, never offered to the model as tools."""
 
 
 def route_path(operation_name: str) -> str:
@@ -59,11 +65,15 @@ def _endpoint(
     executor: Executor,
     authenticator: RunAuthenticator,
     settings: SettingsService,
+    masks: Masks | None,
 ) -> Callable[..., Awaitable[JSONResponse]]:
     async def endpoint(request: Request, payload: Any) -> JSONResponse:
         caller = await authenticator.authenticate(bearer(request))
         assert caller.run_id is not None
         now = executor.clock()
+        if masks is not None:
+            # CON-8: a given secret never enters the platform through what an agent sends.
+            payload = (await masks(caller.run_id)).model(payload)
         try:
             result = await executor.execute(operation, caller, payload)
         except Refusal as refusal:
@@ -78,7 +88,7 @@ def _endpoint(
         data = result.model_dump(mode="json")
         async with executor.sessions() as session, session.begin():
             await runs.note_success(session, caller.run_id, operation.name)
-            if operation.name != "agent.context":
+            if operation.name not in HARNESS_ONLY:
                 session.add(_step(caller.run_id, operation, payload, {"ok": True}, now))
         return JSONResponse(data)
 
@@ -115,14 +125,16 @@ def add_agent_api(
     authenticator: RunAuthenticator,
     gateway: Gateway,
     settings: SettingsService,
+    masks: Masks | None = None,
 ) -> None:
-    """Add the agent API routes and the model gateway route to the server."""
+    """Add the agent API routes and the model gateway route to the server. With `masks`,
+    every request an agent sends is masked before anything reads it (CON-8)."""
     router = app
     exposed = [operation for operation in catalog if exposed_on(operation, Surface.AGENT_API)]
     for operation in exposed:
         router.add_api_route(
             route_path(operation.name),
-            _endpoint(operation, executor, authenticator, settings),
+            _endpoint(operation, executor, authenticator, settings, masks),
             methods=["POST"],
             response_model=operation.output,
             operation_id=f"agent:{operation.name}",
@@ -136,7 +148,7 @@ def add_agent_api(
         offered = [
             operation
             for operation in exposed
-            if operation.name != "agent.context"
+            if operation.name not in HARNESS_ONLY
             and not (operation.authority.value == "agent_ceo" and caller.seat_kind != "ceo")
         ]
         return ToolList(
@@ -152,7 +164,15 @@ def add_agent_api(
         )
 
     async def complete(request: Request, payload: CompletionRequest) -> JSONResponse:
-        """The model gateway. A refusal here is the per-run cap (GOV-6)."""
+        """The model gateway. A refusal here is the per-run cap (GOV-6). The request is
+        masked first, so a given secret never reaches the provider or the trace (CON-8)."""
+        if masks is not None:
+            try:
+                caller = await authenticator.authenticate(bearer(request))
+            except Refusal:
+                caller = None
+            if caller is not None and caller.run_id is not None:
+                payload = (await masks(caller.run_id)).model(payload)
         try:
             response = await gateway.complete(bearer(request), payload)
         except Refusal as refusal:

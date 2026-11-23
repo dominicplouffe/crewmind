@@ -9,14 +9,20 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
 import httpx
 
 CONTEXT_PATH = "/agent/v1/agent/context"
+ENVIRONMENT_PATH = "/agent/v1/agent/environment"
+SECRETS_DIR = "CREWMIND_SECRETS_DIR"
+PRIVATE_PLACES = ("/run/crewmind", "/dev/shm")
+"""In-memory filesystems for a run's file secrets, in order of preference (CON-7)."""
 TOOLS_PATH = "/agent/v1/tools"
 GATEWAY_PATH = "/gateway/v1/complete"
 POST_PATH = "/agent/v1/agent/post_message"
@@ -75,8 +81,46 @@ def _inside(workspace: Path, relative: str) -> Path:
     return target
 
 
-def local_tool(workspace: Path, name: str, arguments: dict[str, Any]) -> str:
-    """Run a tool the role grants inside the sandbox: files and shell."""
+class Given:
+    """What this run is given (CON-7): variables for the commands it runs, and files in a
+    private in-memory directory that is removed when the run ends. Nothing here is ever
+    sent anywhere by the harness."""
+
+    def __init__(self, variables: dict[str, str], files: dict[str, str]) -> None:
+        self.directory: str | None = None
+        self.environment = {**os.environ, **variables}
+        if files:
+            place = next(
+                (
+                    path
+                    for path in PRIVATE_PLACES
+                    if os.path.isdir(path) and os.access(path, os.W_OK)
+                ),
+                None,
+            )
+            self.directory = tempfile.mkdtemp(prefix="crewmind-", dir=place)
+            os.chmod(self.directory, 0o700)
+            for name, content in files.items():
+                path = os.path.join(self.directory, name)
+                descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(descriptor, "w", encoding="utf-8") as file:
+                    file.write(content)
+            self.environment[SECRETS_DIR] = self.directory
+
+    def close(self) -> None:
+        if self.directory is not None:
+            shutil.rmtree(self.directory, ignore_errors=True)
+            self.directory = None
+
+
+NOTHING_GIVEN = Given({}, {})
+
+
+def local_tool(
+    workspace: Path, name: str, arguments: dict[str, Any], given: Given = NOTHING_GIVEN
+) -> str:
+    """Run a tool the role grants inside the sandbox: files and shell. Only the shell's
+    commands see what the run is given."""
     try:
         if name == "read_file":
             return (
@@ -99,6 +143,7 @@ def local_tool(workspace: Path, name: str, arguments: dict[str, Any]) -> str:
                 arguments["command"],
                 shell=True,
                 cwd=workspace,
+                env=given.environment,
                 capture_output=True,
                 text=True,
                 timeout=SHELL_TIMEOUT_SECONDS,
@@ -126,6 +171,17 @@ async def agent_loop(client: httpx.AsyncClient, workspace: Path) -> str:
     pack = await _post(client, CONTEXT_PATH, {})
     if "refused" in pack:
         raise Stop(pack["refused"]["message"])
+    offered = await _post(client, ENVIRONMENT_PATH, {})
+    given = Given(offered.get("variables", {}), offered.get("files", {}))
+    try:
+        return await _turns(client, workspace, pack, given)
+    finally:
+        given.close()
+
+
+async def _turns(
+    client: httpx.AsyncClient, workspace: Path, pack: dict[str, Any], given: Given
+) -> str:
     listed = (await client.get(TOOLS_PATH)).json()
     paths: dict[str, str] = listed["paths"]
     local = [tool for grant in pack["local_tools"] for tool in LOCAL_TOOLS.get(grant, [])]
@@ -149,7 +205,7 @@ async def agent_loop(client: httpx.AsyncClient, workspace: Path) -> str:
         for call in calls:
             if call["name"] in local_names:
                 result = await asyncio.to_thread(
-                    local_tool, workspace, call["name"], call["arguments"]
+                    local_tool, workspace, call["name"], call["arguments"], given
                 )
             elif call["name"] in paths:
                 result = json.dumps(await _post(client, paths[call["name"]], call["arguments"]))

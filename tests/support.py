@@ -59,6 +59,7 @@ class App:
             runtime.run_authenticator,
             runtime.gateway,
             runtime.settings,
+            runtime.masker,
         )
         add_file_routes(self.api, runtime.executor, runtime.authenticator, runtime.services)
         add_oauth_routes(self.api, runtime.executor, runtime.config.base_url)
@@ -95,6 +96,7 @@ class App:
             blobs=self.runtime.services.blobs,
             workers=workers,
             heartbeat_seconds=heartbeat_seconds,
+            masks=self.runtime.masker,
         )
 
     def script(self, key: str, *turns: dict[str, Any]) -> None:

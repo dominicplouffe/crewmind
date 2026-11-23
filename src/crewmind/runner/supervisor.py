@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 import logging
 import uuid
+from collections.abc import Awaitable, Callable
 from datetime import timedelta
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
 from crewmind.domain.artifacts import service as artifacts
+from crewmind.domain.connections.delivery import Masker
 from crewmind.domain.conversation import sessions as chat_sessions
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.model import HEARTBEAT_EVERY, RunKind
@@ -31,6 +33,9 @@ from crewmind.runner.sandbox import Sandbox, SandboxSpec
 from crewmind.storage.models import Artifact, Project, Seat
 
 logger = logging.getLogger(__name__)
+
+Masks = Callable[[str], Awaitable[Masker]]
+"""A run's masker (CON-8)."""
 
 POLL_SECONDS = 5  # section 10: the runner supervisor runs every 5 s
 
@@ -49,6 +54,7 @@ class Runner:
         workers: int,
         heartbeat_seconds: float = HEARTBEAT_EVERY.total_seconds(),
         secrets: SecretStore | None = None,
+        masks: Masks | None = None,
     ) -> None:
         self.id = f"runner-{uuid.uuid4().hex[:8]}"
         self._sessions = sessions
@@ -61,6 +67,7 @@ class Runner:
         self._workers = workers
         self._heartbeat_seconds = heartbeat_seconds
         self._secrets = secrets
+        self._masks = masks
         self._tasks: set[asyncio.Task[None]] = set()
 
     @property
@@ -155,7 +162,12 @@ class Runner:
             artifacts.lock_in_workspace(workspace, list(locked))
 
     async def _after(self, lease: Lease, workspace: Path) -> None:
-        """Snapshot the workspace: every changed file becomes a working artifact (ART-2)."""
+        """Snapshot the workspace: every changed file becomes a working artifact (ART-2),
+        with the run's given secrets masked first (CON-8)."""
+        mask = None
+        if self._masks is not None:
+            masker = await self._masks(lease.run_id)
+            mask = masker.bytes if masker else None
         try:
             async with self._sessions() as session, session.begin():
                 project = await session.get(Project, lease.project_id)
@@ -170,6 +182,7 @@ class Runner:
                     workspace,
                     artifacts.Author("agent", seat.id, seat.name, lease.run_id, seat.display_name),
                     self._clock(),
+                    mask,
                 )
         except Exception:
             logger.exception("runner: workspace snapshot for run %s failed", lease.run_id)
