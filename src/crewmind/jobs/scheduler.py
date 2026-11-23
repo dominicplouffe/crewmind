@@ -11,6 +11,7 @@ import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -29,7 +30,7 @@ from crewmind.domain.accounts.model import (
 from crewmind.domain.accounts.people import LINK_EXPIRED
 from crewmind.domain.accounts.token_operations import TOKEN_EXPIRED
 from crewmind.domain.budget import service as budget
-from crewmind.domain.connections import expiry
+from crewmind.domain.connections import expiry, upkeep
 from crewmind.domain.conversation import corrections, sessions, speaking
 from crewmind.domain.execution import runs
 from crewmind.domain.projects import lifecycle
@@ -148,9 +149,11 @@ class Scheduler:
         sessions: async_sessionmaker[AsyncSession],
         clock: Clock,
         settings: SettingsService | None = None,
+        key_file: Path | None = None,
     ) -> None:
         self._sessions = sessions
         self._clock = clock
+        self._key_file = key_file
         self._settings = settings or SettingsService(load_registry())
 
     async def tick(self) -> list[str]:
@@ -191,6 +194,13 @@ class Scheduler:
                 await expiry.check(session, self._settings, now)
         except Exception:
             logger.exception("scheduler: connection expiry failed this tick")
+        if self._key_file is not None:
+            try:
+                await upkeep.refresh_due(
+                    self._sessions, self._settings, self._key_file, self._clock
+                )
+            except Exception:
+                logger.exception("scheduler: MCP upkeep failed this tick")
         return failed
 
     async def run(self) -> None:

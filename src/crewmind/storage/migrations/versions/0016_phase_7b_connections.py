@@ -58,6 +58,47 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("connection_id"),
     )
     op.create_table(
+        "mcp_servers",
+        sa.Column("connection_id", sa.String(length=32), nullable=False),
+        sa.Column("kind", sa.String(length=16), nullable=False),
+        sa.Column("url", sa.String(length=2000), nullable=True),
+        sa.Column("transport", sa.String(length=24), nullable=True),
+        sa.Column("auth_kind", sa.String(length=16), nullable=False),
+        sa.Column("header_name", sa.String(length=100), nullable=True),
+        sa.Column("private_allowed", sa.Boolean(), nullable=False),
+        sa.Column("state", sa.String(length=16), nullable=False),
+        sa.Column("server_name", sa.String(length=200), nullable=True),
+        sa.Column("server_version", sa.String(length=100), nullable=True),
+        sa.Column("failures", sa.Integer(), nullable=False),
+        sa.Column("breaker_until", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("cool_off_seconds", sa.Integer(), nullable=False),
+        sa.Column("last_error", sa.String(length=500), nullable=True),
+        sa.Column("tools_refreshed_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("oauth", sa.JSON(), server_default="{}", nullable=False),
+        sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("connection_id"),
+    )
+    op.create_table(
+        "mcp_tools",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("server_id", sa.String(length=32), nullable=False),
+        sa.Column("name", sa.String(length=200), nullable=False),
+        sa.Column("title", sa.String(length=200), nullable=True),
+        sa.Column("description", sa.Text(), nullable=False),
+        sa.Column("input_schema", sa.JSON(), nullable=False),
+        sa.Column("classification", sa.String(length=16), nullable=False),
+        sa.Column("permission", sa.String(length=16), nullable=False),
+        sa.Column("first_seen", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("last_seen", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("gone", sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(["server_id"], ["mcp_servers.connection_id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("server_id", "name"),
+    )
+    with op.batch_alter_table("mcp_tools", schema=None) as batch_op:
+        batch_op.create_index(batch_op.f("ix_mcp_tools_server_id"), ["server_id"], unique=False)
+
+    op.create_table(
         "project_connections",
         sa.Column("id", sa.String(length=32), nullable=False),
         sa.Column("project_id", sa.String(length=32), nullable=False),

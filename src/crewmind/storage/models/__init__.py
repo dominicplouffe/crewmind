@@ -26,6 +26,8 @@ from crewmind.storage.models.connections import (
     Connection,
     ConnectionSecret,
     ConnectionVariable,
+    McpServer,
+    McpTool,
     ProjectConnection,
     ProjectNeed,
 )
@@ -141,6 +143,8 @@ __all__ = [
     "Link",
     "LoginAttempts",
     "McpConfirmToken",
+    "McpServer",
+    "McpTool",
     "Membership",
     "Message",
     "MetricReading",

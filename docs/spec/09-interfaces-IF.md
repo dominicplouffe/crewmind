@@ -109,9 +109,9 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
 - **IF-5.4 Attribution.** Every MCP write is recorded permanently as machine-mediated ("person via mcp:\<client name>"), distinct from the same person acting directly.
 - **IF-5.5 Untrusted content.** All agent-written text returned to a client travels inside a labelled envelope naming its author. Text that contains the envelope's closing marker is defanged before wrapping.
 - **IF-5.6 Human-only verbs.** These require the person, not their model client:
-  - allowing a write-capable data-source tool;
-  - creating or revealing a credential value (a secret's value is never revealed to anyone, CON-2);
-  - signing in to an MCP server with OAuth, and adding an MCP server started from a command (CON-10, CON-11);
+  - allowing any MCP server tool (INT-4);
+  - creating or revealing a credential value (a secret's value is never revealed to anyone, CON-2), choosing where a secret is sent, and testing an MCP server with a value;
+  - adding any MCP server, and signing in to one with OAuth (CON-9 to CON-11);
   - deleting a connection (CON-1);
   - changing project membership;
   - handing on the chair;

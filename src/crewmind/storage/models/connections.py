@@ -107,3 +107,56 @@ class ProjectConnection(Base):
     attached_by: Mapped[str] = mapped_column(String(32))
     attached_at: Mapped[datetime] = mapped_column(UtcDateTime)
     changed_at: Mapped[datetime] = mapped_column(UtcDateTime)
+
+
+class McpServer(Base):
+    """An MCP server's address, how it signs in, and its health (CON-9 to CON-12). Every
+    value that signs in (a token, a header value, OAuth tokens) is a secret of its
+    connection, never here."""
+
+    __tablename__ = "mcp_servers"
+
+    connection_id: Mapped[str] = mapped_column(
+        ForeignKey("connections.id", ondelete="CASCADE"), primary_key=True
+    )
+    kind: Mapped[str] = mapped_column(String(16))
+    """remote, or command (7B.5)."""
+    url: Mapped[str | None] = mapped_column(String(2000))
+    transport: Mapped[str | None] = mapped_column(String(24))
+    """What the server answered on: streamable_http, or sse for older servers."""
+    auth_kind: Mapped[str] = mapped_column(String(16))
+    header_name: Mapped[str | None] = mapped_column(String(100))
+    private_allowed: Mapped[bool] = mapped_column(default=False)
+    state: Mapped[str] = mapped_column(String(16))
+    server_name: Mapped[str | None] = mapped_column(String(200))
+    server_version: Mapped[str | None] = mapped_column(String(100))
+    failures: Mapped[int] = mapped_column(default=0)
+    breaker_until: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    cool_off_seconds: Mapped[int] = mapped_column(default=0)
+    last_error: Mapped[str | None] = mapped_column(String(500))
+    tools_refreshed_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    oauth: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, server_default="{}")
+    """OAuth endpoints, client id, scopes, resource and token expiry; never a token."""
+
+
+class McpTool(Base):
+    """One tool an MCP server offers, as it described itself (untrusted, P4), with how
+    crewmind classified it and whether agents may call it (CON-12, INT-4)."""
+
+    __tablename__ = "mcp_tools"
+    __table_args__ = (UniqueConstraint("server_id", "name"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    server_id: Mapped[str] = mapped_column(
+        ForeignKey("mcp_servers.connection_id", ondelete="CASCADE"), index=True
+    )
+    name: Mapped[str] = mapped_column(String(200))
+    title: Mapped[str | None] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text)
+    input_schema: Mapped[dict[str, Any]] = mapped_column(JSON)
+    classification: Mapped[str] = mapped_column(String(16))
+    """read, or write when it may change things or does not say."""
+    permission: Mapped[str] = mapped_column(String(16))
+    first_seen: Mapped[datetime] = mapped_column(UtcDateTime)
+    last_seen: Mapped[datetime] = mapped_column(UtcDateTime)
+    gone: Mapped[bool] = mapped_column(default=False)
