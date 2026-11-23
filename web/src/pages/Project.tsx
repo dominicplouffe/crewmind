@@ -32,6 +32,7 @@ import { ProjectOverview } from "../overview/ProjectOverview";
 import { ProjectPanel } from "../panels/ProjectPanel";
 import { ChatRail } from "../project/ChatRail";
 import { NeedsSheet } from "../project/NeedsSheet";
+import { NeedsStack } from "../project/NeedsStack";
 import { ProjectTop, TAB_ORDER, type ProjectTab } from "../project/ProjectTop";
 import { WorkView } from "../project/WorkView";
 import { usePaletteItems } from "../shell/palette";
@@ -305,6 +306,9 @@ export function Project(): JSX.Element {
               </p>
             ) : null}
             <AwayNote projectId={projectId} />
+            {mine.length > 0 ? (
+              <NeedsStack projectId={projectId} entries={mine} onChanged={items.onChanged} onOpenAll={() => setNeedsOpen(true)} />
+            ) : null}
             <MessageList
               state={state}
               roles={roles}
@@ -335,7 +339,7 @@ export function Project(): JSX.Element {
             projectId={projectId}
             changes={state.changes}
             header={state.header}
-            needs={mine}
+            needs={[]}
             onNeeds={() => setNeedsOpen(true)}
             onTab={goTab}
             onPanel={open}

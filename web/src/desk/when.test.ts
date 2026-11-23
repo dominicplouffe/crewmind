@@ -28,9 +28,9 @@ describe("a decision card's deadline in words (HUM-2)", () => {
 
 describe("who asks, and what kind of decision it is", () => {
   it("names the CEO for kinds it files, and crewmind for its own", () => {
-    expect(askerOf("agent", "proposed scope")).toEqual({ name: "CEO", line: "The CEO asks" });
-    expect(askerOf("agent", "assist")).toEqual({ name: "Agent", line: "An agent asks" });
-    expect(askerOf("platform", "verdict")).toEqual({ name: null, line: "crewmind asks" });
+    expect(askerOf("agent", "proposed scope")).toEqual({ name: "CEO", line: "The CEO asks", who: "CEO" });
+    expect(askerOf("agent", "assist")).toEqual({ name: "Agent", line: "An agent asks", who: "An agent" });
+    expect(askerOf("platform", "verdict")).toEqual({ name: null, line: "crewmind asks", who: "crewmind" });
     expect(askerOf("researcher", "approval: tool permission").line).toBe("researcher asks");
   });
 

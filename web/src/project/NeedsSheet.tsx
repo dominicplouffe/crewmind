@@ -1,7 +1,9 @@
-/** What waits on the person in this project, as decision cards in a sheet, from the one desk list. */
+/** What waits on the person in this project, as compact decision cards in a sheet, from the one desk list. */
 import { CheckCircle2 } from "lucide-react";
+import { useRef } from "react";
 import { InboxItem } from "../home/InboxItem";
-import type { DeskEntry } from "../needs/summary";
+import { useListKeys } from "../home/useListKeys";
+import { byPriority, type DeskEntry } from "../needs/summary";
 import { home, projectLayout } from "../strings.shell";
 import { Sheet } from "../ui/Sheet";
 
@@ -13,6 +15,8 @@ interface Props {
 }
 
 export function NeedsSheet({ projectName, entries, onClose, onChanged }: Props): JSX.Element {
+  const list = useRef<HTMLUListElement>(null);
+  useListKeys(list, '[data-testid="desk-entry"]');
   return (
     <Sheet title={projectLayout.needsYou(entries.length)} subtitle={projectName} onClose={onClose} size="lg" testId="needs-sheet">
       {entries.length === 0 ? (
@@ -24,8 +28,8 @@ export function NeedsSheet({ projectName, entries, onClose, onChanged }: Props):
           <p className="quiet">{projectLayout.railNeedsEmpty}</p>
         </div>
       ) : (
-        <ul className="plain inbox-list" aria-label={home.inboxLabel}>
-          {entries.map((entry, index) => (
+        <ul className="plain inbox-list" aria-label={home.inboxLabel} ref={list}>
+          {[...entries].sort(byPriority).map((entry, index) => (
             <InboxItem key={entry.item ? `item-${entry.item.id}` : `${entry.what}-${index}`} entry={entry} onChanged={onChanged} showProject={false} />
           ))}
         </ul>

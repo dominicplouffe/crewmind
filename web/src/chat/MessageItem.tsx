@@ -23,7 +23,9 @@ import {
 import { memo, useState } from "react";
 import type { Card, Message, Order, ReopenRequest } from "../api/client";
 import { Markdown } from "../components/common";
+import { isNote } from "../desk/headline";
 import { ChatItemCard } from "../desk/ItemCard";
+import { ChatItemNote } from "../desk/ItemNote";
 import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
 import { Avatar } from "../ui/Avatar";
@@ -135,7 +137,10 @@ function MessageItemInner({
   const threadId = message.thread_id ?? (replies > 0 ? message.id : null);
   const isExample = example ?? (message.example === true || detail.kind === "example");
   const hasActionCard = detail.kind === "action card" && detail.card !== undefined;
-  const hasItemCard = detail.kind === "decision item" && detail.item !== undefined && !isReopenLine(detail);
+  const isItemLine = detail.kind === "decision item" && detail.item !== undefined && !isReopenLine(detail);
+  // A heads-up or a flag tells rather than asks: a quiet note, not a card.
+  const hasItemNote = isItemLine && isNote(detail.itemKind);
+  const hasItemCard = isItemLine && !hasItemNote;
   const hasStatusActions = isStatus && (detail.kind === "standing order proposed" || isReopenLine(detail));
   const kind = message.author_kind as "person" | "agent" | "platform";
   // A plain line from crewmind (or a person's status line) is a quiet row; one that carries a card is a card.
@@ -226,6 +231,16 @@ function MessageItemInner({
     </article>
   );
 
+  if (hasItemNote && detail.item !== undefined) {
+    return article(
+      "is-note",
+      <>
+        <ChatItemNote itemId={detail.item} fallback={message.body} time={<RelativeTime at={message.at} className="message-time" />} />
+        {hasTools ? toolbar : null}
+      </>,
+    );
+  }
+
   if (layout === "row") {
     const Icon = systemIcon(detail);
     return article(
@@ -249,7 +264,7 @@ function MessageItemInner({
   if (layout === "system") {
     const Icon = systemIcon(detail);
     return article(
-      "is-system",
+      hasItemCard ? "is-system is-item" : "is-system",
       <>
         <div className="message-gutter">
           <span className="system-avatar" aria-hidden="true">
@@ -257,11 +272,14 @@ function MessageItemInner({
           </span>
         </div>
         <div className="message-main">
-          <header className="message-head">
-            <span className="author">{message.author}</span>
-            <RelativeTime at={message.at} className="message-time" />
-            <Markers detail={detail} example={isExample} />
-          </header>
+          {/* A decision card says who asks and by when itself; crewmind's name and the time stay in the line's label. */}
+          {hasItemCard ? null : (
+            <header className="message-head">
+              <span className="author">{message.author}</span>
+              <RelativeTime at={message.at} className="message-time" />
+              <Markers detail={detail} example={isExample} />
+            </header>
+          )}
           {quote}
           <div className="message-content">
             {hasActionCard || hasItemCard ? (

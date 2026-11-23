@@ -68,16 +68,21 @@ export interface Asker {
   /** The name for the avatar, or null for crewmind itself. */
   name: string | null;
   line: string;
+  /** Who, in a word: "CEO", "An agent", "crewmind", or the seat's name. */
+  who: string;
 }
 
 /** Who is asking, from the item's filer ("agent", "platform", or a seat's name) and its kind. */
 export function askerOf(filedBy: string, kind: string): Asker {
   const words = t.decisions.card.askedBy;
-  if (filedBy === "platform" || filedBy === "") return { name: null, line: words.platform };
+  const who = t.decisions.compact.who;
+  if (filedBy === "platform" || filedBy === "") return { name: null, line: words.platform, who: who.platform };
   if (filedBy === "agent" || filedBy === "ceo") {
-    return CEO_KINDS.has(kind) || filedBy === "ceo" ? { name: "CEO", line: words.ceo } : { name: "Agent", line: words.agent };
+    return CEO_KINDS.has(kind) || filedBy === "ceo"
+      ? { name: "CEO", line: words.ceo, who: who.ceo }
+      : { name: "Agent", line: words.agent, who: who.agent };
   }
-  return { name: filedBy, line: words.named(filedBy) };
+  return { name: filedBy, line: words.named(filedBy), who: filedBy };
 }
 
 /** The kind of decision in plain words. */

@@ -202,7 +202,6 @@ export const story = {
     now: "Now",
     delivered: "Just delivered",
     deliveredEmpty: "No files yet.",
-    openFile: (name: string, who: string): string => `${name}, by ${who}. Open in Deliverables`,
     budget: "Budget",
     next: "Next",
     needs: (count: number): string => `${plural(count, "decision waits", "decisions wait")} for you`,

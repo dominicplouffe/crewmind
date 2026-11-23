@@ -112,6 +112,7 @@ test("Home lists the proposal under its project, with what happens if nothing is
   await expect(entry).toContainText(PROJECT);
   await expect(entry.getByTestId("item-deadline")).not.toBeEmpty();
   await expect(entry.getByRole("button", { name: /^Accept “/ })).toBeVisible();
+  await entry.getByRole("button", { name: /^Details/ }).click();
   const snooze = entry.getByRole("group", { name: /^Set aside:/ });
   await expect(snooze.getByRole("button", { name: "1 hour" })).toBeEnabled();
   await expect(snooze.getByRole("button", { name: "Until tomorrow" })).toBeVisible();

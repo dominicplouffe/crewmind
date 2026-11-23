@@ -1,16 +1,19 @@
 /**
- * Home: "What needs me?" first, then the projects at a glance. The inbox is the desk (HUM-10):
- * the same list every badge and count reads, soonest deadline first, with one-click decisions.
+ * Home: "What needs me?" answered first, in one sentence, then the decisions themselves grouped by
+ * how soon they fall due, and the projects at a glance beside them. The inbox is the desk (HUM-10):
+ * the same list every badge and count reads, with one-click decisions.
  */
-import { useState } from "react";
-import { BellRing, CheckCircle2, Plus, Sparkles, WifiOff } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { BellRing, CheckCircle2, Newspaper, Plus, Sparkles, WifiOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { get } from "../api/client";
 import { useAuth } from "../auth";
 import { Brief } from "../desk/Brief";
 import { Unfinished } from "../founder/Unfinished";
 import { InboxItem } from "../home/InboxItem";
+import { inboxGroups, summaryLine, type InboxGroup } from "../home/logic";
 import { ProjectCard } from "../home/ProjectCard";
+import { useListKeys } from "../home/useListKeys";
 import { firstName, greeting } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { useNeedsYou, usePageTitle } from "../needs/NeedsYou";
@@ -21,6 +24,7 @@ import { home } from "../strings.shell";
 import { Skeleton } from "../ui/Skeleton";
 
 const ALERTS_DISMISSED = "crewmind.alerts-prompt-dismissed";
+const DAY_FORMAT = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "long" });
 
 function readDismissed(): boolean {
   try {
@@ -43,10 +47,8 @@ function AlertsPrompt({ needed }: { needed: boolean }): JSX.Element | null {
     }
   };
   return (
-    <section className="callout" aria-labelledby="alerts-title">
-      <span className="callout-icon" aria-hidden="true">
-        <BellRing size={18} />
-      </span>
+    <section className="callout callout-slim" aria-labelledby="alerts-title">
+      <BellRing size={16} aria-hidden="true" className="callout-slim-icon" />
       <div className="callout-text">
         <h2 id="alerts-title">{home.alertsTitle}</h2>
         <p className="quiet">{home.alertsNext}</p>
@@ -66,10 +68,8 @@ function AlertsPrompt({ needed }: { needed: boolean }): JSX.Element | null {
 function SetupPrompt({ setup }: { setup: ReturnType<typeof useSetupStatus> }): JSX.Element | null {
   if (setup.loading || setup.founderReady) return null;
   return (
-    <section className="callout callout-accent" aria-labelledby="setup-title" data-testid="setup-prompt">
-      <span className="callout-icon" aria-hidden="true">
-        <Sparkles size={18} />
-      </span>
+    <section className="callout callout-slim callout-accent" aria-labelledby="setup-title" data-testid="setup-prompt">
+      <Sparkles size={16} aria-hidden="true" className="callout-slim-icon" />
       <div className="callout-text">
         <h2 id="setup-title">{home.setupTitle}</h2>
         <p className="quiet">{setup.isAdmin ? home.setupNext : home.setupMember}</p>
@@ -85,6 +85,27 @@ function SetupPrompt({ setup }: { setup: ReturnType<typeof useSetupStatus> }): J
   );
 }
 
+function Group({ group, onChanged }: { group: InboxGroup; onChanged(): void }): JSX.Element {
+  const id = useId();
+  const name = home.groups[group.key] ?? group.key;
+  return (
+    <section className={`inbox-group group-${group.key}`} aria-labelledby={id}>
+      <h3 className="inbox-group-title" id={id}>
+        <span>{name}</span>
+        <span className="inbox-group-count" aria-hidden="true">
+          {group.entries.length}
+        </span>
+        <span className="visually-hidden">{home.groupCount(group.entries.length)}</span>
+      </h3>
+      <ul className="plain inbox-list">
+        {group.entries.map((entry, index) => (
+          <InboxItem key={entry.item ? `item-${entry.project_id}-${entry.item.id}` : `${entry.project_id}-${entry.what}-${index}`} entry={entry} onChanged={onChanged} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function Home(): JSX.Element {
   usePageTitle(home.title);
   const { person } = useAuth();
@@ -93,6 +114,8 @@ export function Home(): JSX.Element {
   const navigate = useNavigate();
   const brief = useLoad(() => get("/v1/brief/show"), []);
   const setup = useSetupStatus();
+  const inbox = useRef<HTMLDivElement>(null);
+  useListKeys(inbox, '[data-testid="desk-entry"]');
   // The page appears in one pass once its parts have answered, so nothing jumps as they arrive.
   const ready =
     (needs.loaded || Boolean(needs.error)) &&
@@ -101,20 +124,25 @@ export function Home(): JSX.Element {
     (projects.data !== undefined || Boolean(projects.error));
   const list = sortProjects(projects.data?.items ?? []).filter((project) => project.state !== "deleted");
   const live = list.filter((project) => LIVE_STATES.includes(project.state) || project.state === "draft");
-  const projectCount = needs.byProject.size;
+  const groups = inboxGroups(needs.entries);
   const changed = (): void => {
     needs.reload();
     brief.reload();
   };
+  const hello = home.greeting(greeting(), firstName(person?.name));
 
   return (
     <main className="content home" aria-labelledby="home-title">
       <header className="home-head">
-        <div>
-          <h1 id="home-title">{home.greeting(greeting(), firstName(person?.name))}</h1>
-          <p className="home-summary" role="status" data-testid="home-summary">
-            {!needs.loaded ? " " : needs.count === 0 ? home.summaryNone : home.summary(needs.count, projectCount)}
+        <div className="home-head-text">
+          <p className="home-hello">
+            {hello}
+            <span aria-hidden="true"> · </span>
+            <span>{home.today(DAY_FORMAT.format(new Date()))}</span>
           </p>
+          <h1 id="home-title" className="home-summary" aria-live="polite" data-testid="home-summary">
+            {!needs.loaded ? " " : summaryLine(needs.entries, needs.byProject.size)}
+          </h1>
         </div>
         <button type="button" className="button primary" onClick={() => navigate("/draft")}>
           <Plus size={16} aria-hidden="true" />
@@ -142,6 +170,12 @@ export function Home(): JSX.Element {
                     </span>
                   ) : null}
                 </h2>
+                {needs.count > 1 ? (
+                  <p className="keys-hint" aria-hidden="true">
+                    <kbd>J</kbd>
+                    <kbd>K</kbd> {home.keysHint}
+                  </p>
+                ) : null}
               </div>
               {needs.error && needs.loaded ? (
                 <p className="quiet stale" role="status">
@@ -159,55 +193,61 @@ export function Home(): JSX.Element {
                 </div>
               ) : null}
               {needs.count > 0 ? (
-                <ul className="plain inbox-list" aria-label={home.inboxLabel}>
-                  {needs.entries.map((entry, index) => (
-                    <InboxItem key={entry.item ? `item-${entry.project_id}-${entry.item.id}` : `${entry.project_id}-${entry.what}-${index}`} entry={entry} onChanged={changed} />
+                <div className="inbox-groups" ref={inbox} role="region" aria-label={home.inboxLabel} aria-keyshortcuts="j k">
+                  <p className="visually-hidden">{home.keysLabel}</p>
+                  {groups.map((group) => (
+                    <Group key={group.key} group={group} onChanged={changed} />
                   ))}
-                </ul>
-              ) : null}
-              <AlertsPrompt needed={live.length > 0} />
-              {brief.data ? (
-                <details className="home-brief">
-                  <summary>{home.briefTitle}</summary>
-                  <Brief brief={brief.data} />
-                </details>
+                </div>
               ) : null}
             </section>
 
-            <section className="home-projects" aria-labelledby="home-projects-title">
-              <div className="section-head">
-                <h2 id="home-projects-title">{home.projectsTitle}</h2>
-                <Link to="/projects" className="button ghost small">
-                  {home.allProjects}
-                </Link>
-              </div>
-              {!projects.data && projects.loading ? <Skeleton lines={3} block /> : null}
-              {projects.data && list.length === 0 ? (
-                <div className="empty">
-                  <span className="empty-icon" aria-hidden="true">
-                    <Sparkles size={22} />
-                  </span>
-                  <p className="empty-title">{home.projectsEmptyTitle}</p>
-                  <p className="quiet">{home.projectsEmptyNext}</p>
-                  <div className="empty-action row wrap">
-                    <Link to="/draft" className="button primary">
-                      {home.start}
-                    </Link>
-                    <Link to="/projects?new=form" className="button">
-                      {home.byForm}
-                    </Link>
-                  </div>
+            <aside className="home-side" aria-label={home.projectsTitle}>
+              <section className="home-projects" aria-labelledby="home-projects-title">
+                <div className="section-head">
+                  <h2 id="home-projects-title">{home.projectsTitle}</h2>
+                  <Link to="/projects" className="button ghost small">
+                    {home.allProjects}
+                  </Link>
                 </div>
+                {!projects.data && projects.loading ? <Skeleton lines={3} block /> : null}
+                {projects.data && list.length === 0 ? (
+                  <div className="empty">
+                    <span className="empty-icon" aria-hidden="true">
+                      <Sparkles size={22} />
+                    </span>
+                    <p className="empty-title">{home.projectsEmptyTitle}</p>
+                    <p className="quiet">{home.projectsEmptyNext}</p>
+                    <div className="empty-action row wrap">
+                      <Link to="/draft" className="button primary">
+                        {home.start}
+                      </Link>
+                      <Link to="/projects?new=form" className="button">
+                        {home.byForm}
+                      </Link>
+                    </div>
+                  </div>
+                ) : null}
+                <Unfinished />
+                <ul className="plain project-cards">
+                  {(live.length > 0 ? live : list).slice(0, 6).map((project) => (
+                    <li key={project.project_id}>
+                      <ProjectCard project={project} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              {brief.data ? (
+                <details className="home-brief">
+                  <summary>
+                    <Newspaper size={15} aria-hidden="true" />
+                    {home.briefTitle}
+                  </summary>
+                  <Brief brief={brief.data} />
+                </details>
               ) : null}
-              <Unfinished />
-              <ul className="plain project-cards">
-                {(live.length > 0 ? live : list).slice(0, 6).map((project) => (
-                  <li key={project.project_id}>
-                    <ProjectCard project={project} />
-                  </li>
-                ))}
-              </ul>
-            </section>
+              <AlertsPrompt needed={live.length > 0} />
+            </aside>
           </div>
         </>
       )}

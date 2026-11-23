@@ -75,7 +75,6 @@ export function ChatRail({ projectId, changes, header, needs, onNeeds, onTab, on
                       type="button"
                       className="rail-file"
                       onClick={() => onTab("deliverables")}
-                      aria-label={words.openFile(item.name, item.last_author)}
                     >
                       <span className="rail-file-icon">
                         <FileIcon name={item.name} mediaType={item.media_type} size={14} />

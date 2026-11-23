@@ -2,6 +2,7 @@
 import { formatNumber, formatValue } from "../lib/format";
 import { AgentText } from "../panels/board/parts";
 import { t } from "../strings";
+import { money } from "./headline";
 import { listField, numberField, textField, type Item } from "./logic";
 import { ReviewBody } from "./ReviewBody";
 
@@ -73,6 +74,22 @@ function knownRows(item: Item): Row[] | null {
       text("fix", words.fix);
       text("prevention", words.prevention);
       return rows;
+    case "approval: spend": {
+      const value = numberField(fields, "amount");
+      if (value !== null) rows.push([words.amount, money(value, textField(fields, "currency"))]);
+      return rows;
+    }
+    case "approval: tool permission":
+      text("tool", words.tool);
+      return rows;
+    case "proposed commitment":
+      text("projected", words.projected);
+      return rows;
+    case "budget checkpoint":
+      amount("spent", words.spent, words.tokens);
+      amount("budget", words.budget, words.tokens);
+      return rows;
+    case "approval: legal":
     case "heads-up":
     case "delivery sign-off":
     case "status review":
@@ -86,17 +103,6 @@ function plainRows(item: Item): Row[] {
   return Object.entries(item.fields)
     .filter(([, value]) => typeof value === "string" || typeof value === "number" || typeof value === "boolean")
     .map(([name, value]) => [name.replace(/_/g, " "), typeof value === "number" ? formatNumber(value) : formatValue(value)]);
-}
-
-/** The words the item is about (a proposed requirement, a heads-up), quoted under the title. */
-export function ItemBody({ item }: { item: Item }): JSX.Element | null {
-  const body = item.kind === "proposed scope" || item.kind === "heads-up" ? textField(item.fields, "text") : null;
-  if (!body) return null;
-  return (
-    <blockquote className="item-body">
-      <AgentText text={body} />
-    </blockquote>
-  );
 }
 
 export function ItemFields({ item, onChanged }: { item: Item; onChanged(item: Item): void }): JSX.Element {
