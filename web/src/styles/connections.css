@@ -139,3 +139,21 @@ li.chip { cursor: default; min-height: 1.5rem; padding: 0 var(--space-2); font-s
   .connection-actions,
   .need-row > .button { grid-column: 1 / -1; justify-content: flex-end; }
 }
+
+/* MCP servers: the test result and the tools. */
+.connection-icon.kind-mcp_server { color: var(--color-success); background: var(--color-success-soft); border-color: var(--color-success-border); }
+.connection-problem { color: var(--color-danger); }
+.mcp-test { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); margin: 0 0 var(--space-4); }
+.mcp-probe-tools { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); }
+.mcp-tools { margin-top: var(--space-2); }
+.mcp-tools > summary { cursor: pointer; font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-link); }
+.mcp-tool-list { display: flex; flex-direction: column; margin-top: var(--space-2); border-top: 1px solid var(--color-border-subtle); }
+.mcp-tool { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-subtle); }
+.mcp-tool.gone { opacity: 0.6; }
+.mcp-tool-main { min-width: 0; }
+.mcp-tool-main p { margin: 0; }
+.mcp-tool-name { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+.mcp-tool-description { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.check-row { display: flex; gap: var(--space-2); align-items: flex-start; margin: 0 0 var(--space-4); font-weight: var(--weight-regular); }
+.check-row input { margin-top: 0.25rem; }
+

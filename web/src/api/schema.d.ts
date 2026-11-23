@@ -931,6 +931,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/add_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a remote MCP server. It is tested and its tools are listed before it is saved.
+         * @description Requires: person.
+         */
+        post: operations["connections.add_mcp_server"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/connections/add_secret": {
         parameters: {
             query?: never;
@@ -965,6 +985,26 @@ export interface paths {
          * @description Requires: person.
          */
         post: operations["connections.add_variable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/allow_tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Allow agents to call one tool of an MCP server.
+         * @description Requires: person.
+         */
+        post: operations["connections.allow_tool"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1051,6 +1091,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/deny_tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop agents calling one tool of an MCP server.
+         * @description Requires: person.
+         */
+        post: operations["connections.deny_tool"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/connections/detach": {
         parameters: {
             query?: never;
@@ -1065,6 +1125,26 @@ export interface paths {
          * @description Requires: project_chair.
          */
         post: operations["connections.detach"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/finish_sign_in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish an MCP sign-in with the code the provider sent back to the browser.
+         * @description Requires: person.
+         */
+        post: operations["connections.finish_sign_in"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1205,6 +1285,66 @@ export interface paths {
         get: operations["connections.show"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/sign_in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start signing in to an MCP server with OAuth; open the address it returns.
+         * @description Requires: person.
+         */
+        post: operations["connections.sign_in"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/test_mcp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test an MCP server again and read its tools; new tools start by their kind.
+         * @description Requires: person.
+         */
+        post: operations["connections.test_mcp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/test_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test an MCP server before adding it: its name and the tools it offers.
+         * @description Requires: person.
+         */
+        post: operations["connections.test_mcp_server"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4621,6 +4761,60 @@ export interface components {
              */
             text: string;
         };
+        /** AddMcpInput */
+        AddMcpInput: {
+            /**
+             * @description none, bearer, header (a named header) or oauth.
+             * @default none
+             */
+            auth_kind?: components["schemas"]["AuthKind"];
+            /**
+             * Description
+             * @description What it is for.
+             */
+            description: string;
+            /**
+             * Header Name
+             * @description For header: its name.
+             */
+            header_name?: string | null;
+            /**
+             * Name
+             * @description What it is called, such as github.
+             */
+            name: string;
+            /**
+             * Private Network
+             * @description Admins only: allow a private address for this server.
+             * @default false
+             */
+            private_network?: boolean;
+            /**
+             * Project Id
+             * @description The project it belongs to (project scope), or to attach it to at once.
+             */
+            project_id?: string | null;
+            /**
+             * Roles
+             * @description With a project: the roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+            /**
+             * @description person (yours, for any project you chair), project, or install (admins).
+             * @default person
+             */
+            scope?: components["schemas"]["Scope"];
+            /**
+             * Url
+             * @description The server's address, such as https://mcp.example.com/mcp.
+             */
+            url: string;
+            /**
+             * Value
+             * @description For bearer or header: the token or header value.
+             */
+            value?: string | null;
+        };
         /** AddMemberInput */
         AddMemberInput: {
             /**
@@ -5017,6 +5211,11 @@ export interface components {
              */
             verdict: "passed" | "failed";
         };
+        /**
+         * AuthKind
+         * @enum {string}
+         */
+        AuthKind: "none" | "bearer" | "header" | "oauth";
         /** Away */
         Away: {
             /**
@@ -5570,6 +5769,8 @@ export interface components {
             kind: string;
             /** Last Used At */
             last_used_at?: string | null;
+            /** @description For an MCP server: its details. */
+            mcp?: components["schemas"]["McpView"] | null;
             /** Name */
             name: string;
             /**
@@ -6477,6 +6678,19 @@ export interface components {
             /** Type */
             type: string;
         };
+        /** FinishInput */
+        FinishInput: {
+            /**
+             * Code
+             * @description The code the provider sent back.
+             */
+            code: string;
+            /**
+             * State
+             * @description The state the provider sent back.
+             */
+            state: string;
+        };
         /** FixInput */
         FixInput: {
             /**
@@ -7095,6 +7309,93 @@ export interface components {
              */
             project_id: string;
         };
+        /** McpTarget */
+        McpTarget: {
+            /**
+             * @description none, bearer, header (a named header) or oauth.
+             * @default none
+             */
+            auth_kind?: components["schemas"]["AuthKind"];
+            /**
+             * Header Name
+             * @description For header: its name.
+             */
+            header_name?: string | null;
+            /**
+             * Private Network
+             * @description Admins only: allow a private address for this server.
+             * @default false
+             */
+            private_network?: boolean;
+            /**
+             * Url
+             * @description The server's address, such as https://mcp.example.com/mcp.
+             */
+            url: string;
+            /**
+             * Value
+             * @description For bearer or header: the token or header value.
+             */
+            value?: string | null;
+        };
+        /** McpToolView */
+        McpToolView: {
+            /**
+             * Classification
+             * @description read, or write when it may change things.
+             */
+            classification: string;
+            /**
+             * Description
+             * @description As the server describes it: untrusted, cut to size.
+             */
+            description: string;
+            /**
+             * Gone
+             * @description The server no longer offers it.
+             */
+            gone: boolean;
+            /** Name */
+            name: string;
+            /**
+             * Permission
+             * @description allowed or denied.
+             */
+            permission: string;
+            /** Title */
+            title: string | null;
+        };
+        /** McpView */
+        McpView: {
+            /** Auth Kind */
+            auth_kind: string;
+            /** Header Name */
+            header_name: string | null;
+            /**
+             * Last Error
+             * @description Why the last test or call failed.
+             */
+            last_error: string | null;
+            /** Private Allowed */
+            private_allowed: boolean;
+            /** Server Name */
+            server_name: string | null;
+            /** Server Version */
+            server_version: string | null;
+            /**
+             * State
+             * @description active, needs sign-in, failing or deleted.
+             */
+            state: string;
+            /** Tools */
+            tools: components["schemas"]["McpToolView"][];
+            /** Tools Refreshed At */
+            tools_refreshed_at: string | null;
+            /** Transport */
+            transport: string | null;
+            /** Url */
+            url: string | null;
+        };
         /** MemberItem */
         MemberItem: {
             /** Email */
@@ -7629,6 +7930,17 @@ export interface components {
              * @description The preference's id, from `memory preferences`.
              */
             memory_id: string;
+        };
+        /** ProbeView */
+        ProbeView: {
+            /** Server Name */
+            server_name: string | null;
+            /** Server Version */
+            server_version: string | null;
+            /** Tools */
+            tools: components["schemas"]["ToolView"][];
+            /** Transport */
+            transport: string;
         };
         /** ProjectConnections */
         ProjectConnections: {
@@ -8653,6 +8965,52 @@ export interface components {
          * @enum {string}
          */
         Shape: "text" | "file";
+        /** SignInInput */
+        SignInInput: {
+            /**
+             * Client Id
+             * @description A client id from the provider, when its server offers no registration.
+             */
+            client_id?: string | null;
+            /**
+             * Client Secret
+             * @description That client's secret, if the provider gave one.
+             */
+            client_secret?: string | null;
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+        };
+        /** SignInStart */
+        SignInStart: {
+            /**
+             * Acts As
+             * @description What signing in means, in plain words.
+             */
+            acts_as: string;
+            /**
+             * Authorize Url
+             * @description Open this in the browser to sign in.
+             */
+            authorize_url: string;
+        };
+        /** SignedIn */
+        SignedIn: {
+            /** Name */
+            name: string;
+            /**
+             * Return To
+             * @description Where the person goes back to.
+             */
+            return_to: string;
+        };
         /** SmokeResult */
         SmokeResult: {
             /** Detail */
@@ -9077,6 +9435,41 @@ export interface components {
              * @default Bearer
              */
             token_type?: string;
+        };
+        /** ToolRef */
+        ToolRef: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+            /**
+             * Tool
+             * @description The tool's name, as the server gives it.
+             */
+            tool: string;
+        };
+        /** ToolView */
+        ToolView: {
+            /**
+             * Description
+             * @description As the server describes it: untrusted, cut to size.
+             */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Reads Only
+             * @description The server marks it as only reading.
+             */
+            reads_only: boolean;
+            /** Title */
+            title: string | null;
         };
         /** UnsubscribeInput */
         UnsubscribeInput: {
@@ -11104,6 +11497,39 @@ export interface operations {
             };
         };
     };
+    "connections.add_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMcpInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "connections.add_secret": {
         parameters: {
             query?: never;
@@ -11147,6 +11573,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["AddVariableInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.allow_tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToolRef"];
             };
         };
         responses: {
@@ -11302,6 +11761,39 @@ export interface operations {
             };
         };
     };
+    "connections.deny_tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToolRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "connections.detach": {
         parameters: {
             query?: never;
@@ -11322,6 +11814,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.finish_sign_in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FinishInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignedIn"];
                 };
             };
             /** @description Validation Error */
@@ -11554,6 +12079,105 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.sign_in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignInInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SignInStart"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.test_mcp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectionRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.test_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["McpTarget"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProbeView"];
                 };
             };
             /** @description Validation Error */

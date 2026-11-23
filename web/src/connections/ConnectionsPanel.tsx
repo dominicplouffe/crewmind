@@ -27,6 +27,10 @@ interface Props {
   onChanged(): void;
 }
 
+function kindOf(kind: string): "secret" | "variable" | "mcp_server" {
+  return kind === "variable" || kind === "mcp_server" ? kind : "secret";
+}
+
 function roleNames(slugs: string[], roles: Role[]): string[] {
   if (slugs.includes("*")) return [words.project.allRoles];
   return slugs.map((slug) => roles.find((role) => role.slug === slug)?.name ?? slug);
@@ -185,7 +189,7 @@ function AttachRow({
 export function ConnectionsPanel({ projectId, changes, onChanged }: Props): JSX.Element {
   const [tick, setTick] = useState(0);
   const view = useLoad(() => get("/v1/connections/for_project", { project_id: projectId }), [projectId, changes, tick]);
-  const [adding, setAdding] = useState<{ kind: "secret" | "variable"; preset?: Preset } | null>(null);
+  const [adding, setAdding] = useState<{ kind: "secret" | "variable" | "mcp_server"; preset?: Preset } | null>(null);
   const [importing, setImporting] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
   const [actionError, setActionError] = useState<unknown>(null);
@@ -224,8 +228,8 @@ export function ConnectionsPanel({ projectId, changes, onChanged }: Props): JSX.
                 roles={roles}
                 onAdd={() =>
                   setAdding({
-                    kind: need.kind === "variable" ? "variable" : "secret",
-                    preset: { kind: need.kind === "variable" ? "variable" : "secret", name: need.name, roles: need.roles },
+                    kind: kindOf(need.kind),
+                    preset: { kind: kindOf(need.kind), name: need.name, roles: need.roles },
                   })
                 }
               />

@@ -13,6 +13,7 @@ interface Item {
   expires_soon?: boolean;
   last_used_at?: string | null;
   used_in: number;
+  mcp?: { state: string } | null;
 }
 
 const DAY = 86_400_000;
@@ -24,6 +25,10 @@ export function daysUntil(day: string, now: number): number {
 
 export function healthOf(item: Item, now: number = Date.now()): Health {
   if (item.state === "expired") return { tone: "danger", label: words.health.expired };
+  if (item.mcp && item.mcp.state !== "active") {
+    const tone = item.mcp.state === "needs sign-in" ? "warning" : "danger";
+    return { tone, label: words.mcp.states[item.mcp.state] ?? item.mcp.state };
+  }
   // The server says when an expiry is near, by the install's own reminder setting.
   if (item.expires_on && item.expires_soon) {
     const days = daysUntil(item.expires_on, now);
@@ -37,12 +42,18 @@ export function healthOf(item: Item, now: number = Date.now()): Health {
 /** The line under a name that says how it is used, in plain words. */
 export function usageLine(item: {
   kind: string;
+  mcp?: { url?: string | null; tools: { permission: string; gone: boolean }[] } | null;
   delivery?: string | null;
   sites?: string[];
   env_name?: string | null;
   shape?: string | null;
 }): string {
   if (item.kind === "variable") return words.variableAs(item.env_name ?? "");
+  if (item.kind === "mcp_server") {
+    const tools = (item.mcp?.tools ?? []).filter((tool) => !tool.gone);
+    const allowed = tools.filter((tool) => tool.permission === "allowed").length;
+    return [item.mcp?.url ?? "", words.mcp.toolsSummary(allowed, tools.length)].filter(Boolean).join(" · ");
+  }
   if (item.delivery === "given") return words.givenAs(item.env_name ?? "", item.shape === "file");
   return words.sentTo(item.sites ?? []);
 }

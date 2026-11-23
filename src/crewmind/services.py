@@ -12,6 +12,12 @@ from crewmind.domain.settings.registry import SettingsRegistry, load_registry
 from crewmind.domain.settings.service import SettingsService
 from crewmind.runner.check_sandbox import CheckRunner, ProcessCheckRunner
 
+SESSIONS = "sessions"
+"""Where `wired` holds the session factory, for an operation's `prepare` step: slow work
+that needs its own short transactions before the operation's own one opens."""
+CLOCK = "clock"
+"""Where `wired` holds the platform clock, for the same `prepare` step."""
+
 
 @dataclass(frozen=True)
 class Services:

@@ -4,17 +4,18 @@
  * into a field that is never pre-filled, never stored in the browser, and gone once saved.
  */
 import { useId, useRef, useState, type FormEvent } from "react";
-import { Braces, KeyRound, Send } from "lucide-react";
+import { Braces, KeyRound, Plug, Send } from "lucide-react";
 import { post, type Schemas } from "../api/client";
 import { ErrorNote } from "../components/common";
 import { ChoiceCard } from "../settings/ChoiceCard";
 import { connectionWords as words } from "../strings.connections";
 import { Sheet } from "../ui/Sheet";
+import { AddMcpSheet } from "./AddMcpSheet";
 import { RolePicker } from "./RolePicker";
 
 type Item = Schemas["ConnectionView"];
 type Role = Schemas["RoleOption"];
-type Kind = "secret" | "variable";
+type Kind = "secret" | "variable" | "mcp_server";
 type Delivery = "sent_for_you" | "given";
 type HeaderKind = "bearer" | "basic" | "header";
 
@@ -112,6 +113,9 @@ export function AddSheet({ context, preset, startKind = "secret", onClose, onSav
       .finally(() => setBusy(false));
   };
 
+  if (kind === "mcp_server") {
+    return <AddMcpSheet context={context} name={preset?.name} roles={preset?.roles} onClose={onClose} onSaved={onSaved} />;
+  }
   const title = preset ? `${words.add} ${preset.name}` : kind === "secret" ? words.addSecret : words.addVariable;
   return (
     <Sheet title={title} size="lg" testId="add-connection" onClose={onClose}>
@@ -134,6 +138,14 @@ export function AddSheet({ context, preset, startKind = "secret", onClose, onSav
               onChange={() => setKind("variable")}
               title={words.kinds.variable}
               icon={<Braces size={18} />}
+            />
+            <ChoiceCard
+              name={field("kind")}
+              value="mcp_server"
+              checked={false}
+              onChange={() => setKind("mcp_server")}
+              title={words.kinds.mcp_server}
+              icon={<Plug size={18} />}
             />
           </fieldset>
         )}
