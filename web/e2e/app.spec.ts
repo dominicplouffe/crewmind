@@ -365,6 +365,8 @@ test("polling keeps the chat working when the live stream is blocked", async () 
   await page.route("**/stream/v1/**", (route) => route.abort());
   await page.reload();
   await expect(page.getByText("Live updates stopped.")).toBeVisible();
+  // The conversation shows once its messages and decisions are in; count after that.
+  await expect(agentMessages().first()).toBeVisible();
   const before = await agentMessages().count();
   await sendMessage(page, "Are you still there?");
   await expect(agentMessages()).toHaveCount(before + 1, { timeout: 40_000 });

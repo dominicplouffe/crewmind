@@ -1,6 +1,6 @@
 # ADR-0010: A tokenised design system for the web app, with Inter and Lucide
 
-- **Status:** Proposed (22 Nov 2026), for the owner to accept
+- **Status:** Accepted (23 Nov 2026; the owner delegated the call)
 - **Spec:** NFR-18 (accessibility), NFR-24 (stack), P18 (plain words), CHAT-18, CHAT-20, HUM-10
 
 ## Context

@@ -66,6 +66,8 @@ export function Project(): JSX.Element {
   const status = useLoad(() => get("/v1/projects/status", { project_id: projectId }), [projectId, state.header?.state]);
   const help = useLoad(() => get("/v1/chat/help"), []);
   const roster = useLoad(() => get("/v1/roster/show", { project_id: projectId }), [projectId, state.changes]);
+  const decisionItems = useLoad(() => get("/v1/items/list", { project_id: projectId, open_only: false }), [projectId, state.changes]);
+  const known = useMemo(() => new Map((decisionItems.data?.items ?? []).map((entry) => [entry.id, entry])), [decisionItems.data]);
   const uploads = useUploads(projectId, actions.refresh);
 
   const projectName = status.data?.name ?? t.project.fallbackName;
@@ -232,8 +234,9 @@ export function Project(): JSX.Element {
         actions.refresh();
         reloadNeeds();
       },
+      known,
     }),
-    [projectId, state.changes, actions, reloadNeeds],
+    [projectId, state.changes, actions, reloadNeeds, known],
   );
 
   const send = (body: string): void => {
@@ -310,7 +313,7 @@ export function Project(): JSX.Element {
             {needs.loaded && mine.length > 0 ? (
               <NeedsStack projectId={projectId} entries={mine} onChanged={items.onChanged} onOpenAll={() => setNeedsOpen(true)} />
             ) : null}
-            {!needs.loaded && !needs.error ? (
+            {(!needs.loaded && !needs.error) || (decisionItems.data === undefined && !decisionItems.error) ? (
               <div className="chat-loading">
                 <Skeleton lines={4} block />
               </div>

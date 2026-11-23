@@ -324,12 +324,13 @@ export function ChatItemCard({ itemId }: { itemId: number }): JSX.Element {
   // A settled item no longer changes, so it is not asked for again on every change in the project.
   const watch = settled ? 0 : (scope?.changes ?? 0);
   const item = useLoad(() => get("/v1/items/show", { project_id: projectId, item_id: itemId }), [projectId, itemId, watch]);
-  const closedAt = item.data?.closed_at ?? null;
+  const data = item.data ?? scope?.known?.get(itemId);
+  const closedAt = data?.closed_at ?? null;
   useEffect(() => {
     if (closedAt !== null) setSettled(true);
   }, [closedAt]);
 
-  if (!item.data) {
+  if (!data) {
     return item.error ? (
       <ErrorNote error={item.error} />
     ) : (
@@ -338,5 +339,5 @@ export function ChatItemCard({ itemId }: { itemId: number }): JSX.Element {
       </div>
     );
   }
-  return <ItemCard item={item.data} onChanged={() => scope?.onChanged()} />;
+  return <ItemCard item={data} onChanged={() => scope?.onChanged()} />;
 }

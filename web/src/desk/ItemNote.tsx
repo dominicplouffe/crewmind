@@ -60,7 +60,7 @@ export function ChatItemNote({ itemId, fallback, time }: Props): JSX.Element {
   const [settled, setSettled] = useState(false);
   const watch = settled ? 0 : (scope?.changes ?? 0);
   const loaded = useLoad(() => get("/v1/items/show", { project_id: projectId, item_id: itemId }), [projectId, itemId, watch]);
-  const item: Item | undefined = view ?? loaded.data;
+  const item: Item | undefined = view ?? loaded.data ?? scope?.known?.get(itemId);
   const closedAt = item?.closed_at ?? null;
   useEffect(() => {
     if (closedAt !== null) setSettled(true);

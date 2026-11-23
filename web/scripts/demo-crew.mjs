@@ -109,6 +109,9 @@ const plan = await get(`/v1/plan/show?project_id=${P}`);
 const ids = plan.requirements.map((item) => item.id);
 for (const id of ids.slice(0, 3)) await post("/v1/requirements/accept", { ...ref, requirement_id: id, anyway: true });
 log(`accepted ${ids.slice(0, 3).join(", ")}; left ${ids[3]} proposed`);
+// Accepting scope wakes the CEO. Let that run end first: a directive sent while it is live joins it
+// (one run per agent at a time), and the scripted turn below would be played by the wrong run.
+await settle(P, "scope accepted");
 
 // ---- The members are scripted before their tasks exist: a new task wakes them at once -------
 const LANDING = `# Fieldnotes\n\n## Your field notebook, finally searchable.\n\nFieldnotes keeps every observation, photo and voice memo from the field in one place, and finds any of them in a second.\n\n- **Works offline.** Take notes on a ridge with no signal; they sync when you are back.\n- **Tags itself.** Place, time and weather are added to every note.\n- **Shares cleanly.** Export a season of notes as a tidy report for your team.\n\n[Start free](#signup)\n`;

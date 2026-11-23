@@ -17,7 +17,7 @@ The first pass was judged against a near-empty project. The second was designed 
 | "Good evening, Admin" | ACC-8: a person sets their own name (Settings, first-run setup). |
 | No signature moment | The crew assembles around the mark once, after the Founder starts a project. |
 
-**Checks after pass two.** Python: 492 passed on SQLite and on Postgres. Web: 617 unit tests; 62 browser tests including axe (WCAG 2.2 A/AA) in both themes and a 390 px run, plus a scan of the crew-assembled dialog. Layout shift on a throttled phone: Home 0.01, Overview 0, Work 0, Deliverables 0; chat 0.02 on a desktop and 0.05–0.2 on a phone, depending on when each decision card's item arrives (fix: API proposal A-18).
+**Checks after pass two.** Python: 492 passed on SQLite and on Postgres. Web: 617 unit tests; 62 browser tests including axe (WCAG 2.2 A/AA) in both themes and a 390 px run, plus a scan of the crew-assembled dialog. Layout shift on a throttled phone: Home 0.01, Overview 0, Work 0, Deliverables 0, chat 0.00–0.004 on a phone and a desktop. The chat loads the project's decision items in one list and every card paints complete from it, then refreshes on its own.
 
 ## First pass
 
@@ -73,7 +73,7 @@ Throttled phone profile (390 px, 4× CPU slowdown, 10 Mbit/s, 40 ms latency), mo
 | Projects, Work, Crew, Deliverables, Settings, Welcome | — | — | ≤ 0.04 |
 
 - Home first measured 0.33: its parts arrived one by one. It now appears in one pass after a skeleton.
-- The chat's remaining shift comes from decision cards that load their item after the message renders; their space is reserved, but the final height varies. Fix proposed: include the item in the message (API proposal A-18).
+- The chat's shift came from decision cards loading their item after the message rendered. Fixed in the second pass: the chat loads all the project's items in one list first.
 - JavaScript: main bundle 198 KB gzip, project page 61 KB gzip (lazy). Inter is one variable Latin file; other scripts' subsets load only when used.
 - Animations use only `transform` and `opacity`.
 
