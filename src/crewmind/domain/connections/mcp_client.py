@@ -45,7 +45,12 @@ METADATA = (
 
 
 class Unreachable(Exception):
-    """The server could not be reached or did not speak MCP. The message is plain words."""
+    """The server could not be reached or did not speak MCP. The message is plain words.
+    `refused` says the server refused the sign-in, which a fresh token may cure."""
+
+    def __init__(self, message: str, *, refused: bool = False) -> None:
+        super().__init__(message)
+        self.refused = refused
 
 
 def check_url(url: str, private_allowed: bool) -> str:
@@ -252,7 +257,9 @@ async def probe(
         except Exception as error:  # the transports raise many kinds; each is one plain reason
             refused = [status for status in statuses if status in (401, 403)]
             if refused:
-                raise Unreachable(f"it refused the sign-in (HTTP {refused[0]})") from None
+                raise Unreachable(
+                    f"it refused the sign-in (HTTP {refused[0]})", refused=True
+                ) from None
             reasons.append(_reason(error))
         finally:
             await http.aclose()

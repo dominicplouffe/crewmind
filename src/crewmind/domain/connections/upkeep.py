@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from crewmind.catalog.caller import platform_job
 from crewmind.domain.connections import mcp
 from crewmind.domain.connections.mcp_client import Unreachable, probe
+from crewmind.domain.connections.mcp_sign_in import fresh_headers
 from crewmind.domain.connections.model import ConnectionState
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.registry import Scope
@@ -61,13 +62,21 @@ async def refresh_due(
                 )
             )
         )
-        targets = [
-            (server.connection_id, server.url or "", server.private_allowed, server.transport,
-             await mcp.headers_for(session, store, server))
-            for server in due
-            if mcp.breaker_allows(server, now)
-        ]  # fmt: skip
-    for server_id, url, private, transport, headers in targets:
+        targets = [server.connection_id for server in due if mcp.breaker_allows(server, now)]
+    for server_id in targets:
+        # Tokens are refreshed in their own short transaction; the server is reached after.
+        async with sessions() as session, session.begin():
+            server = await session.get(McpServer, server_id)
+            item = await session.get(Connection, server_id)
+            if server is None or item is None:
+                continue
+            try:
+                headers = await fresh_headers(
+                    session, store, server, item, clock(), UPKEEP, seconds=seconds
+                )
+            except Unreachable:
+                continue
+            url, private, transport = server.url or "", server.private_allowed, server.transport
         try:
             found = await probe(
                 url, headers, private_allowed=private, seconds=seconds, description_max=most,

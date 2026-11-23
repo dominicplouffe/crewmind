@@ -343,6 +343,10 @@ async def test_INV_21_every_write_operation_records_an_event(
 # Writes that change no governed state, so they record no event (INV-21), and one covered
 # by its own test.
 NO_EVENT = {
+    "connections.sign_in": "asserted in test_CON_10_sign_in_uses_pkce_and_the_resource_and_"
+    "finishes_once_in_the_same_browser",
+    "connections.finish_sign_in": "asserted in test_CON_10_sign_in_uses_pkce_and_the_resource_and_"
+    "finishes_once_in_the_same_browser",
     "grill.start": (
         "asserted in test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_confirmed"
     ),

@@ -160,3 +160,21 @@ class McpTool(Base):
     first_seen: Mapped[datetime] = mapped_column(UtcDateTime)
     last_seen: Mapped[datetime] = mapped_column(UtcDateTime)
     gone: Mapped[bool] = mapped_column(default=False)
+
+
+class McpSignIn(Base):
+    """An OAuth sign-in to an MCP server that was started and not yet finished (CON-10).
+    Its `state` is kept only as a hash, it is bound to the browser session that started it,
+    and its PKCE verifier is a secret of this row."""
+
+    __tablename__ = "mcp_sign_ins"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    """The SHA-256 of the `state` sent to the authorization server."""
+    connection_id: Mapped[str] = mapped_column(
+        ForeignKey("connections.id", ondelete="CASCADE"), index=True
+    )
+    person_id: Mapped[str] = mapped_column(String(32))
+    session_id: Mapped[str] = mapped_column(String(64))
+    return_to: Mapped[str] = mapped_column(String(300))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime)
