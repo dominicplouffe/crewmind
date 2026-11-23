@@ -221,6 +221,212 @@
     "title": "AddMemberInput",
     "type": "object"
    },
+   "AddSecretInput": {
+    "properties": {
+     "basic_user": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The user name, for basic.",
+      "title": "Basic User"
+     },
+     "delivery": {
+      "$ref": "#/components/schemas/Delivery",
+      "default": "sent_for_you",
+      "description": "sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
+     },
+     "description": {
+      "description": "What it is for, in one line. Agents read it.",
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Given: the variable or file name. By default, from the name.",
+      "title": "Env Name"
+     },
+     "expires_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The day it stops working (UTC).",
+      "title": "Expires On"
+     },
+     "header_kind": {
+      "$ref": "#/components/schemas/HeaderKind",
+      "default": "bearer",
+      "description": "Sent for you: bearer, basic (with a user) or header."
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The header, for header.",
+      "title": "Header Name"
+     },
+     "name": {
+      "description": "What it is called, such as wordpress.",
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project it belongs to (project scope), or to attach it to at once.",
+      "title": "Project Id"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "With a project: the roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     },
+     "scope": {
+      "$ref": "#/components/schemas/Scope",
+      "default": "person",
+      "description": "person (yours, for any project you chair), project, or install (admins)."
+     },
+     "shape": {
+      "$ref": "#/components/schemas/Shape",
+      "default": "text",
+      "description": "Given: text (a variable) or file."
+     },
+     "sites": {
+      "description": "Sent for you: the exact host names it is sent to.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Sites",
+      "type": "array"
+     },
+     "value": {
+      "description": "The value. It is encrypted and never shown again.",
+      "format": "password",
+      "title": "Value",
+      "type": "string",
+      "writeOnly": true
+     }
+    },
+    "required": [
+     "name",
+     "description",
+     "value"
+    ],
+    "title": "AddSecretInput",
+    "type": "object"
+   },
+   "AddVariableInput": {
+    "properties": {
+     "description": {
+      "description": "What it is for.",
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The environment variable name.",
+      "title": "Env Name"
+     },
+     "name": {
+      "description": "What it is called.",
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project it belongs to (project scope), or to attach it to at once.",
+      "title": "Project Id"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "With a project: the roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     },
+     "scope": {
+      "$ref": "#/components/schemas/Scope",
+      "default": "person",
+      "description": "person (yours, for any project you chair), project, or install (admins)."
+     },
+     "value": {
+      "description": "The value. Variables are shown to members and agents.",
+      "title": "Value",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "description",
+     "value"
+    ],
+    "title": "AddVariableInput",
+    "type": "object"
+   },
    "Agenda": {
     "properties": {
      "lines": {
@@ -510,6 +716,87 @@
      "name"
     ],
     "title": "ArtifactRef",
+    "type": "object"
+   },
+   "AttachInput": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A variable or file name for this project only.",
+      "title": "Env Name"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     }
+    },
+    "required": [
+     "project_id",
+     "connection"
+    ],
+    "title": "AttachInput",
+    "type": "object"
+   },
+   "Attached": {
+    "properties": {
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The variable or file name in this project.",
+      "title": "Env Name"
+     },
+     "item": {
+      "$ref": "#/components/schemas/ConnectionView"
+     },
+     "roles": {
+      "description": "The roles granted, or * for every role.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "item",
+     "roles",
+     "env_name"
+    ],
+    "title": "Attached",
     "type": "object"
    },
    "Attempt": {
@@ -1346,6 +1633,202 @@
     "title": "ChangeProjectInput",
     "type": "object"
    },
+   "ChangeSecretInput": {
+    "properties": {
+     "basic_user": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basic User"
+     },
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "delivery": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Delivery"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Env Name"
+     },
+     "expires_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A new expiry day (UTC).",
+      "title": "Expires On"
+     },
+     "header_kind": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/HeaderKind"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Header Name"
+     },
+     "no_expiry": {
+      "default": false,
+      "description": "Remove the expiry date.",
+      "title": "No Expiry",
+      "type": "boolean"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     },
+     "shape": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Shape"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "sites": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Sites"
+     }
+    },
+    "required": [
+     "connection"
+    ],
+    "title": "ChangeSecretInput",
+    "type": "object"
+   },
+   "ChangeVariableInput": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "description": {
+      "anyOf": [
+       {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Description"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Env Name"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Value"
+     }
+    },
+    "required": [
+     "connection"
+    ],
+    "title": "ChangeVariableInput",
+    "type": "object"
+   },
    "ChannelList": {
     "properties": {
      "items": {
@@ -1604,6 +2087,231 @@
      "order_id"
     ],
     "title": "ConfirmInput",
+    "type": "object"
+   },
+   "ConnectionRef": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     }
+    },
+    "required": [
+     "connection"
+    ],
+    "title": "ConnectionRef",
+    "type": "object"
+   },
+   "ConnectionView": {
+    "properties": {
+     "basic_user": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basic User"
+     },
+     "changed_at": {
+      "format": "date-time",
+      "title": "Changed At",
+      "type": "string"
+     },
+     "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+     },
+     "delivery": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For a secret: sent_for_you or given.",
+      "title": "Delivery"
+     },
+     "description": {
+      "description": "What it is for. Agents read it.",
+      "title": "Description",
+      "type": "string"
+     },
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The variable or file name a run gets it under.",
+      "title": "Env Name"
+     },
+     "expires_on": {
+      "anyOf": [
+       {
+        "format": "date",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Expires On"
+     },
+     "expires_soon": {
+      "default": false,
+      "description": "Its expiry is within secret.expiry_warning: people were told.",
+      "title": "Expires Soon",
+      "type": "boolean"
+     },
+     "header_kind": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "bearer, basic or header.",
+      "title": "Header Kind"
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Header Name"
+     },
+     "id": {
+      "title": "Id",
+      "type": "string"
+     },
+     "kind": {
+      "description": "secret, variable or mcp_server.",
+      "title": "Kind",
+      "type": "string"
+     },
+     "last_used_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Last Used At"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "scope": {
+      "description": "install, person or project.",
+      "title": "Scope",
+      "type": "string"
+     },
+     "shape": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For a given secret: text or file.",
+      "title": "Shape"
+     },
+     "sites": {
+      "description": "For a secret sent for you: the sites it is sent to.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Sites",
+      "type": "array"
+     },
+     "state": {
+      "description": "active, expired or deleted.",
+      "title": "State",
+      "type": "string"
+     },
+     "used_in": {
+      "description": "How many projects it is attached to.",
+      "title": "Used In",
+      "type": "integer"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A variable's value. A secret's value is never shown.",
+      "title": "Value"
+     },
+     "value_set_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "When a secret's value was last set.",
+      "title": "Value Set At"
+     },
+     "yours": {
+      "description": "You may change or delete it.",
+      "title": "Yours",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "name",
+     "kind",
+     "scope",
+     "description",
+     "state",
+     "created_at",
+     "changed_at",
+     "used_in",
+     "yours"
+    ],
+    "title": "ConnectionView",
     "type": "object"
    },
    "CorrectionItem": {
@@ -2423,6 +3131,14 @@
     "title": "DeleteRequested",
     "type": "object"
    },
+   "Delivery": {
+    "enum": [
+     "sent_for_you",
+     "given"
+    ],
+    "title": "Delivery",
+    "type": "string"
+   },
    "Desk": {
     "properties": {
      "waiting": {
@@ -2491,6 +3207,26 @@
      "item"
     ],
     "title": "DeskEntry",
+    "type": "object"
+   },
+   "DetachInput": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "connection"
+    ],
+    "title": "DetachInput",
     "type": "object"
    },
    "DirectiveItem": {
@@ -3689,6 +4425,35 @@
     "title": "GrantRef",
     "type": "object"
    },
+   "GrantsInput": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "roles": {
+      "description": "Every role that may use it, or *.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "project_id",
+     "connection",
+     "roles"
+    ],
+    "title": "GrantsInput",
+    "type": "object"
+   },
    "GrillAnswer": {
     "properties": {
      "answer": {
@@ -3902,6 +4667,15 @@
     "title": "Header",
     "type": "object"
    },
+   "HeaderKind": {
+    "enum": [
+     "bearer",
+     "basic",
+     "header"
+    ],
+    "title": "HeaderKind",
+    "type": "string"
+   },
    "HireInput": {
     "properties": {
      "members": {
@@ -4007,42 +4781,6 @@
      "at"
     ],
     "title": "HistoryItem",
-    "type": "object"
-   },
-   "HistoryLine": {
-    "properties": {
-     "actor_kind": {
-      "title": "Actor Kind",
-      "type": "string"
-     },
-     "at": {
-      "format": "date-time",
-      "title": "At",
-      "type": "string"
-     },
-     "state": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "State"
-     },
-     "what": {
-      "title": "What",
-      "type": "string"
-     }
-    },
-    "required": [
-     "at",
-     "actor_kind",
-     "what",
-     "state"
-    ],
-    "title": "HistoryLine",
     "type": "object"
    },
    "HoldInput": {
@@ -4152,6 +4890,143 @@
     "title": "HoldLine",
     "type": "object"
    },
+   "ImportEnvInput": {
+    "properties": {
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project it belongs to (project scope), or to attach it to at once.",
+      "title": "Project Id"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "With a project: the roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     },
+     "scope": {
+      "$ref": "#/components/schemas/Scope",
+      "default": "person",
+      "description": "person (yours, for any project you chair), project, or install (admins)."
+     },
+     "secrets": {
+      "description": "Keys to add as secrets, whatever their name.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Secrets",
+      "type": "array"
+     },
+     "skip": {
+      "description": "Keys to leave out.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Skip",
+      "type": "array"
+     },
+     "text": {
+      "description": "The pasted KEY=value lines.",
+      "format": "password",
+      "title": "Text",
+      "type": "string",
+      "writeOnly": true
+     },
+     "variables": {
+      "description": "Keys to add as variables, whatever their name.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Variables",
+      "type": "array"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "title": "ImportEnvInput",
+    "type": "object"
+   },
+   "ImportLine": {
+    "properties": {
+     "kind": {
+      "description": "secret or variable.",
+      "title": "Kind",
+      "type": "string"
+     },
+     "line": {
+      "title": "Line",
+      "type": "integer"
+     },
+     "name": {
+      "description": "The KEY of the line: the connection's name.",
+      "title": "Name",
+      "type": "string"
+     },
+     "problem": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What stops this line being saved, in plain words.",
+      "title": "Problem"
+     },
+     "skipped": {
+      "title": "Skipped",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "line",
+     "name",
+     "kind",
+     "skipped",
+     "problem"
+    ],
+    "title": "ImportLine",
+    "type": "object"
+   },
+   "ImportReview": {
+    "properties": {
+     "lines": {
+      "items": {
+       "$ref": "#/components/schemas/ImportLine"
+      },
+      "title": "Lines",
+      "type": "array"
+     },
+     "saved": {
+      "description": "How many were saved; 0 for a review.",
+      "title": "Saved",
+      "type": "integer"
+     }
+    },
+    "required": [
+     "lines",
+     "saved"
+    ],
+    "title": "ImportReview",
+    "type": "object"
+   },
    "InstanceRole": {
     "enum": [
      "admin",
@@ -4203,182 +5078,6 @@
      "name"
     ],
     "title": "InviteInput",
-    "type": "object"
-   },
-   "ItemDetail": {
-    "properties": {
-     "actions": {
-      "description": "What you can do with it now.",
-      "items": {
-       "type": "string"
-      },
-      "title": "Actions",
-      "type": "array"
-     },
-     "basis": {
-      "anyOf": [
-       {
-        "additionalProperties": true,
-        "type": "object"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Basis"
-     },
-     "chairman_note": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Chairman Note"
-     },
-     "closed_at": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Closed At"
-     },
-     "deadline": {
-      "anyOf": [
-       {
-        "format": "date-time",
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Deadline"
-     },
-     "default_outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "What happens if nobody answers.",
-      "title": "Default Outcome"
-     },
-     "fields": {
-      "additionalProperties": true,
-      "title": "Fields",
-      "type": "object"
-     },
-     "filed_by": {
-      "description": "agent or platform.",
-      "title": "Filed By",
-      "type": "string"
-     },
-     "history": {
-      "items": {
-       "$ref": "#/components/schemas/HistoryLine"
-      },
-      "title": "History",
-      "type": "array"
-     },
-     "id": {
-      "title": "Id",
-      "type": "integer"
-     },
-     "if_declined": {
-      "title": "If Declined",
-      "type": "string"
-     },
-     "kind": {
-      "title": "Kind",
-      "type": "string"
-     },
-     "opened_at": {
-      "format": "date-time",
-      "title": "Opened At",
-      "type": "string"
-     },
-     "outcome": {
-      "anyOf": [
-       {
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Outcome"
-     },
-     "project_id": {
-      "title": "Project Id",
-      "type": "string"
-     },
-     "recommendation": {
-      "title": "Recommendation",
-      "type": "string"
-     },
-     "state": {
-      "title": "State",
-      "type": "string"
-     },
-     "title": {
-      "description": "Built from the item's typed fields.",
-      "title": "Title",
-      "type": "string"
-     },
-     "waits_on_you": {
-      "title": "Waits On You",
-      "type": "boolean"
-     }
-    },
-    "required": [
-     "id",
-     "project_id",
-     "kind",
-     "title",
-     "state",
-     "filed_by",
-     "fields",
-     "recommendation",
-     "if_declined",
-     "basis",
-     "actions",
-     "deadline",
-     "default_outcome",
-     "outcome",
-     "chairman_note",
-     "waits_on_you",
-     "opened_at",
-     "closed_at",
-     "history"
-    ],
-    "title": "ItemDetail",
-    "type": "object"
-   },
-   "ItemList": {
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/ItemView"
-      },
-      "title": "Items",
-      "type": "array"
-     }
-    },
-    "required": [
-     "items"
-    ],
-    "title": "ItemList",
     "type": "object"
    },
    "ItemView": {
@@ -5265,6 +5964,48 @@
     "title": "ModelsView",
     "type": "object"
    },
+   "NeedView": {
+    "properties": {
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "roles": {
+      "description": "The roles that need it.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+     },
+     "seats": {
+      "description": "The agents who wait while it is missing.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Seats",
+      "type": "array"
+     },
+     "state": {
+      "description": "met, open (missing) or waived (started without it).",
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "name",
+     "roles",
+     "state",
+     "seats"
+    ],
+    "title": "NeedView",
+    "type": "object"
+   },
    "NoteInput": {
     "properties": {
      "item_id": {
@@ -5995,6 +6736,48 @@
      "memory_id"
     ],
     "title": "PreferenceRef",
+    "type": "object"
+   },
+   "ProjectConnections": {
+    "properties": {
+     "attached": {
+      "items": {
+       "$ref": "#/components/schemas/Attached"
+      },
+      "title": "Attached",
+      "type": "array"
+     },
+     "available": {
+      "description": "What you could attach here.",
+      "items": {
+       "$ref": "#/components/schemas/ConnectionView"
+      },
+      "title": "Available",
+      "type": "array"
+     },
+     "needs": {
+      "items": {
+       "$ref": "#/components/schemas/NeedView"
+      },
+      "title": "Needs",
+      "type": "array"
+     },
+     "roles": {
+      "description": "The roles on the roster, for grants.",
+      "items": {
+       "$ref": "#/components/schemas/RoleOption"
+      },
+      "title": "Roles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "attached",
+     "available",
+     "needs",
+     "roles"
+    ],
+    "title": "ProjectConnections",
     "type": "object"
    },
    "ProjectItem": {
@@ -6980,6 +7763,40 @@
     "title": "RenameSeatInput",
     "type": "object"
    },
+   "ReplaceSecretInput": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     },
+     "value": {
+      "description": "The new value. The old one is gone.",
+      "format": "password",
+      "title": "Value",
+      "type": "string",
+      "writeOnly": true
+     }
+    },
+    "required": [
+     "connection",
+     "value"
+    ],
+    "title": "ReplaceSecretInput",
+    "type": "object"
+   },
    "RequestItem": {
     "properties": {
      "approved": {
@@ -7469,6 +8286,24 @@
     "title": "RoleList",
     "type": "object"
    },
+   "RoleOption": {
+    "properties": {
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     }
+    },
+    "required": [
+     "slug",
+     "name"
+    ],
+    "title": "RoleOption",
+    "type": "object"
+   },
    "RoleSaved": {
     "properties": {
      "changed": {
@@ -7942,6 +8777,15 @@
     ],
     "title": "SayInput",
     "type": "object"
+   },
+   "Scope": {
+    "enum": [
+     "install",
+     "person",
+     "project"
+    ],
+    "title": "Scope",
+    "type": "string"
    },
    "SearchHit": {
     "properties": {
@@ -8419,6 +9263,14 @@
     ],
     "title": "SettingsView",
     "type": "object"
+   },
+   "Shape": {
+    "enum": [
+     "text",
+     "file"
+    ],
+    "title": "Shape",
+    "type": "string"
    },
    "SmokeResult": {
     "properties": {
@@ -9596,6 +10448,44 @@
     "title": "UploadStatus",
     "type": "object"
    },
+   "Usage": {
+    "properties": {
+     "env_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Env Name"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "project_name": {
+      "title": "Project Name",
+      "type": "string"
+     },
+     "roles": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "project_id",
+     "project_name",
+     "roles",
+     "env_name"
+    ],
+    "title": "Usage",
+    "type": "object"
+   },
    "UseLinkInput": {
     "properties": {
      "link": {
@@ -9843,6 +10733,93 @@
     "title": "Working",
     "type": "object"
    },
+   "crewmind__domain__connections__item_operations__HistoryLine": {
+    "properties": {
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "by": {
+      "title": "By",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Project Id"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "at",
+     "what",
+     "by",
+     "project_id"
+    ],
+    "title": "HistoryLine",
+    "type": "object"
+   },
+   "crewmind__domain__connections__item_operations__ItemDetail": {
+    "properties": {
+     "hidden_uses": {
+      "description": "Projects using it that you cannot see.",
+      "title": "Hidden Uses",
+      "type": "integer"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__HistoryLine"
+      },
+      "title": "History",
+      "type": "array"
+     },
+     "item": {
+      "$ref": "#/components/schemas/ConnectionView"
+     },
+     "used_in": {
+      "description": "The projects you can see that use it.",
+      "items": {
+       "$ref": "#/components/schemas/Usage"
+      },
+      "title": "Used In",
+      "type": "array"
+     }
+    },
+    "required": [
+     "item",
+     "used_in",
+     "hidden_uses",
+     "history"
+    ],
+    "title": "ItemDetail",
+    "type": "object"
+   },
+   "crewmind__domain__connections__item_operations__ItemList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ConnectionView"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "ItemList",
+    "type": "object"
+   },
    "crewmind__domain__conversation__decisions__DecideInput": {
     "properties": {
      "project_id": {
@@ -10073,6 +11050,218 @@
      "reason"
     ],
     "title": "ExtendInput",
+    "type": "object"
+   },
+   "crewmind__domain__decisions__operations__HistoryLine": {
+    "properties": {
+     "actor_kind": {
+      "title": "Actor Kind",
+      "type": "string"
+     },
+     "at": {
+      "format": "date-time",
+      "title": "At",
+      "type": "string"
+     },
+     "state": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "State"
+     },
+     "what": {
+      "title": "What",
+      "type": "string"
+     }
+    },
+    "required": [
+     "at",
+     "actor_kind",
+     "what",
+     "state"
+    ],
+    "title": "HistoryLine",
+    "type": "object"
+   },
+   "crewmind__domain__decisions__operations__ItemDetail": {
+    "properties": {
+     "actions": {
+      "description": "What you can do with it now.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Actions",
+      "type": "array"
+     },
+     "basis": {
+      "anyOf": [
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Basis"
+     },
+     "chairman_note": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Chairman Note"
+     },
+     "closed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Closed At"
+     },
+     "deadline": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Deadline"
+     },
+     "default_outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "What happens if nobody answers.",
+      "title": "Default Outcome"
+     },
+     "fields": {
+      "additionalProperties": true,
+      "title": "Fields",
+      "type": "object"
+     },
+     "filed_by": {
+      "description": "agent or platform.",
+      "title": "Filed By",
+      "type": "string"
+     },
+     "history": {
+      "items": {
+       "$ref": "#/components/schemas/crewmind__domain__decisions__operations__HistoryLine"
+      },
+      "title": "History",
+      "type": "array"
+     },
+     "id": {
+      "title": "Id",
+      "type": "integer"
+     },
+     "if_declined": {
+      "title": "If Declined",
+      "type": "string"
+     },
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "opened_at": {
+      "format": "date-time",
+      "title": "Opened At",
+      "type": "string"
+     },
+     "outcome": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Outcome"
+     },
+     "project_id": {
+      "title": "Project Id",
+      "type": "string"
+     },
+     "recommendation": {
+      "title": "Recommendation",
+      "type": "string"
+     },
+     "state": {
+      "title": "State",
+      "type": "string"
+     },
+     "title": {
+      "description": "Built from the item's typed fields.",
+      "title": "Title",
+      "type": "string"
+     },
+     "waits_on_you": {
+      "title": "Waits On You",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "id",
+     "project_id",
+     "kind",
+     "title",
+     "state",
+     "filed_by",
+     "fields",
+     "recommendation",
+     "if_declined",
+     "basis",
+     "actions",
+     "deadline",
+     "default_outcome",
+     "outcome",
+     "chairman_note",
+     "waits_on_you",
+     "opened_at",
+     "closed_at",
+     "history"
+    ],
+    "title": "ItemDetail",
+    "type": "object"
+   },
+   "crewmind__domain__decisions__operations__ItemList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/ItemView"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "ItemList",
     "type": "object"
    },
    "crewmind__domain__founder__operations__StartInput": {
@@ -12414,6 +13603,646 @@
     ]
    }
   },
+  "/v1/connections/add_secret": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.add_secret",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AddSecretInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a secret. Its value is encrypted and never shown again.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/add_variable": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.add_variable",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AddVariableInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a variable: a plain value members and agents can read.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/attach": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "connections.attach",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AttachInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Attached"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Attach a secret, variable or MCP server to a project and choose who may use it.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/change_secret": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.change_secret",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChangeSecretInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Change what a secret is for, how it is used, or its expiry date.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/change_variable": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.change_variable",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChangeVariableInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Change a variable's value, description or environment variable name.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/delete": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.delete",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectionRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Delete a connection: it is detached from every project and its value destroyed.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/detach": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "connections.detach",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/DetachInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Detach a connection from a project. Agents that needed it wait.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/for_project": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "connections.for_project",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProjectConnections"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show what a project has, what its crew needs, and what could be attached.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/import_env": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.import_env",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImportEnvInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ImportReview"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add many secrets and variables from pasted KEY=value lines: all or none.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/list": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "connections.list",
+    "parameters": [
+     {
+      "description": "Only this scope.",
+      "in": "query",
+      "name": "scope",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "$ref": "#/components/schemas/Scope"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Only this scope.",
+       "title": "Scope"
+      }
+     },
+     {
+      "description": "Include this project's own.",
+      "in": "query",
+      "name": "project_id",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "Include this project's own.",
+       "title": "Project Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "List the secrets, variables and MCP servers you can use. Values are never shown.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/replace_secret": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.replace_secret",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReplaceSecretInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Replace a secret's value. The old value is gone for good.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/review_env": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.review_env",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ImportEnvInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ImportReview"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Review pasted KEY=value lines before adding them: names, kinds and problems.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/set_grants": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "connections.set_grants",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/GrantsInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Attached"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Set the roles of a project that may use an attached connection.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "connections.show",
+    "parameters": [
+     {
+      "description": "The connection's name or id.",
+      "in": "query",
+      "name": "connection",
+      "required": true,
+      "schema": {
+       "description": "The connection's name or id.",
+       "title": "Connection",
+       "type": "string"
+      }
+     },
+     {
+      "description": "The project, to find a project connection by name.",
+      "in": "query",
+      "name": "project_id",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "The project, to find a project connection by name.",
+       "title": "Project Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemDetail"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show a connection: how it is used, where, and its history. Never its value.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
   "/v1/corrections/list": {
    "get": {
     "description": "Requires: project_observer.",
@@ -14305,7 +16134,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemList"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemList"
         }
        }
       },
@@ -14403,7 +16232,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/ItemDetail"
+         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemDetail"
         }
        }
       },

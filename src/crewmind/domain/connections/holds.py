@@ -64,7 +64,7 @@ async def _seat_check(session: AsyncSession, project: Project, seat: Seat) -> st
     return None
 
 
-async def _seats(session: AsyncSession, project_id: str) -> list[tuple[Seat, Role]]:
+async def roster_seats(session: AsyncSession, project_id: str) -> list[tuple[Seat, Role]]:
     rows = await session.execute(
         select(Seat, Role)
         .join(Role, Role.id == Seat.role_id)
@@ -100,7 +100,7 @@ async def apply(
     seats this module holds are released. Returns the seats held now."""
     current = await needs.sync(session, project, now, caller)
     held: list[Seat] = []
-    for seat, role in await _seats(session, project.id):
+    for seat, role in await roster_seats(session, project.id):
         waiting = needs.unmet_for(current, role.slug)
         check = None if waiting else await _seat_check(session, project, seat)
         reasons = [_need_key(need) for need in waiting] + ([SEAT_CHECK] if check else [])
@@ -128,17 +128,15 @@ async def blockers(
         if keep
         else await needs.preview(session, project)
     )
-    roster_seats = await _seats(session, project.id)
+    on_roster = await roster_seats(session, project.id)
     found: list[Blocker] = []
     for need in current:
         if need.state != needs.NeedState.OPEN:
             continue
-        names = [
-            seat.display_name for seat, role in roster_seats if role.slug in (need.roles or [])
-        ]
+        names = [seat.display_name for seat, role in on_roster if role.slug in (need.roles or [])]
         found.append(Blocker(text=needs.describe(need).capitalize() + " is missing.", seats=names))
     unmet = {slug for need in current if need.state in needs.UNMET for slug in need.roles or []}
-    for seat, role in roster_seats:
+    for seat, role in on_roster:
         if role.slug in unmet:
             continue
         check = await _seat_check(session, project, seat)

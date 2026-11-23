@@ -209,6 +209,7 @@ export const settingWords: Record<string, SettingWords> = {
     help: "Secrets shorter than this are refused, because they cannot be hidden reliably in what agents write.",
     noun: ["character", "characters"],
   },
+  "secret.max_size": { label: "Largest secret", help: "Secrets larger than this are refused." },
   "secret.expiry_warning": { label: "Warn before a secret expires", help: "How long before a secret's expiry date the chairman is told." },
   "mcp.call_timeout": { label: "MCP call time limit", help: "How long one call to an MCP server may take before it is stopped." },
   "mcp.max_calls_per_run": {
@@ -422,6 +423,7 @@ export const settingsWords = {
     profile: { label: "Profile & appearance", help: "Your name, theme and how agents talk to you." },
     notifications: { label: "Notifications", help: "Alerts on this device and your daily brief." },
     models: { label: "Models & keys", help: "The AI model keys your agents use." },
+    connections: { label: "Connections", help: "Secrets and variables your crews use." },
     founder: { label: "Founder", help: "The key and quality the Founder uses." },
     people: { label: "People", help: "Invite teammates and manage roles." },
     install: { label: "Install settings", help: "Limits and record keeping for every project." },

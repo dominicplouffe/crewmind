@@ -1,0 +1,141 @@
+/* Connections: secrets and variables in Settings and in a project (CON-15). */
+
+.connection-list { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.connection-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+.connection-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-muted);
+}
+.connection-icon.kind-secret { color: var(--color-accent-soft-text); background: var(--color-accent-soft); border-color: var(--color-accent-border); }
+.connection-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.connection-main p { margin: 0; }
+.connection-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+.connection-description { color: var(--color-text); }
+.connection-value {
+  align-self: flex-start;
+  margin-top: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+.connection-actions { display: flex; align-items: center; gap: var(--space-1); }
+.small { font-size: var(--text-sm); }
+
+/* The empty state teaches the three kinds. */
+.connection-empty { margin: var(--space-4) 0; }
+.kind-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.kind-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border-control);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-sunken);
+}
+.kind-card p { margin: 0; }
+.kind-card .button { margin-top: auto; }
+.kind-card-icon { color: var(--color-accent-soft-text); }
+.kind-card-title { font-weight: var(--weight-semibold); }
+
+/* The add flow. */
+.connection-form { display: flex; flex-direction: column; }
+.connection-form fieldset .segmented { margin: var(--space-1) 0 var(--space-2); }
+.connection-form .field.nested { margin: var(--space-3) 0 0; }
+.secret-input { display: flex; gap: var(--space-2); align-items: flex-start; }
+.secret-input input,
+.secret-input textarea { flex: 1; min-width: 0; font-family: var(--font-mono); }
+textarea.masked { -webkit-text-security: disc; }
+.env-text { font-family: var(--font-mono); }
+
+/* Roles that may use a connection. */
+.role-picker { border: 0; padding: 0; margin: 0 0 var(--space-4); }
+.role-picker > legend { font-weight: var(--weight-semibold); padding: 0; margin-bottom: var(--space-2); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--control-sm);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+.role-picker .chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.chip:has(input:disabled) { cursor: default; }
+.chip-on { border-color: var(--color-accent-border); background: var(--color-accent-soft); color: var(--color-accent-soft-text); }
+li.chip { cursor: default; min-height: 1.5rem; padding: 0 var(--space-2); font-size: var(--text-xs); }
+.grants { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+.grants.editing { flex-direction: column; align-items: stretch; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-sunken); }
+
+/* A project's connections: what is missing comes first. */
+.connections-panel { display: flex; flex-direction: column; gap: var(--space-5); }
+.connections-group .group-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
+.connections-group .group-head .group-title { margin: 0; }
+.need-list { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.need-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-danger-soft);
+}
+.need-row p { margin: 0; }
+.need-icon { color: var(--color-danger); }
+.need-name { font-weight: var(--weight-semibold); }
+.need-waits { color: var(--color-danger); font-weight: var(--weight-medium); }
+
+/* The .env review. */
+.import-review { width: 100%; border-collapse: collapse; }
+.import-review th,
+.import-review td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-subtle); vertical-align: top; }
+.import-review thead th { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--weight-semibold); }
+.import-review tr.skipped { opacity: 0.55; }
+.import-review tr.has-problem th code { color: var(--color-danger); }
+.import-problem { margin: var(--space-1) 0 0; font-size: var(--text-sm); font-weight: var(--weight-regular); color: var(--color-danger); }
+.delete-uses { margin: var(--space-2) 0 var(--space-3); }
+
+@media (max-width: 640px) {
+  .connection-row,
+  .need-row { grid-template-columns: auto minmax(0, 1fr); }
+  .connection-actions,
+  .need-row > .button { grid-column: 1 / -1; justify-content: flex-end; }
+}

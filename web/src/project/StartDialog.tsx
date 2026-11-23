@@ -11,10 +11,12 @@ import { startDialog as words } from "../strings.shell";
 interface Props {
   waiting: Schemas["BlockerItem"][];
   onStartWithout(): Promise<void>;
+  /** Opens the project's connections, where each missing one is added in place. */
+  onAddNow?(): void;
   onClose(): void;
 }
 
-export function StartDialog({ waiting, onStartWithout, onClose }: Props): JSX.Element {
+export function StartDialog({ waiting, onStartWithout, onAddNow, onClose }: Props): JSX.Element {
   const [busy, setBusy] = useState(false);
   const seats = new Set(waiting.flatMap((item) => item.seats));
   return (
@@ -33,6 +35,11 @@ export function StartDialog({ waiting, onStartWithout, onClose }: Props): JSX.El
         <button type="button" className="button" onClick={onClose} disabled={busy}>
           {words.notNow}
         </button>
+        {onAddNow ? (
+          <button type="button" className="button" onClick={onAddNow} disabled={busy}>
+            {words.addNow}
+          </button>
+        ) : null}
         <button
           type="button"
           className="button primary"

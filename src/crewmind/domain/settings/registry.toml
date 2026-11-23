@@ -2,7 +2,7 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
-version = "2.8"
+version = "2.9"
 
 [settings."quality"]
 type = "enum"
@@ -894,6 +894,16 @@ max = 64
 used_by = ["CON-2", "CON-8"]
 spec_default = "8"
 spec_range = "8–64"
+
+[settings."secret.max_size"]
+type = "bytes"
+scope = "install"
+default = 65536
+min = 1024
+max = 1048576
+used_by = ["CON-2"]
+spec_default = "64 KB"
+spec_range = "1 KB–1 MB"
 
 [settings."secret.expiry_warning"]
 type = "duration"

@@ -6,15 +6,16 @@ A project reaches the outside world through its connections: secrets, variables 
   - A connection is a **secret**, a **variable** or an **MCP server**, and lives in one of three scopes: the **install** (added by an admin, attachable by anyone), a **person** (added by its owner, attachable to any project they chair), or a **project** (added in that project, used only there).
   - The owner changes or deletes a person connection; an admin an install connection; the chairman or a co-chair a project connection.
   - Deleting a connection first lists every project that uses it.
+  - A name starts with a letter and holds letters, digits, `_`, `-` and `.`. Names are unique per owner whatever their case, and a need (CON-5) is met by a connection of the same kind whose name matches it whatever its case.
 - **CON-2 Secrets.**
   - A secret has a name, a one-line description of what it is for (agents read it), and a value.
   - **Values are write-only.** Once saved, a value is never shown again to anyone, admins included, on any surface. It can be replaced.
-  - A value shorter than `secret.min_length` \[8\] is refused, because it cannot be masked reliably (CON-8).
+  - A value shorter than `secret.min_length` \[8\] is refused, because it cannot be masked reliably (CON-8). A value larger than `secret.max_size` \[64 KB\] is refused.
   - A secret is used in one of two ways, chosen when it is added:
     - **sent for you** (the default): crewmind adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
     - **given to the agent**: placed in the run's sandbox as an environment variable or a file (CON-7), for what cannot be sent for the agent.
-  - A secret may carry an expiry date. The chairman of every project that uses it is told `secret.expiry_warning` \[7 days\] before, and on the day.
-  - Many secrets and variables can be added at once by pasting `KEY=value` lines, reviewed as a table before anything is saved.
+  - A secret may carry an expiry date, a day in UTC. The chairman of every project that uses it is told `secret.expiry_warning` \[7 days\] before, and on the day. The day after, it expires.
+  - Many secrets and variables can be added at once by pasting `KEY=value` lines, reviewed as a table before anything is saved. The review shows each line's name, whether it becomes a secret or a variable (guessed from the name, changeable) and any problem, never a value. Secrets added this way are given to the agent under their own name, as a `.env` file is read by programs.
 - **CON-3 Variables.** A variable has a name, a description and a plain value. It is shown to members and agents, placed in granted runs as an environment variable, and listed in their context pack.
 - **CON-4 Attachment and grants.**
   - A project uses a connection only once the chairman attaches it and grants it to roles of the project, or to every role.
@@ -77,7 +78,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny).
   - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
 - **CON-15 Surfaces.**
-  - The web app has a Connections area in Settings (install and personal) and a Connections tab in each project, sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
+  - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
   - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets.
   - Human-only (IF-5.6): creating or replacing a value, OAuth sign-in, adding a command server, allowing a tool that changes things, deleting a connection. MCP clients see names, kinds and health.
   - Values are typed only into fields that are never pre-filled, are cleared after saving, and are never put in a URL or browser storage.

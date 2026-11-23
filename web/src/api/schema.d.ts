@@ -931,6 +931,286 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/add_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a secret. Its value is encrypted and never shown again.
+         * @description Requires: person.
+         */
+        post: operations["connections.add_secret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/add_variable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a variable: a plain value members and agents can read.
+         * @description Requires: person.
+         */
+        post: operations["connections.add_variable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attach a secret, variable or MCP server to a project and choose who may use it.
+         * @description Requires: project_chair.
+         */
+        post: operations["connections.attach"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/change_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change what a secret is for, how it is used, or its expiry date.
+         * @description Requires: person.
+         */
+        post: operations["connections.change_secret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/change_variable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change a variable's value, description or environment variable name.
+         * @description Requires: person.
+         */
+        post: operations["connections.change_variable"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete a connection: it is detached from every project and its value destroyed.
+         * @description Requires: person.
+         */
+        post: operations["connections.delete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/detach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Detach a connection from a project. Agents that needed it wait.
+         * @description Requires: project_chair.
+         */
+        post: operations["connections.detach"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/for_project": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show what a project has, what its crew needs, and what could be attached.
+         * @description Requires: project_observer.
+         */
+        get: operations["connections.for_project"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/import_env": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add many secrets and variables from pasted KEY=value lines: all or none.
+         * @description Requires: person.
+         */
+        post: operations["connections.import_env"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the secrets, variables and MCP servers you can use. Values are never shown.
+         * @description Requires: person.
+         */
+        get: operations["connections.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/replace_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replace a secret's value. The old value is gone for good.
+         * @description Requires: person.
+         */
+        post: operations["connections.replace_secret"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/review_env": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review pasted KEY=value lines before adding them: names, kinds and problems.
+         * @description Requires: person.
+         */
+        post: operations["connections.review_env"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/set_grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set the roles of a project that may use an attached connection.
+         * @description Requires: project_chair.
+         */
+        post: operations["connections.set_grants"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show a connection: how it is used, where, and its history. Never its value.
+         * @description Requires: person.
+         */
+        get: operations["connections.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/corrections/list": {
         parameters: {
             query?: never;
@@ -4360,6 +4640,118 @@ export interface components {
              */
             role: "co-chair" | "observer";
         };
+        /** AddSecretInput */
+        AddSecretInput: {
+            /**
+             * Basic User
+             * @description The user name, for basic.
+             */
+            basic_user?: string | null;
+            /**
+             * @description sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
+             * @default sent_for_you
+             */
+            delivery?: components["schemas"]["Delivery"];
+            /**
+             * Description
+             * @description What it is for, in one line. Agents read it.
+             */
+            description: string;
+            /**
+             * Env Name
+             * @description Given: the variable or file name. By default, from the name.
+             */
+            env_name?: string | null;
+            /**
+             * Expires On
+             * @description The day it stops working (UTC).
+             */
+            expires_on?: string | null;
+            /**
+             * @description Sent for you: bearer, basic (with a user) or header.
+             * @default bearer
+             */
+            header_kind?: components["schemas"]["HeaderKind"];
+            /**
+             * Header Name
+             * @description The header, for header.
+             */
+            header_name?: string | null;
+            /**
+             * Name
+             * @description What it is called, such as wordpress.
+             */
+            name: string;
+            /**
+             * Project Id
+             * @description The project it belongs to (project scope), or to attach it to at once.
+             */
+            project_id?: string | null;
+            /**
+             * Roles
+             * @description With a project: the roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+            /**
+             * @description person (yours, for any project you chair), project, or install (admins).
+             * @default person
+             */
+            scope?: components["schemas"]["Scope"];
+            /**
+             * @description Given: text (a variable) or file.
+             * @default text
+             */
+            shape?: components["schemas"]["Shape"];
+            /**
+             * Sites
+             * @description Sent for you: the exact host names it is sent to.
+             */
+            sites?: string[];
+            /**
+             * Value
+             * Format: password
+             * @description The value. It is encrypted and never shown again.
+             */
+            value: string;
+        };
+        /** AddVariableInput */
+        AddVariableInput: {
+            /**
+             * Description
+             * @description What it is for.
+             */
+            description: string;
+            /**
+             * Env Name
+             * @description The environment variable name.
+             */
+            env_name?: string | null;
+            /**
+             * Name
+             * @description What it is called.
+             */
+            name: string;
+            /**
+             * Project Id
+             * @description The project it belongs to (project scope), or to attach it to at once.
+             */
+            project_id?: string | null;
+            /**
+             * Roles
+             * @description With a project: the roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+            /**
+             * @description person (yours, for any project you chair), project, or install (admins).
+             * @default person
+             */
+            scope?: components["schemas"]["Scope"];
+            /**
+             * Value
+             * @description The value. Variables are shown to members and agents.
+             */
+            value: string;
+        };
         /** Agenda */
         Agenda: {
             /** Lines */
@@ -4509,6 +4901,43 @@ export interface components {
              * @description The project's id, from `projects list`.
              */
             project_id: string;
+        };
+        /** AttachInput */
+        AttachInput: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Env Name
+             * @description A variable or file name for this project only.
+             */
+            env_name?: string | null;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Roles
+             * @description The roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+        };
+        /** Attached */
+        Attached: {
+            /**
+             * Env Name
+             * @description The variable or file name in this project.
+             */
+            env_name: string | null;
+            item: components["schemas"]["ConnectionView"];
+            /**
+             * Roles
+             * @description The roles granted, or * for every role.
+             */
+            roles: string[];
         };
         /** Attempt */
         Attempt: {
@@ -4895,6 +5324,62 @@ export interface components {
              */
             reason: string;
         };
+        /** ChangeSecretInput */
+        ChangeSecretInput: {
+            /** Basic User */
+            basic_user?: string | null;
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            delivery?: components["schemas"]["Delivery"] | null;
+            /** Description */
+            description?: string | null;
+            /** Env Name */
+            env_name?: string | null;
+            /**
+             * Expires On
+             * @description A new expiry day (UTC).
+             */
+            expires_on?: string | null;
+            header_kind?: components["schemas"]["HeaderKind"] | null;
+            /** Header Name */
+            header_name?: string | null;
+            /**
+             * No Expiry
+             * @description Remove the expiry date.
+             * @default false
+             */
+            no_expiry?: boolean;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+            shape?: components["schemas"]["Shape"] | null;
+            /** Sites */
+            sites?: string[] | null;
+        };
+        /** ChangeVariableInput */
+        ChangeVariableInput: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /** Description */
+            description?: string | null;
+            /** Env Name */
+            env_name?: string | null;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+            /** Value */
+            value?: string | null;
+        };
         /** ChannelList */
         ChannelList: {
             /** Items */
@@ -5018,6 +5503,115 @@ export interface components {
              * @description Your edited sentence, if any.
              */
             text?: string | null;
+        };
+        /** ConnectionRef */
+        ConnectionRef: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+        };
+        /** ConnectionView */
+        ConnectionView: {
+            /** Basic User */
+            basic_user?: string | null;
+            /**
+             * Changed At
+             * Format: date-time
+             */
+            changed_at: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Delivery
+             * @description For a secret: sent_for_you or given.
+             */
+            delivery?: string | null;
+            /**
+             * Description
+             * @description What it is for. Agents read it.
+             */
+            description: string;
+            /**
+             * Env Name
+             * @description The variable or file name a run gets it under.
+             */
+            env_name?: string | null;
+            /** Expires On */
+            expires_on?: string | null;
+            /**
+             * Expires Soon
+             * @description Its expiry is within secret.expiry_warning: people were told.
+             * @default false
+             */
+            expires_soon?: boolean;
+            /**
+             * Header Kind
+             * @description bearer, basic or header.
+             */
+            header_kind?: string | null;
+            /** Header Name */
+            header_name?: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @description secret, variable or mcp_server.
+             */
+            kind: string;
+            /** Last Used At */
+            last_used_at?: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Scope
+             * @description install, person or project.
+             */
+            scope: string;
+            /**
+             * Shape
+             * @description For a given secret: text or file.
+             */
+            shape?: string | null;
+            /**
+             * Sites
+             * @description For a secret sent for you: the sites it is sent to.
+             */
+            sites?: string[];
+            /**
+             * State
+             * @description active, expired or deleted.
+             */
+            state: string;
+            /**
+             * Used In
+             * @description How many projects it is attached to.
+             */
+            used_in: number;
+            /**
+             * Value
+             * @description A variable's value. A secret's value is never shown.
+             */
+            value?: string | null;
+            /**
+             * Value Set At
+             * @description When a secret's value was last set.
+             */
+            value_set_at?: string | null;
+            /**
+             * Yours
+             * @description You may change or delete it.
+             */
+            yours: boolean;
         };
         /** CorrectionItem */
         CorrectionItem: {
@@ -5377,6 +5971,11 @@ export interface components {
             /** Purged After Days */
             purged_after_days: number;
         };
+        /**
+         * Delivery
+         * @enum {string}
+         */
+        Delivery: "sent_for_you" | "given";
         /** Desk */
         Desk: {
             /**
@@ -5401,6 +6000,19 @@ export interface components {
              * @description The item's kind, or expired bet, or frozen thread.
              */
             what: string;
+        };
+        /** DetachInput */
+        DetachInput: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
         };
         /** DirectiveItem */
         DirectiveItem: {
@@ -5952,6 +6564,24 @@ export interface components {
              */
             grant_id: string;
         };
+        /** GrantsInput */
+        GrantsInput: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Roles
+             * @description Every role that may use it, or *.
+             */
+            roles: string[];
+        };
         /** GrillAnswer */
         GrillAnswer: {
             /**
@@ -6046,6 +6676,11 @@ export interface components {
              */
             waiting_on_you: number;
         };
+        /**
+         * HeaderKind
+         * @enum {string}
+         */
+        HeaderKind: "bearer" | "basic" | "header";
         /** HireInput */
         HireInput: {
             /**
@@ -6098,20 +6733,6 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** HistoryLine */
-        HistoryLine: {
-            /** Actor Kind */
-            actor_kind: string;
-            /**
-             * At
-             * Format: date-time
-             */
-            at: string;
-            /** State */
-            state: string | null;
-            /** What */
-            what: string;
-        };
         /** HoldInput */
         HoldInput: {
             /**
@@ -6153,6 +6774,77 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** ImportEnvInput */
+        ImportEnvInput: {
+            /**
+             * Project Id
+             * @description The project it belongs to (project scope), or to attach it to at once.
+             */
+            project_id?: string | null;
+            /**
+             * Roles
+             * @description With a project: the roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+            /**
+             * @description person (yours, for any project you chair), project, or install (admins).
+             * @default person
+             */
+            scope?: components["schemas"]["Scope"];
+            /**
+             * Secrets
+             * @description Keys to add as secrets, whatever their name.
+             */
+            secrets?: string[];
+            /**
+             * Skip
+             * @description Keys to leave out.
+             */
+            skip?: string[];
+            /**
+             * Text
+             * Format: password
+             * @description The pasted KEY=value lines.
+             */
+            text: string;
+            /**
+             * Variables
+             * @description Keys to add as variables, whatever their name.
+             */
+            variables?: string[];
+        };
+        /** ImportLine */
+        ImportLine: {
+            /**
+             * Kind
+             * @description secret or variable.
+             */
+            kind: string;
+            /** Line */
+            line: number;
+            /**
+             * Name
+             * @description The KEY of the line: the connection's name.
+             */
+            name: string;
+            /**
+             * Problem
+             * @description What stops this line being saved, in plain words.
+             */
+            problem: string | null;
+            /** Skipped */
+            skipped: boolean;
+        };
+        /** ImportReview */
+        ImportReview: {
+            /** Lines */
+            lines: components["schemas"]["ImportLine"][];
+            /**
+             * Saved
+             * @description How many were saved; 0 for a review.
+             */
+            saved: number;
+        };
         /**
          * InstanceRole
          * @enum {string}
@@ -6182,71 +6874,6 @@ export interface components {
              * @default member
              */
             role?: components["schemas"]["InstanceRole"];
-        };
-        /** ItemDetail */
-        ItemDetail: {
-            /**
-             * Actions
-             * @description What you can do with it now.
-             */
-            actions: string[];
-            /** Basis */
-            basis: {
-                [key: string]: unknown;
-            } | null;
-            /** Chairman Note */
-            chairman_note: string | null;
-            /** Closed At */
-            closed_at: string | null;
-            /** Deadline */
-            deadline: string | null;
-            /**
-             * Default Outcome
-             * @description What happens if nobody answers.
-             */
-            default_outcome: string | null;
-            /** Fields */
-            fields: {
-                [key: string]: unknown;
-            };
-            /**
-             * Filed By
-             * @description agent or platform.
-             */
-            filed_by: string;
-            /** History */
-            history: components["schemas"]["HistoryLine"][];
-            /** Id */
-            id: number;
-            /** If Declined */
-            if_declined: string;
-            /** Kind */
-            kind: string;
-            /**
-             * Opened At
-             * Format: date-time
-             */
-            opened_at: string;
-            /** Outcome */
-            outcome: string | null;
-            /** Project Id */
-            project_id: string;
-            /** Recommendation */
-            recommendation: string;
-            /** State */
-            state: string;
-            /**
-             * Title
-             * @description Built from the item's typed fields.
-             */
-            title: string;
-            /** Waits On You */
-            waits_on_you: boolean;
-        };
-        /** ItemList */
-        ItemList: {
-            /** Items */
-            items: components["schemas"]["ItemView"][];
         };
         /** ItemView */
         ItemView: {
@@ -6666,6 +7293,28 @@ export interface components {
             /** Seats */
             seats: components["schemas"]["SeatModel"][];
         };
+        /** NeedView */
+        NeedView: {
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /**
+             * Roles
+             * @description The roles that need it.
+             */
+            roles: string[];
+            /**
+             * Seats
+             * @description The agents who wait while it is missing.
+             */
+            seats: string[];
+            /**
+             * State
+             * @description met, open (missing) or waived (started without it).
+             */
+            state: string;
+        };
         /** NoteInput */
         NoteInput: {
             /**
@@ -6980,6 +7629,23 @@ export interface components {
              * @description The preference's id, from `memory preferences`.
              */
             memory_id: string;
+        };
+        /** ProjectConnections */
+        ProjectConnections: {
+            /** Attached */
+            attached: components["schemas"]["Attached"][];
+            /**
+             * Available
+             * @description What you could attach here.
+             */
+            available: components["schemas"]["ConnectionView"][];
+            /** Needs */
+            needs: components["schemas"]["NeedView"][];
+            /**
+             * Roles
+             * @description The roles on the roster, for grants.
+             */
+            roles: components["schemas"]["RoleOption"][];
         };
         /** ProjectItem */
         ProjectItem: {
@@ -7402,6 +8068,25 @@ export interface components {
              */
             seat: string;
         };
+        /** ReplaceSecretInput */
+        ReplaceSecretInput: {
+            /**
+             * Connection
+             * @description The connection's name or id.
+             */
+            connection: string;
+            /**
+             * Project Id
+             * @description The project, to find a project connection by name.
+             */
+            project_id?: string | null;
+            /**
+             * Value
+             * Format: password
+             * @description The new value. The old one is gone.
+             */
+            value: string;
+        };
         /** RequestItem */
         RequestItem: {
             /** Approved */
@@ -7595,6 +8280,13 @@ export interface components {
             /** Items */
             items: components["schemas"]["RoleItem"][];
         };
+        /** RoleOption */
+        RoleOption: {
+            /** Name */
+            name: string;
+            /** Slug */
+            slug: string;
+        };
         /** RoleSaved */
         RoleSaved: {
             /**
@@ -7747,6 +8439,11 @@ export interface components {
              */
             drafting_id: string;
         };
+        /**
+         * Scope
+         * @enum {string}
+         */
+        Scope: "install" | "person" | "project";
         /** SearchHit */
         SearchHit: {
             /**
@@ -7951,6 +8648,11 @@ export interface components {
             /** Scope */
             scope: string;
         };
+        /**
+         * Shape
+         * @enum {string}
+         */
+        Shape: "text" | "file";
         /** SmokeResult */
         SmokeResult: {
             /** Detail */
@@ -8434,6 +9136,17 @@ export interface components {
             /** Upload Id */
             upload_id: string;
         };
+        /** Usage */
+        Usage: {
+            /** Env Name */
+            env_name: string | null;
+            /** Project Id */
+            project_id: string;
+            /** Project Name */
+            project_name: string;
+            /** Roles */
+            roles: string[];
+        };
         /** UseLinkInput */
         UseLinkInput: {
             /**
@@ -8544,6 +9257,41 @@ export interface components {
             run_kind: string;
             /** Seat */
             seat: string;
+        };
+        /** HistoryLine */
+        crewmind__domain__connections__item_operations__HistoryLine: {
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** By */
+            by: string;
+            /** Project Id */
+            project_id: string | null;
+            /** What */
+            what: string;
+        };
+        /** ItemDetail */
+        crewmind__domain__connections__item_operations__ItemDetail: {
+            /**
+             * Hidden Uses
+             * @description Projects using it that you cannot see.
+             */
+            hidden_uses: number;
+            /** History */
+            history: components["schemas"]["crewmind__domain__connections__item_operations__HistoryLine"][];
+            item: components["schemas"]["ConnectionView"];
+            /**
+             * Used In
+             * @description The projects you can see that use it.
+             */
+            used_in: components["schemas"]["Usage"][];
+        };
+        /** ItemList */
+        crewmind__domain__connections__item_operations__ItemList: {
+            /** Items */
+            items: components["schemas"]["ConnectionView"][];
         };
         /** DecideInput */
         crewmind__domain__conversation__decisions__DecideInput: {
@@ -8666,6 +9414,85 @@ export interface components {
              * @description Why it needs more time.
              */
             reason: string;
+        };
+        /** HistoryLine */
+        crewmind__domain__decisions__operations__HistoryLine: {
+            /** Actor Kind */
+            actor_kind: string;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /** State */
+            state: string | null;
+            /** What */
+            what: string;
+        };
+        /** ItemDetail */
+        crewmind__domain__decisions__operations__ItemDetail: {
+            /**
+             * Actions
+             * @description What you can do with it now.
+             */
+            actions: string[];
+            /** Basis */
+            basis: {
+                [key: string]: unknown;
+            } | null;
+            /** Chairman Note */
+            chairman_note: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Deadline */
+            deadline: string | null;
+            /**
+             * Default Outcome
+             * @description What happens if nobody answers.
+             */
+            default_outcome: string | null;
+            /** Fields */
+            fields: {
+                [key: string]: unknown;
+            };
+            /**
+             * Filed By
+             * @description agent or platform.
+             */
+            filed_by: string;
+            /** History */
+            history: components["schemas"]["crewmind__domain__decisions__operations__HistoryLine"][];
+            /** Id */
+            id: number;
+            /** If Declined */
+            if_declined: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /** Outcome */
+            outcome: string | null;
+            /** Project Id */
+            project_id: string;
+            /** Recommendation */
+            recommendation: string;
+            /** State */
+            state: string;
+            /**
+             * Title
+             * @description Built from the item's typed fields.
+             */
+            title: string;
+            /** Waits On You */
+            waits_on_you: boolean;
+        };
+        /** ItemList */
+        crewmind__domain__decisions__operations__ItemList: {
+            /** Items */
+            items: components["schemas"]["ItemView"][];
         };
         /** StartInput */
         crewmind__domain__founder__operations__StartInput: {
@@ -10277,6 +11104,469 @@ export interface operations {
             };
         };
     };
+    "connections.add_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSecretInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.add_variable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddVariableInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.attach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttachInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attached"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.change_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeSecretInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.change_variable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeVariableInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectionRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.detach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DetachInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.for_project": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectConnections"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.import_env": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportEnvInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.list": {
+        parameters: {
+            query?: {
+                /** @description Only this scope. */
+                scope?: components["schemas"]["Scope"] | null;
+                /** @description Include this project's own. */
+                project_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemList"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.replace_secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReplaceSecretInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.review_env": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportEnvInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportReview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.set_grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GrantsInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attached"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.show": {
+        parameters: {
+            query: {
+                /** @description The connection's name or id. */
+                connection: string;
+                /** @description The project, to find a project connection by name. */
+                project_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "corrections.list": {
         parameters: {
             query: {
@@ -11723,7 +13013,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ItemList"];
+                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemList"];
                 };
             };
             /** @description Validation Error */
@@ -11790,7 +13080,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ItemDetail"];
+                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemDetail"];
                 };
             };
             /** @description Validation Error */
