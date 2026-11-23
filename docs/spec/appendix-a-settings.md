@@ -111,6 +111,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `mcp.description_max` | 1,000 characters | 100–4,000 | install | CON-12 |
 | `mcp.tools_refresh` | daily | hourly, daily, weekly | install | CON-12 |
 | `mcp.command_idle` | 15 min | 1 min–24 h | install | CON-11 |
+| `proxy.idle_timeout` | 5 min | 10 s–1 h | install | CON-6 |
 | `proxy.certificate_life` | 24 h | 1–168 h | install | CON-6 |
 
 ### Constraints
@@ -133,6 +134,7 @@ Environment variables, read at start (NFR-7). They are not governed settings: th
 | `CREWMIND_MASTER_KEY_FILE` | `<data dir>/master.key`, created once by install and never overwritten | A readable file | ACC-6, NFR-2 |
 | `CREWMIND_HOST` | 127.0.0.1 | An address | NFR-6 |
 | `CREWMIND_PORT` | 8420 (starting default) | 1–65535 | NFR-6 |
+| `CREWMIND_EGRESS_PORT` | 0 (a free port, chosen at start and told to each run) | 0–65535 | CON-6 |
 | `CREWMIND_PUBLIC_URL` | none | An https URL; required to bind beyond localhost | NFR-6 |
 | `CREWMIND_SANDBOX_MODE` | container | container, host-jail (once it ships), unisolated (development only) | EXE-12 |
 | `CREWMIND_SANDBOX_CPUS` | 2 | 1–32 | EXE-12 |

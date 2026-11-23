@@ -43,6 +43,8 @@ class Config:
     sandbox_cpus: int = 2
     sandbox_memory: int = 2 * 1024**3
     agent_api_url: str | None = None
+    egress_port: int = 0
+    """CON-6: where the egress proxy listens, on the server's own host (`CREWMIND_EGRESS_PORT`)."""
     mock_script_dir: Path | None = None
     memory_engine: str = "mem0"
     allow_agent_checks_unisolated: bool = False
@@ -120,6 +122,7 @@ def load_config(env: Mapping[str, str] | None = None, *, slim: bool = False) -> 
         sandbox_cpus=read("CREWMIND_SANDBOX_CPUS", env),
         sandbox_memory=read("CREWMIND_SANDBOX_MEMORY", env),
         agent_api_url=read("CREWMIND_AGENT_API_URL", env),
+        egress_port=read("CREWMIND_EGRESS_PORT", env),
         mock_script_dir=Path(scripts).expanduser()
         if (scripts := read("CREWMIND_MOCK_SCRIPT_DIR", env))
         else None,

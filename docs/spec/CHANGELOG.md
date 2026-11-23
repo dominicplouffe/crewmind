@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.26 (23 Nov 2026): connections, part 7B.3
+
+- **CON-6, EXE-14:** only a run with a secret sent for it goes through the egress proxy, so the proxy never stands in the way of ordinary traffic; the proxy connects only to public addresses (WRK-12) and says why it refuses; a secret is never added to plain HTTP; upgrades to a site with a secret are refused; the authority is valid for ten years and certificate validity follows the wall clock; idle connections close after `proxy.idle_timeout`.
+- **Appendix A:** `proxy.idle_timeout` (5 min, 10 s–1 h, install) and `CREWMIND_EGRESS_PORT` (a free port by default).
+
 ## Revision 2.25 (23 Nov 2026): connections, part 7B.2
 
 - **CON-7, CON-3:** given secrets and variables reach the harness over the run's own channel when the run starts and only the commands it runs receive them, never a container's settings; file secrets are in `CREWMIND_SECRETS_DIR`, removed when the run ends.

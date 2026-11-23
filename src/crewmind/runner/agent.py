@@ -10,11 +10,13 @@ import asyncio
 import json
 import os
 import shutil
+import ssl
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 
@@ -81,15 +83,39 @@ def _inside(workspace: Path, relative: str) -> Path:
     return target
 
 
-class Given:
-    """What this run is given (CON-7): variables for the commands it runs, and files in a
-    private in-memory directory that is removed when the run ends. Nothing here is ever
-    sent anywhere by the harness."""
+SYSTEM_BUNDLES = (
+    "/etc/ssl/certs/ca-certificates.crt",
+    "/etc/pki/tls/certs/ca-bundle.crt",
+    "/etc/ssl/cert.pem",
+)
+"""Where Linux distributions keep the system's trusted certificates."""
 
-    def __init__(self, variables: dict[str, str], files: dict[str, str]) -> None:
+
+def _system_bundle() -> str:
+    paths = ssl.get_default_verify_paths()
+    for candidate in (paths.cafile, paths.openssl_cafile, *SYSTEM_BUNDLES):
+        if candidate and os.path.isfile(candidate):
+            with open(candidate, encoding="utf-8") as file:
+                return file.read()
+    return ""
+
+
+class Given:
+    """What this run is given (CON-6, CON-7): variables for the commands it runs, files in
+    a private in-memory directory that is removed when the run ends, and the egress proxy
+    with the authority it signs with. Nothing here is ever sent anywhere by the harness."""
+
+    def __init__(
+        self,
+        variables: dict[str, str],
+        files: dict[str, str],
+        proxy: str | None = None,
+        authority: str | None = None,
+        token: str = "",
+    ) -> None:
         self.directory: str | None = None
         self.environment = {**os.environ, **variables}
-        if files:
+        if files or (proxy and authority):
             place = next(
                 (
                     path
@@ -106,6 +132,32 @@ class Given:
                 with os.fdopen(descriptor, "w", encoding="utf-8") as file:
                     file.write(content)
             self.environment[SECRETS_DIR] = self.directory
+        if proxy and authority and self.directory is not None:
+            self._use_proxy(proxy, authority, token)
+
+    def _write(self, name: str, content: str) -> str:
+        assert self.directory is not None
+        path = os.path.join(self.directory, name)
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as file:
+            file.write(content)
+        return path
+
+    def _use_proxy(self, proxy: str, authority: str, token: str) -> None:
+        """CON-6: web traffic goes through the egress proxy, which knows the run by its
+        token, and the authority it signs with is trusted beside the system's own."""
+        scheme, _, address = proxy.partition("://")
+        through = f"{scheme}://run:{token}@{address}"
+        own = urlsplit(os.environ.get("CREWMIND_AGENT_API", "")).hostname or ""
+        bundle = self._write(".crewmind-ca-bundle.pem", _system_bundle() + "\n" + authority)
+        extra = self._write(".crewmind-ca.pem", authority)
+        for name in ("HTTPS_PROXY", "HTTP_PROXY", "https_proxy", "http_proxy"):
+            self.environment[name] = through
+        skipped = ",".join(host for host in (own, "localhost", "127.0.0.1") if host)
+        self.environment["NO_PROXY"] = self.environment["no_proxy"] = skipped
+        for name in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"):
+            self.environment[name] = bundle
+        self.environment["NODE_EXTRA_CA_CERTS"] = extra
 
     def close(self) -> None:
         if self.directory is not None:
@@ -172,7 +224,14 @@ async def agent_loop(client: httpx.AsyncClient, workspace: Path) -> str:
     if "refused" in pack:
         raise Stop(pack["refused"]["message"])
     offered = await _post(client, ENVIRONMENT_PATH, {})
-    given = Given(offered.get("variables", {}), offered.get("files", {}))
+    token = client.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+    given = Given(
+        offered.get("variables", {}),
+        offered.get("files", {}),
+        offered.get("proxy"),
+        offered.get("authority"),
+        token,
+    )
     try:
         return await _turns(client, workspace, pack, given)
     finally:

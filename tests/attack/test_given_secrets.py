@@ -182,7 +182,10 @@ async def test_CON_4_a_run_is_given_only_what_its_role_is_granted(app: App) -> N
     project, writer = await given_project(app, owner)
     ceo = await live_run(app, project)
     environment = (await agent_call(app, ceo.token, "agent.environment")).json()
-    assert environment == {"variables": {"REGION": "ca-east", "CEO_KEY": OTHER}, "files": {}}
+    assert (environment["variables"], environment["files"]) == (
+        {"REGION": "ca-east", "CEO_KEY": OTHER},
+        {},
+    )
     run = await live_run(app, project, seat=writer)
     mine = (await agent_call(app, run.token, "agent.environment")).json()
     assert mine["variables"] == {"WP_PASSWORD": WP, "REGION": "ca-east"}
@@ -196,7 +199,24 @@ async def test_CON_4_a_run_is_given_only_what_its_role_is_granted(app: App) -> N
     await app.ok("projects.start", owner, project_id=other)
     await quiet_start(app, other)
     elsewhere = await live_run(app, other)
-    assert (await agent_call(app, elsewhere.token, "agent.environment")).json() == {
-        "variables": {},
-        "files": {},
-    }
+    nothing = (await agent_call(app, elsewhere.token, "agent.environment")).json()
+    assert (nothing["variables"], nothing["files"], nothing["proxy"]) == ({}, {}, None)
+
+
+@pytest.mark.attack("CON-8")
+async def test_CON_8_a_value_replaced_mid_run_stays_masked_for_the_run_that_holds_it(
+    app: App,
+) -> None:
+    """CON-8: a run keeps the value it was handed even if the secret is replaced while it
+    works; that value is still masked in everything the run sends."""
+    owner = await app.person("owner@example.com")
+    project, writer = await given_project(app, owner)
+    run = await live_run(app, project, seat=writer)
+    assert (await agent_call(app, run.token, "agent.environment")).json()["variables"][
+        "WP_PASSWORD"
+    ] == WP
+    await app.ok(
+        "connections.replace_secret", owner, connection="wordpress", value="a-new-value-0099-x"
+    )
+    await agent_call(app, run.token, "agent.remember", text=f"old one was {WP}", scope="agent")
+    assert leaks(await stored_text(app)) == []

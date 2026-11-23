@@ -230,6 +230,7 @@ export const settingWords: Record<string, SettingWords> = {
   },
   "mcp.tools_refresh": { label: "Check MCP tools every", help: "How often each MCP server's list of tools is read again." },
   "mcp.command_idle": { label: "Stop unused MCP commands after", help: "A command MCP server unused this long is stopped; it starts again on its next call." },
+  "proxy.idle_timeout": { label: "Proxy idle limit", help: "A connection through the egress proxy that stays silent this long is closed." },
   "proxy.certificate_life": {
     label: "Proxy certificate life",
     help: "How long each certificate the egress proxy makes for a site stays valid.",

@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import logging
 from collections.abc import AsyncGenerator
+from urllib.parse import urlsplit
 
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
@@ -23,6 +24,7 @@ from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
 from crewmind.domain.connections import delivery
+from crewmind.domain.connections.agent_operations import EGRESS
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
@@ -32,6 +34,8 @@ from crewmind.jobs.platform_work import PlatformWorker
 from crewmind.jobs.scheduler import Scheduler
 from crewmind.jobs.work import WorkJobs
 from crewmind.runner.containers import install_id
+from crewmind.runner.egress.proxy import EgressProxy
+from crewmind.runner.egress.service import build_proxy
 from crewmind.runner.sandbox import ContainerSandbox, Sandbox, UnisolatedSandbox
 from crewmind.runner.supervisor import Runner
 from crewmind.runtime import SANDBOX_IMAGE, Runtime
@@ -125,6 +129,26 @@ async def bind_stored_secrets(runtime: Runtime) -> None:
         logger.info("sealed %d stored secrets to their owner and name", bound)
 
 
+async def start_egress(runtime: Runtime) -> EgressProxy | None:
+    """The egress proxy for secrets sent for the agent (CON-6), on the server's own host.
+    Runs are told its address. Without a master key there are no secrets to send."""
+    config = runtime.config
+    if not config.master_key_file.exists():
+        return None
+    try:
+        proxy = await build_proxy(
+            runtime.sessions, runtime.settings, config.master_key_file, runtime.clock
+        )
+        port = await proxy.start(config.host, config.egress_port)
+    except Exception as error:
+        logger.error("the egress proxy did not start, so no secret is sent for agents: %s", error)
+        return None
+    sandbox_host = urlsplit(config.agent_api).hostname or config.host
+    runtime.services.wired[EGRESS] = f"http://{sandbox_host}:{port}"
+    logger.info("egress proxy listening on port %d", port)
+    return proxy
+
+
 def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKERS) -> Runner:
     return Runner(
         runtime.sessions,
@@ -156,6 +180,7 @@ def create_app(
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         delivery.install_log_masking()
         await bind_stored_secrets(runtime)
+        egress = await start_egress(runtime)
         tasks: list[asyncio.Task[None]] = []
         if run_scheduler:
             scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
@@ -204,6 +229,8 @@ def create_app(
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
+        if egress is not None:
+            await egress.stop()
         await runtime.close()
 
     app = build_api(
