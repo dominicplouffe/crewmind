@@ -3,12 +3,13 @@
  * state explains the kinds; one Add flow serves both; `.env` lines can be pasted at once.
  */
 import { useState } from "react";
-import { Braces, ClipboardPaste, KeyRound, Plus, Send } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Braces, ClipboardPaste, KeyRound, Plug, Plus, Send } from "lucide-react";
 import { get, type Schemas } from "../api/client";
 import { useAuth } from "../auth";
 import { ErrorNote } from "../components/common";
 import { useLoad } from "../lib/useLoad";
-import { connectionWords as words } from "../strings.connections";
+import { connectionWords, connectionWords as words } from "../strings.connections";
 import { Skeleton } from "../ui/Skeleton";
 import { AddSheet } from "./AddSheet";
 import { ImportSheet } from "./ImportSheet";
@@ -17,11 +18,12 @@ import { ItemRow } from "./ItemRow";
 type Item = Schemas["ConnectionView"];
 type Tab = "person" | "install";
 
-export function EmptyKinds({ onAdd }: { onAdd(kind: "secret" | "variable"): void }): JSX.Element {
+export function EmptyKinds({ onAdd }: { onAdd(kind: "secret" | "variable" | "mcp_server"): void }): JSX.Element {
   const cards = [
     { key: "send", icon: <Send size={20} />, ...words.empty.secret, kind: "secret" as const },
     { key: "given", icon: <KeyRound size={20} />, ...words.empty.given, kind: "secret" as const },
     { key: "variable", icon: <Braces size={20} />, ...words.empty.variable, kind: "variable" as const },
+    { key: "mcp", icon: <Plug size={20} />, ...words.empty.mcp, kind: "mcp_server" as const },
   ];
   return (
     <div className="connection-empty" data-testid="connections-empty">
@@ -49,9 +51,12 @@ export function ConnectionsSection(): JSX.Element {
   const { person } = useAuth();
   const isAdmin = person?.role === "admin";
   const [tab, setTab] = useState<Tab>("person");
-  const [adding, setAdding] = useState<"secret" | "variable" | null>(null);
+  const [adding, setAdding] = useState<"secret" | "variable" | "mcp_server" | null>(null);
   const [importing, setImporting] = useState(false);
   const [saved, setSaved] = useState<string | null>(null);
+  const [search, setSearch] = useSearchParams();
+  const signedIn = search.get("signed_in");
+  const signInError = search.get("sign_in_error");
   const list = useLoad(() => get("/v1/connections/list", { scope: tab }), [tab]);
   const items: Item[] = list.data?.items ?? [];
   const canAdd = tab === "person" || isAdmin;
@@ -90,10 +95,21 @@ export function ConnectionsSection(): JSX.Element {
           </button>
         ))}
       </div>
-      {saved ? (
+      {saved || signedIn ? (
         <p className="note note-success" role="status">
-          {saved}
+          {saved ?? words.mcp.signedIn(signedIn ?? "")}
         </p>
+      ) : null}
+      {signInError ? (
+        <div className="note note-error" role="alert">
+          <p className="note-title">{words.mcp.signInFailed}</p>
+          <p>{signInError}</p>
+          <div className="note-actions">
+            <button type="button" className="button small" onClick={() => setSearch({}, { replace: true })}>
+              {connectionWords.form.cancel}
+            </button>
+          </div>
+        </div>
       ) : null}
       <ErrorNote error={list.error} />
       {list.loading && !list.data ? <Skeleton lines={3} block /> : null}

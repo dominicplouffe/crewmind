@@ -191,6 +191,103 @@
     "title": "AddInput",
     "type": "object"
    },
+   "AddMcpInput": {
+    "properties": {
+     "auth_kind": {
+      "$ref": "#/components/schemas/AuthKind",
+      "default": "none",
+      "description": "none, bearer, header (a named header) or oauth."
+     },
+     "description": {
+      "description": "What it is for.",
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For header: its name.",
+      "title": "Header Name"
+     },
+     "name": {
+      "description": "What it is called, such as github.",
+      "title": "Name",
+      "type": "string"
+     },
+     "private_network": {
+      "default": false,
+      "description": "Admins only: allow a private address for this server.",
+      "title": "Private Network",
+      "type": "boolean"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project it belongs to (project scope), or to attach it to at once.",
+      "title": "Project Id"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "With a project: the roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     },
+     "scope": {
+      "$ref": "#/components/schemas/Scope",
+      "default": "person",
+      "description": "person (yours, for any project you chair), project, or install (admins)."
+     },
+     "url": {
+      "description": "The server's address, such as https://mcp.example.com/mcp.",
+      "title": "Url",
+      "type": "string"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "format": "password",
+        "type": "string",
+        "writeOnly": true
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For bearer or header: the token or header value.",
+      "title": "Value"
+     }
+    },
+    "required": [
+     "url",
+     "name",
+     "description"
+    ],
+    "title": "AddMcpInput",
+    "type": "object"
+   },
    "AddMemberInput": {
     "properties": {
      "email": {
@@ -977,6 +1074,16 @@
     ],
     "title": "AuditVerdictInput",
     "type": "object"
+   },
+   "AuthKind": {
+    "enum": [
+     "none",
+     "bearer",
+     "header",
+     "oauth"
+    ],
+    "title": "AuthKind",
+    "type": "string"
    },
    "Away": {
     "properties": {
@@ -2228,6 +2335,17 @@
        }
       ],
       "title": "Last Used At"
+     },
+     "mcp": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/McpView"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For an MCP server: its details."
      },
      "name": {
       "title": "Name",
@@ -4163,6 +4281,26 @@
     "title": "FeedItem",
     "type": "object"
    },
+   "FinishInput": {
+    "properties": {
+     "code": {
+      "description": "The code the provider sent back.",
+      "title": "Code",
+      "type": "string"
+     },
+     "state": {
+      "description": "The state the provider sent back.",
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "code",
+     "state"
+    ],
+    "title": "FinishInput",
+    "type": "object"
+   },
    "FixInput": {
     "properties": {
      "cost_us": {
@@ -5453,6 +5591,224 @@
     "title": "MarkReadInput",
     "type": "object"
    },
+   "McpTarget": {
+    "properties": {
+     "auth_kind": {
+      "$ref": "#/components/schemas/AuthKind",
+      "default": "none",
+      "description": "none, bearer, header (a named header) or oauth."
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For header: its name.",
+      "title": "Header Name"
+     },
+     "private_network": {
+      "default": false,
+      "description": "Admins only: allow a private address for this server.",
+      "title": "Private Network",
+      "type": "boolean"
+     },
+     "url": {
+      "description": "The server's address, such as https://mcp.example.com/mcp.",
+      "title": "Url",
+      "type": "string"
+     },
+     "value": {
+      "anyOf": [
+       {
+        "format": "password",
+        "type": "string",
+        "writeOnly": true
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "For bearer or header: the token or header value.",
+      "title": "Value"
+     }
+    },
+    "required": [
+     "url"
+    ],
+    "title": "McpTarget",
+    "type": "object"
+   },
+   "McpToolView": {
+    "properties": {
+     "classification": {
+      "description": "read, or write when it may change things.",
+      "title": "Classification",
+      "type": "string"
+     },
+     "description": {
+      "description": "As the server describes it: untrusted, cut to size.",
+      "title": "Description",
+      "type": "string"
+     },
+     "gone": {
+      "description": "The server no longer offers it.",
+      "title": "Gone",
+      "type": "boolean"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "permission": {
+      "description": "allowed or denied.",
+      "title": "Permission",
+      "type": "string"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Title"
+     }
+    },
+    "required": [
+     "name",
+     "title",
+     "description",
+     "classification",
+     "permission",
+     "gone"
+    ],
+    "title": "McpToolView",
+    "type": "object"
+   },
+   "McpView": {
+    "properties": {
+     "auth_kind": {
+      "title": "Auth Kind",
+      "type": "string"
+     },
+     "header_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Header Name"
+     },
+     "last_error": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Why the last test or call failed.",
+      "title": "Last Error"
+     },
+     "private_allowed": {
+      "title": "Private Allowed",
+      "type": "boolean"
+     },
+     "server_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Server Name"
+     },
+     "server_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Server Version"
+     },
+     "state": {
+      "description": "active, needs sign-in, failing or deleted.",
+      "title": "State",
+      "type": "string"
+     },
+     "tools": {
+      "items": {
+       "$ref": "#/components/schemas/McpToolView"
+      },
+      "title": "Tools",
+      "type": "array"
+     },
+     "tools_refreshed_at": {
+      "anyOf": [
+       {
+        "format": "date-time",
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Tools Refreshed At"
+     },
+     "transport": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Transport"
+     },
+     "url": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Url"
+     }
+    },
+    "required": [
+     "url",
+     "transport",
+     "auth_kind",
+     "header_name",
+     "private_allowed",
+     "state",
+     "server_name",
+     "server_version",
+     "last_error",
+     "tools_refreshed_at",
+     "tools"
+    ],
+    "title": "McpView",
+    "type": "object"
+   },
    "MemberItem": {
     "properties": {
      "email": {
@@ -6677,6 +7033,51 @@
      "memory_id"
     ],
     "title": "PreferenceRef",
+    "type": "object"
+   },
+   "ProbeView": {
+    "properties": {
+     "server_name": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Server Name"
+     },
+     "server_version": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Server Version"
+     },
+     "tools": {
+      "items": {
+       "$ref": "#/components/schemas/ToolView"
+      },
+      "title": "Tools",
+      "type": "array"
+     },
+     "transport": {
+      "title": "Transport",
+      "type": "string"
+     }
+    },
+    "required": [
+     "transport",
+     "server_name",
+     "server_version",
+     "tools"
+    ],
+    "title": "ProbeView",
     "type": "object"
    },
    "ProjectConnections": {
@@ -9213,6 +9614,97 @@
     "title": "Shape",
     "type": "string"
    },
+   "SignInInput": {
+    "properties": {
+     "client_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "A client id from the provider, when its server offers no registration.",
+      "title": "Client Id"
+     },
+     "client_secret": {
+      "anyOf": [
+       {
+        "format": "password",
+        "type": "string",
+        "writeOnly": true
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "That client's secret, if the provider gave one.",
+      "title": "Client Secret"
+     },
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     }
+    },
+    "required": [
+     "connection"
+    ],
+    "title": "SignInInput",
+    "type": "object"
+   },
+   "SignInStart": {
+    "properties": {
+     "acts_as": {
+      "description": "What signing in means, in plain words.",
+      "title": "Acts As",
+      "type": "string"
+     },
+     "authorize_url": {
+      "description": "Open this in the browser to sign in.",
+      "title": "Authorize Url",
+      "type": "string"
+     }
+    },
+    "required": [
+     "authorize_url",
+     "acts_as"
+    ],
+    "title": "SignInStart",
+    "type": "object"
+   },
+   "SignedIn": {
+    "properties": {
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "return_to": {
+      "description": "Where the person goes back to.",
+      "title": "Return To",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "return_to"
+    ],
+    "title": "SignedIn",
+    "type": "object"
+   },
    "SmokeResult": {
     "properties": {
      "detail": {
@@ -10285,6 +10777,75 @@
      "scope"
     ],
     "title": "Tokens",
+    "type": "object"
+   },
+   "ToolRef": {
+    "properties": {
+     "connection": {
+      "description": "The connection's name or id.",
+      "title": "Connection",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project, to find a project connection by name.",
+      "title": "Project Id"
+     },
+     "tool": {
+      "description": "The tool's name, as the server gives it.",
+      "title": "Tool",
+      "type": "string"
+     }
+    },
+    "required": [
+     "connection",
+     "tool"
+    ],
+    "title": "ToolRef",
+    "type": "object"
+   },
+   "ToolView": {
+    "properties": {
+     "description": {
+      "description": "As the server describes it: untrusted, cut to size.",
+      "title": "Description",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "reads_only": {
+      "description": "The server marks it as only reading.",
+      "title": "Reads Only",
+      "type": "boolean"
+     },
+     "title": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Title"
+     }
+    },
+    "required": [
+     "name",
+     "title",
+     "description",
+     "reads_only"
+    ],
+    "title": "ToolView",
     "type": "object"
    },
    "UnsubscribeInput": {
@@ -13544,6 +14105,48 @@
     ]
    }
   },
+  "/v1/connections/add_mcp_server": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.add_mcp_server",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AddMcpInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a remote MCP server. It is tested and its tools are listed before it is saved.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
   "/v1/connections/add_secret": {
    "post": {
     "description": "Requires: person.",
@@ -13623,6 +14226,48 @@
      }
     },
     "summary": "Add a variable: a plain value members and agents can read.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/allow_tool": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.allow_tool",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ToolRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Allow agents to call one tool of an MCP server.",
     "tags": [
      "connections"
     ]
@@ -13796,6 +14441,48 @@
     ]
    }
   },
+  "/v1/connections/deny_tool": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.deny_tool",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ToolRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Stop agents calling one tool of an MCP server.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
   "/v1/connections/detach": {
    "post": {
     "description": "Requires: project_chair.",
@@ -13833,6 +14520,48 @@
      }
     },
     "summary": "Detach a connection from a project. Agents that needed it wait.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/finish_sign_in": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.finish_sign_in",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FinishInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SignedIn"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Finish an MCP sign-in with the code the provider sent back to the browser.",
     "tags": [
      "connections"
     ]
@@ -14179,6 +14908,132 @@
      }
     },
     "summary": "Show a connection: how it is used, where, and its history. Never its value.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/sign_in": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.sign_in",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SignInInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SignInStart"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Start signing in to an MCP server with OAuth; open the address it returns.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/test_mcp": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.test_mcp",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ConnectionRef"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Test an MCP server again and read its tools; new tools start by their kind.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/test_mcp_server": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.test_mcp_server",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/McpTarget"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ProbeView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Test an MCP server before adding it: its name and the tools it offers.",
     "tags": [
      "connections"
     ]

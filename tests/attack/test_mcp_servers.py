@@ -253,3 +253,19 @@ async def test_CON_12_tools_are_read_again_every_refresh_period(app: App, clock:
     refreshed = await app.ok("connections.show", owner, connection="blog")
     assert tools_of(refreshed["item"])["count_posts"] == ("read", "allowed")
     assert refreshed["item"]["mcp"]["server_version"] == "3.0"
+
+
+async def test_IF_5_1_crewmind_marks_its_own_reading_tools_so_clients_can_tell_them_apart(
+    app: App,
+) -> None:
+    """IF-5.1, CON-12: crewmind's own MCP tools say whether they only read and whether they
+    can be undone, so a client (crewmind included) allows its readers and asks about writers."""
+    owner = await app.person("owner@example.com")
+    minted = await app.ok("mcp_clients.mint", owner, client_name="Reader", scopes=["steer"])
+    caller = await mcp_caller(app, minted["token"])
+    async with client_for(app, caller) as client:
+        tools = {tool.name: tool for tool in (await client.list_tools()).tools}
+    assert tools["projects_status"].annotations is not None
+    assert tools["projects_status"].annotations.read_only_hint is True
+    assert tools["projects_hold"].annotations is not None
+    assert tools["projects_hold"].annotations.read_only_hint is False

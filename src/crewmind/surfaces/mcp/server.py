@@ -29,6 +29,7 @@ from mcp.types import (
     TextContent,
     TextResourceContents,
     Tool,
+    ToolAnnotations,
 )
 from pydantic import ValidationError
 
@@ -55,6 +56,16 @@ async def caller_from_http(context: Any) -> Caller:
     caller = request.scope.get(CALLER_STATE, ANONYMOUS)
     assert isinstance(caller, Caller)
     return caller
+
+
+def annotations_of(operation: Operation) -> ToolAnnotations:
+    """IF-5.1, CON-12: the catalog says which tools only read and which cannot be undone, so
+    a client can tell readers from writers instead of treating every tool as a writer."""
+    reads = operation.reversibility is Reversibility.READ
+    return ToolAnnotations(
+        read_only_hint=reads,
+        destructive_hint=None if reads else operation.reversibility is Reversibility.IRREVERSIBLE,
+    )
 
 
 def tool_name(operation_name: str) -> str:
@@ -136,7 +147,12 @@ def build_mcp(
     async def list_tools(context: Any, _: PaginatedRequestParams | None) -> ListToolsResult:
         return ListToolsResult(
             tools=[
-                Tool(name=name, description=operation.summary, input_schema=_schema(operation))
+                Tool(
+                    name=name,
+                    description=operation.summary,
+                    input_schema=_schema(operation),
+                    annotations=annotations_of(operation),
+                )
                 for name, operation in granted(await caller_of(context)).items()
             ]
         )

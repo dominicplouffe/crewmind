@@ -93,3 +93,42 @@ test("a project's Connections panel attaches what is yours, with the roles chose
   await shot("05-project-panel");
   await expectAccessible(page, "project connections");
 });
+
+
+test("an MCP server is tested before saving, then its tools are allowed one by one (CON-9, CON-12, CON-15)", async () => {
+  // crewmind's own MCP endpoint is a real server to connect to; a read client token signs in.
+  const token = await page.evaluate(async () => {
+    const response = await fetch("/v1/mcp_clients/mint", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ client_name: "E2E MCP", scopes: ["steer"] }),
+    });
+    return ((await response.json()) as { token: string }).token;
+  });
+  await page.goto("/settings/connections");
+  await page.getByRole("tab", { name: "Whole install" }).click();
+  await page.getByRole("button", { name: /^Add An MCP server/ }).click();
+  const sheet = page.getByTestId("add-mcp");
+  await sheet.getByLabel("Name", { exact: true }).fill("crewmind-self");
+  await sheet.getByLabel("What is it for?").fill("crewmind's own tools, for the test.");
+  await sheet.getByLabel("Address", { exact: true }).fill(`${new URL(page.url()).origin}/mcp`);
+  await sheet.getByLabel(/Bearer token/).check();
+  await sheet.getByLabel("Token", { exact: true }).fill(token);
+  await sheet.getByLabel("Allow a private address").check();
+  await expect(sheet.getByRole("button", { name: "Save" })).toBeDisabled();
+  await sheet.getByRole("button", { name: "Test connection" }).click();
+  await expect(sheet.getByTestId("mcp-probe")).toBeVisible();
+  await shot("06-mcp-tested");
+  await expectAccessible(page, "add an MCP server");
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet).toBeHidden();
+  const row = page.getByTestId("connection").filter({ hasText: "crewmind-self" });
+  await row.locator("summary").click();
+  // crewmind marks its own reading tools, so they start allowed; the others start off.
+  await expect(row.getByRole("switch", { name: "Allow agenda_show" })).toHaveAttribute("aria-checked", "true");
+  await expect(row.getByRole("switch", { name: "Allow projects_hold" })).toHaveAttribute("aria-checked", "false");
+  await shot("07-mcp-tools");
+  await expectAccessible(page, "MCP tools");
+  expect(await page.content()).not.toContain(token);
+});
+

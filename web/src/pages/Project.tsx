@@ -114,6 +114,15 @@ export function Project(): JSX.Element {
   });
 
   const open = useCallback((id: PanelId) => setPanel({ id }), []);
+  // A link may name a panel to open (`?panel=connections`, where an MCP sign-in returns).
+  useEffect(() => {
+    const wanted = search.get("panel");
+    if (wanted && (PANEL_ORDER as string[]).includes(wanted)) {
+      setPanel({ id: wanted as PanelId });
+      search.delete("panel");
+      setSearch(search, { replace: true });
+    }
+  }, [search, setSearch]);
   const refocus = useRef(false);
   const closePanel = useCallback(() => {
     refocus.current = true;

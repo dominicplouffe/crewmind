@@ -9,12 +9,14 @@ person's account at that provider.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
 from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, SecretStr
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.caller import Authority, Caller
 from crewmind.catalog.define import operation
@@ -31,13 +33,13 @@ from crewmind.domain.connections.mcp import (
     AuthKind,
     ServerState,
 )
-from crewmind.domain.connections.mcp_client import Unreachable, probe
+from crewmind.domain.connections.mcp_client import Probe, Unreachable, probe
 from crewmind.domain.connections.model import SECRET_OWNER, Kind, Scope
 from crewmind.domain.integrations import alerts
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.registry import Scope as SettingScope
 from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
-from crewmind.services import services_of
+from crewmind.services import CLOCK, SESSIONS, Services, services_of
 from crewmind.storage.events import event_type
 from crewmind.storage.models import Connection, McpServer, McpSignIn
 
@@ -56,6 +58,16 @@ VERIFIER_ID = 32
 length of a secret owner's id."""
 SIGNED_IN = event_type("mcp.signed_in", "Someone signed in to an MCP server (CON-10).")
 SIGN_IN_STARTED = event_type("mcp.sign_in_started", "A sign-in to an MCP server began (CON-10).")
+
+
+def sessions_of(services: Services) -> async_sessionmaker[AsyncSession]:
+    found: async_sessionmaker[AsyncSession] = services.wired[SESSIONS]
+    return found
+
+
+def clock_of(services: Services) -> Callable[[], datetime]:
+    found: Callable[[], datetime] = services.wired[CLOCK]
+    return found
 
 
 class SignInInput(ConnectionRef):
@@ -83,8 +95,8 @@ class SignedIn(BaseModel):
     return_to: str = Field(description="Where the person goes back to.")
 
 
-def _callback(context: Context) -> str:
-    base = services_of(context).base_url.rstrip("/")
+def callback_of(base_url: str) -> str:
+    base = base_url.rstrip("/")
     parts = urlsplit(base)
     local = parts.hostname in ("localhost", "127.0.0.1")
     if parts.scheme != "https" and not local:
@@ -98,8 +110,8 @@ def _callback(context: Context) -> str:
     return base + CALLBACK_PATH
 
 
-async def _limits(context: Context) -> float:
-    return float(str(services_of(context).settings.registry.settings["mcp.call_timeout"].default))
+def _seconds(services: Services) -> float:
+    return float(str(services.settings.registry.settings["mcp.call_timeout"].default))
 
 
 def _return_to(item: Connection) -> str:
@@ -108,38 +120,44 @@ def _return_to(item: Connection) -> str:
     return "/settings/connections"
 
 
-@operation(
-    "connections.sign_in",
-    summary="Start signing in to an MCP server with OAuth; open the address it returns.",
-    authority=Authority.PERSON,
-    reversibility=Reversibility.REVERSIBLE,
-)
-async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
-    """CON-10: discovery, registration (or a pasted client), PKCE S256, a single-use state
-    bound to this browser session, and the resource indicator."""
-    item = await service.manageable(
-        context.session, context.caller, payload.connection, payload.project_id
-    )
-    server = await context.session.get(McpServer, item.id)
+async def _oauth_server(
+    session: AsyncSession, caller: Caller, payload: SignInInput
+) -> tuple[Connection, McpServer]:
+    item = await service.manageable(session, caller, payload.connection, payload.project_id)
+    server = await session.get(McpServer, item.id)
     if item.kind != Kind.MCP_SERVER or server is None or server.auth_kind != AuthKind.OAUTH:
         raise Refusal("not_oauth", f"{item.name} does not sign in with OAuth.", rule=CON_10.id)
-    if context.caller.credential_id is None:
+    if caller.credential_id is None:
         raise Refusal("browser_needed", "Sign in from your browser.", rule=CON_10.id)
-    redirect = _callback(context)
-    seconds = await _limits(context)
+    return item, server
+
+
+@dataclass(frozen=True)
+class Discovered:
+    endpoints: mcp_oauth.Endpoints
+    client_id: str
+    client_secret: str | None
+    redirect: str
+
+    def __repr__(self) -> str:  # never shows the client secret
+        return f"Discovered({self.endpoints.issuer}, client {self.client_id})"
+
+
+async def _prepare_sign_in(caller: Caller, payload: SignInInput, services: Services) -> Discovered:
+    """The provider is reached here, with no database transaction open (CON-10)."""
+    async with sessions_of(services)() as session:
+        item, server = await _oauth_server(session, caller, payload)
+        url, private = server.url or "", server.private_allowed
+    redirect = callback_of(services.base_url)
+    seconds = _seconds(services)
     try:
-        endpoints = await mcp_oauth.discover(
-            server.url or "", private_allowed=server.private_allowed, seconds=seconds
-        )
+        endpoints = await mcp_oauth.discover(url, private_allowed=private, seconds=seconds)
         if payload.client_id:
-            client_id, secret = (
-                payload.client_id,
-                (payload.client_secret.get_secret_value() if payload.client_secret else None),
-            )
-        else:
-            client_id, secret = await mcp_oauth.register(
-                endpoints, redirect, private_allowed=server.private_allowed, seconds=seconds
-            )
+            pasted = payload.client_secret.get_secret_value() if payload.client_secret else None
+            return Discovered(endpoints, payload.client_id, pasted, redirect)
+        client_id, secret = await mcp_oauth.register(
+            endpoints, redirect, private_allowed=private, seconds=seconds
+        )
     except Unreachable as error:
         raise Refusal(
             "oauth_unavailable",
@@ -147,24 +165,42 @@ async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
             rule=CON_10.id,
             hint="Paste a client id from the provider if it offers no registration.",
         ) from None
+    return Discovered(endpoints, client_id, secret, redirect)
+
+
+@operation(
+    "connections.sign_in",
+    summary="Start signing in to an MCP server with OAuth; open the address it returns.",
+    authority=Authority.PERSON,
+    reversibility=Reversibility.REVERSIBLE,
+    prepare=_prepare_sign_in,
+)
+async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
+    """CON-10: discovery, registration (or a pasted client), PKCE S256, a single-use state
+    bound to this browser session, and the resource indicator."""
+    item, server = await _oauth_server(context.session, context.caller, payload)
+    found: Discovered = context.prepared
+    endpoints = found.endpoints
     store = SecretStore(services_of(context).master_key_file)
-    if secret:
+    owner = (SECRET_OWNER, item.id)
+    if found.client_secret:
         await store.put(
-            context.session, (SECRET_OWNER, item.id), OAUTH_CLIENT_SECRET, secret, context.now
+            context.session, owner, OAUTH_CLIENT_SECRET, found.client_secret, context.now
         )
     else:
-        await store.delete(context.session, (SECRET_OWNER, item.id), OAUTH_CLIENT_SECRET)
+        await store.delete(context.session, owner, OAUTH_CLIENT_SECRET)
     server.oauth = {
         **(server.oauth or {}),
         "issuer": endpoints.issuer,
         "authorization_endpoint": endpoints.authorization,
         "token_endpoint": endpoints.token,
         "resource": endpoints.resource,
-        "client_id": client_id,
+        "client_id": found.client_id,
         "scopes": endpoints.scopes,
     }
     verifier, challenge = mcp_oauth.new_verifier()
     state, key = mcp_oauth.new_state()
+    assert context.caller.credential_id is not None
     context.session.add(
         McpSignIn(
             id=key, connection_id=item.id, person_id=context.caller.actor_id,
@@ -178,10 +214,12 @@ async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
     context.record(
         SIGN_IN_STARTED,
         subject=("connection", item.id),
-        after={"name": item.name, "issuer": endpoints.issuer, "client_id": client_id},
+        after={"name": item.name, "issuer": endpoints.issuer, "client_id": found.client_id},
     )
     return SignInStart(
-        authorize_url=mcp_oauth.authorize_url(endpoints, client_id, redirect, state, challenge),
+        authorize_url=mcp_oauth.authorize_url(
+            endpoints, found.client_id, found.redirect, state, challenge
+        ),
         acts_as=f"crewmind will act as your account at {urlsplit(endpoints.issuer).hostname} "
         f"when agents use {item.name}.",
     )
@@ -209,43 +247,90 @@ async def store_tokens(
     server.oauth = {**(server.oauth or {}), "expires_at": expires}
 
 
+@dataclass(frozen=True)
+class Finished:
+    connection_id: str
+    return_to: str
+    tokens: mcp_oauth.Tokens
+    probe: Probe | None
+    failure: str | None
+
+
+async def _prepare_finish(caller: Caller, payload: FinishInput, services: Services) -> Finished:
+    """CON-10: the state is used up in its own transaction, so it can never be replayed;
+    the provider and the server are reached with no transaction open."""
+    key = mcp_oauth.state_key(payload.state)
+    store = SecretStore(services.master_key_file)
+    now = clock_of(services)()
+    async with sessions_of(services)() as session, session.begin():
+        row = await session.get(McpSignIn, key)
+        if row is None:
+            raise _refused("this sign-in is unknown or was already used")
+        await session.delete(row)
+        owner = (VERIFIER_OWNER, key[:VERIFIER_ID])
+        verifier = await store.reveal(session, owner, "verifier")
+        await store.delete(session, owner, "verifier")
+        expired = row.created_at + SIGN_IN_LIFE < now
+        someone_else = row.person_id != caller.actor_id or row.session_id != caller.credential_id
+        item = await session.get(Connection, row.connection_id)
+        server = await session.get(McpServer, row.connection_id)
+        oauth: dict[str, Any] = dict(server.oauth or {}) if server is not None else {}
+        secret = (
+            await store.reveal(session, (SECRET_OWNER, row.connection_id), OAUTH_CLIENT_SECRET)
+            if item is not None
+            else None
+        )
+        url = server.url or "" if server is not None else ""
+        private = server.private_allowed if server is not None else False
+        return_to = row.return_to
+    if expired:
+        raise _refused("it took longer than ten minutes")
+    if someone_else:
+        raise _refused("it was started in another browser session")
+    if item is None or server is None or verifier is None:
+        raise _refused("the server is gone")
+    seconds = _seconds(services)
+    try:
+        tokens = await mcp_oauth.exchange(
+            str(oauth["token_endpoint"]), str(oauth["resource"]), str(oauth["client_id"]), secret,
+            payload.code, verifier, callback_of(services.base_url), private_allowed=private,
+            seconds=seconds,
+        )  # fmt: skip
+    except Unreachable as error:
+        raise _refused(str(error)) from None
+    async with sessions_of(services)() as session:
+        most = int(
+            await services.settings.get(
+                session, Subject(SettingScope.INSTALL, INSTALL_SUBJECT), "mcp.description_max"
+            )
+        )
+    try:
+        found = await probe(
+            url, {"Authorization": f"Bearer {tokens.access}"}, private_allowed=private,
+            seconds=seconds, description_max=most,
+        )  # fmt: skip
+        return Finished(item.id, return_to, tokens, found, None)
+    except Unreachable as error:
+        return Finished(item.id, return_to, tokens, None, str(error))
+
+
 @operation(
     "connections.finish_sign_in",
     summary="Finish an MCP sign-in with the code the provider sent back to the browser.",
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
+    prepare=_prepare_finish,
 )
 async def finish_sign_in(context: Context, payload: FinishInput) -> SignedIn:
     """CON-10: the state is used once, within its life, by the same person in the same
     browser session; then the code and the verifier become tokens and the tools are read."""
-    key = mcp_oauth.state_key(payload.state)
-    row = await context.session.get(McpSignIn, key)
-    if row is None:
-        raise _refused("this sign-in is unknown or was already used")
-    await context.session.delete(row)
-    store = SecretStore(services_of(context).master_key_file)
-    verifier = await store.reveal(context.session, (VERIFIER_OWNER, key[:VERIFIER_ID]), "verifier")
-    await store.delete(context.session, (VERIFIER_OWNER, key[:VERIFIER_ID]), "verifier")
-    if row.created_at + SIGN_IN_LIFE < context.now:
-        raise _refused("it took longer than ten minutes")
-    if row.person_id != context.caller.actor_id or row.session_id != context.caller.credential_id:
-        raise _refused("it was started in another browser session")
-    item = await context.session.get(Connection, row.connection_id)
-    server = await context.session.get(McpServer, row.connection_id)
-    if item is None or server is None or verifier is None:
+    done: Finished = context.prepared
+    item = await context.session.get(Connection, done.connection_id)
+    server = await context.session.get(McpServer, done.connection_id)
+    if item is None or server is None:
         raise _refused("the server is gone")
-    oauth: dict[str, Any] = server.oauth or {}
-    seconds = await _limits(context)
-    secret = await store.reveal(context.session, (SECRET_OWNER, item.id), OAUTH_CLIENT_SECRET)
-    try:
-        tokens = await mcp_oauth.exchange(
-            str(oauth["token_endpoint"]), str(oauth["resource"]), str(oauth["client_id"]), secret,
-            payload.code, verifier, _callback(context), private_allowed=server.private_allowed,
-            seconds=seconds,
-        )  # fmt: skip
-    except Unreachable as error:
-        raise _refused(str(error)) from None
-    await store_tokens(context.session, store, server, tokens, context.now)
+    store = SecretStore(services_of(context).master_key_file)
+    await store_tokens(context.session, store, server, done.tokens, context.now)
     if server.state == ServerState.NEEDS_SIGN_IN:
         mcp.move(
             context.session,
@@ -257,22 +342,13 @@ async def finish_sign_in(context: Context, payload: FinishInput) -> SignedIn:
             "signed in",
         )
     context.record(SIGNED_IN, subject=("connection", item.id), after={"name": item.name})
-    most = int(
-        await services_of(context).settings.get(
-            context.session, Subject(SettingScope.INSTALL, INSTALL_SUBJECT), "mcp.description_max"
-        )
-    )
-    try:
-        found = await probe(
-            server.url or "", {"Authorization": f"Bearer {tokens.access}"},
-            private_allowed=server.private_allowed, seconds=seconds, description_max=most,
-        )  # fmt: skip
-        await mcp.sync_tools(context.session, server, item, found, context.now, context.caller)
+    if done.probe is not None:
+        await mcp.sync_tools(context.session, server, item, done.probe, context.now, context.caller)
         mcp.worked(context.session, server, item, context.now, context.caller)
-    except Unreachable as error:
-        mcp.failed(context.session, server, item, str(error), context.now, context.caller)
+    else:
+        mcp.failed(context.session, server, item, done.failure or "", context.now, context.caller)
     await service.refresh_users(context.session, item, context.now, context.caller)
-    return SignedIn(name=item.name, return_to=row.return_to)
+    return SignedIn(name=item.name, return_to=done.return_to)
 
 
 async def fresh_headers(

@@ -24,7 +24,7 @@ from crewmind.gateway.service import Gateway
 from crewmind.live import StreamHub
 from crewmind.runner.check_sandbox import ContainerCheckRunner, ProcessCheckRunner
 from crewmind.runner.containers import install_id
-from crewmind.services import Services
+from crewmind.services import CLOCK, SESSIONS, Services
 from crewmind.storage.engine import create_engine
 
 
@@ -96,6 +96,8 @@ def build_runtime(
     hub = StreamHub()
     gateway = Gateway(sessions, services.settings, clock, mock, config.master_key_file, hub)
     services.wired["gateway"] = gateway
+    services.wired[SESSIONS] = sessions
+    services.wired[CLOCK] = clock
     return Runtime(
         hub=hub,
         settings=services.settings,

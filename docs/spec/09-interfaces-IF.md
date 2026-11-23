@@ -95,6 +95,7 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
   - Streamable HTTP at one endpoint.
   - Clients authenticate with a minted bearer token, or OAuth 2.1: authorization code with PKCE, dynamic client registration, and audience-bound tokens per RFC 8707.
   - The server must resist PKCE stripping, code replay, redirect swap, audience confusion and scope widening at the token endpoint.
+  - Each tool says whether it only reads and whether it can be undone (the MCP tool annotations), from the catalog's reversibility, so a client can tell readers from writers.
   - Each step (register, approve, token, revoke) is an operation in the catalog; the standard endpoints are adapters over them. The person approves a client in their own signed-in session. A code presented with a wrong verifier, redirect or audience is spent.
 - **IF-5.2 Scopes.** Four scopes, with `read` implied by every other one. A client sees only its person's projects. Tools outside the client's scope are not listed, and answer as unknown.
 

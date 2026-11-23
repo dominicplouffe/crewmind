@@ -6,6 +6,7 @@ Newest first. One line per change, citing the ids touched.
 
 - **CON-15, IF-5.6:** adding any MCP server and allowing any tool are human-only, not only command servers and changing tools: a model client could otherwise give agents new reach. Testing a server with a value and choosing where a secret is sent are human-only too.
 - **7.18:** the MCP server table lists the states that may be deleted, so it can be checked.
+- **IF-5.1:** crewmind's own MCP tools carry the read-only and destructive annotations from the catalog's reversibility, so any client, crewmind's own connections included, can tell readers from writers.
 - **CON-10:** a sign-in expires after ten minutes; tokens are refreshed a minute before expiry; a server waiting for sign-in meets no need, so its seats are held.
 
 ## Revision 2.26 (23 Nov 2026): connections, part 7B.3
