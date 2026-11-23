@@ -6830,6 +6830,33 @@
     "title": "RememberInput",
     "type": "object"
    },
+   "RenameSeatInput": {
+    "properties": {
+     "display_name": {
+      "description": "The name to show it by.",
+      "maxLength": 200,
+      "title": "Display Name",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "seat": {
+      "description": "The seat's name, from `roster show`.",
+      "title": "Seat",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "seat",
+     "display_name"
+    ],
+    "title": "RenameSeatInput",
+    "type": "object"
+   },
    "RequestItem": {
     "properties": {
      "approved": {
@@ -7876,6 +7903,11 @@
       "description": "Times you said: not what I asked.",
       "title": "Corrections"
      },
+     "display_name": {
+      "description": "The name the agent is shown by, such as \"Maya\".",
+      "title": "Display Name",
+      "type": "string"
+     },
      "kind": {
       "title": "Kind",
       "type": "string"
@@ -7897,6 +7929,7 @@
       "title": "Listening Score"
      },
      "name": {
+      "description": "The seat's identity, used in mentions, events and tools.",
       "title": "Name",
       "type": "string"
      },
@@ -7945,6 +7978,7 @@
     },
     "required": [
      "name",
+     "display_name",
      "kind",
      "role",
      "team",
@@ -7979,6 +8013,11 @@
        }
       ],
       "title": "Model"
+     },
+     "name": {
+      "description": "The name the agent goes by (EXE-18).",
+      "title": "Name",
+      "type": "string"
      },
      "note": {
       "anyOf": [
@@ -8022,6 +8061,7 @@
     },
     "required": [
      "seat",
+     "name",
      "kind",
      "asked_class",
      "effort",
@@ -8102,7 +8142,7 @@
    "SendInput": {
     "properties": {
      "body": {
-      "description": "The message. `@name` addresses an agent, `@team` its lead.",
+      "description": "The message. `@name` addresses an agent by its name, `@team` its lead.",
       "title": "Body",
       "type": "string"
      },
@@ -9686,6 +9726,11 @@
       "title": "Doing",
       "type": "string"
      },
+     "name": {
+      "description": "The name the agent goes by (EXE-18).",
+      "title": "Name",
+      "type": "string"
+     },
      "run_kind": {
       "title": "Run Kind",
       "type": "string"
@@ -9697,6 +9742,7 @@
     },
     "required": [
      "seat",
+     "name",
      "run_kind",
      "doing"
     ],
@@ -18367,6 +18413,48 @@
      }
     },
     "summary": "Recall a team that was stood down.",
+    "tags": [
+     "roster"
+    ]
+   }
+  },
+  "/v1/roster/rename_seat": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "roster.rename_seat",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RenameSeatInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Roster"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Give an agent the name it is shown by.",
     "tags": [
      "roster"
     ]

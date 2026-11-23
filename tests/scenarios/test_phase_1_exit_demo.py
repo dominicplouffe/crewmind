@@ -179,6 +179,9 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("roster.hire_team", alice, project_id=project, team="research", role="Generalist")
     await write("roster.stand_down_team", alice, project_id=project, team="research")
     await write("roster.recall_team", alice, project_id=project, team="research")
+    await write(
+        "roster.rename_seat", alice, project_id=project, seat="research", display_name="Quill"
+    )
     await write("chat.send", alice, project_id=project, body="Hello, team.")
     await write("projects.start", alice, project_id=project)
     await write("projects.hold", alice, project_id=project)

@@ -94,18 +94,18 @@ async def test_IF_4_8_the_terminal_chat_sends_streams_and_runs_commands(
 
 
 def test_CHAT_18_the_header_and_messages_are_plain_and_cannot_inject_markup() -> None:
-    """CHAT-18, P4, P18: the header says Now, Next, Waiting on you and the budget. Text an
-    agent wrote is shown as text, never as terminal markup."""
+    """CHAT-18, P4, P18, EXE-18: the header says Now (by the agent's name), Next, Waiting on
+    you and the budget. Text an agent wrote is shown as text, never as terminal markup."""
     header = {
         "state": "paused",
-        "now": [{"seat": "CEO", "run_kind": "chat", "doing": "thinking"}],
+        "now": [{"seat": "CEO", "name": "Maya", "run_kind": "chat", "doing": "thinking"}],
         "next": ["1 run(s) queued."],
         "waiting_on_you": 2,
         "budget": "5 of 10 tokens used (50%)",
         "holds": [{"reason": "budget_wall", "lifts": "a budget raise"}],
     }
     shown = header_text(header)
-    assert "Now: CEO is thinking" in shown
+    assert "Now: Maya is thinking" in shown
     assert "Waiting on you: 2 | Budget: 5 of 10 tokens used (50%)" in shown
     assert "held: budget_wall (lifts by a budget raise)" in shown
     hostile = {

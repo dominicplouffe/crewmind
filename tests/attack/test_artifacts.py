@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 
 from tests.attack.harness import assert_refused
-from tests.support import App, agent_call, live_run, running_project, wake
+from tests.support import App, agent_call, live_run, running_project, shown_as, wake
 
 KB = 1024
 
@@ -69,7 +69,8 @@ async def test_ART_3_a_deliverable_has_a_plain_name_and_one_per_purpose(app: App
     }
     history = (await app.ok("chat.history", owner, project_id=project))["items"]
     announced = [m for m in history if detail_kind(m) == "deliverable"]
-    assert "CEO published report.md (version 1)." in announced[0]["body"]
+    ceo = await shown_as(app, owner, project)
+    assert f"{ceo} published report.md (version 1)." in announced[0]["body"]
     assert "> # Findings\n> Demand is real.\n> Third line." in announced[0]["body"]
     assert "Fourth" not in announced[0]["body"]
 

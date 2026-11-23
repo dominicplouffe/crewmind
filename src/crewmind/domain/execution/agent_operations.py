@@ -318,6 +318,7 @@ async def _show(context: Context, view: AgentView) -> Roster:
     seats: list[Any] = [
         SeatItem(
             name=seat.name,
+            display_name=seat.display_name,
             kind=seat.kind,
             role=role.name,
             team=team.name if team else None,

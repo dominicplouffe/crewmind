@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.22 (23 Nov 2026): agents have names
+
+- **EXE-18 (new):** every agent has a person-like name it is shown by ("Maya, the CEO"), given at hire or drawn from a fixed pool, unique in the project; the chairman renames one with `roster.rename_seat` (every surface, recorded); `@Maya` addresses it; its prompt and context pack name it. The seat name stays the identity, including the stored author of chat messages.
+- **EXE-15:** "who it is" includes the agent's name.
+
 ## Revision 2.21 (23 Nov 2026): your own name
 
 - **ACC-8 (new):** a person sets their own display name (`auth.set_name`, every surface); the change is recorded. The web showed the seeded "Admin" with no way to change it. Confirm: Q-021.

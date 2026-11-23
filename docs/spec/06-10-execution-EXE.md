@@ -67,7 +67,7 @@
   - **Pinned memory:** the goal, active standing orders, closed decisions, corrections and lessons for this agent, and its charter. Examples are labelled ILLUSTRATION. Retired orders are listed as retired.
   - The chairman's newest unanswered message, if any.
   - Run id, wake reasons and attempt number.
-  - Who it is: role, team, channels and roster.
+  - Who it is: its name (EXE-18), role, team, channels and roster.
   - Notices, consumed on read; unread messages (MSG-10).
   - Recall memories relevant to this run (MEM-5), each with source and date.
   - For task runs: the task, its success test, previous attempts, check output and side effects already fired.
@@ -91,3 +91,11 @@
   - **Visible.** The chairman can watch an agent's browser live in the app. Every navigation, click and submission is recorded in the run trace with a screenshot.
   - **Watches.** A watch (WRK-17) may be a recorded browser script. It replays at 0 tokens, with no model involved.
   - **Resources.** A sandbox with a browser gets 2 CPUs and 4 GB by default.
+- **EXE-18 Agent names.** Every agent has a person-like name it is shown by, such as "Maya, the CEO", next to its role.
+  - **Identity stays.** A seat's name (such as `CEO`, `Reviewer` or `research-1`) is its identity in events, tools, scripts and stored chat authors, and never changes. The name it is shown by is a separate field. Clients map a chat author to the name through the roster.
+  - **Given at creation.** A seat hired with names (the chairman's `names`, a crew's or a spec's members) is shown by the name it was given. Any other seat (the CEO, a reviewer the platform staffs, a member hired by count) draws a first name from a fixed pool: the first one no seat in the project uses as a seat name or a shown name, active or not, walking the pool from a point a hash of the project id decides. When every pool name is used, the pool goes round again with a number ("Lena 2").
+  - **Unique.** No two seats in a project share a name, compared without case, across seat names and shown names. A hire whose given name another agent already goes by is refused.
+  - **Renaming.** The chairman or a co-chair renames an agent (`roster.rename_seat`). The name is tidied of extra spaces, is never empty and is at most 100 characters; the change is in the event log with before and after. No agent renames a seat, its own included.
+  - **Mentions.** `@Maya` addresses the agent shown as Maya, without case and with any spaces left out, as `@CEO` addresses it by its seat name. `@team` still addresses the team's lead.
+  - **The agent knows.** Its prompt says "You are Maya, the CEO …", and its context pack lists the crew by shown name and role, with the seat name where it differs. A tool that names a team member accepts either.
+  - **Shown everywhere.** The roster, the chat header's "now" and the model view carry the shown name next to the seat. Platform lines the server writes about an agent use the shown name.

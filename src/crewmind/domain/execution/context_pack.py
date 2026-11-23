@@ -22,7 +22,7 @@ from crewmind.domain.projects import lifecycle
 from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import board
-from crewmind.storage.models import Run, Seat, Team, Wake
+from crewmind.storage.models import Role, Run, Seat, Team, Wake
 
 
 def output_standard() -> str:
@@ -124,8 +124,14 @@ async def build(
         team.id: team.name
         for team in await session.scalars(select(Team).where(Team.project_id == project.id))
     }
+    roles = {
+        role.id: role.name
+        for role in await session.scalars(
+            select(Role).where(Role.id.in_({other.role_id for other in seats}))
+        )
+    }
     roster = "\n".join(
-        f"- {_called(other)}: {other.kind}"
+        f"- {_called(other)}: {roles.get(other.role_id, other.kind)}"
         + (f", team {teams[other.team_id]}" if other.team_id else "")
         + (", lead" if other.is_lead else "")
         + ("" if other.state == "active" else f" ({other.state})")

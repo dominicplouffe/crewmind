@@ -17,7 +17,7 @@ from tests.attack.test_planning import CHAIRMAN_HOLDS, propose
 from tests.attack.work_support import Crew
 from tests.conftest import FakeClock
 from tests.push_support import BROWSER, FakePushService, sender
-from tests.support import App, running_project, wake
+from tests.support import App, running_project, shown_as, wake
 
 
 async def ask(app: App, owner: Any, project: str, body: str) -> int:
@@ -110,8 +110,9 @@ async def test_INV_24_an_agent_that_answers_with_nothing_is_not_asked_in_a_loop(
     asked = await ask(app, owner, project, "Anything to report?")
     await one_minute(app, clock)
     replies = await answers(app, owner, project, asked)
+    ceo = await shown_as(app, owner, project)
     assert [reply["body"] for reply in replies] == [
-        "CEO ran and gave no reply to this message. Ask again in other words."
+        f"{ceo} ran and gave no reply to this message. Ask again in other words."
     ]
     runs = (await app.ok("runs.list", owner, project_id=project))["items"]
     assert [run["kind"] for run in runs] == ["chat"]

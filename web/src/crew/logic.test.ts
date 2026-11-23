@@ -20,7 +20,7 @@ const NOW = Date.parse("2026-11-22T12:00:00Z");
 const ago = (minutes: number): string => new Date(NOW - minutes * 60_000).toISOString();
 
 function seat(name: string, extra: Partial<Seat> = {}): Seat {
-  return { name, kind: "worker", role: name, team: null, lead: false, state: "active", pause_reason: null, ...extra };
+  return { name, display_name: name, kind: "worker", role: name, team: null, lead: false, state: "active", pause_reason: null, ...extra };
 }
 
 function run(seatName: string, extra: Partial<Run> = {}): Run {
@@ -43,8 +43,8 @@ function run(seatName: string, extra: Partial<Run> = {}): Run {
   };
 }
 
-function header(now: Header["now"]): Header {
-  return { state: "running", now, next: [], waiting_on_you: 0, budget: "", budget_spent: 0, budget_wall: 1, holds: [], notes: [], unread: 0 };
+function header(now: Omit<Header["now"][number], "name">[]): Header {
+  return { state: "running", now: now.map((item) => ({ ...item, name: item.seat })), next: [], waiting_on_you: 0, budget: "", budget_spent: 0, budget_wall: 1, holds: [], notes: [], unread: 0 };
 }
 
 describe("crewMembers status (CHAT-18, EXE-4)", () => {
