@@ -177,6 +177,10 @@ export const founder = {
     missingTitle: "Still needed before it can start",
     nothingMissing: "Nothing is missing. It can start.",
     start: "Start the project",
+    startWithout: "Start without it",
+    waitingTitle: "Some of the crew can't work yet",
+    waitingAfter:
+      "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
     starting: "Starting…",
     open: "Open the project",
     later: "Open it without starting",

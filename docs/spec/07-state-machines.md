@@ -416,7 +416,8 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | open | waived | The project starts without it; the seats that need it are held | Chairman |
 | waived | met | The connection is attached; the holds lift | Chairman |
 | met | open | The connection is detached, revoked, deleted or expires | Chairman; owner; platform |
-| open, waived | dropped | The roles that needed it leave the roster | Chairman; CEO |
+| open, waived, met | dropped | The roles that needed it leave the roster | Chairman; CEO |
+| dropped | open | A role that needs it joins the roster again | Chairman; CEO |
 
 **Mailbox**, project or agent (INT-6, INT-10):
 

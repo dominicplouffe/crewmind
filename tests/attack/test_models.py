@@ -18,7 +18,7 @@ from crewmind.storage.models import Base, ModelCredential
 from tests.attack.harness import assert_refused
 from tests.attack.test_budget import complete, ledger
 from tests.conftest import FakeClock
-from tests.support import Actor, App, agent_call, live_run, running_project, wake
+from tests.support import Actor, App, agent_call, live_run, quiet_start, running_project, wake
 
 KEY = "sk-ant-very-secret-key-000111222"
 
@@ -151,8 +151,10 @@ async def test_P3_no_sandbox_holds_a_provider_key(app: App, provider: FakeProvid
 async def test_LLM_6_a_seat_with_no_way_to_run_is_refused_before_any_token(
     app: App, provider: FakeProvider, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """LLM-6, LLM-7: with no paying credential, or a hidden one, the run fails at lease
-    with the reason in the chat, and nothing is spent. One resolver serves chat and work."""
+    """LLM-6, LLM-7, PRJ-1, CON-5: with no paying credential, start shows which seats could
+    not run. Started without it, those seats are held with the reason and nothing is spent;
+    once a credential pays, they work. A hidden credential makes the seat note say so. One
+    resolver serves chat and work."""
     from crewmind.domain.execution import runs
     from crewmind.domain.models.service import SeatResolver
 
@@ -162,17 +164,22 @@ async def test_LLM_6_a_seat_with_no_way_to_run_is_refused_before_any_token(
         SeatResolver(app.runtime.settings, app.runtime.clock, mock_default=False),
     )
     owner = await app.person("owner@example.com")
-    project = await running_project(app, owner)
+    project = await app.project(owner)
+    refused = await app.call("projects.start", owner, project_id=project)
+    assert_refused(refused, rule="CON-5", code="start_blocked")
+    assert "no credential on the project pays for this seat" in refused.json()["message"]
+    await app.ok("projects.start", owner, project_id=project, without_missing=True)
+    await quiet_start(app, project)
     view = await app.ok("models.show", owner, project_id=project)
     assert "no credential on the project pays for this seat" in view["seats"][0]["note"]
     await wake(app, project)
     assert await app.work() == 0
-    listed = (await app.ok("runs.list", owner, project_id=project))["items"]
-    assert (listed[0]["state"], listed[0]["tokens_counted"]) == ("failed", 0)
+    assert (await app.ok("runs.list", owner, project_id=project))["items"] == []
     assert provider.calls == []
 
     await app.ok("credentials.add", owner, name="main", provider="anthropic", key=KEY)
     await app.ok("models.set_payer", owner, project_id=project, credential="main")
+    await app.work_jobs.keep_work_moving()
     await app.ok("chat.send", owner, project_id=project, body="Hello?")
     await wake(app, project, kind="again")
     assert await app.work() == 2

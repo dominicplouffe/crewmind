@@ -15,6 +15,7 @@ from crewmind.catalog.define import PERSON_AND_MCP, Empty, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.refusal import Refusal
+from crewmind.domain.connections import holds
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.founder import drafting as state
 from crewmind.domain.founder import model as m
@@ -143,7 +144,11 @@ class CreatedProject(BaseModel):
     missing_credentials: list[str] = Field(
         description="Model credentials the roster needs that you do not have yet."
     )
-    can_start: bool
+    waiting: list[str] = Field(
+        description="Who in the crew could not work yet, and why: a connection their role "
+        "needs, or a seat that cannot run. Starting now means starting without it (CON-5)."
+    )
+    can_start: bool = Field(description="The project is a draft and can be started.")
 
 
 async def view(context: Context, drafting: Drafting) -> DraftingView:
@@ -540,18 +545,26 @@ async def create(context: Context, payload: ConfirmDraftInput) -> CreatedProject
         _move(context, drafting, D.CREATED)
     else:
         _move(context, drafting, D.STARTING)
+    waiting = [
+        blocker.text
+        for blocker in await holds.blockers(session, project, context.now, context.caller)
+    ]
     started = False
-    if payload.start or drafting.quick:
-        await _call(context, "projects.start", project_id=project.id)
+    # Quick mode asks nothing, so it starts without what is missing and says who waits.
+    # A chairman who asked to start is never started past what would hold the crew.
+    if drafting.quick or (payload.start and not waiting):
+        await _call(
+            context, "projects.start", project_id=project.id, without_missing=drafting.quick
+        )
         started = True
         if drafting.quick:
             _move(context, drafting, D.STARTED)
-    blocking = [line for line in still_missing if "not available in this version" not in line]
     return CreatedProject(
         project_id=project.id,
         name=project.name,
         state=project.state,
         missing=still_missing,
         missing_credentials=await missing_credentials(context, spec),
-        can_start=not started and not blocking,
+        waiting=waiting,
+        can_start=not started,
     )

@@ -3091,6 +3091,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/projects/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show what the crew would wait for if the project started now, and who.
+         * @description Requires: project_observer.
+         */
+        get: operations["projects.readiness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/projects/receipt": {
         parameters: {
             query?: never;
@@ -4633,6 +4653,19 @@ export interface components {
             /** Statement */
             statement: string;
         };
+        /** BlockerItem */
+        BlockerItem: {
+            /**
+             * Seats
+             * @description The names of the agents who would wait for it.
+             */
+            seats: string[];
+            /**
+             * Text
+             * @description What is missing, or why a seat cannot run, in plain words.
+             */
+            text: string;
+        };
         /** BreakGlassInput */
         BreakGlassInput: {
             /**
@@ -5061,10 +5094,18 @@ export interface components {
             state: string;
             /** Type */
             type: string;
+            /**
+             * Waiting
+             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).
+             */
+            waiting?: string[];
         };
         /** CreatedProject */
         CreatedProject: {
-            /** Can Start */
+            /**
+             * Can Start
+             * @description The project is a draft and can be started.
+             */
             can_start: boolean;
             /**
              * Missing
@@ -5082,6 +5123,11 @@ export interface components {
             project_id: string;
             /** State */
             state: string;
+            /**
+             * Waiting
+             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).
+             */
+            waiting: string[];
         };
         /**
          * CredentialGrant
@@ -7184,6 +7230,19 @@ export interface components {
             /** What */
             what: string;
         };
+        /** Readiness */
+        Readiness: {
+            /**
+             * Ready
+             * @description Every agent could work if the project started now.
+             */
+            ready: boolean;
+            /**
+             * Waiting
+             * @description What would hold agents, and who. Starting without it holds exactly them.
+             */
+            waiting: components["schemas"]["BlockerItem"][];
+        };
         /** Receipt */
         Receipt: {
             /** Completed */
@@ -7978,19 +8037,6 @@ export interface components {
             /** Purchases */
             purchases: components["schemas"]["PurchaseLine"][];
         };
-        /** StartInput */
-        StartInput: {
-            /**
-             * Brief
-             * @description What you want, in your own words.
-             */
-            brief: string;
-            /**
-             * Document
-             * @description The text of a brief to grill first.
-             */
-            document?: string | null;
-        };
         /** Step */
         Step: {
             /**
@@ -8594,6 +8640,19 @@ export interface components {
              */
             reason: string;
         };
+        /** StartInput */
+        crewmind__domain__founder__operations__StartInput: {
+            /**
+             * Brief
+             * @description What you want, in your own words.
+             */
+            brief: string;
+            /**
+             * Document
+             * @description The text of a brief to grill first.
+             */
+            document?: string | null;
+        };
         /** ReasonInput */
         crewmind__domain__planning__delivery_operations__ReasonInput: {
             /**
@@ -8690,6 +8749,20 @@ export interface components {
              * @description The requirement's id, from `plan show`.
              */
             requirement_id: number;
+        };
+        /** StartInput */
+        crewmind__domain__projects__operations__StartInput: {
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Without Missing
+             * @description Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).
+             * @default false
+             */
+            without_missing?: boolean;
         };
         /** History */
         crewmind__domain__settings__operations__History: {
@@ -11282,7 +11355,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["StartInput"];
+                "application/json": components["schemas"]["crewmind__domain__founder__operations__StartInput"];
             };
         };
         responses: {
@@ -13657,6 +13730,38 @@ export interface operations {
             };
         };
     };
+    "projects.readiness": {
+        parameters: {
+            query: {
+                /** @description The project's id, from `projects list`. */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Readiness"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "projects.receipt": {
         parameters: {
             query: {
@@ -13829,7 +13934,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ProjectRef"];
+                "application/json": components["schemas"]["crewmind__domain__projects__operations__StartInput"];
             };
         };
         responses: {

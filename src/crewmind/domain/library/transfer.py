@@ -172,12 +172,7 @@ async def missing_setup(context: Context, spec: ProjectSpec) -> list[str]:
             f"You have no credential named {spec.paying_credential}. Add it with "
             "`credentials add`, then choose it with `models set-payer`."
         )
-    for grant in spec.credentials:
-        if grant.name != spec.paying_credential:
-            missing.append(
-                f"The roles {', '.join(grant.roles) or '(none)'} expect a credential named "
-                f"{grant.name}. Role credentials are not available in this version."
-            )
+    # A role's secrets are needs of the project, shown with what they hold (CON-5).
     for integration in spec.integrations:
         missing.append(f"The spec asks for {integration}, which is not available in this version.")
     return missing

@@ -165,22 +165,32 @@ class Session:
                 self.say(f"Added {name}. It pays for this project.")
             except Refused as refused:
                 self.say(str(refused))
-        blocking = [
-            line for line in created["missing"] if "not available in this version" not in line
-        ]
         if created["missing"]:
             self.say("\nStill to set up:")
             for line in created["missing"]:
                 self.say(f"  - {line}")
-        if created.get("state") == "draft" and not blocking:
-            if self.ask("Start the project now? [y/N]").strip().lower() in ("y", "yes"):
-                try:
-                    started = self.founder.call("projects.start", project_id=project)
-                    self.say(f"Started. The project is {started['state']}.")
-                except Refused as refused:
-                    self.say(str(refused))
-        elif created.get("state") == "draft":
-            self.say("\nStart it with `crewmind projects start` once that is done.")
+        waiting = list(created.get("waiting", []))
+        if waiting:
+            self.say("\nSome of the crew could not work yet:")
+            for line in waiting:
+                self.say(f"  - {line}")
+        if created.get("state") != "draft":
+            return
+        question = (
+            "Start now without it? Those agents wait until it is added. [y/N]"
+            if waiting
+            else "Start the project now? [y/N]"
+        )
+        if self.ask(question).strip().lower() in ("y", "yes"):
+            try:
+                started = self.founder.call(
+                    "projects.start", project_id=project, without_missing=bool(waiting)
+                )
+                self.say(f"Started. The project is {started['state']}.")
+            except Refused as refused:
+                self.say(str(refused))
+        else:
+            self.say("\nStart it with `crewmind projects start` when you are ready.")
 
 
 def run_draft(

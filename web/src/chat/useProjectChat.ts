@@ -19,7 +19,7 @@ export interface ChatActions {
   interrupt(): Promise<boolean>;
   acceptCard(cardId: number, edited?: string): Promise<void>;
   dismissCard(cardId: number): Promise<void>;
-  projectAction(action: "start" | "hold" | "resume"): Promise<void>;
+  projectAction(action: "start" | "hold" | "resume", options?: { withoutMissing?: boolean }): Promise<void>;
   refresh(): void;
   reportError(error: unknown): void;
   /** Loads the page of messages before the oldest one shown. */
@@ -224,9 +224,13 @@ export function useProjectChat(projectId: string): { state: ChatState; actions: 
           reportError(error);
         }
       },
-      async projectAction(action) {
+      async projectAction(action, options) {
         try {
-          await post(`/v1/projects/${action}`, { project_id: projectId });
+          if (action === "start") {
+            await post("/v1/projects/start", { project_id: projectId, without_missing: options?.withoutMissing ?? false });
+          } else {
+            await post(`/v1/projects/${action}`, { project_id: projectId });
+          }
           await refreshNow();
           dispatch({ type: "changed" });
         } catch (error) {

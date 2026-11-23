@@ -131,7 +131,10 @@ export function useDrafting(draftingId: string): DraftingHook {
       async start() {
         const projectId = created?.project_id ?? stateRef.current.view?.project_id;
         if (!projectId) return null;
-        const status = await run(() => post("/v1/projects/start", { project_id: projectId }));
+        // CON-5: what is still waiting was shown on the created screen; starting holds only
+        // the agents who need it.
+        const withoutMissing = (created?.waiting.length ?? 0) > 0;
+        const status = await run(() => post("/v1/projects/start", { project_id: projectId, without_missing: withoutMissing }));
         return status ? projectId : null;
       },
     };

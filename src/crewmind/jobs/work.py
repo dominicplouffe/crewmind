@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.execute import Clock
+from crewmind.domain.connections import holds
 from crewmind.domain.execution import notices, roster
 from crewmind.domain.work import board, checks, fetch, outside, reviews, tasks
 from crewmind.domain.work import operations as work_operations
@@ -227,6 +228,8 @@ class WorkJobs:
                     )
                     if project.state in ("deleting", "deleted", "stopped"):
                         continue
+                    if project.state != "draft":
+                        await holds.apply(session, project, now)
                     if independent:
                         await roster.ensure_reviewer(session, project, now)
                     elif await tasks.is_solo(session, project.id):

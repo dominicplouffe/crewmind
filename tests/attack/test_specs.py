@@ -49,7 +49,8 @@ KEY = "sk-test-0123456789abcdef"
 async def test_LIB_4_a_spec_never_holds_or_yields_a_secret(app: App) -> None:
     """LIB-4, INV-6, PRJ-9: a spec that carries a credential value is refused, whoever
     wrote it. An export and a clone name the paying credential and never hold its value,
-    and a spec that names a credential the person lacks creates the project and says so."""
+    and a spec that names a credential the person lacks creates the project and says so.
+    A secret its roles need is listed as what the crew waits for (CON-5)."""
     owner = await app.person("owner@example.com")
     smuggling: list[dict[str, Any]] = [
         {**SPEC, "credentials": [{"name": "maps-api", "roles": [], "value": KEY}]},
@@ -63,7 +64,8 @@ async def test_LIB_4_a_spec_never_holds_or_yields_a_secret(app: App) -> None:
     created = await app.ok("projects.import_spec", owner, **SPEC)
     assert created["state"] == "draft"
     assert any("no credential named main" in line for line in created["missing"])
-    assert any("maps-api" in line for line in created["missing"])
+    # A role's secret is a need of the project: who waits for it is listed (CON-5).
+    assert any("maps-api" in line and "researcher" in line for line in created["waiting"])
     assert any("email" in line for line in created["missing"])
 
     ensure_master_key(app.runtime.config.master_key_file)
