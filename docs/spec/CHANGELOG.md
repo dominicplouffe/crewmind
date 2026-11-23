@@ -7,6 +7,8 @@ Newest first. One line per change, citing the ids touched.
 - **CON-1:** connection names: a letter first, then letters, digits, `_`, `-` and `.`; unique per owner whatever their case; a need is met by a same-kind connection whose name matches whatever its case.
 - **CON-2:** a value larger than `secret.max_size` is refused; the expiry date is a UTC day and the secret expires the day after; the `.env` review shows names, kinds and problems, never values, and secrets added from a `.env` are given to the agent under their own name.
 - **Appendix A:** `secret.max_size` (64 KB, 1 KB–1 MB, install).
+- **IF-3.1:** a read whose input holds a secret is sent as a POST body, like one that takes a document; a secret never travels in a URL.
+- **CON-15:** each project's Connections is a panel under More, opened from the start dialog and from anything missing, rather than a top-level tab.
 
 ## Revision 2.23 (23 Nov 2026): connections, phase 7.B
 

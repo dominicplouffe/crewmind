@@ -393,6 +393,10 @@ export function Project(): JSX.Element {
           <StartDialog
             waiting={startWaiting}
             onClose={() => setStartWaiting(null)}
+            onAddNow={() => {
+              setStartWaiting(null);
+              open("connections");
+            }}
             onStartWithout={async () => {
               await actions.projectAction("start", { withoutMissing: true });
               setStartWaiting(null);

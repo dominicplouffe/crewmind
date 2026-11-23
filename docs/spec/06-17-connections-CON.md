@@ -78,7 +78,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny).
   - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
 - **CON-15 Surfaces.**
-  - The web app has a Connections area in Settings (install and personal) and a Connections tab in each project, sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
+  - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
   - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets.
   - Human-only (IF-5.6): creating or replacing a value, OAuth sign-in, adding a command server, allowing a tool that changes things, deleting a connection. MCP clients see names, kinds and health.
   - Values are typed only into fields that are never pre-filled, are cleared after saving, and are never put in a URL or browser storage.

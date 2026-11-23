@@ -18,6 +18,7 @@ import "./styles/overview.css";
 import "./styles/crew.css";
 import "./styles/deliverables.css";
 import "./styles/settings.css";
+import "./styles/connections.css";
 import "./styles/onboarding.css";
 
 applyTheme(currentTheme());

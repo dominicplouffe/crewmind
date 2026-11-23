@@ -5,7 +5,8 @@
  */
 import { useEffect, useRef, type ComponentType } from "react";
 import { Link, NavLink, useParams } from "react-router-dom";
-import { Bell, ChevronLeft, ChevronRight, KeyRound, Settings2, Sparkles, UserRound, Users } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, KeyRound, PlugZap, Settings2, Sparkles, UserRound, Users } from "lucide-react";
+import { ConnectionsSection } from "../connections/ConnectionsSection";
 import { useAuth } from "../auth";
 import { settingsWords } from "../strings.settings";
 import { Skeleton } from "../ui/Skeleton";
@@ -29,6 +30,7 @@ const SECTIONS: Section[] = [
   { id: "profile", icon: <UserRound size={18} aria-hidden="true" />, adminOnly: false, body: ProfileSection },
   { id: "notifications", icon: <Bell size={18} aria-hidden="true" />, adminOnly: false, body: NotificationsSection },
   { id: "models", icon: <KeyRound size={18} aria-hidden="true" />, adminOnly: false, body: ModelsSection },
+  { id: "connections", icon: <PlugZap size={18} aria-hidden="true" />, adminOnly: false, body: ConnectionsSection },
   { id: "founder", icon: <Sparkles size={18} aria-hidden="true" />, adminOnly: true, body: FounderSection },
   { id: "people", icon: <Users size={18} aria-hidden="true" />, adminOnly: true, body: PeopleSection },
   { id: "install", icon: <Settings2 size={18} aria-hidden="true" />, adminOnly: true, body: InstallSection },

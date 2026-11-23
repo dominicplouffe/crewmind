@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import TYPE_CHECKING, get_args
 
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
 if TYPE_CHECKING:
     from crewmind.catalog.operation import Operation
@@ -57,10 +57,13 @@ def exposed_on(operation: Operation, surface: Surface) -> bool:
 
 def takes_a_document(model: type[BaseModel]) -> bool:
     """Whether an input holds another model, or a list of them: a whole document, such
-    as a project spec, which cannot be sent in a query string."""
+    as a project spec, which cannot be sent in a query string. A secret is never sent in
+    one either (IF-3.1, INV-6)."""
     for field in model.model_fields.values():
         parts = [field.annotation, *get_args(field.annotation)]
         parts += [inner for part in get_args(field.annotation) for inner in get_args(part)]
+        if SecretStr in parts:
+            return True
         if any(isinstance(part, type) and issubclass(part, BaseModel) for part in parts):
             return True
     return False

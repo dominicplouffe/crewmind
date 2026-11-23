@@ -1,5 +1,6 @@
 /** Picks the panel to show beside the chat. */
 import type { MessageHandlers } from "../chat/MessageItem";
+import { ConnectionsPanel } from "../connections/ConnectionsPanel";
 import type { PanelState } from "../chat/panels";
 import { lastMessageId, type ChatState } from "../chat/state";
 import { t } from "../strings";
@@ -29,6 +30,9 @@ export function ProjectPanel({ projectId, panel, state, handlers, onClose, onPan
   const changes = state.changes;
   let body: JSX.Element;
   switch (panel.id) {
+    case "connections":
+      body = <ConnectionsPanel projectId={projectId} changes={changes} onChanged={onChanged} />;
+      break;
     case "files":
       body = (
         <FilesPanel

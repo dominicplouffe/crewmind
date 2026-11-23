@@ -97,6 +97,7 @@ export const t = {
     navLabel: "Panels",
     close: "Close panel",
     names: {
+      connections: "Connections",
       files: "Files",
       feed: "Activity",
       search: "Search",

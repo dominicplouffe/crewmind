@@ -38,7 +38,7 @@ from crewmind.domain.connections.model import (
     check_site,
     default_env_name,
 )
-from crewmind.domain.connections.views import ItemView, item_view
+from crewmind.domain.connections.views import ConnectionView, item_view
 from crewmind.domain.projects.access import project_not_found, role_in
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.registry import Scope as SettingScope
@@ -143,7 +143,7 @@ class ListInput(BaseModel):
 
 
 class ItemList(BaseModel):
-    items: list[ItemView]
+    items: list[ConnectionView]
 
 
 class Usage(BaseModel):
@@ -161,7 +161,7 @@ class HistoryLine(BaseModel):
 
 
 class ItemDetail(BaseModel):
-    item: ItemView
+    item: ConnectionView
     used_in: list[Usage] = Field(description="The projects you can see that use it.")
     hidden_uses: int = Field(description="Projects using it that you cannot see.")
     history: list[HistoryLine]
@@ -258,7 +258,7 @@ def _recorded(context: Context, item: Connection, extra: dict[str, object]) -> N
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def add_secret(context: Context, payload: AddSecretInput) -> ItemView:
+async def add_secret(context: Context, payload: AddSecretInput) -> ConnectionView:
     """CON-1, CON-2, CON-4, CON-6, CON-7: a write-only value, used one way, owned by one
     scope; with a project, attached and granted at once."""
     await service.check_project(context.session, context.caller, payload.project_id)
@@ -285,7 +285,7 @@ async def add_secret(context: Context, payload: AddSecretInput) -> ItemView:
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def add_variable(context: Context, payload: AddVariableInput) -> ItemView:
+async def add_variable(context: Context, payload: AddVariableInput) -> ConnectionView:
     """CON-1, CON-3, CON-4: a plain value, placed in granted runs as an environment variable."""
     await service.check_project(context.session, context.caller, payload.project_id)
     await _check_variable_size(context, payload.value, payload.name)
@@ -331,7 +331,7 @@ def _activate(context: Context, item: Connection) -> None:
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def replace_secret(context: Context, payload: ReplaceSecretInput) -> ItemView:
+async def replace_secret(context: Context, payload: ReplaceSecretInput) -> ConnectionView:
     """CON-2: replacing is the only change a value can have. It takes effect at each run's
     next request."""
     item = await service.manageable(
@@ -358,7 +358,7 @@ async def replace_secret(context: Context, payload: ReplaceSecretInput) -> ItemV
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def change_secret(context: Context, payload: ChangeSecretInput) -> ItemView:
+async def change_secret(context: Context, payload: ChangeSecretInput) -> ConnectionView:
     """CON-2, CON-4, CON-7: where a secret goes is the person's decision, so a model client
     cannot change it (IF-5.6). A change that would collide in a project is refused."""
     item = await service.manageable(
@@ -433,7 +433,7 @@ async def change_secret(context: Context, payload: ChangeSecretInput) -> ItemVie
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def change_variable(context: Context, payload: ChangeVariableInput) -> ItemView:
+async def change_variable(context: Context, payload: ChangeVariableInput) -> ConnectionView:
     """CON-3, CON-4: a variable's change reaches each run at its next start."""
     item = await service.manageable(
         context.session, context.caller, payload.connection, payload.project_id
@@ -484,7 +484,7 @@ async def list_connections(context: Context, payload: ListInput) -> ItemList:
         .where(Connection.state.in_(service.LIVE))
         .order_by(Connection.scope, Connection.name_key)
     )
-    shown: list[ItemView] = []
+    shown: list[ConnectionView] = []
     for row in rows:
         if payload.scope is not None and row.scope != payload.scope:
             continue
@@ -567,7 +567,7 @@ async def show_connection(context: Context, payload: ConnectionRef) -> ItemDetai
     authority=Authority.PERSON,
     reversibility=Reversibility.IRREVERSIBLE,
 )
-async def delete_connection(context: Context, payload: ConnectionRef) -> ItemView:
+async def delete_connection(context: Context, payload: ConnectionRef) -> ConnectionView:
     """CON-1, CON-2, CON-14: the value is destroyed, every attachment ends, and the seats
     that needed it are held. The row stays, without its value, for the record."""
     item = await service.manageable(

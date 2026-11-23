@@ -12,7 +12,7 @@ from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.domain.connections import attach, holds, needs, service
 from crewmind.domain.connections.model import Scope
-from crewmind.domain.connections.views import ItemView, item_view
+from crewmind.domain.connections.views import ConnectionView, item_view
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
 from crewmind.storage.models import Connection, Project
@@ -69,7 +69,7 @@ class DetachInput(ProjectRef):
 
 
 class Attached(BaseModel):
-    item: ItemView
+    item: ConnectionView
     roles: list[str] = Field(description="The roles granted, or * for every role.")
     env_name: str | None = Field(description="The variable or file name in this project.")
 
@@ -89,7 +89,7 @@ class RoleOption(BaseModel):
 
 class ProjectConnections(BaseModel):
     attached: list[Attached]
-    available: list[ItemView] = Field(description="What you could attach here.")
+    available: list[ConnectionView] = Field(description="What you could attach here.")
     needs: list[NeedView]
     roles: list[RoleOption] = Field(description="The roles on the roster, for grants.")
 
@@ -144,7 +144,7 @@ async def set_grants(context: Context, payload: GrantsInput) -> Attached:
     authority=Authority.PROJECT_CHAIR,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def detach_connection(context: Context, payload: DetachInput) -> ItemView:
+async def detach_connection(context: Context, payload: DetachInput) -> ConnectionView:
     """CON-4, CON-14: takes effect at each seat's next run; seats that needed it are held."""
     project = await _project(context)
     item = await service.find(context.session, context.caller, payload.connection, project.id)
@@ -176,7 +176,7 @@ async def for_project(context: Context, payload: ProjectRef) -> ProjectConnectio
         )
         for link, item in links
     ]
-    available: list[ItemView] = []
+    available: list[ConnectionView] = []
     rows = await session.scalars(
         select(Connection)
         .where(Connection.state.in_(service.LIVE))

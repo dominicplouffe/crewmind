@@ -20,7 +20,7 @@ from crewmind.storage.models import (
 )
 
 
-class ItemView(BaseModel):
+class ConnectionView(BaseModel):
     id: str
     name: str
     kind: str = Field(description="secret, variable or mcp_server.")
@@ -45,6 +45,9 @@ class ItemView(BaseModel):
         default=None, description="When a secret's value was last set."
     )
     expires_on: date | None = None
+    expires_soon: bool = Field(
+        default=False, description="Its expiry is within secret.expiry_warning: people were told."
+    )
     created_at: datetime
     changed_at: datetime
     last_used_at: datetime | None = None
@@ -52,8 +55,8 @@ class ItemView(BaseModel):
     yours: bool = Field(description="You may change or delete it.")
 
 
-async def item_view(session: AsyncSession, caller: Caller, item: Connection) -> ItemView:
-    view = ItemView(
+async def item_view(session: AsyncSession, caller: Caller, item: Connection) -> ConnectionView:
+    view = ConnectionView(
         id=item.id,
         name=item.name,
         kind=item.kind,
@@ -62,6 +65,7 @@ async def item_view(session: AsyncSession, caller: Caller, item: Connection) -> 
         state=item.state,
         env_name=item.env_name,
         expires_on=item.expires_on,
+        expires_soon=bool(item.warned),
         created_at=item.created_at,
         changed_at=item.changed_at,
         last_used_at=item.last_used_at,

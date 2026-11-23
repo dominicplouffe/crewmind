@@ -16,6 +16,7 @@ import {
   Play,
   Search,
   SlidersHorizontal,
+  PlugZap,
   Wallet,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -43,6 +44,7 @@ const ACTION_FOR_STATE: Record<string, "start" | "hold" | "resume"> = {
 };
 
 const MORE: { id: PanelId; icon: JSX.Element }[] = [
+  { id: "connections", icon: <PlugZap size={16} /> },
   { id: "feed", icon: <Activity size={16} /> },
   { id: "search", icon: <Search size={16} /> },
   { id: "budget", icon: <Wallet size={16} /> },

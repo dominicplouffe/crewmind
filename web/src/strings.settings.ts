@@ -423,6 +423,7 @@ export const settingsWords = {
     profile: { label: "Profile & appearance", help: "Your name, theme and how agents talk to you." },
     notifications: { label: "Notifications", help: "Alerts on this device and your daily brief." },
     models: { label: "Models & keys", help: "The AI model keys your agents use." },
+    connections: { label: "Connections", help: "Secrets and variables your crews use." },
     founder: { label: "Founder", help: "The key and quality the Founder uses." },
     people: { label: "People", help: "Invite teammates and manage roles." },
     install: { label: "Install settings", help: "Limits and record keeping for every project." },

@@ -163,6 +163,7 @@ export const startDialog = {
   after:
     "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
   notNow: "Not now",
+  addNow: "Add them now",
   startWithout: "Start without it",
   starting: "Starting…",
 };
