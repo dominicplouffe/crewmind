@@ -209,6 +209,7 @@ export const settingWords: Record<string, SettingWords> = {
     help: "Secrets shorter than this are refused, because they cannot be hidden reliably in what agents write.",
     noun: ["character", "characters"],
   },
+  "secret.max_size": { label: "Largest secret", help: "Secrets larger than this are refused." },
   "secret.expiry_warning": { label: "Warn before a secret expires", help: "How long before a secret's expiry date the chairman is told." },
   "mcp.call_timeout": { label: "MCP call time limit", help: "How long one call to an MCP server may take before it is stopped." },
   "mcp.max_calls_per_run": {

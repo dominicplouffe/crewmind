@@ -215,13 +215,13 @@ ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_acce
 ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_secrets.py,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
 ACC-8,Your name,06-16-accounts-ACC.md,7,yes,done,test_ACC_8_a_person_sets_only_their_own_name,auth.set_name; the web sets it in Settings and first-run setup.
-CON-1,Scopes and ownership,06-17-connections-CON.md,7B,yes,not started,,
-CON-2,Secrets,06-17-connections-CON.md,7B,yes,partial,test_CON_2_a_sealed_value_moved_to_another_row_does_not_open,Values are sealed to their owner and name (7B.0). The rest of CON-2 arrives in 7B.1
-CON-3,Variables,06-17-connections-CON.md,7B,yes,not started,,
-CON-4,Attachment and grants,06-17-connections-CON.md,7B,yes,not started,,
-CON-5,Needs and starting,06-17-connections-CON.md,7B,yes,partial,test_CON_5_a_seat_never_runs_while_its_role_needs_something_missing; test_CON_5_a_need_met_releases_the_seats_it_held; test_CON_5_readiness_lists_what_is_missing_without_changing_anything; test_7_18_a_need_moves_only_by_listed_transitions; test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process,"Needs are kept per project from roles' declared credentials; start shows them with who waits (CLI, web dialog, Founder), start without them holds exactly those seats, and the lease guard keeps their runs unleased. Needs are met only once connections exist (7B.1); the desk item and agent requests come with 7B.7"
+CON-1,Scopes and ownership,06-17-connections-CON.md,7B,yes,done,test_CON_1_only_its_owner_sees_or_changes_an_item; test_INV_5_a_project_you_cannot_see_answers_like_one_that_does_not_exist,Three scopes; names unique per owner whatever their case; deleting lists the projects first in the web (7B.1 web) and in connections.show
+CON-2,Secrets,06-17-connections-CON.md,7B,yes,partial,test_CON_2_a_sealed_value_moved_to_another_row_does_not_open; test_CON_2_a_secret_value_never_comes_back_and_dies_with_its_item; test_CON_2_a_pasted_env_is_reviewed_without_values_and_saved_whole; test_7_18_a_secret_warns_then_expires_and_its_seats_wait; test_IF_5_6_a_model_client_sees_names_and_never_sets_a_value,"Write-only values, min and max size, sent for you or given, expiry with warnings, .env review and import (7B.1). Using a secret in a run arrives in 7B.2 and 7B.3"
+CON-3,Variables,06-17-connections-CON.md,7B,yes,partial,test_CON_7_a_name_that_changes_how_programs_run_is_refused,"Variables are stored, shown and attached (7B.1). Placing them in runs and context packs arrives in 7B.2"
+CON-4,Attachment and grants,06-17-connections-CON.md,7B,yes,partial,test_CON_4_a_project_gets_only_what_is_attached_and_granted_without_collisions; test_CON_5_attaching_lifts_the_hold_and_detaching_brings_it_back,"Attachment, default grants from needs, role grants, collisions on variable and site (7B.1). What a run receives arrives in 7B.2; ending warm chat processes too"
+CON-5,Needs and starting,06-17-connections-CON.md,7B,yes,partial,test_CON_5_a_seat_never_runs_while_its_role_needs_something_missing; test_CON_5_a_need_met_releases_the_seats_it_held; test_CON_5_readiness_lists_what_is_missing_without_changing_anything; test_7_18_a_need_moves_only_by_listed_transitions; test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process; test_CON_5_attaching_lifts_the_hold_and_detaching_brings_it_back,"Needs are kept and met by attached connections; start shows them with who waits; start without them holds exactly those seats; attaching lifts the hold and detaching, deleting or expiry brings it back. The desk item and agent requests come with 7B.7"
 CON-6,Secrets sent for you,06-17-connections-CON.md,7B,yes,not started,,
-CON-7,Secrets given to the agent,06-17-connections-CON.md,7B,yes,not started,,
+CON-7,Secrets given to the agent,06-17-connections-CON.md,7B,yes,partial,test_CON_7_a_name_that_changes_how_programs_run_is_refused,Names are checked and reserved names refused (7B.1). Placing given secrets in runs arrives in 7B.2
 CON-8,Masking,06-17-connections-CON.md,7B,yes,not started,,
 CON-9,Remote MCP servers,06-17-connections-CON.md,7B,yes,not started,,
 CON-10,MCP OAuth,06-17-connections-CON.md,7B,yes,not started,,
@@ -229,7 +229,7 @@ CON-11,MCP servers started from a command,06-17-connections-CON.md,7B,yes,not st
 CON-12,MCP tools,06-17-connections-CON.md,7B,yes,not started,,
 CON-13,MCP calls in a run,06-17-connections-CON.md,7B,yes,not started,,
 CON-14,Everyone knows what a project has,06-17-connections-CON.md,7B,yes,not started,,
-CON-15,Surfaces,06-17-connections-CON.md,7B,yes,not started,,
+CON-15,Surfaces,06-17-connections-CON.md,7B,yes,partial,test_IF_5_6_a_model_client_sees_names_and_never_sets_a_value,Human-only verbs and MCP names-only reads (7B.1). The web Connections area arrives with 7B.1 web
 CON-16,Records and errors,06-17-connections-CON.md,7B,yes,not started,,
 INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,partial,test_scenario_the_rule_breaker_gets_nowhere,"Covered for everything that exists: settings, standing orders, decisions, corrections, a verdict on own work, locked artifacts. Commitments, tool permissions, revenue lines, flags and chairman-authored scope arrive in later phases"
 INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,done,test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies; test_WRK_5_a_test_must_fail_first_and_cannot_be_weakened; test_scenario_a_competent_crew_finishes_a_verified_job,

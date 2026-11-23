@@ -29,6 +29,7 @@ from crewmind.domain.accounts.model import (
 from crewmind.domain.accounts.people import LINK_EXPIRED
 from crewmind.domain.accounts.token_operations import TOKEN_EXPIRED
 from crewmind.domain.budget import service as budget
+from crewmind.domain.connections import expiry
 from crewmind.domain.conversation import corrections, sessions, speaking
 from crewmind.domain.execution import runs
 from crewmind.domain.projects import lifecycle
@@ -185,6 +186,11 @@ class Scheduler:
                     await job(session, now)
             except Exception:
                 logger.exception("scheduler: %s failed this tick", job.__name__)
+        try:
+            async with self._sessions() as session, session.begin():
+                await expiry.check(session, self._settings, now)
+        except Exception:
+            logger.exception("scheduler: connection expiry failed this tick")
         return failed
 
     async def run(self) -> None:

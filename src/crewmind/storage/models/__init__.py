@@ -22,7 +22,13 @@ from crewmind.storage.models.artifacts import (
     UploadInProgress,
 )
 from crewmind.storage.models.base import Base, new_id
-from crewmind.storage.models.connections import ProjectNeed
+from crewmind.storage.models.connections import (
+    Connection,
+    ConnectionSecret,
+    ConnectionVariable,
+    ProjectConnection,
+    ProjectNeed,
+)
 from crewmind.storage.models.conversation import Channel, Message, ReadPosition
 from crewmind.storage.models.decisions import (
     BriefRun,
@@ -108,6 +114,9 @@ __all__ = [
     "ChatSession",
     "ClosedDecision",
     "Commitment",
+    "Connection",
+    "ConnectionSecret",
+    "ConnectionVariable",
     "Correction",
     "Crew",
     "Cycle",
@@ -144,6 +153,7 @@ __all__ = [
     "PinnedNote",
     "Presence",
     "Project",
+    "ProjectConnection",
     "ProjectCredential",
     "ProjectGuard",
     "ProjectNeed",

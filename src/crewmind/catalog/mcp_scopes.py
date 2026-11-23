@@ -12,6 +12,12 @@ SCOPES = (READ, STEER, CREATE, CONFIGURE)
 
 HUMAN_ONLY: dict[str, str] = {
     "credentials.add": "creating a credential value",
+    "connections.add_secret": "creating a credential value",
+    "connections.replace_secret": "creating a credential value",
+    "connections.import_env": "creating a credential value",
+    "connections.review_env": "reading pasted secret values",
+    "connections.change_secret": "choosing where a secret is sent (CON-15)",
+    "connections.delete": "deleting a connection (CON-15)",
     "members.add": "changing project membership",
     "members.remove": "changing project membership",
     "members.set_role": "changing project membership",
@@ -77,7 +83,15 @@ _CREATE = (
     "founder.create",
     "founder.discard",
 )
-_CONFIGURE_GROUPS = ("roster", "settings", "models", "credentials", "roles", "crews")
+_CONFIGURE_GROUPS = (
+    "roster",
+    "settings",
+    "models",
+    "credentials",
+    "roles",
+    "crews",
+    "connections",
+)
 _STEER_GROUPS = (
     "artifacts",
     "audits",

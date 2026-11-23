@@ -280,6 +280,24 @@ async def test_INV_21_every_write_operation_records_an_event(
         source="The trade fair opens that day.",
     )  # fmt: skip
     await write("credentials.delete", alice, name="main")
+    secret = {"description": "A test key.", "value": "a-long-test-value-1234"}
+    await write(
+        "connections.add_secret", alice, name="site-key", sites=["example.com"],
+        project_id=project, roles=["*"], **secret,
+    )  # fmt: skip
+    await write(
+        "connections.replace_secret", alice, connection="site-key", value="another-value-5678"
+    )
+    await write("connections.change_secret", alice, connection="site-key", description="The key.")
+    await write("connections.add_variable", alice, name="region", description="Where.", value="ca")
+    await write("connections.change_variable", alice, connection="region", value="us")
+    await write("connections.attach", alice, project_id=project, connection="region", roles=["*"])
+    await write(
+        "connections.set_grants", alice, project_id=project, connection="region", roles=["*"]
+    )
+    await write("connections.detach", alice, project_id=project, connection="region")
+    await write("connections.import_env", alice, text="TIMEZONE=UTC")
+    await write("connections.delete", alice, connection="site-key")
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
     await write("push.unsubscribe", alice, endpoint=browser)

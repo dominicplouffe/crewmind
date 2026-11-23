@@ -18,6 +18,7 @@ from crewmind.domain.accounts.model import (
     SESSION_MACHINE,
     TOKEN_MACHINE,
 )
+from crewmind.domain.connections.model import CONNECTION_MACHINE
 from crewmind.domain.connections.needs import NEED_MACHINE
 from crewmind.domain.conversation.corrections import CORRECTION_MACHINE
 from crewmind.domain.conversation.decisions import DECISION_MACHINE
@@ -123,6 +124,7 @@ def declared(machine: StateMachine) -> set[tuple[str, str]]:
         ("7.18:Model credential", CREDENTIAL_MACHINE, NOTHING),
         ("7.18:Circuit breaker", BREAKER_MACHINE, NOTHING),
         ("7.18:Need", NEED_MACHINE, NOTHING),
+        ("7.18:Connection", CONNECTION_MACHINE, NOTHING),
     ],
 )
 def test_section_7_the_declared_transitions_equal_the_spec(

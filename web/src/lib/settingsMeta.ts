@@ -130,6 +130,7 @@ const SPECS: Record<string, Spec> = {
   "email.agent_addresses": { group: "integrations", kind: "toggle" },
   "search.max_per_day": { group: "integrations", kind: "number" },
   "secret.min_length": { group: "integrations", kind: "number" },
+  "secret.max_size": { group: "integrations", kind: "bytes" },
   "secret.expiry_warning": { group: "integrations", kind: "duration" },
   "mcp.call_timeout": { group: "integrations", kind: "duration" },
   "mcp.max_calls_per_run": { group: "integrations", kind: "number" },

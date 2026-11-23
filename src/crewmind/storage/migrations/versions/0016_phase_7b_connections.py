@@ -15,6 +15,72 @@ down_revision: str | None = "0015"
 
 def upgrade() -> None:
     op.create_table(
+        "connections",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("kind", sa.String(length=16), nullable=False),
+        sa.Column("scope", sa.String(length=16), nullable=False),
+        sa.Column("owner_id", sa.String(length=32), nullable=False),
+        sa.Column("name", sa.String(length=100), nullable=False),
+        sa.Column("name_key", sa.String(length=100), nullable=False),
+        sa.Column("description", sa.String(length=300), nullable=False),
+        sa.Column("env_name", sa.String(length=100), nullable=True),
+        sa.Column("state", sa.String(length=16), nullable=False),
+        sa.Column("created_by", sa.String(length=32), nullable=False),
+        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("changed_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("value_set_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("last_used_at", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("expires_on", sa.Date(), nullable=True),
+        sa.Column("warned", sa.JSON(), server_default="[]", nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    with op.batch_alter_table("connections", schema=None) as batch_op:
+        batch_op.create_index(batch_op.f("ix_connections_name_key"), ["name_key"], unique=False)
+        batch_op.create_index(batch_op.f("ix_connections_owner_id"), ["owner_id"], unique=False)
+
+    op.create_table(
+        "connection_secrets",
+        sa.Column("connection_id", sa.String(length=32), nullable=False),
+        sa.Column("delivery", sa.String(length=16), nullable=False),
+        sa.Column("sites", sa.JSON(), nullable=False),
+        sa.Column("header_kind", sa.String(length=16), nullable=True),
+        sa.Column("header_name", sa.String(length=100), nullable=True),
+        sa.Column("basic_user", sa.String(length=200), nullable=True),
+        sa.Column("shape", sa.String(length=16), nullable=True),
+        sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("connection_id"),
+    )
+    op.create_table(
+        "connection_variables",
+        sa.Column("connection_id", sa.String(length=32), nullable=False),
+        sa.Column("value", sa.Text(), nullable=False),
+        sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("connection_id"),
+    )
+    op.create_table(
+        "project_connections",
+        sa.Column("id", sa.String(length=32), nullable=False),
+        sa.Column("project_id", sa.String(length=32), nullable=False),
+        sa.Column("connection_id", sa.String(length=32), nullable=False),
+        sa.Column("env_name", sa.String(length=100), nullable=True),
+        sa.Column("roles", sa.JSON(), nullable=False),
+        sa.Column("attached_by", sa.String(length=32), nullable=False),
+        sa.Column("attached_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("changed_at", sa.DateTime(timezone=True), nullable=False),
+        sa.ForeignKeyConstraint(["connection_id"], ["connections.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(["project_id"], ["projects.id"], ondelete="CASCADE"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("project_id", "connection_id"),
+    )
+    with op.batch_alter_table("project_connections", schema=None) as batch_op:
+        batch_op.create_index(
+            batch_op.f("ix_project_connections_connection_id"), ["connection_id"], unique=False
+        )
+        batch_op.create_index(
+            batch_op.f("ix_project_connections_project_id"), ["project_id"], unique=False
+        )
+
+    op.create_table(
         "project_needs",
         sa.Column("id", sa.String(length=32), nullable=False),
         sa.Column("project_id", sa.String(length=32), nullable=False),

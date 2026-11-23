@@ -102,6 +102,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `cycle.due_time` | The end of the cycle | A time within the cycle | project | PRJ-8 |
 | `token.default_expiry` | 30 days | 1–365 days | person | ACC-3 |
 | `secret.min_length` | 8 | 8–64 | install | CON-2, CON-8 |
+| `secret.max_size` | 64 KB | 1 KB–1 MB | install | CON-2 |
 | `secret.expiry_warning` | 7 days | 1–60 days | install | CON-2 |
 | `mcp.call_timeout` | 60 s | 5 s–10 min | project | CON-13 |
 | `mcp.max_calls_per_run` | 100 | 1–1,000 | project | CON-13 |

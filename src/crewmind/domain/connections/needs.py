@@ -72,7 +72,7 @@ meets: list[Meets] = []
 open until the roles that have it leave the roster."""
 
 
-async def _roles_on_roster(session: AsyncSession, project_id: str) -> list[Role]:
+async def roles_on_roster(session: AsyncSession, project_id: str) -> list[Role]:
     # Distinct ids first: Postgres cannot compare the role's JSON columns for DISTINCT.
     on_roster = (
         select(Seat.role_id)
@@ -87,7 +87,7 @@ async def declared(session: AsyncSession, project: Project) -> dict[tuple[str, s
     """Every need of the project, with the roles that have it: what each role on the roster
     declares, and what the spec it came from asked for (LIB-4)."""
     found: dict[tuple[str, str], set[str]] = {}
-    roster = await _roles_on_roster(session, project.id)
+    roster = await roles_on_roster(session, project.id)
     on_roster = {role.slug for role in roster}
     for role in roster:
         for name in role.credential_names or []:

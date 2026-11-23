@@ -6,7 +6,7 @@ import inspect
 import json
 import sys
 import types
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, Union, get_args, get_origin
@@ -38,7 +38,7 @@ def kind_of(field: FieldInfo) -> str | None:
         return "secret"
     if annotation in _SCALARS:
         return "scalar"
-    if annotation is datetime or get_origin(annotation) is Literal:
+    if annotation in (datetime, date) or get_origin(annotation) is Literal:
         return "text"
     if isinstance(annotation, type) and issubclass(annotation, Enum):
         return "text"
