@@ -156,7 +156,7 @@ EXE-9,Revocation,06-10-execution-EXE.md,2,yes,done,test_INV_4_a_hold_revokes_wor
 EXE-10,Refusal cap,06-10-execution-EXE.md,2,yes,done,test_EXE_10_the_refusal_cap_ends_the_run_and_revokes_its_token,
 EXE-11,Records,06-10-execution-EXE.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
 EXE-12,Sandboxes,06-10-execution-EXE.md,2,yes,done,test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process; test_EXE_12_a_real_crew_finishes_a_verified_job_in_containers; test_EXE_12_a_sandbox_holds_no_privilege_and_nothing_of_the_host; test_EXE_12_a_second_install_never_adopts_these_containers; test_EXE_12_one_project_cannot_reach_another_projects_sandbox; test_WRK_7_a_check_container; test_NFR_5_doctor_says_what_container_sandboxes_still_need,"Container mode proven on Docker 29 (22 Nov 2026): unprivileged user, no capabilities, limits, install label, a network per project. Unisolated mode verified end to end. Host-jail (optional) is phase 8. A slim install on a Linux host cannot use container mode yet (Q-019)"
-EXE-13,Secrets in sandboxes,06-10-execution-EXE.md,2,yes,done,test_P3_no_sandbox_holds_a_provider_key,
+EXE-13,Secrets in sandboxes,06-10-execution-EXE.md,2,yes,partial,test_EXE_12_a_sandbox_holds_no_privilege_and_nothing_of_the_host; test_P3_no_sandbox_holds_a_provider_key,"Only the half that keeps things out of a sandbox is built and tested. Role credentials, the half that puts a granted secret in, were never built and were in no phase's list; phase 7.B builds them"
 EXE-14,Network,06-10-execution-EXE.md,2,yes,partial,,Egress open; SECURITY.md states what is contained. The SSRF guard arrives with WRK-12
 EXE-15,Context pack,06-10-execution-EXE.md,2,yes,done,test_EXE_15_the_context_pack_is_ordered_stored_and_marks_what_it_delivered,
 EXE-16,Stall watchdog,06-10-execution-EXE.md,4,yes,done,test_EXE_16_stalled_work_wakes_the_ceo_and_alarms_once,Moved from phase 2. The alarm is a chat line and a push alert until flags exist
@@ -199,7 +199,7 @@ LIB-6,Agent Skills,06-14-library-LIB.md,8,later,not started,,
 INT-1,Signed webhooks,06-15-integrations-INT.md,8,later,not started,,
 INT-2,GitHub events,06-15-integrations-INT.md,8,later,not started,,
 INT-3,Generic signed events,06-15-integrations-INT.md,8,later,not started,,
-INT-4,Data sources,06-15-integrations-INT.md,8,later,not started,,
+INT-4,Data sources,06-15-integrations-INT.md,7B,yes,not started,,Moved to phase 7.B (MCP servers). Not started
 INT-5,Slack: one channel per project,06-15-integrations-INT.md,8,later,not started,,
 INT-6,Email: a mailbox per project,06-15-integrations-INT.md,8,later,not started,,
 INT-7,Alerts,06-15-integrations-INT.md,6,yes,partial,test_HUM_11_the_daily_brief_is_built_once_per_local_day; test_INT_7_the_alert_level_decides_what_is_pushed,Alert levels and the chase of proposals are built for browser push. The email grace period and daily cap wait for mail (phase 8); Slack is phase 8

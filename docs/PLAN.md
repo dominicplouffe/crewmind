@@ -91,11 +91,18 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 - **Exit demo:** the Founder acceptance scenario passes, grilling included. The full v2.0 acceptance suite passes; the Standards item and the Slack column of surface parity are deferred.
 - **Ids:** PRJ-9; IF-4.6, IF-4.7; FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
 
+## Phase 7.B: Secrets, variables and MCP servers (inserted 23 Nov 2026)
+
+- **Why:** the first real project could not do its job. Nothing accepts a role's secret, nothing connects an MCP server, and nothing stopped it starting. Most real projects need one or the other.
+- **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the crew know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
+- **Plan:** `docs/phases/phase-7b-plan.md`, with the code review that found how this was missed. Waiting for the owner's answers to its questions.
+- **Ids:** EXE-13 (the role-credential half, never built), INT-4 (moved from phase 8), PRJ-1 (the start checks), FND-13, IF-4.7, INV-6 (sandboxes and the scrubber), and a new section of the spec, SEC, once the owner has answered.
+
 ## Phase 8: Breadth (after v2.0)
 
 - **Order:** project email (managed via Stalwart, manual, agent mailboxes), then the agent browser, OpenTelemetry export, Agent Skills, A2A, Slack, extra harnesses, host-jail mode, TOTP and SSO.
 - **Exit:** the remaining acceptance items pass, Standards and Slack parity included.
-- **Ids:** EXE-17; LIB-6; INT-1, INT-2, INT-3, INT-4, INT-5, INT-6, INT-9, INT-10, INT-11; ACC-7; IF-7.1, IF-7.2; NFR-22
+- **Ids:** EXE-17; LIB-6; INT-1, INT-2, INT-3, INT-5, INT-6, INT-9, INT-10, INT-11; ACC-7; IF-7.1, IF-7.2; NFR-22
 
 ## Cross-cutting ids
 
