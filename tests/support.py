@@ -468,3 +468,9 @@ async def quiet_start(app: App, project_id: str) -> None:
         await session.execute(
             delete(Notice).where(Notice.project_id == project_id, Notice.kind == "project started")
         )
+
+
+async def shown_as(app: App, actor: Actor, project_id: str, seat: str = "CEO") -> str:
+    """The name a seat is shown by (EXE-18): platform lines about an agent use it."""
+    roster = await app.ok("roster.show", actor, project_id=project_id)
+    return next(item["display_name"] for item in roster["seats"] if item["name"] == seat)

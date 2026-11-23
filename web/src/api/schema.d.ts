@@ -411,6 +411,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/auth/set_name": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the name you are shown by.
+         * @description Requires: person.
+         */
+        post: operations["auth.set_name"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/use_link": {
         parameters: {
             query?: never;
@@ -3651,6 +3671,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/roster/rename_seat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Give an agent the name it is shown by.
+         * @description Requires: project_chair.
+         */
+        post: operations["roster.rename_seat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/roster/repin_team": {
         parameters: {
             query?: never;
@@ -5907,7 +5947,10 @@ export interface components {
             state: string;
             /** Unread */
             unread: number;
-            /** Waiting On You */
+            /**
+             * Waiting On You
+             * @description The desk count for this project (HUM-10).
+             */
             waiting_on_you: number;
         };
         /** HireInput */
@@ -7235,6 +7278,24 @@ export interface components {
              */
             text: string;
         };
+        /** RenameSeatInput */
+        RenameSeatInput: {
+            /**
+             * Display Name
+             * @description The name to show it by.
+             */
+            display_name: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+            /**
+             * Seat
+             * @description The seat's name, from `roster show`.
+             */
+            seat: string;
+        };
         /** RequestItem */
         RequestItem: {
             /** Approved */
@@ -7613,6 +7674,11 @@ export interface components {
              * @description Times you said: not what I asked.
              */
             corrections?: number | null;
+            /**
+             * Display Name
+             * @description The name the agent is shown by, such as "Maya".
+             */
+            display_name: string;
             /** Kind */
             kind: string;
             /** Lead */
@@ -7622,7 +7688,10 @@ export interface components {
              * @description Corrections per 100 replies. Lower is better.
              */
             listening_score?: number | null;
-            /** Name */
+            /**
+             * Name
+             * @description The seat's identity, used in mentions, events and tools.
+             */
             name: string;
             /** Pause Reason */
             pause_reason: string | null;
@@ -7648,6 +7717,11 @@ export interface components {
             kind: string;
             /** Model */
             model: string | null;
+            /**
+             * Name
+             * @description The name the agent goes by (EXE-18).
+             */
+            name: string;
             /**
              * Note
              * @description A substitution, or why the seat cannot run.
@@ -7694,7 +7768,7 @@ export interface components {
         SendInput: {
             /**
              * Body
-             * @description The message. `@name` addresses an agent, `@team` its lead.
+             * @description The message. `@name` addresses an agent by its name, `@team` its lead.
              */
             body: string;
             /**
@@ -7726,6 +7800,14 @@ export interface components {
              * @enum {string}
              */
             role: "co-chair" | "observer";
+        };
+        /** SetNameInput */
+        SetNameInput: {
+            /**
+             * Name
+             * @description The name you are shown by.
+             */
+            name: string;
         };
         /** SetRoleInput */
         SetRoleInput: {
@@ -8360,6 +8442,11 @@ export interface components {
         Working: {
             /** Doing */
             doing: string;
+            /**
+             * Name
+             * @description The name the agent goes by (EXE-18).
+             */
+            name: string;
             /** Run Kind */
             run_kind: string;
             /** Seat */
@@ -9226,6 +9313,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Done"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "auth.set_name": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetNameInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WhoAmI"];
                 };
             };
             /** @description Validation Error */
@@ -14440,6 +14560,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["TeamRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Roster"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "roster.rename_seat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenameSeatInput"];
             };
         };
         responses: {

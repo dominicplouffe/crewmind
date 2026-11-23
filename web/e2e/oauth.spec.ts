@@ -6,7 +6,7 @@
  */
 import { createHash, randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { STATE_FILE, createProject, expectAccessible, expectNoViolations } from "./helpers";
+import { STATE_FILE, createProject, expectAccessible, expectNoViolations, openPanel } from "./helpers";
 
 test.use({ storageState: STATE_FILE });
 
@@ -72,7 +72,7 @@ test("approve an AI client for fewer scopes than it asked, land on its callback 
   });
   expect(tokens.ok(), await tokens.text()).toBe(true);
   await createProject(page, "OAuth project");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openPanel(page, "Settings");
   const client = page.getByTestId("approved-client").filter({ hasText: CLIENT_NAME });
   await expect(client).toContainText("May: Read ·");
   await client.getByRole("button", { name: /^Revoke/ }).click();

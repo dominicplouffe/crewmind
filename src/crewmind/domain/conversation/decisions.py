@@ -392,7 +392,8 @@ async def request_reopen(context: Context, payload: RequestInput) -> RequestItem
     await service.platform_line(
         context.session,
         view.project.id,
-        f"{view.seat.name} asks to reopen decision {row.id} ({row.topic}): {payload.reason}\n"
+        f"{view.seat.display_name} asks to reopen decision {row.id} ({row.topic}): "
+        f"{payload.reason}\n"
         f"New evidence: {links}. Answer with `decisions answer`. The ruling stands until you do.",
         context.now,
         detail={

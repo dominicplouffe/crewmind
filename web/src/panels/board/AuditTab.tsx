@@ -1,7 +1,9 @@
 /** Audit: closes drawn at random for the chairman to check. Each sample is judged once. */
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { get, post } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
@@ -34,7 +36,7 @@ export function AuditTab({ projectId, changes, onChanged }: Props): JSX.Element 
       <ErrorNote error={audits.error} />
       <ErrorNote error={act.error} />
       {audits.loading && !data ? <Loading /> : null}
-      {data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {data && items.length === 0 ? <Empty icon={ShieldCheck} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {items.map((sample) => (
           <li key={sample.id} data-testid="audit" className={sample.verdict ? "is-past" : ""}>

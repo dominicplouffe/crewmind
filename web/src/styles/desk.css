@@ -1,30 +1,417 @@
-/* The Desk, decision cards, the summary after time away, and the agenda. */
+/* The Desk, decision cards, the summary after time away, the brief and the agenda. */
 a.button {
   display: inline-flex;
   align-items: center;
-  color: var(--text);
+  color: var(--color-text);
   text-decoration: none;
 }
-.item-card { color: var(--text); font-size: 1rem; margin: 0.3rem 0; }
-.item-card p { margin: 0.3rem 0; }
-.item-card ul, .item-card ol { margin: 0.3rem 0; padding-left: 1.25rem; }
-.item-card textarea, .item-card input:not([type="radio"]) { width: 100%; }
-.item-label { font-weight: 600; font-size: 1rem; margin: 0.4rem 0 0.1rem; }
-.item-fields { margin: 0.3rem 0; }
-.desk-group { margin: 1.25rem 0; }
+a.button.primary { color: var(--color-accent-text); }
+
+/* ---------- Decision card (compact) ---------- */
+.dcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-3);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  overflow-wrap: anywhere;
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+}
+.dcard p { margin: 0; }
+.dcard:focus { outline: none; }
+.dcard:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.dcard.is-open:hover { border-color: var(--color-border-control); }
+/* Urgency shows as an edge as well as in words on the deadline. */
+.dcard.is-today { box-shadow: inset 3px 0 0 var(--color-warning-solid), var(--shadow-xs); }
+.dcard.is-overdue { box-shadow: inset 3px 0 0 var(--color-danger-solid), var(--shadow-xs); border-color: var(--color-danger-border); }
+.dcard.is-loading { min-height: 8.5rem; justify-content: center; }
+.message .dcard.is-loading { min-height: 8.5rem; }
+.message-content .dcard { margin-top: var(--space-1); max-width: 44rem; }
+
+.dcard-ask {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.dcard-subject {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-md);
+}
+.clamp-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  white-space: pre-line;
+}
+.clamp.is-open .clamp-text { display: block; -webkit-line-clamp: unset; line-clamp: none; overflow: visible; }
+.clamp-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+.clamp-toggle:hover { text-decoration: underline; }
+
+/* Who asks, by when, how much: one quiet line, separated by dots. */
+.dcard-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.dcard-meta > * { display: inline-flex; align-items: center; gap: 0.375rem; min-width: 0; }
+.dcard-meta > * + *::before {
+  content: "·";
+  margin: 0 var(--space-2);
+  color: var(--color-text-faint);
+}
+.dcard-project { color: var(--color-text); font-weight: var(--weight-medium); text-decoration: none; }
+.dcard-project:hover { text-decoration: underline; }
+.dcard-project svg { color: var(--color-text-muted); }
+.dcard-who-icon { color: var(--color-accent); }
+.dcard-due { font-variant-numeric: tabular-nums; }
+.dcard-due.urgency-today { color: var(--color-warning); font-weight: var(--weight-medium); }
+.dcard-due.urgency-overdue { color: var(--color-danger); font-weight: var(--weight-medium); }
+.dcard-size { color: var(--color-text); font-weight: var(--weight-medium); }
+
+.dcard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.dcard-toggle { margin-left: auto; color: var(--color-text-muted); }
+.dcard-chevron { transition: transform var(--duration-base) var(--ease-out); }
+.dcard-toggle[aria-expanded="true"] .dcard-chevron,
+.dcard[open] > summary .dcard-chevron { transform: rotate(180deg); }
+.dcard-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-warning-border);
+  background: var(--color-warning-soft);
+}
+.dcard-confirm-question { font-weight: var(--weight-semibold); }
+.dcard textarea, .dcard input:not([type="radio"]):not([type="checkbox"]) { width: 100%; }
+
+/* A question's options as a compact choice. */
+.dcard-answer { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-1); }
+.choice { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; border: 0; min-width: 0; }
+.choice-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-sm);
+  max-width: 100%;
+  padding: 0.3rem 0.75rem;
+  margin: 0;
+  border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.choice-option:hover { background: var(--color-surface-hover); }
+.choice-option.is-chosen {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-soft-text);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+.choice-option:has(.choice-input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.choice-input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+.choice-recommended {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--color-border);
+  color: var(--color-accent-soft-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+/* What waits behind "Details". */
+.dcard-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-subtle);
+  font-size: var(--text-sm);
+}
+.dcard-details[hidden] { display: none; }
+.dcard-default { color: var(--color-text); font-weight: var(--weight-medium); }
+.dcard-details dl.pairs { margin: 0; }
+.dcard-details dl.pairs > div { padding: 0 0 var(--space-2); border-bottom: 0; gap: var(--space-3); }
+.dcard-details dl.pairs > div:last-child { padding-bottom: 0; }
+.dcard-details dl.pairs dt { flex: 0 0 10.5rem; }
+.dcard-facts { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; }
+.dcard-facts > div { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: var(--space-3); }
+.dcard-facts dt { color: var(--color-text-muted); font-weight: var(--weight-regular); }
+.dcard-facts dd { margin: 0; color: var(--color-text); }
+.dcard-label {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.dcard-history { display: flex; flex-direction: column; gap: var(--space-1); }
+.dcard-history time { color: var(--color-text-muted); margin-right: var(--space-1); }
+.dcard-tools { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-left: calc(-1 * var(--space-2)); }
+.dcard-details .text-form { width: 100%; }
+
+/* A settled item: one quiet line that opens to what was decided. */
+.dcard.is-closed {
+  padding: 0;
+  gap: 0;
+  background: transparent;
+  border-color: var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.dcard-settled {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+.dcard-settled::-webkit-details-marker { display: none; }
+.dcard-settled:hover { background: var(--color-surface-hover); }
+.dcard-settled:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.dcard-settled-icon { flex: none; color: var(--color-success); }
+.dcard-settled-what { flex: none; color: var(--color-text); font-weight: var(--weight-medium); }
+.dcard-settled-subject { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dcard-settled-subject .agent-text,
+.dcard-slim-subject .agent-text { white-space: nowrap; }
+.dcard-time { flex: none; font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.dcard-settled .dcard-chevron { flex: none; color: var(--color-text-faint); }
+.dcard.is-closed > .dcard-details { margin: 0 var(--space-3) var(--space-3); }
+
+/* The slim row of the stack above the chat. */
+.dcard.is-slim {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.dcard.is-slim.is-today { box-shadow: inset 3px 0 0 var(--color-warning-solid); }
+.dcard.is-slim.is-overdue { box-shadow: inset 3px 0 0 var(--color-danger-solid); }
+.dcard-slim-text {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.dcard.is-slim .dcard-ask { flex: none; font-size: var(--text-sm); }
+.dcard-slim-icon { flex: none; align-self: center; color: var(--color-text-muted); }
+.dcard-slim-subject {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.dcard.is-slim .dcard-due { flex: none; font-size: var(--text-xs); color: var(--color-text-muted); white-space: nowrap; }
+.dcard.is-slim .dcard-due.urgency-today { color: var(--color-warning); }
+.dcard.is-slim .dcard-due.urgency-overdue { color: var(--color-danger); }
+.dcard.is-slim [data-testid="item-actions"] { flex: none; }
+.dcard.is-slim .dcard-actions { margin: 0; flex-wrap: nowrap; }
+.dcard.is-slim .dcard-confirm { flex-basis: 100%; }
+.dcard.is-slim:has(.dcard-confirm) { flex-wrap: wrap; }
+
+/* A decision line in the chat: the card beside crewmind's mark; a settled one is a quiet line. */
+.message.is-item .message-content .dcard { margin-top: 0; }
+.message.is-item:has(.dcard.is-closed) { padding-top: 0.125rem; padding-bottom: 0.125rem; margin-bottom: var(--space-1); }
+.message.is-item:has(.dcard.is-closed) .system-avatar { display: none; }
+
+/* A heads-up or a flag in the chat: a quiet note, not a card. */
+.message.is-note { padding: var(--space-1) var(--space-3); }
+.message.is-note:hover { background: color-mix(in srgb, var(--color-surface-hover) 45%, transparent); }
+.item-note {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.item-note-icon { justify-self: center; margin-top: 0.15rem; color: var(--color-text-muted); }
+.item-note.is-warning .item-note-icon { color: var(--color-warning); }
+.item-note-text { margin: 0; color: var(--color-text); overflow-wrap: anywhere; }
+.item-note-who { font-weight: var(--weight-semibold); }
+.item-note-end { display: inline-flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+.item-note-act.button.small { min-height: 1.75rem; padding: 0 var(--space-2); color: var(--color-text-muted); }
+.item-note-act.button.small:hover:not(:disabled) { color: var(--color-text); }
+.item-note-done { display: inline-flex; align-items: center; gap: 0.2rem; color: var(--color-success); font-size: var(--text-xs); }
+
+/* Shared pieces the review and the plan panel still use. */
+.cap { display: inline-block; }
+.cap::first-letter { text-transform: uppercase; }
+.badge-accent { background: var(--color-accent-soft); color: var(--color-accent-soft-text); border-color: var(--color-accent-border); }
+.item-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-1);
+}
+.item-fields { margin: 0; font-size: var(--text-sm); }
+.item-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-warning-border);
+  background: var(--color-warning-soft);
+}
+.review-health { font-weight: var(--weight-semibold); }
+.review-health.is-green { color: var(--color-success); }
+.review-health.is-attention { color: var(--color-warning); }
+.dcard ul, .dcard ol:not(.plain) { margin: 0; padding-left: 1.25rem; }
+.snooze-row { gap: var(--space-1); }
+.snooze-lead { display: inline-flex; align-items: center; gap: var(--space-1); margin-right: var(--space-1); }
+
+/* ---------- Desk groups and brief ---------- */
+.desk-group { margin: var(--space-6) 0; display: flex; flex-direction: column; gap: var(--space-3); }
 .desk-group h2 { margin: 0; }
 .desk-group li { list-style: none; }
 .desk-group ul ul li, .desk-group .item-card li { list-style: revert; }
+.brief-project {
+  margin: var(--space-3) 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  gap: var(--space-2);
+}
+.brief-project .group-title { margin: 0; }
+.brief-project .group-title a { color: var(--color-text); text-decoration: none; }
+.brief-project .group-title a:hover { text-decoration: underline; }
+.brief-section-title { margin: var(--space-2) 0 var(--space-1); }
+.brief-project ul { margin: 0; padding-left: 1.25rem; }
+.brief-project li { list-style: disc; }
+
+/* ---------- Since you were away ---------- */
 .away-note {
-  max-width: 52rem;
-  width: calc(100% - 1.5rem);
-  margin: 0.5rem auto 0;
+  position: relative;
+  max-width: 48rem;
+  width: calc(100% - 2rem);
+  margin: var(--space-4) auto 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-xs);
+}
+.away-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  margin: 0 0 var(--space-2);
+  color: var(--color-accent-soft-text);
 }
 .away-note ul { margin: 0.2rem 0 0.4rem; padding-left: 1.25rem; }
-.agenda-day { margin-bottom: 1rem; }
+.away-note .eyebrow { color: var(--color-accent-soft-text); }
+.away-dismiss { position: absolute; top: var(--space-3); right: var(--space-3); }
+
+/* ---------- Agenda ---------- */
+.agenda-day { margin-bottom: var(--space-5); }
+.agenda-day ul { margin: 0; padding: 0; }
 .agenda-day li {
   display: grid;
-  grid-template-columns: 5rem 1fr;
-  gap: 0 0.75rem;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0 var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  list-style: none;
 }
+.agenda-day li:last-child { border-bottom: 0; }
 .agenda-day li p { margin: 0; }
+.agenda-day time { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 599px) {
+  .dcard { padding: var(--space-3); }
+  .dcard-meta { column-gap: var(--space-3); }
+  .dcard-meta > * + *::before { content: none; }
+  .dcard-meta > .dcard-due { flex-basis: 100%; order: 2; }
+  .dcard-facts > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .dcard-details dl.pairs > div { flex-direction: column; gap: 0; }
+  .dcard-details dl.pairs dt { flex-basis: auto; }
+  .dcard-actions .button:not(.ghost) { flex: 1 1 auto; }
+  .dcard-toggle { margin-left: 0; }
+  .choice-option { flex: 1 1 100%; }
+  .dcard.is-slim { flex-wrap: wrap; row-gap: var(--space-1); padding-left: var(--space-3); }
+  .dcard.is-slim .dcard-slim-text { flex-basis: 100%; flex-wrap: wrap; white-space: normal; }
+  .dcard.is-slim .dcard-slim-subject { flex-basis: 100%; white-space: nowrap; }
+  .dcard.is-slim .dcard-due { flex: 1; }
+  .item-note { grid-template-columns: 1.5rem minmax(0, 1fr); }
+  .message.is-item:has(.dcard.is-closed) { grid-template-columns: minmax(0, 1fr); }
+  .message.is-item:has(.dcard.is-closed) .message-gutter { display: none; }
+  .dcard-settled .dcard-time { display: none; }
+  .item-note-end { grid-column: 2; }
+}
+@media (pointer: coarse) {
+  .dcard .button,
+  .dcard .button.small,
+  .needs-stack .button.small,
+  .choice-option,
+  .dcard-settled { min-height: var(--control-lg); }
+  .clamp-toggle { min-height: var(--control-lg); }
+  .item-note-act.button.small { min-height: var(--control-lg); }
+}

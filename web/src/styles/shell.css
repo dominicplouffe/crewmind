@@ -1,0 +1,429 @@
+/* The app shell: sidebar (desktop), top bar and bottom tab bar (phone), the project layout. */
+
+.shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-areas: "side main";
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  grid-area: side;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-sidebar);
+  border-right: 1px solid var(--color-border-subtle);
+  overflow: hidden;
+}
+.sidebar-brand { padding: var(--space-1) var(--space-2) var(--space-3); }
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 2.125rem;
+  padding: 0 var(--space-2) 0 var(--space-3);
+  margin-bottom: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  box-shadow: var(--shadow-xs);
+}
+.sidebar-search span { flex: 1; text-align: left; }
+.sidebar-search:hover { border-color: var(--color-border-control); color: var(--color-text); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.125rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+}
+.nav-item > span:not(.count):not(.visually-hidden):not(.project-dot) { flex: 1; min-width: 0; }
+.nav-item:hover { background: var(--color-surface-hover); color: var(--color-text); text-decoration: none; }
+.nav-item.active,
+.nav-item[aria-current="page"] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-xs), inset 0 0 0 1px var(--color-border-subtle);
+}
+.nav-item.active svg { color: var(--color-accent); }
+.sidebar-section { display: flex; flex-direction: column; min-height: 0; flex: 1; margin-top: var(--space-4); }
+.sidebar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-1) var(--space-1) var(--space-3);
+}
+.sidebar-empty { padding: var(--space-1) var(--space-3); }
+.sidebar-projects { overflow: auto; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.project-item { font-size: var(--text-sm); min-height: 2rem; }
+.project-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--slate-8);
+}
+.project-dot.state-running { background: var(--color-success-solid); }
+.project-dot.state-held,
+.project-dot.state-paused { background: var(--color-warning-solid); }
+.project-dot.state-ready { background: var(--color-accent); }
+.project-dot.state-draft { background: transparent; box-shadow: inset 0 0 0 1.5px var(--slate-9); }
+.sidebar-foot { padding-top: var(--space-2); border-top: 1px solid var(--color-border-subtle); }
+.sidebar-foot .menu { display: flex; }
+.user-button { width: 100%; justify-content: flex-start; padding: var(--space-1) var(--space-2); min-height: 2.75rem; }
+.user-text { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; gap: 2px; }
+.user-name { font-weight: var(--weight-semibold); overflow: hidden; text-overflow: ellipsis; max-width: 10rem; }
+.user-role { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: var(--weight-regular); }
+.user-button.compact { width: var(--control-lg); min-height: var(--control-lg); padding: 0; justify-content: center; }
+
+/* ---------- Main ---------- */
+.shell-main {
+  grid-area: main;
+  min-width: 0;
+  outline: none;
+}
+
+/* ---------- Phone ---------- */
+.topbar,
+.tabbar { display: none; }
+
+@media (max-width: 899px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "top" "main";
+  }
+  .sidebar { display: none; }
+  .topbar {
+    grid-area: top;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-nav);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: var(--topbar-height);
+    padding: 0 var(--space-2) 0 var(--space-4);
+    padding-top: env(safe-area-inset-top);
+    background: color-mix(in srgb, var(--color-canvas) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(12px);
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .shell-main { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom)); }
+  .tabbar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-nav);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: color-mix(in srgb, var(--color-canvas) 92%, transparent);
+    backdrop-filter: saturate(1.4) blur(12px);
+    border-top: 1px solid var(--color-border-subtle);
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.6875rem;
+    font-weight: var(--weight-medium);
+  }
+  .tab-item.active { color: var(--color-accent-soft-text); }
+  .tab-item.active .tab-icon { background: var(--color-accent-soft); }
+  .tab-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 1.875rem;
+    border-radius: var(--radius-full);
+    transition: background var(--duration-base) var(--ease-out);
+  }
+  .tab-badge {
+    position: absolute;
+    top: -3px;
+    right: 0.55rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.3rem;
+    border-radius: var(--radius-full);
+    background: var(--color-danger-solid);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: var(--weight-bold);
+    line-height: 1.1rem;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--color-canvas);
+  }
+  /* Inside a project the conversation takes the whole height: the tab bar steps aside. */
+  .shell.in-project .tabbar { display: none; }
+  .shell.in-project .shell-main { padding-bottom: 0; }
+}
+
+/* ---------- Pages inside the shell ---------- */
+.content {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-8) var(--space-12);
+}
+.content.narrow { max-width: var(--reading-max); }
+@media (max-width: 899px) {
+  .content { padding: var(--space-5) var(--space-4) var(--space-10); }
+}
+
+/* ---------- Project layout ---------- */
+.project-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+}
+@media (max-width: 899px) {
+  .project-shell { height: calc(100dvh - var(--topbar-height) - env(safe-area-inset-top)); }
+}
+.project-top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-canvas);
+}
+.project-titlebar { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex-wrap: wrap; }
+.project-titlebar h1 {
+  margin: 0;
+  font-size: var(--text-lg);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-back { display: none; }
+.project-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--space-2));
+}
+.project-tabs::-webkit-scrollbar { display: none; }
+.project-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.project-tab:hover { color: var(--color-text); text-decoration: none; }
+.project-tab[aria-current="page"] { color: var(--color-text); }
+.project-tab[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-accent);
+}
+.project-tabs .menu { margin-left: auto; align-self: center; }
+.project-body { flex: 1; min-height: 0; display: flex; }
+.project-view { flex: 1; min-width: 0; min-height: 0; overflow: auto; }
+.project-view.chat-view { display: flex; overflow: hidden; }
+
+/* The status line under the title: state, needs-you, who is working, budget. */
+.statusline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  flex-wrap: wrap;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.statusline .divider { width: 1px; height: 1rem; background: var(--color-border); }
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 1.75rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.status-chip:hover { background: var(--color-surface-hover); color: var(--color-text); }
+.status-chip.needs {
+  background: var(--color-warning-soft);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+  font-weight: var(--weight-semibold);
+}
+.status-chip.needs:hover { filter: brightness(0.98); color: var(--color-warning); }
+.status-budget { display: inline-flex; align-items: center; gap: var(--space-2); min-width: 9rem; }
+.status-budget .meter { width: 4.5rem; }
+.holdbar {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-soft);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+.holdbar svg { color: var(--color-warning); flex: none; margin-top: 2px; }
+.holdbar ul { margin: 0; padding: 0; list-style: none; }
+
+/* The docked panel: wide, elevated, beside the content. Full screen on smaller screens. */
+.project-body > .panel {
+  width: min(44rem, 46vw);
+  flex: none;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  animation: sheet-in var(--duration-base) var(--ease-out);
+}
+.project-body > .panel .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.project-body > .panel .panel-head h2 { margin: 0; font-size: var(--text-lg); outline: none; }
+.project-body > .panel .panel-body { flex: 1; overflow: auto; padding: var(--space-5); }
+@media (max-width: 1099px) {
+  .project-body > .panel {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-sheet);
+    width: auto;
+    border-left: 0;
+  }
+  .project-body > .panel .panel-body { padding: var(--space-4); padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); }
+}
+
+/* The chat's side rail: needs you, the crew, progress and budget, beside the conversation. */
+.chat-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.chat-rail {
+  width: 20rem;
+  flex: none;
+  overflow: auto;
+  padding: var(--space-5);
+  border-left: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-sunken);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.rail-section h2 { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); margin-bottom: var(--space-2); }
+@media (max-width: 1279px) {
+  .chat-rail { display: none; }
+}
+.has-panel .chat-rail { display: none; }
+
+@media (max-width: 899px) {
+  .project-top { padding: var(--space-2) var(--space-4) 0; gap: var(--space-1); }
+  .project-back { display: inline-flex; margin-left: calc(-1 * var(--space-2)); }
+  .project-titlebar { flex-wrap: nowrap; }
+  .project-titlebar .title-actions { margin-left: auto; }
+  .statusline { gap: var(--space-1) var(--space-2); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .statusline::-webkit-scrollbar { display: none; }
+  .statusline .divider,
+  .statusline .hide-phone { display: none; }
+  .status-budget { min-width: 0; }
+  .status-budget .meter { width: 3rem; }
+}
+
+/* Work view: Plan and Board, full width. */
+.work-view { max-width: var(--content-max); margin: 0 auto; padding: var(--space-5) var(--space-6) var(--space-10); }
+.work-view .work-switch { margin-bottom: var(--space-4); }
+@media (max-width: 899px) {
+  .work-view { padding: var(--space-4); }
+}
+
+/* Tab views share one page frame. */
+.project-view > .overview,
+.project-view > .crew,
+.project-view > .deliv {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-6) var(--space-10);
+}
+@media (max-width: 899px) {
+  .project-view > .overview,
+  .project-view > .crew,
+  .project-view > .deliv { padding: var(--space-4) var(--space-4) var(--space-8); }
+}
+.status-chip { white-space: nowrap; flex: none; }
+.project-titlebar .project-back { display: none; }
+@media (max-width: 899px) {
+  .project-titlebar .project-back { display: inline-flex; }
+}
+
+/* "While you were away" floats over the top of the conversation, so the messages never move when
+   it arrives (no layout shift). It is dismissible and scrolls on its own if long. */
+.chat-main > .away-note {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  z-index: var(--z-sticky);
+  margin: 0;
+  transform: translateX(-50%);
+  max-height: 45%;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
+  background: var(--color-surface-raised);
+  animation: rise-in var(--duration-slow) var(--ease-out);
+}
+
+/* Space is kept for what arrives a moment later, so nothing below it jumps (CLS). */
+.project-titlebar { min-height: var(--control-sm); }
+.statusline { min-height: 1.75rem; }
+@media (pointer: coarse) {
+  .project-titlebar { min-height: 2.5rem; }
+}
+/* A decision card in the chat loads its item after the message: hold about its usual height. */
+.message .dcard.is-loading { min-height: 10rem; }
+@media (max-width: 599px) {
+  .message .dcard.is-loading { min-height: 13rem; }
+}
+.chat-loading { flex: 1; padding: var(--space-6); max-width: var(--reading-max); width: 100%; margin: 0 auto; }

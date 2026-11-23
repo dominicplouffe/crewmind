@@ -10,7 +10,7 @@ from tests.attack.harness import assert_refused
 from tests.attack.test_planning import CHAIRMAN_HOLDS, propose
 from tests.attack.work_support import Crew
 from tests.conftest import FakeClock
-from tests.support import App
+from tests.support import Actor, App
 
 
 @pytest.mark.attack("HUM-10")
@@ -53,3 +53,57 @@ async def test_HUM_10_the_desk_is_one_list_and_a_snooze_cannot_outlast_a_deadlin
     clock.advance(hours=7)
     kinds = [entry["what"] for entry in (await app.ok("desk.show", owner))["waiting"]]
     assert "proposed scope" in kinds
+
+
+async def _header_count(app: App, actor: Actor, project: str) -> int:
+    return (await app.ok("chat.header", actor, project_id=project))["waiting_on_you"]
+
+
+async def _desk_count(app: App, actor: Actor, project: str) -> int:
+    desk = (await app.ok("desk.show", actor))["waiting"]
+    return sum(1 for entry in desk if entry["project_id"] == project)
+
+
+@pytest.mark.attack("HUM-10")
+async def test_HUM_10_CHAT_18_the_header_count_is_the_desk_count(
+    app: App, clock: FakeClock
+) -> None:
+    """HUM-10, CHAT-18: the project header's "waiting on you" is the caller's desk for that
+    project, in every state: empty, with proposed scope waiting, after a snooze, for a person
+    who does not chair the project, and after the chairman decides. The header once counted
+    only open action cards and said "nothing" while proposed scope waited."""
+    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
+    owner = await app.login(crew.owner.email)
+    observer = await app.person("observer@example.com")
+    await app.ok(
+        "members.add", owner, project_id=crew.project, email=observer.email, role="observer"
+    )
+
+    async def agree(expected_owner: int) -> None:
+        assert await _header_count(app, owner, crew.project) == expected_owner
+        assert await _desk_count(app, owner, crew.project) == expected_owner
+        assert await _header_count(app, observer, crew.project) == 0
+        assert await _desk_count(app, observer, crew.project) == 0
+
+    await agree(0)
+    await propose(crew)
+    await agree(1)
+
+    item = next(
+        entry["item"]
+        for entry in (await app.ok("desk.show", owner))["waiting"]
+        if entry["what"] == "proposed scope"
+    )
+    now = app.runtime.clock()
+    await app.ok(
+        "items.snooze", owner, project_id=crew.project, item_id=item["id"],
+        until=(now + timedelta(hours=6)).isoformat(),
+    )  # fmt: skip
+    await agree(0)
+    clock.advance(hours=7)
+    await agree(1)
+
+    await app.ok(
+        "items.decide", owner, project_id=crew.project, item_id=item["id"], action="accept"
+    )
+    await agree(0)

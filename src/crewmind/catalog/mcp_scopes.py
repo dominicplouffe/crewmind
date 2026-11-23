@@ -30,6 +30,7 @@ NOT_FOR_CLIENTS: dict[str, str] = {
     "auth.login": "signing in is the person's own",
     "auth.logout": "signing out is the person's own",
     "auth.change_password": "the password is the person's own",
+    "auth.set_name": "the name is the person's own",
     "auth.use_link": "a one-time link is the person's own",
     "people.invite": "instance administration",
     "people.deactivate": "instance administration",

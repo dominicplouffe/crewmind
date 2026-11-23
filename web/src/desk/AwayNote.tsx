@@ -1,4 +1,5 @@
 /** "Since you were away": what happened in a project while the person was gone, shown once when its chat opens. */
+import { History } from "lucide-react";
 import { useEffect, useState } from "react";
 import { post } from "../api/client";
 import { t } from "../strings";
@@ -27,13 +28,14 @@ export function AwayNote({ projectId }: { projectId: string }): JSX.Element | nu
   if (summary === null) return null;
   const words = t.decisions.away;
   return (
-    <section className="note away-note" aria-labelledby="away-title" data-testid="away-note">
-      <h2 id="away-title" className="group-title">
+    <section className="away-note" aria-labelledby="away-title" data-testid="away-note">
+      <h2 id="away-title" className="away-title">
+        <History size={16} aria-hidden="true" />
         {words.title}
       </h2>
       {filledSections(summary, AWAY_SECTIONS).length === 0 ? <p className="quiet">{words.nothing}</p> : null}
       <SectionLists sections={summary} order={AWAY_SECTIONS} titles={words.sections} />
-      <button type="button" className="link" onClick={() => setSummary(null)}>
+      <button type="button" className="button small ghost away-dismiss" onClick={() => setSummary(null)}>
         {t.common.dismiss}
         <span className="visually-hidden"> {words.title}</span>
       </button>

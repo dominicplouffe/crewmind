@@ -15,10 +15,26 @@ interface Props extends BoardTabProps {
   onChanged(): void;
 }
 
+export type BoardTabId = TabId;
+
+/** One section of the board, without the tab row. The Work view shows audits, evidence and launches with it. */
+export function BoardSection({ projectId, changes, onChanged, tab }: Props & { tab: TabId }): JSX.Element {
+  const shared = { projectId, changes };
+  switch (tab) {
+    case "tasks":
+      return <TasksTab {...shared} />;
+    case "audit":
+      return <AuditTab {...shared} onChanged={onChanged} />;
+    case "evidence":
+      return <EvidenceTab {...shared} />;
+    case "launches":
+      return <LaunchesTab {...shared} onChanged={onChanged} />;
+  }
+}
+
 export function BoardPanel({ projectId, changes, onChanged }: Props): JSX.Element {
   const [tab, setTab] = useState<TabId>("tasks");
   const list = useRef<HTMLDivElement>(null);
-  const shared = { projectId, changes };
 
   const onKeyDown = (event: KeyboardEvent): void => {
     const at = TABS.indexOf(tab);
@@ -33,22 +49,6 @@ export function BoardPanel({ projectId, changes, onChanged }: Props): JSX.Elemen
     setTab(id);
     list.current?.querySelector<HTMLElement>(`#board-tab-${id}`)?.focus();
   };
-
-  let body: JSX.Element;
-  switch (tab) {
-    case "tasks":
-      body = <TasksTab {...shared} />;
-      break;
-    case "audit":
-      body = <AuditTab {...shared} onChanged={onChanged} />;
-      break;
-    case "evidence":
-      body = <EvidenceTab {...shared} />;
-      break;
-    case "launches":
-      body = <LaunchesTab {...shared} onChanged={onChanged} />;
-      break;
-  }
 
   return (
     <>
@@ -71,7 +71,7 @@ export function BoardPanel({ projectId, changes, onChanged }: Props): JSX.Elemen
         ))}
       </div>
       <div role="tabpanel" id="board-tabpanel" aria-labelledby={`board-tab-${tab}`} data-testid={`board-${tab}`}>
-        {body}
+        <BoardSection projectId={projectId} changes={changes} onChanged={onChanged} tab={tab} />
       </div>
     </>
   );

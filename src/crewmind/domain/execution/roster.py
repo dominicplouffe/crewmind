@@ -11,8 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from crewmind.catalog.caller import Caller, platform_job
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.conversation import service as conversation
+from crewmind.domain.execution import names as agent_names
 from crewmind.domain.execution.model import (
     EXE_1,
+    EXE_18,
     SEAT_MACHINE,
     TEAM_MACHINE,
     SeatKind,
@@ -31,6 +33,7 @@ TEAM_STOOD_DOWN = event_type("team.stood_down", "A team was stood down (7.12).")
 TEAM_RECALLED = event_type("team.recalled", "A team was recalled (7.12).")
 SEAT_CREATED = event_type("seat.created", "A seat was created (7.12).")
 SEAT_STATE_CHANGED = event_type("seat.state_changed", "A seat changed state (7.12).")
+SEAT_RENAMED = event_type("seat.renamed", "The chairman changed an agent's name (EXE-18).")
 
 CEO_ROLE = "ceo"
 TEAM_MEMBERS_MAX = 12
@@ -53,7 +56,15 @@ async def ceo_of(session: AsyncSession, project_id: str) -> Seat:
     return seat
 
 
-def _new_seat(
+async def names_in_use(session: AsyncSession, project_id: str) -> set[str]:
+    """Every seat name and display name in the project, active or not (EXE-18)."""
+    rows = await session.execute(
+        select(Seat.name, Seat.display_name).where(Seat.project_id == project_id)
+    )
+    return {name for row in rows.all() for name in row}
+
+
+async def _new_seat(
     session: AsyncSession,
     project_id: str,
     role: Role,
@@ -64,13 +75,21 @@ def _new_seat(
     *,
     team_id: str | None = None,
     is_lead: bool = False,
+    given_name: bool = False,
 ) -> Seat:
+    """EXE-18: a seat hired with a name shows that name; any other draws one from the pool."""
     SEAT_MACHINE.check("(new)", SeatState.ACTIVE)
+    display_name = (
+        name
+        if given_name
+        else agent_names.draw(project_id, await names_in_use(session, project_id))
+    )
     seat = Seat(
         project_id=project_id,
         team_id=team_id,
         role_id=role.id,
         name=name,
+        display_name=display_name,
         kind=kind,
         is_lead=is_lead,
         state=SeatState.ACTIVE,
@@ -85,7 +104,68 @@ def _new_seat(
         at=now,
         subject=("seat", name),
         project_id=project_id,
-        after={"state": SeatState.ACTIVE, "kind": kind, "role": role.name, "lead": is_lead},
+        after={
+            "state": SeatState.ACTIVE,
+            "kind": kind,
+            "role": role.name,
+            "lead": is_lead,
+            "display_name": display_name,
+        },
+    )
+    return seat
+
+
+async def rename_seat(
+    session: AsyncSession,
+    project_id: str,
+    seat_name: str,
+    display_name: str,
+    caller: Caller,
+    now: datetime,
+) -> Seat:
+    """EXE-18: the chairman changes the name an agent is shown by. The seat's identity stays;
+    the new name is never empty and no other seat in the project has it."""
+    seat = await session.scalar(
+        select(Seat).where(Seat.project_id == project_id, Seat.name == seat_name)
+    )
+    if seat is None:
+        raise Refusal(
+            "seat_not_found", f"There is no agent named {seat_name}.", kind=RefusalKind.NOT_FOUND
+        )
+    wanted = agent_names.tidy(display_name)
+    if not wanted:
+        raise Refusal("name_is_empty", "An agent's name cannot be empty.", rule=EXE_18.id)
+    if len(wanted) > agent_names.DISPLAY_NAME_MAX:
+        raise Refusal(
+            "name_too_long",
+            f"An agent's name has at most {agent_names.DISPLAY_NAME_MAX} characters.",
+            rule=EXE_18.id,
+        )
+    others = await session.execute(
+        select(Seat.name, Seat.display_name).where(
+            Seat.project_id == project_id, Seat.id != seat.id
+        )
+    )
+    if wanted.casefold() in {name.casefold() for row in others.all() for name in row}:
+        raise Refusal(
+            "name_taken",
+            f"Another agent in this project is already called {wanted}.",
+            rule=EXE_18.id,
+            hint="Every agent in a project has its own name. Choose another.",
+        )
+    before = seat.display_name
+    if wanted == before:
+        return seat
+    seat.display_name = wanted
+    append_event(
+        session,
+        type=SEAT_RENAMED,
+        caller=caller,
+        at=now,
+        subject=("seat", seat.name),
+        project_id=project_id,
+        before={"display_name": before},
+        after={"display_name": wanted},
     )
     return seat
 
@@ -96,7 +176,7 @@ async def create_ceo(
     """Every project gets its CEO seat and its channels when it is created (EXE-1, MSG-1)."""
     await ensure_starter_roles(session, now)
     role = await newest_role(session, CEO_ROLE)
-    _new_seat(session, project.id, role, "CEO", SeatKind.CEO, now, caller)
+    await _new_seat(session, project.id, role, "CEO", SeatKind.CEO, now, caller)
     for name, kind in (
         (conversation.PROJECT_CHAT, conversation.ChannelKind.PROJECT),
         (conversation.LEADERSHIP, conversation.ChannelKind.LEADERSHIP),
@@ -173,7 +253,7 @@ async def ensure_reviewer(session: AsyncSession, project: Project, now: datetime
         number += 1
         name = f"{REVIEWER_SEAT}-{number}"
     role = await newest_role(session, REVIEWER_ROLE)
-    _new_seat(session, project.id, role, name, SeatKind.REVIEWER, now, STAFFING)
+    await _new_seat(session, project.id, role, name, SeatKind.REVIEWER, now, STAFFING)
     await session.flush()
     return True
 
@@ -245,16 +325,15 @@ async def hire_team(
         )
     if names is not None:
         members = len(names)
-        taken_seats = set(
-            await session.scalars(select(Seat.name).where(Seat.project_id == project.id))
-        )
-        clash = sorted(set(names) & taken_seats) or sorted(
-            {member for member in names if names.count(member) > 1}
+        taken_seats = {name.casefold() for name in await names_in_use(session, project.id)}
+        folded = [member.casefold() for member in names]
+        clash = sorted(member for member in names if member.casefold() in taken_seats) or sorted(
+            {member for member, key in zip(names, folded, strict=True) if folded.count(key) > 1}
         )
         if clash:
             raise Refusal(
                 "seat_name_taken",
-                f"A seat named {clash[0]} already exists or is named twice.",
+                f"An agent called {clash[0]} already exists or is named twice.",
                 rule=EXE_1.id,
                 hint="Every agent in a project has its own name.",
             )
@@ -302,7 +381,7 @@ async def hire_team(
             seat_name = names[index]
         else:
             seat_name = name if members == 1 else f"{name}-{index + 1}"
-        _new_seat(
+        await _new_seat(
             session,
             project.id,
             role,
@@ -312,6 +391,7 @@ async def hire_team(
             caller,
             team_id=team.id,
             is_lead=index == 0,
+            given_name=names is not None,
         )
     await conversation.ensure_channel(
         session, project.id, f"team {name}", conversation.ChannelKind.TEAM, now, team.id

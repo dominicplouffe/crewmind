@@ -16,8 +16,7 @@ import {
   setCeoScript,
   setTheme,
   setupToken,
-  typingSeen,
-} from "./helpers";
+  typingSeen, openPanel, agentName } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -63,7 +62,11 @@ test("a setup link sets the password, shows the server's refusal, then signs in"
   await page.context().storageState({ path: STATE_FILE });
 });
 
-test("the project list says what to do when empty and is accessible", async () => {
+test("Home and the project list say what to do when empty, and are accessible", async () => {
+  await expect(page.getByTestId("home-summary")).toHaveText("Nothing needs you right now.");
+  await expect(page.locator("#content").getByText("No projects yet", { exact: true })).toBeVisible();
+  await expectAccessible(page, "Home, empty");
+  await page.goto("/projects");
   await expect(page.getByText("You have no projects yet.")).toBeVisible();
   await expectAccessible(page, "project list");
 });
@@ -71,12 +74,12 @@ test("the project list says what to do when empty and is accessible", async () =
 test("create and start a project (CHAT-1, CHAT-18)", async () => {
   await createProject(page, "Plan project");
   saveProjectUrl(page.url());
-  await expect(page.getByTestId("project-state")).toHaveText("draft");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "draft");
   await expect(page.getByText("This project has not started.")).toBeVisible();
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
   await expect(page.getByRole("button", { name: "Hold" })).toBeVisible();
-  await expect(page.getByText(/of [\d,]+ tokens used/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Budget: .*tokens/ })).toBeVisible();
 });
 
 test("a sent message shows as delivered and the reply streams in (CHAT-3, CHAT-10, CHAT-11)", async () => {
@@ -102,7 +105,7 @@ test("/hold changes the header and /resume changes it back (CHAT-5, CHAT-18)", a
   await box.press("Enter");
   await expect(box).toHaveValue("/hold ");
   await box.press("Enter");
-  await expect(page.getByTestId("project-state")).toHaveText("held");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "held");
   await expect(page.getByText(/Lifted by:/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Resume" })).toBeVisible();
   await expect(page.getByTestId("notice-result").last()).toContainText("Done: /hold");
@@ -114,19 +117,48 @@ test("/hold changes the header and /resume changes it back (CHAT-5, CHAT-18)", a
   await page.getByRole("button", { name: "Dismiss" }).last().click();
 
   await sendMessage(page, "/resume");
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
 });
 
 test("@ completes agents, and Up arrow recalls the last message (CHAT-4)", async () => {
   const box = page.getByRole("textbox", { name: "Message" });
+  // An agent is offered by the name it goes by, found by its role too (EXE-18).
+  const ceo = await agentName(page);
   await box.fill("@C");
-  await expect(page.getByRole("option", { name: /@CEO/ })).toBeVisible();
+  await expect(page.getByRole("option", { name: new RegExp(`@${ceo}.*CEO`) })).toBeVisible();
   await box.press("Tab");
-  await expect(box).toHaveValue("@CEO ");
+  await expect(box).toHaveValue(`@${ceo} `);
   await box.fill("");
   await box.press("ArrowUp");
   await expect(box).toHaveValue("Please make a plan");
   await box.fill("");
+});
+
+test("agents go by person-like names, and the chairman renames one from its sheet (EXE-18)", async () => {
+  const ceo = await agentName(page);
+  const reviewer = await agentName(page, "Reviewer");
+  expect(ceo).not.toBe("CEO");
+  expect(reviewer).not.toBe(ceo);
+  const home = page.url();
+  await page.goto(`${home.replace(/\/$/, "")}/crew`);
+  const card = page.getByTestId("crew-card").filter({ hasText: reviewer });
+  await expect(card).toContainText("Reviewer");
+  await card.click();
+  const sheet = page.getByTestId("agent-sheet");
+  await expect(sheet.getByRole("heading", { name: reviewer })).toBeVisible();
+  await sheet.getByTestId("agent-rename-open").click();
+  const input = sheet.getByLabel(`A new name for ${reviewer}`);
+  await input.fill(ceo.toLowerCase());
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet.getByRole("alert")).toContainText(`already called ${ceo.toLowerCase()}`);
+  await input.fill("  Quill  ");
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet.getByTestId("agent-rename")).toHaveCount(0);
+  await expect(sheet.getByRole("heading", { name: "Quill" })).toBeVisible();
+  await expect(page.getByTestId("crew-card").filter({ hasText: "Quill" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.goto(home);
+  await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
 });
 
 test("upload files and preview them: markdown, CSV, and HTML in a locked frame (CHAT-9, CHAT-16)", async () => {
@@ -185,7 +217,7 @@ test("a file over 1 MB goes up in chunks (CHAT-9)", async () => {
   const big = Buffer.alloc(1_600_000, "a");
   await page.getByTestId("file-picker").setInputFiles([{ name: "big.txt", mimeType: "text/plain", buffer: big }]);
   await expect(page.getByRole("button", { name: "Preview big.txt" })).toBeVisible({ timeout: 30_000 });
-  await page.getByRole("button", { name: "Files", exact: true }).click();
+  await openPanel(page, "Files");
   await expect(page.getByTestId("file-row").filter({ hasText: "big.txt" })).toContainText("1.5 MB");
   await page.getByRole("button", { name: "Close panel" }).click();
 });
@@ -205,7 +237,8 @@ test("accept an action card with one tap (CHAT-7)", async () => {
   await sendMessage(page, "What do you suggest?");
   const card = page.getByTestId("action-card").last();
   await expect(card).toContainText("Hire a research team of two.", { timeout: 30_000 });
-  await expect(card).toContainText("About 400,000 tokens. It can be undone.");
+  await expect(card).toContainText("About 400K tokens");
+  await expect(card).toContainText("It can be undone.");
   await expect(card.getByRole("button", { name: "Not now" })).toBeVisible();
   await expect(card.getByRole("button", { name: "Edit" })).toBeVisible();
   await card.getByRole("button", { name: "Do it" }).click();
@@ -243,7 +276,7 @@ test("attach by drag-and-drop and by paste; images, audio and PDF get a preview 
     const bytes = Uint8Array.from(atob(png), (char) => char.charCodeAt(0));
     const dropped = new DataTransfer();
     dropped.items.add(new File([bytes], "dot.png", { type: "image/png" }));
-    const main = document.querySelector("main.chat");
+    const main = document.querySelector(".chat-main");
     main?.dispatchEvent(new DragEvent("dragover", { dataTransfer: dropped, bubbles: true, cancelable: true }));
     main?.dispatchEvent(new DragEvent("drop", { dataTransfer: dropped, bubbles: true, cancelable: true }));
 
@@ -271,37 +304,39 @@ test("attach by drag-and-drop and by paste; images, audio and PDF get a preview 
 
 test("the command palette opens panels; budget, models, settings, runs, activity and search work", async () => {
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("budget");
+  await page.getByRole("dialog", { name: "Command palette" }).getByRole("combobox").fill("budget");
   await page.keyboard.press("Enter");
   const panel = page.getByTestId("panel");
   await expect(panel.getByRole("heading", { name: "Budget" })).toBeFocused();
   await expect(panel).toContainText("Cache reads do not count against the budget.");
   await expect(panel).toContainText("Remaining");
 
-  await page.getByRole("button", { name: "Models", exact: true }).click();
+  await openPanel(page, "Models");
   await expect(panel).toContainText("Runs on mock-frontier (mock)");
 
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openPanel(page, "Settings");
   const setting = panel.getByTestId("setting-run.concurrency");
-  await expect(setting).toContainText("Allowed: 1–16");
-  await setting.getByRole("button", { name: /Change/ }).click();
-  await setting.getByLabel("New value for run.concurrency").fill("5");
-  await setting.getByLabel("Why are you changing it?").fill("short");
-  await setting.getByRole("button", { name: "Save" }).click();
-  await expect(setting.getByRole("alert")).toContainText("needs a reason of at least 10 characters");
-  await setting.getByLabel("Why are you changing it?").fill("Trying more parallel work.");
-  await setting.getByRole("button", { name: "Save" }).click();
-  await expect(setting.locator(".setting-value")).toHaveText("5");
+  await expect(setting).toContainText("Agents working at once");
+  await expect(setting).not.toContainText("run.concurrency");
+  await setting.getByLabel("Agents working at once").fill("5");
+  const bar = panel.getByRole("region", { name: "1 unsaved change" });
+  await bar.getByLabel("Why the change?").fill("short");
+  await bar.getByRole("button", { name: "Save" }).click();
+  await expect(bar.getByRole("alert")).toContainText("needs a reason of at least 10 characters");
+  await bar.getByLabel("Why the change?").fill("Trying more parallel work.");
+  await bar.getByRole("button", { name: "Save" }).click();
+  await expect(panel.getByRole("region", { name: /unsaved change/ })).toHaveCount(0);
+  await expect(setting.getByLabel("Agents working at once")).toHaveValue("5");
 
-  await page.getByRole("button", { name: "Runs", exact: true }).click();
-  await panel.getByRole("button", { name: /CEO · chat · finished/ }).first().click();
+  await openPanel(page, "Runs");
+  await panel.getByRole("button", { name: new RegExp(`${await agentName(page)} replied to your message`) }).first().click();
   await expect(panel.getByTestId("run-trace")).toContainText("Steps");
   await expect(panel.getByTestId("run-trace")).toContainText("model call");
 
-  await page.getByRole("button", { name: "Activity", exact: true }).click();
+  await openPanel(page, "Activity");
   await expect(panel.getByRole("list", { name: "Activity, newest first" })).toContainText("A chat run is now finished.");
 
-  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await openPanel(page, "Search");
   await panel.getByRole("searchbox").fill("plan");
   await panel.getByRole("searchbox").press("Enter");
   await panel.getByRole("button", { name: /go to message/ }).first().click();
@@ -321,13 +356,13 @@ test("replies open as a thread, and a message links to its run (CHAT-11, CHAT-14
 
 test("the theme switch works and the project page is accessible in both themes (NFR-18)", async () => {
   await setTheme(page, "dark");
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(15, 20, 28)");
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(17, 17, 19)");
   await setTheme(page, "light");
   await expectAccessible(page, "project page");
-  await page.getByRole("button", { name: "Files", exact: true }).click();
+  await openPanel(page, "Files");
   await expect(page.getByTestId("file-row").first()).toBeVisible();
   await expectAccessible(page, "project page with the files panel");
-  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await openPanel(page, "Settings");
   await expect(page.getByTestId("setting-quality")).toBeVisible();
   await expectAccessible(page, "project page with the settings panel");
   await page.getByRole("button", { name: "Close panel" }).click();
@@ -359,6 +394,8 @@ test("polling keeps the chat working when the live stream is blocked", async () 
   await page.route("**/stream/v1/**", (route) => route.abort());
   await page.reload();
   await expect(page.getByText("Live updates stopped.")).toBeVisible();
+  // The conversation shows once its messages and decisions are in; count after that.
+  await expect(agentMessages().first()).toBeVisible();
   const before = await agentMessages().count();
   await sendMessage(page, "Are you still there?");
   await expect(agentMessages()).toHaveCount(before + 1, { timeout: 40_000 });

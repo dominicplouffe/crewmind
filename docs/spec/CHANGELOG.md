@@ -2,6 +2,20 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.22 (23 Nov 2026): agents have names
+
+- **EXE-18 (new):** every agent has a person-like name it is shown by ("Maya, the CEO"), given at hire or drawn from a fixed pool, unique in the project; the chairman renames one with `roster.rename_seat` (every surface, recorded); `@Maya` addresses it; its prompt and context pack name it. The seat name stays the identity, including the stored author of chat messages.
+- **EXE-15:** "who it is" includes the agent's name.
+
+## Revision 2.21 (23 Nov 2026): your own name
+
+- **ACC-8 (new):** a person sets their own display name (`auth.set_name`, every surface); the change is recorded. The web showed the seeded "Admin" with no way to change it. Confirm: Q-021.
+
+## Revision 2.20 (22 Nov 2026): one count of what waits on you
+
+- **HUM-10, CHAT-18:** open action cards are on the desk, and the project header's "waiting on you" is the caller's desk for that project, snoozes included. The header used to count open action cards only, so it said "nothing" while proposed scope waited on the desk. Confirm the action-card addition: Q-020.
+- **No requirement text changed for the web app redesign** (docs/design/): it is a new arrangement of the same operations.
+
 ## Revision 2.19 (22 Nov 2026): container mode proven on a real Docker host
 
 - **EXE-12:** a sandbox container runs as an unprivileged user with no capabilities: the server's own user, or user 10001 of the agent image when the server runs as root. The fixed number is stated here because it must match the image.

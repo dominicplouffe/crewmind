@@ -1,4 +1,5 @@
 /** Sets a waiting item aside for a while. It comes back by itself, and never later than its deadline. */
+import { AlarmClock } from "lucide-react";
 import { useState } from "react";
 import { post } from "../api/client";
 import { ErrorNote } from "../components/common";
@@ -29,13 +30,16 @@ export function Snooze({ item, onDone }: { item: Item; onDone(): void }): JSX.El
 
   return (
     <div data-testid="snooze">
-      <div className="row wrap" role="group" aria-label={words.label(item.title)}>
-        <span className="quiet">{words.lead}</span>
+      <div className="row wrap snooze-row" role="group" aria-label={words.label(item.title)}>
+        <span className="quiet snooze-lead">
+          <AlarmClock size={14} aria-hidden="true" />
+          {words.lead}
+        </span>
         {presets.map((preset) => (
           <button
             key={preset.id}
             type="button"
-            className="button small"
+            className="button small ghost"
             disabled={busy || !preset.allowed}
             title={formatDateTime(preset.until.toISOString())}
             onClick={() => void snooze(preset.until)}

@@ -24,7 +24,10 @@ ATTACH = "/attach"
 
 def header_text(header: dict[str, Any]) -> str:
     """CHAT-18: Now, Next, Waiting on you, and the budget against the wall."""
-    now = ", ".join(f"{w['seat']} is {w['doing']}" for w in header["now"]) or "nobody is working"
+    now = (
+        ", ".join(f"{w.get('name') or w['seat']} is {w['doing']}" for w in header["now"])
+        or "nobody is working"
+    )
     upcoming = " ".join(header["next"]) or "nothing scheduled"
     holds = "".join(f" | held: {h['reason']} (lifts by {h['lifts']})" for h in header["holds"])
     return (

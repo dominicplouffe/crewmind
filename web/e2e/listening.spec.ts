@@ -6,6 +6,7 @@
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import {
+  agentName,
   PLAN_SCRIPT,
   STATE_FILE,
   createProject,
@@ -13,8 +14,7 @@ import {
   expectNoViolations,
   sendMessage,
   setCeoScript,
-  setTheme,
-} from "./helpers";
+  setTheme, openPanel } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -37,7 +37,7 @@ const statusLine = (text: string | RegExp): Locator => page.getByTestId("message
 
 async function openMemory(tab: string): Promise<void> {
   if (!(await panel().getByRole("tab", { name: tab }).isVisible())) {
-    await page.getByRole("button", { name: "Memory", exact: true }).click();
+    await openPanel(page, "Memory");
   }
   await panel().getByRole("tab", { name: tab }).click();
   await expect(panel().getByRole("tab", { name: tab })).toHaveAttribute("aria-selected", "true");
@@ -60,10 +60,10 @@ async function ask(text: string, reply: string | RegExp): Promise<Locator> {
 test("the Memory panel opens from the command palette and says what will fill it", async () => {
   await createProject(page, "Listening project");
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
 
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("memory");
+  await page.getByRole("dialog", { name: "Command palette" }).getByRole("combobox").fill("memory");
   await page.keyboard.press("Enter");
   await expect(panel().getByRole("heading", { name: "Memory" })).toBeFocused();
   await expect(panel().getByTestId("pinned-text")).toContainText("Write a short plan.");
@@ -172,7 +172,8 @@ test("“Not what I asked” records a correction and the agent answers again (C
   setCeoScript([{ text: "Here is the list you asked for." }]);
   await chooseAction(reply, "Not what I asked");
   const dialog = page.getByRole("dialog", { name: "Not what I asked" });
-  await expect(dialog).toContainText("CEO will answer again and remember this.");
+  const ceo = await agentName(page);
+  await expect(dialog).toContainText(`${ceo} will answer again and remember this.`);
 
   // The server refuses empty words, in its own words.
   await dialog.getByRole("button", { name: "Send correction" }).click();
@@ -196,14 +197,14 @@ test("“Not what I asked” records a correction and the agent answers again (C
   await openMemory("Corrections");
   const correction = panel().getByTestId("correction").filter({ hasText: "I asked for a list, not a plan" });
   await expect(correction).toContainText("Make a list of fruit");
-  await expect(correction).toContainText("To CEO");
+  await expect(correction).toContainText(`To ${ceo}`);
   await expect(correction).toContainText("In force");
 
   await openMemory("Pinned");
   await expect(panel().getByTestId("listening-score")).toHaveText(/Listening: 1 correction in \d+ repl(y|ies) \(score [\d.,]+\)/);
-  await page.getByRole("button", { name: "Models", exact: true }).click();
+  await openPanel(page, "Models");
   // Every project has a second agent, the Reviewer: the correction counts against the CEO only.
-  const ceoCard = panel().getByRole("listitem").filter({ has: page.getByRole("heading", { name: "CEO", exact: true }) });
+  const ceoCard = panel().getByRole("listitem").filter({ has: page.getByRole("heading", { name: ceo, exact: true }) });
   await expect(ceoCard.getByTestId("listening-score")).toHaveText(/Listening: 1 correction in \d+ repl(y|ies) \(score [\d.,]+\)/);
 
   await openMemory("Corrections");
@@ -235,7 +236,8 @@ test("an agent's proposed order and reopen request get buttons on their status l
     { text: "I proposed a standing order." },
   ]);
   await sendMessage(page, "How should you report?");
-  const proposal = statusLine("CEO proposes a standing order");
+  const ceo = await agentName(page);
+  const proposal = statusLine(`${ceo} proposes a standing order`);
   await expect(proposal.getByTestId("order-actions")).toBeVisible({ timeout: 30_000 });
   await expect(agentMessages().last()).toContainText("I proposed a standing order.");
   await expect(proposal.getByRole("button", { name: /^Discard/ })).toBeVisible();
@@ -267,14 +269,14 @@ test("an agent's proposed order and reopen request get buttons on their status l
     { text: "I asked to reopen the decision." },
   ]);
   await sendMessage(page, "Does that change anything?");
-  const request = statusLine("CEO asks to reopen decision 1");
+  const request = statusLine(`${ceo} asks to reopen decision 1`);
   await expect(request.getByTestId("request-actions")).toBeVisible({ timeout: 30_000 });
   await expect(agentMessages().last()).toContainText("I asked to reopen the decision.");
   setCeoScript(PLAN_SCRIPT);
 
   await openMemory("Decisions");
   const listed = panel().getByTestId("reopen-request");
-  await expect(listed).toContainText("CEO asks to reopen decision 1 (Database)");
+  await expect(listed).toContainText(`${ceo} asks to reopen decision 1 (Database)`);
   await expect(listed).toContainText("The second office changes what the database must do.");
   await expect(listed.getByRole("button", { name: /^Decline/ })).toBeVisible();
 
@@ -431,7 +433,7 @@ test("earlier messages load a page at a time and the view stays where it was", a
 });
 
 test("a new project's recalled memory says what will fill it", async () => {
-  await page.getByRole("button", { name: "Memory", exact: true }).click();
+  await openPanel(page, "Memory");
   await panel().getByRole("tab", { name: "Recalled memory" }).click();
   await expect(panel()).toContainText("Nothing is remembered yet.");
   await expect(panel()).toContainText("Facts the agents pick up while they work will be listed here.");

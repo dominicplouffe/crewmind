@@ -1,7 +1,9 @@
 /** Side effects and launches: what agents did outside the project, and the watch on each launch. */
+import { Rocket } from "lucide-react";
 import { useState } from "react";
 import { get, post } from "../../api/client";
-import { Empty, ErrorNote, Loading, Pre } from "../../components/common";
+import { ErrorNote, Pre } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { useAct } from "../memory/parts";
@@ -28,7 +30,7 @@ export function LaunchesTab({ projectId, changes, onChanged }: Props): JSX.Eleme
       <ErrorNote error={launches.error} />
       <ErrorNote error={act.error} />
       {launches.loading && !launches.data ? <Loading /> : null}
-      {launches.data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {launches.data && items.length === 0 ? <Empty icon={Rocket} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {items.map((effect) => (
           <li key={effect.id} data-testid="launch" className={effect.state === "retired" ? "is-past" : ""}>
@@ -36,7 +38,7 @@ export function LaunchesTab({ projectId, changes, onChanged }: Props): JSX.Eleme
               <AgentText text={effect.what} />
             </p>
             <p className="quiet row wrap">
-              <span className="marker" data-testid="launch-kind">
+              <span className="badge" data-testid="launch-kind">
                 {effect.launch ? words.launch : words.effect}
               </span>
               <StateTag state={effect.state} />

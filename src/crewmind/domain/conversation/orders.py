@@ -311,7 +311,7 @@ async def propose(context: Context, payload: ProposeOrderInput) -> OrderItem:
     await service.platform_line(
         context.session,
         view.project.id,
-        f"{view.seat.name} proposes a standing order: {row.text}\n"
+        f"{view.seat.display_name} proposes a standing order: {row.text}\n"
         f"Confirm it with `orders confirm`, or discard it. It is not in force yet.",
         context.now,
         detail={"kind": "standing order proposed", "order": row.id},

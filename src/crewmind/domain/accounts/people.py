@@ -28,6 +28,7 @@ PERSON_ACTIVATED = event_type("person.activated", "A person set a password or wa
 PERSON_DEACTIVATED = event_type("person.deactivated", "A person was deactivated.")
 PERSON_ROLE_CHANGED = event_type("person.role_changed", "A person's instance role changed.")
 PASSWORD_CHANGED = event_type("person.password_changed", "A person's password changed.")
+PERSON_RENAMED = event_type("person.renamed", "A person changed the name they are shown by.")
 LINK_ISSUED = event_type("link.issued", "A single-use link was issued (ACC-4).")
 LINK_USED = event_type("link.used", "A single-use link was used (ACC-4).")
 LINK_EXPIRED = event_type("link.expired", "A single-use link expired unused (ACC-4).")
@@ -39,6 +40,7 @@ ACC_2 = rules.register(
 ACC_3 = rules.register(Rule("ACC-3", "Tokens are named, expire, and are stored only as hashes."))
 ACC_4 = rules.register(Rule("ACC-4", "Invite and reset links work once, for 72 hours."))
 ACC_5 = rules.register(Rule("ACC-5", "Instance roles and project membership decide who may act."))
+ACC_8 = rules.register(Rule("ACC-8", "A person sets only their own name, and it is never empty."))
 
 
 def normalize_email(email: str) -> str:

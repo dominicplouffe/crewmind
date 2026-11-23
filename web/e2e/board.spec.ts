@@ -8,14 +8,14 @@
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import {
+  agentName,
   IDLE_SCRIPT,
   STATE_FILE,
   createProject,
   expectNoViolations,
   setTheme,
   setWorkScript,
-  toolTurn,
-} from "./helpers";
+  toolTurn, openPanel } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -58,7 +58,7 @@ const group = (state: string): Locator => panel().locator(`[data-testid="task-gr
 
 async function openBoard(tab: string): Promise<void> {
   if (!(await panel().getByRole("tab", { name: tab }).isVisible())) {
-    await page.getByRole("button", { name: "Board", exact: true }).click();
+    await openPanel(page, "Board");
   }
   await panel().getByRole("tab", { name: tab }).click();
   await expect(panel().getByRole("tab", { name: tab })).toHaveAttribute("aria-selected", "true");
@@ -109,10 +109,10 @@ test("the Board opens from the command palette and its empty states say agents c
   await createProject(page, "Board project");
   projectId = new URL(page.url()).pathname.split("/").pop() ?? "";
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(page.getByTestId("project-state")).toHaveText("running");
+  await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
 
   await page.keyboard.press("Control+k");
-  await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("board");
+  await page.getByRole("dialog", { name: "Command palette" }).getByRole("combobox").fill("open board");
   await page.keyboard.press("Enter");
   await expect(panel().getByRole("heading", { name: "Board" })).toBeFocused();
   await expect(panel()).toContainText("No tasks yet.");
@@ -185,7 +185,7 @@ test("a claimed task moves to the claimed group and names who holds it", async (
   await direct("Claim the draft.");
   const row = group("claimed").locator(`[data-task-id="${draftId}"]`);
   await expect(row).toBeVisible({ timeout: SLOW });
-  await expect(row).toContainText("Held by CEO");
+  await expect(row).toContainText(`Held by ${await agentName(page)}`);
   await expect(row.getByTestId("check-label")).toHaveText("Check: not yet checked");
   // Claimed work is listed before ready work.
   await expect(panel().getByTestId("task-group").first()).toHaveAttribute("data-state", "claimed");
@@ -241,7 +241,7 @@ test("a reviewed task closes as done with the label reviewed, never verified", a
   await expect(detail.getByTestId("task-evidence")).toHaveText(EVIDENCE);
   const attempt = detail.getByTestId("attempt");
   await expect(attempt).toHaveCount(1);
-  await expect(attempt).toContainText("Attempt 1 by CEO");
+  await expect(attempt).toContainText(`Attempt 1 by ${await agentName(page)}`);
   await expect(attempt).toContainText(EVIDENCE);
   await expect(attempt.getByTestId("attempt-result")).toHaveText("Result: passed");
   await expect(attempt.locator("pre")).toHaveText(REVIEW_NOTES);

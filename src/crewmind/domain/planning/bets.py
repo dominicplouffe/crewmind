@@ -309,7 +309,7 @@ async def publish_finding(
         content=body.encode(),
         kind=artifacts.Kind.REPORT,
         audience=artifacts.Audience.CHAIRMAN,
-        author=artifacts.Author("agent", seat.id, seat.name, caller.run_id),
+        author=artifacts.Author("agent", seat.id, seat.name, caller.run_id, seat.display_name),
         caller=caller,
         now=now,
         media_type="text/markdown",

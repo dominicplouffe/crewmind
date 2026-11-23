@@ -1,7 +1,8 @@
 /** Operate: each cycle with what it achieved and the account of it. */
+import { RefreshCcw } from "lucide-react";
 import { useState } from "react";
 import { post } from "../../api/client";
-import { Empty } from "../../components/common";
+import { Empty } from "../kit";
 import { formatDateTime, formatNumber } from "../../lib/format";
 import { t } from "../../strings";
 import { AgentText } from "../board/parts";
@@ -15,7 +16,7 @@ export function Cycles({ projectId, plan, apply }: PlanTabProps): JSX.Element {
 
   return (
     <Section title={words.title} testId="cycles">
-      {cycles.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {cycles.length === 0 ? <Empty icon={RefreshCcw} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {cycles.map((cycle) => {
           const card = readScorecard(cycle.scorecard);

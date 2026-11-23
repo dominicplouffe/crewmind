@@ -173,7 +173,8 @@ async def dispatch(
                 await conversation.platform_line(
                     session,
                     project.id,
-                    f"{seat.name} ran and gave no reply to this message. Ask again in other words.",
+                    f"{seat.display_name} ran and gave no reply to this message. "
+                    "Ask again in other words.",
                     now,
                     reply_to=waiting[0].id,
                     detail={"kind": conversation.NO_REPLY},

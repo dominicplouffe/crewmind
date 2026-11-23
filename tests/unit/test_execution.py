@@ -5,7 +5,7 @@ from __future__ import annotations
 from crewmind.catalog.refusal import Refusal
 from crewmind.domain.execution import context_pack, runs
 from tests.conftest import FakeClock
-from tests.support import App, live_run, running_project, wake
+from tests.support import App, live_run, running_project, shown_as, wake
 
 
 async def statuses(app: App, owner: object, project: str) -> list[str]:
@@ -140,5 +140,6 @@ async def test_LLM_6_a_seat_that_cannot_run_fails_before_any_sandbox_or_token(
     assert await app.work() == 0
     listed = (await app.ok("runs.list", owner, project_id=project))["items"]
     assert (listed[0]["state"], listed[0]["tokens_counted"]) == ("failed", 0)
-    assert "CEO cannot run: no credential" in (await statuses(app, owner, project))[0]
+    ceo = await shown_as(app, owner, project)
+    assert f"{ceo} cannot run: no credential" in (await statuses(app, owner, project))[0]
     assert live_run is not None

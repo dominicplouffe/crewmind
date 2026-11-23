@@ -551,7 +551,7 @@ async def publish(context: Context, payload: PublishInput) -> ArtifactItem:
         content=content,
         kind=Kind.DELIVERABLE,
         audience=payload.audience,
-        author=Author("agent", view.seat.id, view.seat.name, view.run.id),
+        author=Author("agent", view.seat.id, view.seat.name, view.run.id, view.seat.display_name),
         caller=context.caller,
         now=context.now,
     )

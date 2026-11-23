@@ -18,9 +18,9 @@ from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.budget import service as budget
 from crewmind.domain.conversation import service
-from crewmind.domain.conversation.directives import CardState
 from crewmind.domain.conversation.operations import MessageItem, item
 from crewmind.domain.conversation.service import Author, MessageKind
+from crewmind.domain.decisions import desk
 from crewmind.domain.execution import notices
 from crewmind.domain.execution.model import LIVE_STATES, SeatState
 from crewmind.domain.execution.roster import ceo_of
@@ -33,7 +33,6 @@ from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.services import services_of
 from crewmind.storage.events import event_type
 from crewmind.storage.models import (
-    ActionCard,
     Artifact,
     Channel,
     Event,
@@ -189,6 +188,7 @@ class MarkReadInput(ProjectRef):
 
 class Working(BaseModel):
     seat: str
+    name: str = Field(description="The name the agent goes by (EXE-18).")
     run_kind: str
     doing: str
 
@@ -204,7 +204,7 @@ class Header(BaseModel):
     state: str
     now: list[Working]
     next: list[str]
-    waiting_on_you: int
+    waiting_on_you: int = Field(description="The desk count for this project (HUM-10).")
     budget: str
     budget_spent: int
     budget_wall: int
@@ -321,7 +321,8 @@ def _doing(step: RunStep | None, run: Run) -> str:
     mcp_scope="read",
 )
 async def header(context: Context, payload: ProjectRef) -> Header:
-    """CHAT-18, EXE-4, P17: every hold is shown with what lifts it."""
+    """CHAT-18, HUM-10, EXE-4, P17: every hold is shown with what lifts it, and "waiting
+    on you" is the caller's desk for this project, not a count of its own."""
     project = view_of(context).project
     session = context.session
     working: list[Working] = []
@@ -335,7 +336,14 @@ async def header(context: Context, payload: ProjectRef) -> Header:
         step = await session.scalar(
             select(RunStep).where(RunStep.run_id == run.id).order_by(RunStep.id.desc()).limit(1)
         )
-        working.append(Working(seat=seat.name, run_kind=run.kind, doing=_doing(step, run)))
+        working.append(
+            Working(
+                seat=seat.name,
+                name=seat.display_name,
+                run_kind=run.kind,
+                doing=_doing(step, run),
+            )
+        )
     holds = await lifecycle.active_holds(session, project.id)
     coming = [
         f"The hold lifts at {row.lift_at.isoformat(timespec='minutes')}."
@@ -349,19 +357,15 @@ async def header(context: Context, payload: ProjectRef) -> Header:
     )
     if queued:
         coming.append(f"{queued} run(s) queued.")
-    cards = await session.scalar(
-        select(func.count())
-        .select_from(ActionCard)
-        .where(ActionCard.project_id == project.id, ActionCard.state == CardState.OPEN)
-    )
+    waiting = await desk.of_person_in(session, context.caller.actor_id, project.id, context.now)
     state = await budget.state(session, services_of(context).settings, project, context.now)
     seats = await session.scalars(select(Seat).where(Seat.project_id == project.id))
     notes: list[str] = []
     for seat in seats:
         if seat.substitution:
-            notes.append(f"{seat.name}: {seat.substitution}")
+            notes.append(f"{seat.display_name}: {seat.substitution}")
         if seat.state == SeatState.PAUSED:
-            notes.append(f"{seat.name} is paused: {seat.pause_reason or 'it cannot run'}.")
+            notes.append(f"{seat.display_name} is paused: {seat.pause_reason or 'it cannot run'}.")
     target = await service.channel(session, project.id, service.PROJECT_CHAT)
     position = await service.read_position(session, target.id, "person", context.caller.actor_id)
     unread = await session.scalar(
@@ -377,7 +381,7 @@ async def header(context: Context, payload: ProjectRef) -> Header:
         state=project.state,
         now=working,
         next=coming,
-        waiting_on_you=int(cards or 0),
+        waiting_on_you=len(waiting),
         budget=budget.arithmetic(state),
         budget_spent=state.spent,
         budget_wall=state.wall,
@@ -414,7 +418,19 @@ def _plain(event: Event) -> str:
         return f"Directive {event.subject_id} is now {after.get('state')}."
     if kind == "budget.threshold_reached":
         return f"The budget passed its {after.get('threshold')} level."
-    return f"{kind.replace('.', ': ').replace('_', ' ')} ({event.subject_kind} {event.subject_id})."
+    noun = event.subject_kind.replace("_", " ").capitalize()
+    if kind == "project.created":
+        return "The project was created."
+    if kind == "seat.created":
+        return f"{after.get('display_name') or event.subject_id} joined the crew."
+    if kind == "seat.renamed":
+        return f"{before.get('display_name')} is now called {after.get('display_name')}."
+    if kind == "guard.changed":
+        return f"The {event.subject_id} guard changed."
+    if kind.endswith(".state_changed") and after.get("state"):
+        return f"{noun} {event.subject_id} is now {after.get('state')}."
+    action = kind.split(".", 1)[-1].replace("_", " ")
+    return f"{noun} {event.subject_id}: {action}."
 
 
 @operation(

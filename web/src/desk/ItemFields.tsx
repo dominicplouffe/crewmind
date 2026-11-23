@@ -2,6 +2,7 @@
 import { formatNumber, formatValue } from "../lib/format";
 import { AgentText } from "../panels/board/parts";
 import { t } from "../strings";
+import { money } from "./headline";
 import { listField, numberField, textField, type Item } from "./logic";
 import { ReviewBody } from "./ReviewBody";
 
@@ -73,6 +74,22 @@ function knownRows(item: Item): Row[] | null {
       text("fix", words.fix);
       text("prevention", words.prevention);
       return rows;
+    case "approval: spend": {
+      const value = numberField(fields, "amount");
+      if (value !== null) rows.push([words.amount, money(value, textField(fields, "currency"))]);
+      return rows;
+    }
+    case "approval: tool permission":
+      text("tool", words.tool);
+      return rows;
+    case "proposed commitment":
+      text("projected", words.projected);
+      return rows;
+    case "budget checkpoint":
+      amount("spent", words.spent, words.tokens);
+      amount("budget", words.budget, words.tokens);
+      return rows;
+    case "approval: legal":
     case "heads-up":
     case "delivery sign-off":
     case "status review":
@@ -90,18 +107,12 @@ function plainRows(item: Item): Row[] {
 
 export function ItemFields({ item, onChanged }: { item: Item; onChanged(item: Item): void }): JSX.Element {
   const rows = knownRows(item) ?? plainRows(item);
-  const body = item.kind === "proposed scope" || item.kind === "heads-up" ? textField(item.fields, "text") : null;
   const deliverables = item.kind === "delivery sign-off" ? listField(item.fields, "deliverables") : [];
   // An open question lists its options in the answer form; a closed one lists them here.
   const options = item.kind === "question" && !item.actions.includes("answer") ? listField(item.fields, "options") : [];
   const recommended = numberField(item.fields, "recommended");
   return (
     <>
-      {body ? (
-        <p>
-          <AgentText text={body} />
-        </p>
-      ) : null}
       {rows.length > 0 ? (
         <dl className="pairs item-fields">
           {rows.map(([label, value]) => (
@@ -129,7 +140,7 @@ export function ItemFields({ item, onChanged }: { item: Item; onChanged(item: It
           {options.map((option, index) => (
             <li key={index}>
               <AgentText text={formatValue(option)} />
-              {recommended === index + 1 ? <span className="marker"> {t.decisions.question.recommended}</span> : null}
+              {recommended === index + 1 ? <span className="badge badge-accent"> {t.decisions.question.recommended}</span> : null}
             </li>
           ))}
         </ol>

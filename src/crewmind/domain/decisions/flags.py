@@ -166,7 +166,7 @@ async def raise_flag(
     await conversation.platform_line(
         session,
         project.id,
-        f"{seat.name} raises the flag {item.fields['flag']}: {item.fields['cause']} "
+        f"{seat.display_name} raises the flag {item.fields['flag']}: {item.fields['cause']} "
         f"Proposal: {proposal.strip()}",
         now,
         detail={"kind": "decision item", "item": item.id, "item_kind": FLAG},

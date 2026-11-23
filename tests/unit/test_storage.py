@@ -13,7 +13,7 @@ from crewmind.storage.engine import Database, create_engine, database_of, sync_u
 from crewmind.storage.migrate import alembic_config, migrate
 from crewmind.storage.models import Base
 
-HEAD = "0014"
+HEAD = "0015"
 
 
 async def test_NFR_10_migrations_apply_and_are_safe_to_repeat(database_url: str) -> None:
@@ -60,3 +60,69 @@ def test_NFR_10_the_migrations_build_exactly_the_tables_the_code_uses(database_u
             assert compare_metadata(context, Base.metadata) == []
     finally:
         engine.dispose()
+
+
+def _row(table: sqlalchemy.Table, **given: object) -> dict[str, object]:
+    """A row with the given values and a placeholder in every other required column."""
+    from datetime import UTC, datetime
+
+    row = dict(given)
+    for column in table.columns:
+        if column.name in row or column.nullable or column.server_default is not None:
+            continue
+        kind = column.type.python_type
+        row[column.name] = (
+            datetime.now(UTC)
+            if kind is datetime
+            else {}
+            if kind is dict
+            else []
+            if kind is list
+            else kind()
+            if kind in (int, bool)
+            else column.name
+        )
+    return row
+
+
+def test_EXE_18_the_migration_names_the_seats_that_exist(database_url: str) -> None:
+    """EXE-18, NFR-10: on a database from before agent names, team seats show their own
+    name, and the CEO and the reviewer draw different first names from the pool, the same
+    ones a new project with that id would draw."""
+    from alembic import command
+
+    from crewmind.domain.execution import names
+
+    command.upgrade(alembic_config(database_url), "0014")
+    engine = sqlalchemy.create_engine(sync_url(database_url))
+    try:
+        with engine.begin() as connection:
+            tables = sqlalchemy.MetaData()
+            tables.reflect(connection, only=["persons", "projects", "roles", "teams", "seats"])
+            persons, projects, roles, teams, seats = (
+                tables.tables[name] for name in ("persons", "projects", "roles", "teams", "seats")
+            )
+            connection.execute(persons.insert().values(_row(persons, id="a1")))
+            connection.execute(projects.insert().values(_row(projects, id="p1", created_by="a1")))
+            connection.execute(roles.insert().values(_row(roles, id="r1", version=1)))
+            connection.execute(
+                teams.insert().values(_row(teams, id="t1", project_id="p1", role_id="r1"))
+            )
+            rows = (("s1", "CEO", None), ("s2", "Reviewer", None), ("s3", "Rey", "t1"))
+            for seat_id, name, team in rows:
+                connection.execute(
+                    seats.insert().values(
+                        _row(seats, id=seat_id, project_id="p1", team_id=team, name=name,
+                             role_id="r1", is_lead=False)
+                    )
+                )  # fmt: skip
+        migrate(database_url)
+        with engine.connect() as connection:
+            shown = dict(connection.execute(text("SELECT name, display_name FROM seats")).all())
+    finally:
+        engine.dispose()
+    assert shown["Rey"] == "Rey"
+    assert shown["CEO"] in names.POOL
+    assert shown["Reviewer"] in names.POOL
+    assert shown["CEO"] != shown["Reviewer"]
+    assert shown["CEO"] == names.draw("p1", {"CEO", "Reviewer", "Rey"})

@@ -56,20 +56,34 @@ export function toolTurn(...tools: [name: string, args: Record<string, unknown>]
   return { text: "Working.", tools: tools.map(([name, args]) => ({ name, arguments: args })) };
 }
 
+/**
+ * Puts the page in a theme for the accessibility scans. On signed-in pages it uses the user menu,
+ * as a person would; on pages without one (sign-in) it sets the theme the app would apply.
+ */
 export async function setTheme(page: Page, theme: "light" | "dark"): Promise<void> {
   const current = await page.locator("html").getAttribute("data-theme");
   if (current !== theme) {
-    const button = page.getByRole("button", { name: "Dark theme" }).first();
-    if (await button.isVisible()) {
-      await button.click();
+    const menu = page.getByTestId("user-menu").filter({ visible: true }).first();
+    const covered = (await page.locator("dialog[open]").count()) > 0 || (await page.getByTestId("panel").count()) > 0;
+    if ((await menu.count()) > 0 && (await menu.isVisible()) && !covered) {
+      await menu.click();
+      await page.getByRole("menuitemradio", { name: theme === "dark" ? "Dark" : "Light" }).click();
     } else {
-      // A full-screen sheet covers the button on a phone: use the command palette instead.
-      await page.keyboard.press("Control+k");
-      await page.getByRole("dialog", { name: "Command palette" }).getByRole("textbox").fill("light and dark");
-      await page.keyboard.press("Enter");
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
     }
   }
   await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+}
+
+/** Opens a project tool by name ("Files", "Settings", "Runs"…) through the command palette. */
+export async function openPanel(page: Page, name: string): Promise<void> {
+  await page.keyboard.press("Control+k");
+  const palette = page.getByRole("dialog", { name: "Command palette" });
+  await palette.getByRole("combobox").fill(`open ${name}`);
+  await palette.getByRole("option", { name: new RegExp(`^Open ${name}\\b`) }).first().click();
+  await expect(page.getByTestId("panel").getByRole("heading", { name, exact: true })).toBeVisible();
 }
 
 /** Fails on any WCAG 2 A or AA violation in the page as it is now. */
@@ -93,7 +107,7 @@ export async function expectAccessible(page: Page, label: string): Promise<void>
 }
 
 export async function createProject(page: Page, name: string): Promise<void> {
-  await page.goto("/");
+  await page.goto("/projects");
   await page.getByRole("button", { name: "Fill in a form instead" }).click();
   await page.getByLabel("Name").fill(name);
   await page.getByLabel("Type").selectOption("deliver");
@@ -133,4 +147,20 @@ export function saveProjectUrl(url: string): void {
 
 export function projectUrl(): string {
   return readFileSync(projectUrlFile, "utf8");
+}
+
+/**
+ * The name an agent goes by in the project the page shows (EXE-18): the CEO and the reviewer draw a
+ * first name, so tests ask the roster rather than assume one.
+ */
+export async function agentName(page: Page, seat = "CEO"): Promise<string> {
+  const projectId = new URL(page.url()).pathname.split("/")[2] ?? "";
+  return page.evaluate(
+    async ([id, wanted]) => {
+      const response = await fetch(`/v1/roster/show?project_id=${encodeURIComponent(id ?? "")}`, { credentials: "same-origin" });
+      const roster = (await response.json()) as { seats: { name: string; display_name: string }[] };
+      return roster.seats.find((item) => item.name === wanted)?.display_name ?? wanted ?? "";
+    },
+    [projectId, seat],
+  );
 }

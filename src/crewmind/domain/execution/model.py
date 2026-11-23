@@ -99,5 +99,8 @@ RETRY_BACKOFF = timedelta(seconds=30)  # EXE-8: 30 seconds x attempt
 CAP_WARNING_SHARE = 0.8  # GOV-6: the gateway warns the harness at 80% of the per-run cap
 
 EXE_1 = rules.register(Rule("EXE-1", "The roster is one CEO plus teams, within `teams.max`."))
+EXE_18 = rules.register(
+    Rule("EXE-18", "Every agent has its own name in a project; only a person changes it.")
+)
 EXE_10 = rules.register(Rule("EXE-10", "At the refusal cap a run's token is revoked."))
 P3 = rules.register(Rule("P3", "An agent acts only through the agent API, with its own run token."))

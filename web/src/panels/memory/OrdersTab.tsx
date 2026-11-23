@@ -1,7 +1,9 @@
 /** Standing orders: add one, confirm, edit or discard a proposed one, retire one in force. */
+import { ScrollText } from "lucide-react";
 import { useState } from "react";
 import { get, post, type Order } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, Tag, TextForm, stateName, useAct, type TabProps } from "./parts";
@@ -39,7 +41,7 @@ export function OrdersTab({ projectId, changes, onChanged }: TabProps): JSX.Elem
       <ErrorNote error={orders.error} />
       <ErrorNote error={act.error} />
       {orders.loading && !orders.data ? <Loading /> : null}
-      {orders.data && items.length === 0 ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {orders.data && items.length === 0 ? <Empty icon={ScrollText} title={words.emptyTitle} next={words.emptyNext} /> : null}
       <ul className="records plain" aria-label={words.listLabel}>
         {items.map((order) => (
           <li key={order.id} data-testid="order" className={order.state === "retired" ? "is-past" : ""}>

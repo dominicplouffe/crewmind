@@ -1,4 +1,5 @@
-"""The desk (HUM-10): one definition of "waiting on you", used everywhere. Snoozing is a
+"""The desk (HUM-10): one definition of "waiting on you", used everywhere. The project
+header's count (CHAT-18), the Desk page and every badge read this one list. Snoozing is a
 person's own and never outlasts an item's deadline."""
 
 from __future__ import annotations
@@ -11,9 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.rules import Rule, rules
+from crewmind.domain.conversation.directives import CardState
 from crewmind.domain.decisions import items
 from crewmind.domain.decisions.model import ItemState
 from crewmind.storage.models import (
+    ActionCard,
     Bet,
     DecisionItem,
     FrozenThread,
@@ -44,7 +47,7 @@ class Entry:
 
 async def of_project(session: AsyncSession, project: Project) -> list[Entry]:
     """Everything in one project that waits on its chairman: open items of the kinds
-    that ask for a decision, expired bets, and frozen threads."""
+    that ask for a decision, open action cards, expired bets, and frozen threads."""
     found: list[Entry] = []
     rows = await session.scalars(
         select(DecisionItem)
@@ -59,6 +62,20 @@ async def of_project(session: AsyncSession, project: Project) -> list[Entry]:
                     project.id, project.name, item.kind, items.title_of(item), item.deadline, item
                 )
             )
+    for card in await session.scalars(
+        select(ActionCard)
+        .where(ActionCard.project_id == project.id, ActionCard.state == CardState.OPEN)
+        .order_by(ActionCard.id)
+    ):
+        found.append(
+            Entry(
+                project.id,
+                project.name,
+                "action card",
+                f"Action card {card.id}: an agent asks to act on what was said in chat",
+                None,
+            )
+        )
     for bet in await session.scalars(
         select(Bet).where(Bet.project_id == project.id, Bet.state == "expired").order_by(Bet.id)
     ):
@@ -104,6 +121,17 @@ async def projects_of(session: AsyncSession, person_id: str) -> list[Project]:
         .order_by(Project.created_at, Project.id)
     )
     return list(rows)
+
+
+async def of_person_in(
+    session: AsyncSession, person_id: str, project_id: str, now: datetime
+) -> list[Entry]:
+    """The desk narrowed to one project: what the project header counts (CHAT-18)."""
+    return [
+        entry
+        for entry in await of_person(session, person_id, now)
+        if entry.project_id == project_id
+    ]
 
 
 async def of_person(session: AsyncSession, person_id: str, now: datetime) -> list[Entry]:

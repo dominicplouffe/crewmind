@@ -2,9 +2,11 @@
  * The Plan panel: what is in scope, when it will be done and what it will cost, how the project
  * finishes, the decision items filed for the chairman, what the clock will do next, and a rehearsal.
  */
+import { RefreshCw } from "lucide-react";
 import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { get } from "../../api/client";
-import { ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Loading } from "../kit";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, useAct } from "../memory/parts";
@@ -27,10 +29,14 @@ interface Props {
   onChanged(): void;
 }
 
-export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element {
-  const [tab, setTab] = useState<TabId>("scope");
+export type PlanTabId = TabId;
+
+/**
+ * One section of the plan, without the tab row: the refresh bar, any refusal or note, and the body.
+ * The Plan panel shows it under its tabs; the Work view shows it under its own "Plan details".
+ */
+export function PlanSection({ projectId, changes, onChanged, tab }: Props & { tab: TabId }): JSX.Element {
   const [note, setNote] = useState<string | null>(null);
-  const list = useRef<HTMLDivElement>(null);
   const plan = useLoad(() => get("/v1/plan/show", { project_id: projectId }), [projectId, changes]);
   const status = useLoad(() => get("/v1/projects/status", { project_id: projectId }), [projectId, changes]);
   const act = useAct(onChanged);
@@ -53,20 +59,6 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
     },
     [apply, onChanged],
   );
-
-  const onKeyDown = (event: KeyboardEvent): void => {
-    const at = TABS.indexOf(tab);
-    let next: number | null = null;
-    if (event.key === "ArrowRight") next = (at + 1) % TABS.length;
-    else if (event.key === "ArrowLeft") next = (at - 1 + TABS.length) % TABS.length;
-    else if (event.key === "Home") next = 0;
-    else if (event.key === "End") next = TABS.length - 1;
-    const id = next === null ? undefined : TABS[next];
-    if (!id) return;
-    event.preventDefault();
-    setTab(id);
-    list.current?.querySelector<HTMLElement>(`#plan-tab-${id}`)?.focus();
-  };
 
   let body: JSX.Element | null = null;
   // Decision items, the agenda and the rehearsal are loaded by their own tabs; the others show the plan.
@@ -109,6 +101,50 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
 
   return (
     <>
+      <div className="row wrap board-bar">
+        <span className="spacer" />
+        <button
+          type="button"
+          className="button small ghost"
+          disabled={plan.loading}
+          onClick={() => {
+            plan.reload();
+            status.reload();
+          }}
+        >
+          <RefreshCw size={14} aria-hidden="true" />
+          {t.plan.refresh}
+        </button>
+      </div>
+      <ErrorNote error={plan.error ?? status.error} />
+      <ErrorNote error={act.error} />
+      <ServerNote text={note} />
+      {!body && !plan.error && !status.error ? <Loading /> : null}
+      {body}
+    </>
+  );
+}
+
+export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element {
+  const [tab, setTab] = useState<TabId>("scope");
+  const list = useRef<HTMLDivElement>(null);
+
+  const onKeyDown = (event: KeyboardEvent): void => {
+    const at = TABS.indexOf(tab);
+    let next: number | null = null;
+    if (event.key === "ArrowRight") next = (at + 1) % TABS.length;
+    else if (event.key === "ArrowLeft") next = (at - 1 + TABS.length) % TABS.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = TABS.length - 1;
+    const id = next === null ? undefined : TABS[next];
+    if (!id) return;
+    event.preventDefault();
+    setTab(id);
+    list.current?.querySelector<HTMLElement>(`#plan-tab-${id}`)?.focus();
+  };
+
+  return (
+    <>
       {/* Arrow keys move between tabs, as the tabs pattern asks; each tab is also a plain button. */}
       {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
       <div className="tabs" role="tablist" aria-label={t.plan.tabsLabel} ref={list} onKeyDown={onKeyDown}>
@@ -128,25 +164,7 @@ export function PlanPanel({ projectId, changes, onChanged }: Props): JSX.Element
         ))}
       </div>
       <div role="tabpanel" id="plan-tabpanel" aria-labelledby={`plan-tab-${tab}`} data-testid={`plan-${tab}`}>
-        <div className="row wrap board-bar">
-          <span className="spacer" />
-          <button
-            type="button"
-            className="button small"
-            disabled={plan.loading}
-            onClick={() => {
-              plan.reload();
-              status.reload();
-            }}
-          >
-            {t.plan.refresh}
-          </button>
-        </div>
-        <ErrorNote error={plan.error ?? status.error} />
-        <ErrorNote error={act.error} />
-        <ServerNote text={note} />
-        {!body && !plan.error && !status.error ? <Loading /> : null}
-        {body}
+        <PlanSection projectId={projectId} changes={changes} onChanged={onChanged} tab={tab} />
       </div>
     </>
   );

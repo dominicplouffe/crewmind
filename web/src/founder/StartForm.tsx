@@ -2,13 +2,16 @@
  * The way into drafting: one box for what the person wants, an optional text document to grill
  * first (FND-15), and quick mode as the secondary choice (FND-12). Quick mode never picks who
  * pays: when the server asks, the person chooses a credential and the request is sent again.
+ * When the Founder has no model yet (LLM-14), a note says so above the brief and offers the fix.
  */
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ApiError, get, post } from "../api/client";
 import { ErrorNote } from "../components/common";
 import { formatNumber } from "../lib/format";
+import { useSetupStatus } from "../onboarding/useSetupStatus";
 import { t } from "../strings";
+import { FounderSetupNote } from "./FounderSetupNote";
 import { credentialsInHint, documentProblem } from "./logic";
 
 interface Attached {
@@ -19,6 +22,8 @@ interface Attached {
 export function StartForm(): JSX.Element {
   const words = t.founder.start;
   const navigate = useNavigate();
+  // Say what is missing before the person writes a long brief the Founder can't answer.
+  const setup = useSetupStatus();
   const fileInput = useRef<HTMLInputElement>(null);
   const [brief, setBrief] = useState("");
   const [attached, setAttached] = useState<Attached | null>(null);
@@ -87,6 +92,7 @@ export function StartForm(): JSX.Element {
   return (
     <form className="start-form" onSubmit={submit} aria-labelledby="start-title">
       <p className="lead">{words.intro}</p>
+      {!setup.loading && !setup.founderReady ? <FounderSetupNote when="before" returnTo="/draft" /> : null}
       <div className="field">
         <label htmlFor="brief">{words.brief}</label>
         <textarea

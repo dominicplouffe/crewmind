@@ -192,12 +192,12 @@ async def issue(
     if seat.id != ceo.id:
         notices.notify(
             session, project.id, ceo.id, "directive to another agent",
-            f"The chairman directed {seat.name}: {text}", now,
+            f"The chairman directed {seat.display_name}: {text}", now,
         )  # fmt: skip
     await service.platform_line(
         session,
         project.id,
-        f"Directive {row.id} to {seat.name}: {text}"
+        f"Directive {row.id} to {seat.display_name}: {text}"
         + (f"\nIt waits until the project runs again (it is {project.state})." if waiting else ""),
         now,
         detail={"kind": "directive", "directive": row.id, "to": seat.name},
@@ -320,7 +320,7 @@ async def complete(context: Context, payload: DoneInput) -> DirectiveItem:
     await service.platform_line(
         context.session,
         view.project.id,
-        f"{view.seat.name} carried out directive {row.id}: {payload.outcome}",
+        f"{view.seat.display_name} carried out directive {row.id}: {payload.outcome}",
         context.now,
         detail={"kind": "directive done", "directive": row.id},
     )

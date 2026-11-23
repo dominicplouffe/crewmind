@@ -38,6 +38,12 @@ describe("mention completion", () => {
     expect(mentionCompletion("ask @res", 8, targets)?.options).toEqual([{ value: "@research", detail: "Team" }]);
   });
 
+  it("EXE-18 finds an agent by its name or its seat, and inserts its name", () => {
+    const named = [{ name: "Maya", detail: "Agent · CEO", aliases: ["CEO"] }];
+    expect(mentionCompletion("@ma", 3, named)?.options).toEqual([{ value: "@Maya", detail: "Agent · CEO" }]);
+    expect(mentionCompletion("@ce", 3, named)?.options.map((o) => o.value)).toEqual(["@Maya"]);
+  });
+
   it("does not trigger inside an email address or with no match", () => {
     expect(mentionCompletion("mail dom@c", 10, targets)).toBeNull();
     expect(mentionCompletion("@zed", 4, targets)).toBeNull();

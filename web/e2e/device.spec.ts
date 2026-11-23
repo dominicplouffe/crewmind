@@ -3,23 +3,23 @@
  * name order) and reuse the signed-in session and the project it created.
  */
 import { expect, test } from "@playwright/test";
-import { STATE_FILE, expectAccessible, projectUrl, sendMessage } from "./helpers";
+import { STATE_FILE, expectAccessible, projectUrl, sendMessage, openPanel } from "./helpers";
 
 test.describe("on a 390 px wide phone (CHAT-20)", () => {
   test.use({ viewport: { width: 390, height: 844 }, storageState: STATE_FILE });
 
   test("the chat fits, panels open as full-screen sheets, and it is accessible", async ({ page: phone }) => {
     await phone.goto(projectUrl());
-    await expect(phone.getByTestId("project-state")).toHaveText("running");
+    await expect(phone.getByTestId("project-state")).toHaveAttribute("data-state", "running");
     await expect(phone.getByTestId("message-agent").first()).toBeVisible();
     const overflow = await phone.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
     await expectAccessible(phone, "project page on a phone");
 
-    await phone.getByRole("button", { name: "Files", exact: true }).click();
+    await openPanel(phone, "Files");
     const box = await phone.getByTestId("panel").boundingBox();
-    expect(box?.width).toBe(390);
-    expect(box?.height).toBe(844);
+    expect(Math.round(box?.width ?? 0)).toBe(390);
+    expect(Math.round(box?.height ?? 0)).toBe(844);
     await expectAccessible(phone, "files sheet on a phone");
     await phone.getByRole("button", { name: "Close panel" }).click();
     await expect(phone.getByRole("textbox", { name: "Message" })).toBeFocused();

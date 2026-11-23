@@ -250,3 +250,23 @@ async def test_7_8_account_states_change_only_as_listed(app: App) -> None:
         assert list(live) == []
     await app.ok("people.reactivate", admin, person_id=active.person_id)
     await app.login(active.email)
+
+
+@pytest.mark.attack("ACC-8")
+async def test_ACC_8_a_person_sets_only_their_own_name(app: App) -> None:
+    """ACC-8, INV-21: a person changes the name they are shown by; spaces are tidied, an empty
+    name is refused, a name for someone else cannot be given (the operation takes no person),
+    and the change is in the event log with before and after."""
+    admin = await app.admin()
+    other = await app.person("other@example.com")
+    renamed = await app.ok("auth.set_name", admin, name="  Dominic   Plouffe ")
+    assert renamed["name"] == "Dominic Plouffe"
+    assert (await app.ok("auth.whoami", admin))["name"] == "Dominic Plouffe"
+    empty = await app.call("auth.set_name", admin, name="   ")
+    assert_refused(empty, rule="ACC-8", code="name_is_empty")
+    # Naming someone else: the extra field is not part of the operation, so it changes nothing.
+    await app.call("auth.set_name", other, name="Not Dominic", person_id=admin.person_id)
+    assert (await app.ok("auth.whoami", admin))["name"] == "Dominic Plouffe"
+    events = (await app.ok("record.list_install", admin))["items"]
+    renames = [event for event in events if event["type"] == "person.renamed"]
+    assert any(event["after"] == {"name": "Dominic Plouffe"} for event in renames)

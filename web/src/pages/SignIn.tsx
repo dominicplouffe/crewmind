@@ -4,7 +4,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { post } from "../api/client";
 import { useAuth } from "../auth";
 import { ErrorNote, Field } from "../components/common";
-import { ThemeButton } from "../components/ThemeButton";
+import { LogoMark } from "../ui/Logo";
 import { t } from "../strings";
 
 export function SignIn(): JSX.Element {
@@ -36,7 +36,10 @@ export function SignIn(): JSX.Element {
 
   return (
     <main className="center-page">
-      <div className="card">
+      <div className="card auth-card">
+        <div className="auth-brand">
+          <LogoMark size={40} />
+        </div>
         <h1>{t.signIn.title}</h1>
         {state?.notice ? (
           <p className="note" role="status">
@@ -70,7 +73,6 @@ export function SignIn(): JSX.Element {
           </button>
         </form>
         <p className="quiet">{t.signIn.help}</p>
-        <ThemeButton />
       </div>
     </main>
   );

@@ -1,4 +1,5 @@
 /** The "More" menu on a message: a menu button that keeps the less common actions out of the way. */
+import { MoreHorizontal } from "lucide-react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { t } from "../strings";
 
@@ -52,10 +53,11 @@ export function MessageMenu({ author, actions }: { author: string; actions: Menu
   };
 
   return (
-    <span className="menu-wrap" ref={wrap}>
+    <span className="message-menu-wrap" ref={wrap}>
       <button
         type="button"
-        className="link"
+        className="message-action"
+        title={t.listening.more}
         ref={trigger}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -68,11 +70,21 @@ export function MessageMenu({ author, actions }: { author: string; actions: Menu
           }
         }}
       >
-        {t.listening.more}
-        <span className="visually-hidden"> {t.listening.moreFor(author)}</span>
+        <MoreHorizontal size={15} aria-hidden="true" />
+        <span className="visually-hidden">
+          {t.listening.more} {t.listening.moreFor(author)}
+        </span>
       </button>
       {open ? (
-        <div className="menu" role="menu" tabIndex={-1} id={id} ref={list} aria-label={t.listening.menuLabel} onKeyDown={onKeyDown}>
+        <div
+          className="message-menu"
+          role="menu"
+          tabIndex={-1}
+          id={id}
+          ref={list}
+          aria-label={t.listening.menuLabel}
+          onKeyDown={onKeyDown}
+        >
           {actions.map((action) => (
             <button
               key={action.key}

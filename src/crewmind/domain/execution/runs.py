@@ -278,7 +278,7 @@ async def lease(
             await conversation.platform_line(
                 session,
                 project.id,
-                f"{seat.name} cannot run: {refusal.envelope.message}",
+                f"{seat.display_name} cannot run: {refusal.envelope.message}",
                 now,
                 detail={"kind": "seat check failed", "seat": seat.name},
             )
@@ -400,7 +400,7 @@ async def _retry(session: AsyncSession, run: Run, now: datetime) -> None:
         await conversation.platform_line(
             session,
             run.project_id,
-            f"{seat.name}'s run failed {MAX_ATTEMPTS} times and was given up: "
+            f"{seat.display_name}'s run failed {MAX_ATTEMPTS} times and was given up: "
             f"{run.end_detail or 'no detail'}.",
             now,
             detail={"kind": "run gave up", "seat": seat.name},

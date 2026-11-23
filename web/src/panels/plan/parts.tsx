@@ -3,6 +3,7 @@ import { useId, useState, type FormEvent, type ReactNode } from "react";
 import type { Schemas } from "../../api/client";
 import { ErrorNote } from "../../components/common";
 import { t } from "../../strings";
+import { Pill, type Tone } from "../../ui/Status";
 
 export type PlanView = Schemas["PlanView"];
 export type Requirement = Schemas["RequirementItem"];
@@ -25,11 +26,37 @@ export interface PlanTabProps {
   apply(change: Change): Promise<void>;
 }
 
+/** The tone of a plan state's dot. The word beside it carries the meaning. */
+export function stateTone(state: string): Tone {
+  switch (state) {
+    case "met":
+    case "confirmed":
+    case "kept":
+      return "success";
+    case "in progress":
+    case "accepted":
+    case "active":
+    case "open":
+      return "accent";
+    case "checking":
+    case "proposed":
+      return "info";
+    case "breached":
+    case "failed":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+/** A state as a pill with a plain word. The server's state is kept for screen readers and tests. */
 export function StateTag({ state }: { state: string }): JSX.Element {
   return (
-    <span className="marker" data-testid="state-tag">
-      <span className="visually-hidden">{t.plan.stateOf}: </span>
-      {state}
+    <span className="state-tag" data-testid="state-tag">
+      <Pill tone={stateTone(state)}>
+        <span className="visually-hidden">{t.plan.stateOf}: </span>
+        <span className="cap">{t.plan.states[state] ?? state}</span>
+      </Pill>
     </span>
   );
 }
@@ -58,7 +85,7 @@ interface ConfirmProps {
 /** Asks before something that cannot simply be taken back. */
 export function Confirm({ question, yes, busy, onYes, onCancel }: ConfirmProps): JSX.Element {
   return (
-    <div className="note" role="group" aria-label={question}>
+    <div className="item-confirm" role="group" aria-label={question}>
       <p>{question}</p>
       <div className="row wrap">
         <button type="button" className="button small primary" disabled={busy} onClick={onYes}>
@@ -124,7 +151,7 @@ export function FieldsForm({ fields, submit, onSubmit, onCancel }: FieldsFormPro
           onChange: (event: { target: { value: string } }) => setValues((old) => ({ ...old, [field.name]: event.target.value })),
         };
         return (
-          <div key={field.name}>
+          <div key={field.name} className="form-field">
             <label htmlFor={shared.id}>{field.label}</label>
             {field.multiline ? (
               <textarea rows={3} {...shared} />
@@ -167,7 +194,7 @@ export function ActionButton({
   onClick(): void;
 }): JSX.Element {
   return (
-    <button type="button" className={`button small ${primary ? "primary" : ""}`} disabled={disabled} onClick={onClick}>
+    <button type="button" className={primary ? "button small primary" : "button small"} disabled={disabled} onClick={onClick}>
       {label}
       <span className="visually-hidden"> {of}</span>
     </button>

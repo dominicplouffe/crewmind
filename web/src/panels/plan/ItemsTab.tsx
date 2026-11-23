@@ -1,7 +1,9 @@
 /** Decision items: everything filed for the chairman in this project, open or settled, with its history on demand. */
+import { Scale } from "lucide-react";
 import { useState } from "react";
 import { get } from "../../api/client";
-import { Empty, ErrorNote, Loading } from "../../components/common";
+import { ErrorNote } from "../../components/common";
+import { Empty, Loading } from "../kit";
 import { ItemCard } from "../../desk/ItemCard";
 import type { Item } from "../../desk/logic";
 import { formatDateTime } from "../../lib/format";
@@ -15,7 +17,7 @@ function History({ item }: { item: Item }): JSX.Element {
   if (!detail.data) return detail.error ? <ErrorNote error={detail.error} /> : <Loading />;
   if (detail.data.history.length === 0) return <p className="quiet">{words.noHistory}</p>;
   return (
-    <ol className="plain" aria-label={words.historyLabel(item.title)} data-testid="item-history">
+    <ol className="plain item-history" aria-label={words.historyLabel(item.title)} data-testid="item-history">
       {detail.data.history.map((line, index) => (
         <li key={index}>
           <span className="quiet">{formatDateTime(line.at)}</span> {words.historyLine(line.actor_kind, line.what)}
@@ -40,22 +42,25 @@ export function ItemsTab({ projectId, changes, onChanged }: TabProps): JSX.Eleme
     <>
       <div className="row wrap board-bar" role="group" aria-label={words.show}>
         <span className="quiet">{words.show}</span>
-        <button type="button" className="button small" aria-pressed={openOnly} onClick={() => setOpenOnly(true)}>
-          {words.open}
-        </button>
-        <button type="button" className="button small" aria-pressed={!openOnly} onClick={() => setOpenOnly(false)}>
-          {words.all}
-        </button>
+        <span className="segmented">
+          <button type="button" aria-pressed={openOnly} onClick={() => setOpenOnly(true)}>
+            {words.open}
+          </button>
+          <button type="button" aria-pressed={!openOnly} onClick={() => setOpenOnly(false)}>
+            {words.all}
+          </button>
+        </span>
       </div>
       <ErrorNote error={list.error} />
       {!list.data && !list.error ? <Loading /> : null}
       {list.data && items.length === 0 ? (
         <Empty
+          icon={Scale}
           title={openOnly ? words.emptyOpenTitle : words.emptyAllTitle}
           next={openOnly ? words.emptyOpenNext : words.emptyAllNext}
         />
       ) : null}
-      <ul className="records plain" aria-label={words.listLabel}>
+      <ul className="records plain item-list" aria-label={words.listLabel}>
         {items.map((item) => (
           <li key={item.id} data-testid="item">
             <ItemCard
@@ -65,12 +70,12 @@ export function ItemsTab({ projectId, changes, onChanged }: TabProps): JSX.Eleme
                 onChanged();
               }}
             />
-            <p className="quiet row wrap">
+            <p className="row-meta item-dates">
               <span>{words.opened(formatDateTime(item.opened_at))}</span>
               {item.closed_at ? <span>{words.closed(formatDateTime(item.closed_at))}</span> : null}
               <button
                 type="button"
-                className="link"
+                className="button small ghost"
                 aria-expanded={history === item.id}
                 onClick={() => setHistory(history === item.id ? null : item.id)}
               >

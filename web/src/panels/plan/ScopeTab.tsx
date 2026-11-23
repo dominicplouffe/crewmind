@@ -1,6 +1,7 @@
 /** Scope: the requirements by stage and the longest chain; bets for an Explore project; cycles for an Operate one. */
+import { ListTodo } from "lucide-react";
 import { useState } from "react";
-import { Empty } from "../../components/common";
+import { Empty } from "../kit";
 import { t } from "../../strings";
 import { AddRequirement } from "./AddRequirement";
 import { Bets } from "./Bets";
@@ -43,7 +44,7 @@ export function ScopeTab(props: PlanTabProps): JSX.Element {
   const groups = groupByStage(plan.requirements);
   return (
     <>
-      {plan.requirements.length === 0 && !adding ? <Empty title={words.emptyTitle} next={words.emptyNext} /> : null}
+      {plan.requirements.length === 0 && !adding ? <Empty icon={ListTodo} title={words.emptyTitle} next={words.emptyNext} /> : null}
       {groups.map((group) => (
         <section key={group.stage} data-testid="stage" data-stage={group.stage}>
           <h3 className="group-title">

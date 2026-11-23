@@ -38,6 +38,7 @@ INV_23 = rules.register(
 
 class AgentIdentity(BaseModel):
     seat: str
+    name: str = Field(description="The name you go by (EXE-18).")
     kind: str
     role: str
     project: str
@@ -127,7 +128,7 @@ async def _channel(context: Context, view: AgentView, name: str) -> Channel:
 
 @operation(
     "agent.whoami",
-    summary="Who you are: your seat, role, project and run.",
+    summary="Who you are: your name, seat, role, project and run.",
     authority=Authority.AGENT,
     reversibility=Reversibility.READ,
     principals=AGENT,
@@ -136,6 +137,7 @@ async def whoami(context: Context, payload: Empty) -> AgentIdentity:
     view = await agent_of(context)
     return AgentIdentity(
         seat=view.seat.name,
+        name=view.seat.display_name,
         kind=view.seat.kind,
         role=view.role.name,
         project=view.project.name,
@@ -316,6 +318,7 @@ async def _show(context: Context, view: AgentView) -> Roster:
     seats: list[Any] = [
         SeatItem(
             name=seat.name,
+            display_name=seat.display_name,
             kind=seat.kind,
             role=role.name,
             team=team.name if team else None,

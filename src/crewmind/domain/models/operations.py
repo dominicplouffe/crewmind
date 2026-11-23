@@ -106,6 +106,7 @@ class SeatModelInput(ProjectRef):
 
 class SeatModel(BaseModel):
     seat: str
+    name: str = Field(description="The name the agent goes by (EXE-18).")
     kind: str
     asked_class: str
     effort: str
@@ -502,6 +503,7 @@ async def _models(context: Context) -> ModelsView:
         items.append(
             SeatModel(
                 seat=seat.name,
+                name=seat.display_name,
                 kind=seat.kind,
                 asked_class=asked,
                 effort=effort,

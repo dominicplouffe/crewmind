@@ -1,47 +1,63 @@
 /** One task: what it asks for, how it is checked, each attempt, and who checked it in the end. */
+import { ChevronLeft, RefreshCw } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { get } from "../../api/client";
-import { ErrorNote, Loading, Pre } from "../../components/common";
+import { ErrorNote, Pre } from "../../components/common";
+import { Loading } from "../kit";
 import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { isClosed, whoChecked } from "./logic";
 import { AgentText, CheckLabel, StateTag, type BoardTabProps } from "./parts";
+import { useAgentName } from "../../crew/names";
 
 interface Props extends BoardTabProps {
   taskId: number;
   onBack(): void;
+  /**
+   * "sheet" when shown in a sheet that already carries the task's title and a close button: the
+   * back button and the title are left out, and focus stays with the sheet.
+   */
+  variant?: "page" | "sheet";
 }
 
-export function TaskDetail({ projectId, changes, taskId, onBack }: Props): JSX.Element {
+export function TaskDetail({ projectId, changes, taskId, onBack, variant = "page" }: Props): JSX.Element {
   const detail = useLoad(() => get("/v1/tasks/show", { project_id: projectId, task_id: taskId }), [projectId, taskId, changes]);
   const heading = useRef<HTMLHeadingElement>(null);
   const task = detail.data;
   const words = t.board.detail;
+  const nameOf = useAgentName();
   const shown = task !== undefined;
 
+  const inSheet = variant === "sheet";
   useEffect(() => {
-    if (shown) heading.current?.focus();
-  }, [shown]);
+    if (shown && !inSheet) heading.current?.focus();
+  }, [shown, inSheet]);
 
   return (
     <div data-testid="task-detail">
-      <div className="row wrap board-bar">
-        <button type="button" className="link" onClick={onBack}>
-          {words.back}
-        </button>
-        <span className="spacer" />
-        <button type="button" className="button small" onClick={detail.reload} disabled={detail.loading}>
-          {t.board.refresh}
-        </button>
-      </div>
+      {inSheet ? null : (
+        <div className="row wrap board-bar">
+          <button type="button" className="button small ghost back-button" onClick={onBack}>
+            <ChevronLeft size={16} aria-hidden="true" />
+            {words.back}
+          </button>
+          <span className="spacer" />
+          <button type="button" className="button small ghost" onClick={detail.reload} disabled={detail.loading}>
+            <RefreshCw size={14} aria-hidden="true" />
+            {t.board.refresh}
+          </button>
+        </div>
+      )}
       <ErrorNote error={detail.error} />
       {detail.loading && !task ? <Loading /> : null}
       {task ? (
         <>
-          <h3 tabIndex={-1} ref={heading}>
-            {words.title(task.id, task.title)}
-          </h3>
+          {inSheet ? null : (
+            <h3 tabIndex={-1} ref={heading}>
+              {words.title(task.id, task.title)}
+            </h3>
+          )}
           <p className="row wrap">
             <StateTag state={task.state} />
             <CheckLabel label={task.label} />
@@ -102,11 +118,11 @@ export function TaskDetail({ projectId, changes, taskId, onBack }: Props): JSX.E
             </div>
             <div>
               <dt>{words.author}</dt>
-              <dd>{task.author}</dd>
+              <dd>{nameOf(task.author).name}</dd>
             </div>
             <div>
               <dt>{words.holder}</dt>
-              <dd>{task.claimant ?? words.nobody}</dd>
+              <dd>{task.claimant ? nameOf(task.claimant).name : words.nobody}</dd>
             </div>
             {task.team ? (
               <div>
@@ -142,7 +158,7 @@ export function TaskDetail({ projectId, changes, taskId, onBack }: Props): JSX.E
           <ol className="records plain">
             {task.attempts.map((attempt, index) => (
               <li key={`${attempt.at}-${index}`} data-testid="attempt">
-                <p className="record-text">{words.attempt(index + 1, attempt.by, formatDateTime(attempt.at))}</p>
+                <p className="record-text">{words.attempt(index + 1, nameOf(attempt.by).name, formatDateTime(attempt.at))}</p>
                 <p>
                   <AgentText text={attempt.evidence} />
                 </p>

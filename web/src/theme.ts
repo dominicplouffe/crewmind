@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
+export type ThemePreference = Theme | "system";
 const STORAGE_KEY = "crewmind.theme";
 
 function systemTheme(): Theme {
@@ -17,6 +18,15 @@ function storedTheme(): Theme | null {
   }
 }
 
+function store(preference: ThemePreference): void {
+  try {
+    if (preference === "system") window.localStorage.removeItem(STORAGE_KEY);
+    else window.localStorage.setItem(STORAGE_KEY, preference);
+  } catch {
+    // The choice still applies for this visit.
+  }
+}
+
 export function currentTheme(): Theme {
   return storedTheme() ?? systemTheme();
 }
@@ -25,11 +35,20 @@ export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme;
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", theme === "dark" ? "#0f172a" : "#1d4ed8");
+    ?.setAttribute("content", theme === "dark" ? "#111113" : "#ffffff");
 }
 
-export function useTheme(): { theme: Theme; toggle(): void } {
-  const [theme, setTheme] = useState<Theme>(currentTheme);
+export interface ThemeValue {
+  theme: Theme;
+  preference: ThemePreference;
+  setPreference(preference: ThemePreference): void;
+  toggle(): void;
+}
+
+export function useTheme(): ThemeValue {
+  const [preference, setPreferenceState] = useState<ThemePreference>(() => storedTheme() ?? "system");
+  const [system, setSystem] = useState<Theme>(systemTheme);
+  const theme: Theme = preference === "system" ? system : preference;
 
   useEffect(() => {
     applyTheme(theme);
@@ -38,24 +57,19 @@ export function useTheme(): { theme: Theme; toggle(): void } {
   useEffect(() => {
     const media = window.matchMedia?.("(prefers-color-scheme: dark)");
     if (!media) return;
-    const follow = (): void => {
-      if (storedTheme() === null) setTheme(systemTheme());
-    };
+    const follow = (): void => setSystem(systemTheme());
     media.addEventListener("change", follow);
     return () => media.removeEventListener("change", follow);
   }, []);
 
-  const toggle = useCallback(() => {
-    setTheme((previous) => {
-      const next: Theme = previous === "dark" ? "light" : "dark";
-      try {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        // The choice still applies for this visit.
-      }
-      return next;
-    });
+  const setPreference = useCallback((next: ThemePreference) => {
+    store(next);
+    setPreferenceState(next);
   }, []);
 
-  return { theme, toggle };
+  const toggle = useCallback(() => {
+    setPreference(theme === "dark" ? "light" : "dark");
+  }, [setPreference, theme]);
+
+  return { theme, preference, setPreference, toggle };
 }

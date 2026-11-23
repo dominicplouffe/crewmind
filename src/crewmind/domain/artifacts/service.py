@@ -65,6 +65,8 @@ class Author:
     id: str
     name: str
     run_id: str | None = None
+    shown_as: str | None = None
+    """The name people read, when it differs from `name` (an agent's display name, EXE-18)."""
 
 
 class BlobStore:
@@ -255,7 +257,8 @@ async def add_version(
         await conversation.platform_line(
             session,
             project.id,
-            f"{author.name} published {name} (version {version.version}).\n{opening(content)}",
+            f"{author.shown_as or author.name} published {name} (version {version.version}).\n"
+            + opening(content),
             now,
             detail={"kind": "deliverable", "artifact": name, "version": version.version},
         )
@@ -318,7 +321,8 @@ async def snapshot_workspace(
                 await conversation.platform_line(
                     session,
                     project.id,
-                    f"{author.name} changed the locked file {name}; it was put back.",
+                    f"{author.shown_as or author.name} changed the locked file {name}; "
+                    "it was put back.",
                     now,
                     detail={"kind": "locked file restored", "artifact": name},
                 )

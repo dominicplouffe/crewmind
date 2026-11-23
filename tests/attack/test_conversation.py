@@ -9,7 +9,7 @@ import pytest
 
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
-from tests.support import Actor, App, agent_call, live_run, running_project
+from tests.support import Actor, App, agent_call, live_run, running_project, shown_as
 
 
 async def slash(app: App, actor: Actor, project: str, text: str) -> dict[str, Any]:
@@ -64,8 +64,9 @@ async def test_MSG_3_chat_words_change_state_only_through_a_directive(app: App) 
     history = [
         m["body"] for m in (await app.ok("chat.history", owner, project_id=project))["items"]
     ]
-    assert "Directive 1 to CEO: Hire an ops team of two generalists" in history
-    assert "CEO carried out directive 1: Hired the ops team of two." in history
+    ceo_name = await shown_as(app, owner, project)
+    assert f"Directive 1 to {ceo_name}: Hire an ops team of two generalists" in history
+    assert f"{ceo_name} carried out directive 1: Hired the ops team of two." in history
 
     to_worker = await slash(app, owner, project, "/do @research summarise the brief")
     assert to_worker["result"]["to"] == "research"
@@ -89,7 +90,8 @@ async def test_MSG_3_chat_words_change_state_only_through_a_directive(app: App) 
     )
     assert_refused(again, rule="7.17-directive", code="transition_refused")
     pack = (await agent_call(app, ceo.token, "agent.context")).json()["context_pack"]
-    assert "The chairman directed research: @research summarise the brief" in pack
+    worker_name = await shown_as(app, owner, project, "research")
+    assert f"The chairman directed {worker_name}: @research summarise the brief" in pack
 
 
 @pytest.mark.attack("MSG-3")
@@ -347,6 +349,9 @@ async def test_CHAT_14_search_header_and_feed(app: App) -> None:
     assert "The project went from draft to running." in feed
     assert "A hold was added: chairman. It lifts by `/resume`, or its lift time." in feed
     assert any(text.startswith("owner saved version 1 of llama-prices.csv") for text in feed)
+    # P18: no line reads like an event name ("item: state changed (item 3)").
+    assert "The project was created." in feed
+    assert not [text for text in feed if "state changed" in text or "_" in text.split(" ")[0]]
 
 
 async def test_MSG_13_every_surface_reads_and_writes_the_same_conversation(app: App) -> None:
