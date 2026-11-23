@@ -45,7 +45,9 @@ class TaskInput(BaseModel):
     test_kind: TestKind = Field(description="command (the platform runs it) or observable.")
     test_files: list[str] = Field(
         default_factory=list[str],
-        description="For a command test: the workspace files the command uses. They are pinned.",
+        description="For a command test: the files that are the test itself, such as a test "
+        "script or sample input. They are pinned: every check puts them back exactly as they "
+        "are now. Never list a file the work will write or change, or the task cannot pass.",
     )
     outside_evidence: bool = Field(
         default=False, description="Whether it produces outside evidence."
