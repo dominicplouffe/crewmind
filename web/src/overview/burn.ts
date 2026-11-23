@@ -121,3 +121,56 @@ export function pointAt(points: readonly BurnPoint[], at: number): BurnPoint | n
   }
   return found ?? points[0] ?? null;
 }
+
+const SECOND = 1000;
+const DAY = 24 * HOUR;
+/** Tick spacings an eye reads as round, from seconds to a month. */
+const TICK_STEPS = [
+  SECOND, 2 * SECOND, 5 * SECOND, 10 * SECOND, 15 * SECOND, 30 * SECOND,
+  MINUTE, 2 * MINUTE, 5 * MINUTE, 10 * MINUTE, 15 * MINUTE, 30 * MINUTE,
+  HOUR, 2 * HOUR, 3 * HOUR, 6 * HOUR, 12 * HOUR,
+  DAY, 2 * DAY, 7 * DAY, 14 * DAY, 30 * DAY,
+];
+
+export type TickUnit = "second" | "minute" | "day";
+
+export interface TimeTick {
+  at: number;
+  label: string;
+}
+
+const tickFormats: Record<TickUnit, Intl.DateTimeFormat> = {
+  second: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }),
+  minute: new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }),
+  day: new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }),
+};
+
+/** The unit a tick spacing is labelled in: seconds under a minute, days from a day up. */
+export function tickUnit(step: number): TickUnit {
+  if (step < MINUTE) return "second";
+  if (step < DAY) return "minute";
+  return "day";
+}
+
+/**
+ * At most `most` ticks on round local times between `from` and `to` ("12:20, 12:25, 12:30"; or
+ * "Nov 21, Nov 22"), labelled in the unit the spacing needs, so no two labels repeat.
+ */
+export function timeTicks(from: number, to: number, most: number): TimeTick[] {
+  const span = Math.max(0, to - from);
+  const limit = Math.max(2, most);
+  const step = TICK_STEPS.find((candidate) => Math.floor(span / candidate) + 1 <= limit) ?? TICK_STEPS[TICK_STEPS.length - 1] ?? DAY;
+  const unit = tickUnit(step);
+  // Round to the local clock: minutes and hours from local midnight, days at local midnight.
+  const offset = -new Date(from).getTimezoneOffset() * MINUTE;
+  const first = Math.ceil((from + offset) / step) * step - offset;
+  const ticks: TimeTick[] = [];
+  const seen = new Set<string>();
+  for (let at = first; at <= to + 1; at += step) {
+    const label = tickFormats[unit].format(at);
+    if (seen.has(label)) continue;
+    seen.add(label);
+    ticks.push({ at, label });
+  }
+  return ticks;
+}

@@ -1,15 +1,17 @@
 /**
  * A burn-up chart of tokens used (GOV-1, PLN-5): the cumulative total as a step line, the budget
  * wall with its warning and wrap-up levels, and a dashed projection at the measured pace. Every
- * line is named in text, and a table of the points sits behind it for screen readers.
+ * line is named in text, the time axis is labelled in the unit its span needs, and a table of the
+ * points sits behind it for screen readers. `compact` is the side rail's small version: the same
+ * lines, fewer labels.
  */
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { get } from "../api/client";
 import { loadRuns } from "../crew/data";
 import { compactNumber, fromNow, tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
-import { burn, overview } from "../strings.crew";
-import { burnPlan, burnSeries, niceTicks, pointAt, type BurnPlan, type BurnPoint } from "./burn";
+import { burn, story } from "../strings.overview";
+import { burnPlan, burnSeries, niceTicks, pointAt, timeTicks, type BurnPlan, type BurnPoint } from "./burn";
 
 interface Props {
   projectId: string;
@@ -19,8 +21,8 @@ interface Props {
 
 const MARGIN = { top: 14, right: 12, bottom: 24, left: 44 };
 const TABLE_ROWS = 40;
-const shortTime = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
-const shortDay = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+/** A tick label closer than this to an edge is anchored to it instead of centred. */
+const EDGE = 28;
 const fullTime = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 
 function useWidth<T extends HTMLElement>(fallback: number): [RefObject<T>, number] {
@@ -49,15 +51,6 @@ function stepPath(points: BurnPoint[], x: (at: number) => number, y: (total: num
     .join("");
 }
 
-function timeTicks(from: number, to: number, count: number): { at: number; label: string }[] {
-  const span = to - from;
-  const format = span > 36 * 3_600_000 ? shortDay : shortTime;
-  return Array.from({ length: count }, (_, index) => {
-    const at = from + (span * index) / Math.max(1, count - 1);
-    return { at, label: format.format(at) };
-  });
-}
-
 function Chart({
   plan,
   wall,
@@ -66,6 +59,7 @@ function Chart({
   width,
   height,
   label,
+  compact,
 }: {
   plan: BurnPlan;
   wall: number;
@@ -74,13 +68,15 @@ function Chart({
   width: number;
   height: number;
   label: string;
+  compact: boolean;
 }): JSX.Element {
   const [hover, setHover] = useState<number | null>(null);
   const inner = { width: Math.max(10, width - MARGIN.left - MARGIN.right), height: Math.max(10, height - MARGIN.top - MARGIN.bottom) };
   const x = (at: number): number => MARGIN.left + ((at - plan.xMin) / Math.max(1, plan.xMax - plan.xMin)) * inner.width;
   const y = (total: number): number => MARGIN.top + inner.height - (total / plan.yMax) * inner.height;
   const ticks = niceTicks(plan.yMax, height < 160 ? 2 : 4).filter((value) => value <= plan.yMax);
-  const times = timeTicks(plan.xMin, plan.xMax, width < 420 ? 3 : 5);
+  const times = timeTicks(plan.xMin, plan.xMax, compact || width < 420 ? 3 : 5);
+  const right = MARGIN.left + inner.width;
   const line = stepPath(plan.points, x, y);
   const area = `${line}V${y(0).toFixed(1)}H${x(plan.points[0]?.at ?? plan.xMin).toFixed(1)}Z`;
   const levels = [
@@ -101,24 +97,25 @@ function Chart({
               </text>
             </g>
           ))}
-          {times.map((tick, index) => (
-            <text
-              key={tick.at}
-              x={x(tick.at)}
-              y={height - 6}
-              textAnchor={index === 0 ? "start" : index === times.length - 1 ? "end" : "middle"}
-            >
-              {tick.label}
-            </text>
-          ))}
+          {times.map((tick) => {
+            const at = x(tick.at);
+            const anchor = at - MARGIN.left < EDGE ? "start" : right - at < EDGE ? "end" : "middle";
+            return (
+              <text key={tick.at} x={at} y={height - 6} textAnchor={anchor}>
+                {tick.label}
+              </text>
+            );
+          })}
         </g>
 
         {levels.map((level) => (
           <g key={level.key} className={`burn-level burn-${level.key}`} aria-hidden="true">
             <line x1={MARGIN.left} x2={MARGIN.left + inner.width} y1={y(level.value)} y2={y(level.value)} />
-            <text x={MARGIN.left + inner.width} y={y(level.value) - 4} textAnchor="end">
-              {level.name} · {compactNumber(level.value)}
-            </text>
+            {compact ? null : (
+              <text x={MARGIN.left + inner.width} y={y(level.value) - 4} textAnchor="end">
+                {level.name} · {compactNumber(level.value)}
+              </text>
+            )}
           </g>
         ))}
         {plan.wallVisible ? (
@@ -139,6 +136,15 @@ function Chart({
           </g>
         ) : null}
         <circle className="burn-now" cx={x(plan.current.at)} cy={y(plan.current.total)} r={4} aria-hidden="true" />
+        <text
+          className="burn-now-label"
+          x={x(plan.current.at) - 8}
+          y={y(plan.current.total) - 9}
+          textAnchor="end"
+          aria-hidden="true"
+        >
+          {compactNumber(plan.current.total)}
+        </text>
 
         {hovered ? (
           <g className="burn-hover" aria-hidden="true">
@@ -201,7 +207,7 @@ export function BurnChart({ projectId, changes, compact = false }: Props): JSX.E
   if (error && !data) {
     body = (
       <div className="burn-error" role="alert">
-        <p className="quiet">{overview.sectionError}</p>
+        <p className="quiet">{story.sectionError}</p>
         <button
           type="button"
           className="button small"
@@ -210,14 +216,23 @@ export function BurnChart({ projectId, changes, compact = false }: Props): JSX.E
             budget.reload();
           }}
         >
-          {overview.retry}
+          {story.retry}
         </button>
       </div>
     );
   } else if (!data || !budget.data) {
     body = <span className="skeleton burn-skeleton" style={{ height }} />;
   } else {
-    body = <BurnFigure data={data} budget={budget.data} pace={planView.data?.pace.burn_rate ?? null} width={width} height={height} />;
+    body = (
+      <BurnFigure
+        data={data}
+        budget={budget.data}
+        pace={planView.data?.pace.burn_rate ?? null}
+        width={width}
+        height={height}
+        compact={compact}
+      />
+    );
   }
   return (
     <div className={`burn${compact ? " compact" : ""}`} ref={ref}>
@@ -232,16 +247,18 @@ function BurnFigure({
   pace,
   width,
   height,
+  compact,
 }: {
   data: { points: BurnPoint[]; plan: BurnPlan | null };
   budget: { spent: number; wall: number; warn_at: number; wrapup_at: number };
   pace: number | null;
   width: number;
   height: number;
+  compact: boolean;
 }): JSX.Element {
   const { plan, points } = data;
   const wall = budget.wall;
-  const paceText = pace ? overview.pace(compactNumber(pace)) : overview.noPace;
+  const paceText = pace ? burn.pace(compactNumber(pace)) : burn.noPace;
   const wallText =
     plan?.projection?.hitsWall && plan.projection ? burn.reachesWall(fromNow(new Date(plan.projection.to.at).toISOString())) : "";
   const label = burn.label(tokens(budget.spent), tokens(wall), `${paceText}${wallText ? `, ${wallText}` : ""}.`);
@@ -264,8 +281,9 @@ function BurnFigure({
             width={width}
             height={height}
             label={label}
+            compact={compact}
           />
-          <figcaption className="burn-legend">
+          <figcaption className={compact ? "visually-hidden" : "burn-legend"}>
             <span className="burn-key key-used">{burn.legend.used}</span>
             {plan.projection ? <span className="burn-key key-projection">{burn.legend.projection}</span> : null}
             {plan.wallVisible ? <span className="burn-key key-wall">{burn.legend.wall}</span> : null}

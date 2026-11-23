@@ -233,3 +233,8 @@
   .deliv-count { margin-left: 0; width: 100%; }
   .deliv-select { width: 100%; justify-content: space-between; }
 }
+
+/* Tables in a markdown preview keep their words whole; the preview clips instead of wrapping. */
+.thumb-md table { width: max-content; max-width: none; border-collapse: collapse; font-size: inherit; }
+.thumb-md th,
+.thumb-md td { white-space: nowrap; padding: 0.15rem 0.5rem 0.15rem 0; border: 0; border-bottom: 1px solid var(--color-border-subtle); }
