@@ -25,6 +25,7 @@ dependencies = [
     "mem0ai==2.2.1",
     "fastembed>=0.9.1",
     "docker>=7",
+    "h11>=0.16",
 ]
 
 [project.scripts]

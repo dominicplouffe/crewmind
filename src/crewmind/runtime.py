@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock, Executor, utc_now
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.domain.accounts.credentials import Authenticator
-from crewmind.domain.connections.delivery import Masker, masker_for_run
+from crewmind.domain.connections.delivery import Masker, given_runs, masker_for_run
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.install.config import Config, load_config
@@ -44,7 +44,11 @@ class Runtime:
     hub: StreamHub
 
     async def masker(self, run_id: str) -> Masker:
-        """The masking of one run's given secrets (CON-8)."""
+        """The masking of one run's given secrets (CON-8). Held in memory once the run's
+        values were handed over, so most calls touch no database."""
+        kept = given_runs.get(run_id)
+        if kept is not None:
+            return kept
         if not self.config.master_key_file.exists():
             return Masker()
         async with self.sessions() as session, session.begin():

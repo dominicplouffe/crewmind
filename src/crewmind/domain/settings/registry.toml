@@ -2,7 +2,7 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
-version = "2.9"
+version = "2.10"
 
 [settings."quality"]
 type = "enum"
@@ -984,6 +984,16 @@ used_by = ["CON-11"]
 spec_default = "15 min"
 spec_range = "1 min–24 h"
 
+[settings."proxy.idle_timeout"]
+type = "duration"
+scope = "install"
+default = 300
+min = 10
+max = 3600
+used_by = ["CON-6"]
+spec_default = "5 min"
+spec_range = "10 s–1 h"
+
 [settings."proxy.certificate_life"]
 type = "duration"
 scope = "install"
@@ -1050,6 +1060,15 @@ max = 65535
 used_by = ["NFR-6"]
 spec_default = "8420 (starting default)"
 spec_range = "1–65535"
+
+[operational."CREWMIND_EGRESS_PORT"]
+type = "int"
+default = 0
+min = 0
+max = 65535
+used_by = ["CON-6"]
+spec_default = "0 (a free port, chosen at start and told to each run)"
+spec_range = "0–65535"
 
 [operational."CREWMIND_PUBLIC_URL"]
 type = "url"

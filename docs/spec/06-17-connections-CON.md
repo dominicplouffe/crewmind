@@ -29,11 +29,12 @@ A project reaches the outside world through its connections: secrets, variables 
   - **Start with open needs** shows them, each with a way to add it, and offers to start without them. Starting without them holds exactly the seats whose roles need what is missing, each hold naming the missing connection (EXE-4), and puts one item on the desk. Attaching the connection lifts the hold by itself.
   - No seat is run while a need of its role is open.
 - **CON-6 Secrets sent for you.**
-  - Every run's HTTP and HTTPS traffic goes through the platform's egress proxy, which identifies the run by its run token.
-  - A connection to a site with no secret sent for this run is passed through untouched, as an opaque tunnel. Nothing else is blocked or read (EXE-14).
+  - A run that has a secret sent for it has its HTTP and HTTPS traffic go through the platform's egress proxy, which identifies the run by its run token. A run with none reaches the web directly, so the proxy can never stand in the way of ordinary traffic.
+  - A connection to a site with no secret sent for this run is passed through untouched, as an opaque tunnel. Nothing is read (EXE-14). Because the proxy runs beside the control plane, it connects only to public addresses (WRK-12), and a refused connection says why. A secret is never added to a plain HTTP request.
   - A connection to a granted site is opened with a short-lived certificate (`proxy.certificate_life` \[24 h\]) from the install's own certificate authority, which every sandbox trusts. The proxy adds the secret as a header (bearer, basic with a user name, or a named header), replacing any the agent sent, verifies the real site's certificate, and passes the answer back.
-  - The site is the host the request is for, checked against both the TLS server name and the request's `Host`; a mismatch is refused.
-  - The certificate authority's key is a secret and never enters a sandbox.
+  - The site is the host the request is for, checked against both the TLS server name and the request's `Host`; a mismatch is refused. A connection upgrade (such as a WebSocket) to such a site is refused.
+  - The certificate authority is created on first use and valid for ten years; its key is a secret and never enters a sandbox. Certificate validity is measured on the wall clock.
+  - A connection silent for `proxy.idle_timeout` \[5 min\] is closed. The proxy listens on `CREWMIND_EGRESS_PORT`, by default a free port chosen at start and told to each run.
   - Programs that ignore the proxy settings or pin certificates cannot use a secret sent for them; the platform says so when the secret is added, and SECURITY.md states it.
 - **CON-7 Secrets given to the agent.**
   - A text secret becomes an environment variable, a file secret a file on the run's private in-memory filesystem (EXE-13), each under the name set when it was attached. Variables reach runs the same way (CON-3).

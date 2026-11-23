@@ -139,6 +139,7 @@ const SPECS: Record<string, Spec> = {
   "mcp.description_max": { group: "integrations", kind: "number" },
   "mcp.tools_refresh": { group: "integrations", kind: "duration" },
   "mcp.command_idle": { group: "integrations", kind: "duration" },
+  "proxy.idle_timeout": { group: "integrations", kind: "duration" },
   "proxy.certificate_life": { group: "integrations", kind: "duration" },
   "browser.keep_sessions": { group: "integrations", kind: "toggle" },
   "a2a.enabled": { group: "integrations", kind: "toggle" },

@@ -21,6 +21,7 @@ from typing import Any
 from urllib.parse import quote, quote_plus
 
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.rules import Rule, rules
@@ -35,6 +36,7 @@ from crewmind.domain.connections.model import (
     Shape,
 )
 from crewmind.domain.conversation import sessions as chat_sessions
+from crewmind.domain.execution.model import LIVE_STATES
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.storage.models import (
     ConnectionSecret,
@@ -177,7 +179,43 @@ class Masker:
         return type(model).model_validate(self.data(model.model_dump(mode="json")))
 
 
+class GivenRuns:
+    """The masker of exactly what each live run was given, kept from the moment its values
+    were handed over (CON-8). A value replaced mid-run is still masked for the run that
+    holds it. Runs that have ended are dropped whenever the set has doubled."""
+
+    def __init__(self) -> None:
+        self._maskers: dict[str, Masker] = {}
+        self._checked_at = 1
+
+    def remember(self, run_id: str, masker: Masker) -> None:
+        self._maskers[run_id] = masker
+
+    def get(self, run_id: str) -> Masker | None:
+        return self._maskers.get(run_id)
+
+    async def prune(self, session: AsyncSession) -> None:
+        if len(self._maskers) < 2 * self._checked_at:
+            return
+        live = set(
+            await session.scalars(
+                select(Run.id).where(Run.id.in_(list(self._maskers)), Run.state.in_(LIVE_STATES))
+            )
+        )
+        self._maskers = {run: masker for run, masker in self._maskers.items() if run in live}
+        self._checked_at = max(1, len(self._maskers))
+
+
+given_runs = GivenRuns()
+
+
 async def masker_for_run(session: AsyncSession, store: SecretStore, run_id: str) -> Masker:
+    """What was handed to the run, when this process handed it; otherwise what the run is
+    granted now (another process handed it, or nothing was handed yet)."""
+    await given_runs.prune(session)
+    kept = given_runs.get(run_id)
+    if kept is not None:
+        return kept
     run = await session.get(Run, run_id)
     if run is None:
         return Masker()

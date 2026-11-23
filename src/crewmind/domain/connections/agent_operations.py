@@ -13,7 +13,7 @@ from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import Empty, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Principal, Reversibility
-from crewmind.domain.connections import delivery
+from crewmind.domain.connections import delivery, sending
 from crewmind.domain.execution import context_pack
 from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.secrets.store import SecretStore
@@ -21,6 +21,8 @@ from crewmind.services import services_of
 from crewmind.storage.models import Connection, RunStep
 
 GIVEN_STEP = "connections given"
+EGRESS = "egress"
+"""Where `services.wired` holds the egress proxy's address for sandboxes (CON-6)."""
 SECRETS_DIR = "CREWMIND_SECRETS_DIR"
 """The variable that names the run's private directory of file secrets."""
 
@@ -31,6 +33,15 @@ class RunEnvironment(BaseModel):
 
     variables: dict[str, str] = Field(description="Environment variables, by name.")
     files: dict[str, str] = Field(description="Files for the run's private directory, by name.")
+    proxy: str | None = Field(
+        default=None,
+        description="CON-6: the egress proxy to send the run's web traffic through, when it "
+        "has a secret sent for it. The run token is the proxy credential.",
+    )
+    authority: str | None = Field(
+        default=None,
+        description="The certificate (PEM, public) of the authority the proxy signs with.",
+    )
 
 
 @operation(
@@ -46,6 +57,7 @@ async def environment(context: Context, payload: Empty) -> RunEnvironment:
     view = await agent_of(context)
     store = SecretStore(services_of(context).master_key_file)
     given = await delivery.given_for_run(context.session, store, view.run)
+    delivery.given_runs.remember(view.run.id, delivery.Masker.of(given))
     if given:
         context.session.add(
             RunStep(
@@ -70,9 +82,16 @@ async def environment(context: Context, payload: Empty) -> RunEnvironment:
             .where(Connection.id.in_([item.id for item in given]))
             .values(last_used_at=context.now)
         )
+    proxy, certificate = None, None
+    egress: str | None = services_of(context).wired.get(EGRESS)
+    if egress is not None and await sending.has_sending(context.session, view.run):
+        proxy = egress
+        certificate = (await sending.authority(context.session, store, context.now)).certificate_pem
     return RunEnvironment(
         variables={item.env: item.value for item in given if not item.as_file},
         files={item.env: item.value for item in given if item.as_file},
+        proxy=proxy,
+        authority=certificate.decode() if certificate else None,
     )
 
 
