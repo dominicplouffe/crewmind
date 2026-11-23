@@ -27,7 +27,9 @@ _MENTION = re.compile(r"@([\w][\w-]*)")
 
 
 class SendInput(ProjectRef):
-    body: str = Field(description="The message. `@name` addresses an agent, `@team` its lead.")
+    body: str = Field(
+        description="The message. `@name` addresses an agent by its name, `@team` its lead."
+    )
     reply_to: int | None = Field(None, description="The message this replies to.")
 
 
@@ -82,7 +84,8 @@ def item(message: Message, channel_name: str, example: bool = False) -> MessageI
 
 
 async def addressed_seats(context: Context, project_id: str, body: str) -> list[str]:
-    """CHAT-2: `@name` addresses that agent; `@team` addresses the team's lead."""
+    """CHAT-2, EXE-18: `@name` addresses that agent, by its seat name or by the name it is
+    shown by (without case, spaces left out); `@team` addresses the team's lead."""
     names = {name.lower() for name in _MENTION.findall(body)}
     if not names:
         return []
@@ -94,7 +97,8 @@ async def addressed_seats(context: Context, project_id: str, body: str) -> list[
     found: list[str] = []
     for seat in seats:
         leads_named_team = seat.is_lead and teams.get(seat.team_id or "") in names
-        if seat.name.lower() in names or leads_named_team:
+        shown = seat.display_name.lower().replace(" ", "")
+        if seat.name.lower() in names or shown in names or leads_named_team:
             found.append(seat.id)
     return found
 

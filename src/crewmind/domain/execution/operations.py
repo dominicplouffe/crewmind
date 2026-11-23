@@ -43,7 +43,8 @@ class RoleList(BaseModel):
 
 
 class SeatItem(BaseModel):
-    name: str
+    name: str = Field(description="The seat's identity, used in mentions, events and tools.")
+    display_name: str = Field(description='The name the agent is shown by, such as "Maya".')
     kind: str
     role: str
     team: str | None
@@ -83,6 +84,11 @@ class HireInput(ProjectRef):
         description='Stand the team down when this becomes true: "requirements met" or '
         '"stage N cleared".',
     )
+
+
+class RenameSeatInput(ProjectRef):
+    seat: str = Field(description="The seat's name, from `roster show`.")
+    display_name: str = Field(max_length=200, description="The name to show it by.")
 
 
 class TeamRef(ProjectRef):
@@ -166,6 +172,7 @@ async def _roster(context: Context, project_id: str) -> Roster:
         seats=[
             SeatItem(
                 name=seat.name,
+                display_name=seat.display_name,
                 kind=seat.kind,
                 role=role.name,
                 team=team.name if team else None,
@@ -242,6 +249,26 @@ async def hire_team(context: Context, payload: HireInput) -> Roster:
         stand_down_when=payload.stand_down_when,
         caller=context.caller,
         now=context.now,
+    )
+    return await _roster(context, payload.project_id)
+
+
+@operation(
+    "roster.rename_seat",
+    summary="Give an agent the name it is shown by.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def rename_seat(context: Context, payload: RenameSeatInput) -> Roster:
+    """EXE-18: only the chairman or a co-chair renames an agent; agents cannot. The seat's
+    identity (its `name`) stays, so mentions by it, events and scripts keep working."""
+    await roster.rename_seat(
+        context.session,
+        payload.project_id,
+        payload.seat,
+        payload.display_name,
+        context.caller,
+        context.now,
     )
     return await _roster(context, payload.project_id)
 

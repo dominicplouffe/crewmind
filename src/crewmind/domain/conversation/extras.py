@@ -188,6 +188,7 @@ class MarkReadInput(ProjectRef):
 
 class Working(BaseModel):
     seat: str
+    name: str = Field(description="The name the agent goes by (EXE-18).")
     run_kind: str
     doing: str
 
@@ -335,7 +336,14 @@ async def header(context: Context, payload: ProjectRef) -> Header:
         step = await session.scalar(
             select(RunStep).where(RunStep.run_id == run.id).order_by(RunStep.id.desc()).limit(1)
         )
-        working.append(Working(seat=seat.name, run_kind=run.kind, doing=_doing(step, run)))
+        working.append(
+            Working(
+                seat=seat.name,
+                name=seat.display_name,
+                run_kind=run.kind,
+                doing=_doing(step, run),
+            )
+        )
     holds = await lifecycle.active_holds(session, project.id)
     coming = [
         f"The hold lifts at {row.lift_at.isoformat(timespec='minutes')}."
@@ -355,9 +363,9 @@ async def header(context: Context, payload: ProjectRef) -> Header:
     notes: list[str] = []
     for seat in seats:
         if seat.substitution:
-            notes.append(f"{seat.name}: {seat.substitution}")
+            notes.append(f"{seat.display_name}: {seat.substitution}")
         if seat.state == SeatState.PAUSED:
-            notes.append(f"{seat.name} is paused: {seat.pause_reason or 'it cannot run'}.")
+            notes.append(f"{seat.display_name} is paused: {seat.pause_reason or 'it cannot run'}.")
     target = await service.channel(session, project.id, service.PROJECT_CHAT)
     position = await service.read_position(session, target.id, "person", context.caller.actor_id)
     unread = await session.scalar(
@@ -414,7 +422,9 @@ def _plain(event: Event) -> str:
     if kind == "project.created":
         return "The project was created."
     if kind == "seat.created":
-        return f"{event.subject_id} joined the crew."
+        return f"{after.get('display_name') or event.subject_id} joined the crew."
+    if kind == "seat.renamed":
+        return f"{before.get('display_name')} is now called {after.get('display_name')}."
     if kind == "guard.changed":
         return f"The {event.subject_id} guard changed."
     if kind.endswith(".state_changed") and after.get("state"):

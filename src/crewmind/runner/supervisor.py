@@ -151,7 +151,7 @@ class Runner:
                     self._blobs,
                     project,
                     workspace,
-                    artifacts.Author("agent", seat.id, seat.name, lease.run_id),
+                    artifacts.Author("agent", seat.id, seat.name, lease.run_id, seat.display_name),
                     self._clock(),
                 )
         except Exception:

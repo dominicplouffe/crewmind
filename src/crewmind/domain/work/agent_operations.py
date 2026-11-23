@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import Empty, operation
@@ -70,7 +70,7 @@ class CreateInput(TaskInput):
 
 class SubtaskInput(TaskInput):
     parent_id: int = Field(description="The task you have claimed that this is part of.")
-    assignee: str = Field(description="A member of your team, by name.")
+    assignee: str = Field(description="A member of your team, by its seat name or its name.")
 
 
 class TaskRef(BaseModel):
@@ -312,7 +312,7 @@ async def create_subtask(context: Context, payload: SubtaskInput) -> TaskItem:
     assignee = await context.session.scalar(
         select(Seat).where(
             Seat.project_id == view.project.id,
-            Seat.name == payload.assignee,
+            or_(Seat.name == payload.assignee, Seat.display_name == payload.assignee),
             Seat.team_id == view.seat.team_id,
             Seat.state == "active",
         )

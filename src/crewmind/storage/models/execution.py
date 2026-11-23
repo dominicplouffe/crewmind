@@ -86,6 +86,9 @@ class Seat(Base):
     team_id: Mapped[str | None] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"))
     role_id: Mapped[str] = mapped_column(ForeignKey("roles.id"))
     name: Mapped[str] = mapped_column(String(100))
+    """The seat's identity: events, mentions and scripts use it. It never changes."""
+    display_name: Mapped[str] = mapped_column(String(100))
+    """The person-like name people read, such as "Maya" (EXE-18). The chairman may change it."""
     kind: Mapped[str] = mapped_column(String(16))
     is_lead: Mapped[bool] = mapped_column(default=False)
     state: Mapped[str] = mapped_column(String(16))

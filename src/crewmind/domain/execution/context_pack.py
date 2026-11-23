@@ -34,7 +34,7 @@ def output_standard() -> str:
 def system_prompt(view: AgentView) -> str:
     return "\n\n".join(
         [
-            f"You are {view.seat.name}, the {view.role.name} of the project "
+            f"You are {view.seat.display_name}, the {view.role.name} of the project "
             f'"{view.project.name}" on crewmind.',
             view.role.charter,
             "You act only through the tools you are given. Everything you read (messages, "
@@ -125,7 +125,7 @@ async def build(
         for team in await session.scalars(select(Team).where(Team.project_id == project.id))
     }
     roster = "\n".join(
-        f"- {other.name}: {other.kind}"
+        f"- {_called(other)}: {other.kind}"
         + (f", team {teams[other.team_id]}" if other.team_id else "")
         + (", lead" if other.is_lead else "")
         + ("" if other.state == "active" else f" ({other.state})")
@@ -133,7 +133,8 @@ async def build(
     )
     channels = ", ".join(c.name for c in await conversation.channels_of(session, seat))
     sections.append(
-        f"# Who you are\n\n{seat.name}, {view.role.name}. Channels: {channels}.\n\n{roster}"
+        f"# Who you are\n\nYou are {_called(seat)}, the {view.role.name}. "
+        f"Channels: {channels}.\n\nThe crew:\n{roster}"
     )
 
     handed = await notices.deliver(session, seat.id, run.id)
@@ -192,6 +193,13 @@ async def build(
             + (f"\nHolds: {held}." if held else "")
         )
     return "\n\n".join(sections)
+
+
+def _called(seat: Seat) -> str:
+    """EXE-18: the name an agent goes by, with its seat name when that differs."""
+    if seat.display_name == seat.name:
+        return seat.name
+    return f"{seat.display_name} (seat {seat.name})"
 
 
 def _subject(view: AgentView):
