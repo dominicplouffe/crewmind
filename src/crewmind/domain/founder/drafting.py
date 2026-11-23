@@ -202,7 +202,11 @@ async def answer(
     question.state, question.answer, question.answered_at = m.ANSWERED, value, now
     await _resolve(session, drafting, question, value, chosen, m.ANSWER, now)
     say(session, drafting, m.PERSON, value, now, {"kind": "answer", "question": question.id})
-    drafting.turn = m.DUE
+    await session.flush()
+    if not await open_question(session, drafting.id):
+        # FND-4: a round of questions is answered as a whole. The Founder takes its turn
+        # after the last answer, not after each one.
+        drafting.turn = m.DUE
     return question
 
 

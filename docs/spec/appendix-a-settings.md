@@ -80,7 +80,7 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `email.thread_freeze_after` | 40 messages | 10–500 | project | INT-6 |
 | `email.agent_addresses` | off | on, off | project | INT-10 |
 | `budget.reserve_min_done` | 75% of accepted requirements met (Deliver) | 50–100% | project | GOV-10 |
-| `grill.pace` | one at a time | one at a time, batch | person | FND-4, FND-15, FND-16 |
+| `grill.pace` | batch | one at a time, batch | person | FND-4, FND-15, FND-16 |
 | `grill.min_characters` | 1,500 characters | 200–20,000 | install | FND-15 |
 | `founder.credential` | none | The name of a model credential | install | LLM-14, FND-2 |
 | `founder.model_class` | frontier | fast, balanced, frontier | install | LLM-14, FND-2 |

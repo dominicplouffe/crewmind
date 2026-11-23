@@ -13,7 +13,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - ask questions;
   - propose a spec.
 - **FND-3 Draft first, then interview.** Every question carries a recommended answer, and those answers are the draft. A question is one decision, worded so "yes" accepts the recommendation. It offers 2–4 options and says what the answer changes. When more than one credential exists, who pays is asked and never pre-selected.
-- **FND-4 Rounds.** Decisions form a tree. By default the Founder asks one decision at a time: the next one whose prerequisites are settled, most load-bearing first. With `grill.pace` \[one at a time\] set to batch, it asks every ready decision in a round. Facts the Founder can look up, it looks up. Who pays is looked up, not asked, when the chairman has one credential or none.
+- **FND-4 Rounds.** Decisions form a tree. By default (`grill.pace` \[batch\]) the Founder asks every decision whose prerequisites are settled in one round, most load-bearing first, each as its own question with its own recommended answer. The chairman answers the round, and the Founder takes its next turn after the last answer. Set to one at a time, it asks only the next decision. A goal that has not changed is not graded again. Once a draft exists, the Founder changes it by sending only the fields that differ, and each draft is rehearsed as it is kept (FND-11). Facts the Founder can look up, it looks up. Who pays is looked up, not asked, when the chairman has one credential or none.
   - **Roots:** finish line and the record that settles it; beneficiary and standard; project type; who pays; any date the outside world imposes.
   - **Branches:** budget; anti-metrics; the chairman's role; roster.
   - **Leaves:** quality; authority preset; failure deliverable; resource posture.
@@ -41,7 +41,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - The Founder sets only what it can justify, with a one-line reason each. It sets the budget (a range, GOV-4) and quality by name, and leaves the other settings at their defaults unless the goal demands otherwise.
   - It drafts Deliver's first requirement as a first usable version (SPD-4), and Explore's bets with short windows (SPD-7).
   - Resource posture is written as a bias with a reason and a release condition, never as a rule that outranks the goal.
-- **FND-11 Fire drill.** The Founder rehearses (RHS) the draft before calling it ready, and acts on what the drill finds.
+- **FND-11 Fire drill.** Every draft is rehearsed (RHS) as soon as it is kept, without the Founder asking, and the Founder acts on what the drill finds. The Founder may also ask for a rehearsal itself.
 - **FND-12 Quick mode.** On request, the Founder accepts all of its own recommendations and creates and starts the project in under 2 minutes (section 1.3). A quick draft is still rehearsed before the project is created. Creating and starting are one step: if either fails, nothing is created and the conversation ends failed.
   - A quick project gets no data sources, secrets, email or integrations, and one credential pays every seat.
   - Status moves through drafting → creating → starting → started, or failed with nothing created.
