@@ -87,7 +87,7 @@ export function ChatRail({ projectId, changes, header, needs, onNeeds, onTab, on
                       <span className="rail-file-text">
                         <span className="rail-file-name">{item.name}</span>
                         <span className="rail-file-meta">
-                          {item.last_author} · {fromNow(item.last_change)}
+                          {nameOf(item.last_author).name} · {fromNow(item.last_change)}
                         </span>
                       </span>
                     </button>
