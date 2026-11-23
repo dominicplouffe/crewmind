@@ -29,8 +29,15 @@ from crewmind.domain.connections.item_operations import (
     record_added,
 )
 from crewmind.domain.connections.mcp import AuthKind, Permission, ServerState
-from crewmind.domain.connections.mcp_client import CON_9, Probe, Unreachable, check_url, probe
-from crewmind.domain.connections.mcp_sign_in import clock_of, fresh_headers, sessions_of
+from crewmind.domain.connections.mcp_client import (
+    CON_9,
+    Probe,
+    Unreachable,
+    check_url,
+    probe,
+    probe_target,
+)
+from crewmind.domain.connections.mcp_sign_in import clock_of, sessions_of, target_for
 from crewmind.domain.connections.model import Kind, check_header_name
 from crewmind.domain.connections.views import ConnectionView, item_view
 from crewmind.domain.secrets.store import SecretStore
@@ -251,19 +258,15 @@ async def _prepare_retest(caller: Caller, payload: ConnectionRef, services: Serv
                 )  # fmt: skip
             seconds, most = await limits(session, services, payload.project_id)
             try:
-                headers = await fresh_headers(
+                target = await target_for(
                     session, store, server, item, clock(), caller, seconds=seconds,
                     force=attempt > 0,
                 )  # fmt: skip
             except Unreachable as error:
                 return Tested(None, str(error))
-            url, private = server.url or "", server.private_allowed
-            transport, oauth = server.transport, server.auth_kind == AuthKind.OAUTH
+            oauth = server.auth_kind == AuthKind.OAUTH
         try:
-            found = await probe(
-                url, headers, private_allowed=private, seconds=seconds, description_max=most,
-                transport=transport,
-            )  # fmt: skip
+            found = await probe_target(target, seconds=seconds, description_max=most)
             return Tested(found, None)
         except Unreachable as error:
             if not (error.refused and oauth and attempt == 0):

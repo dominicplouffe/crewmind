@@ -7,6 +7,7 @@ see every change in the event log from the API, the CLI and an MCP client.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -305,6 +306,14 @@ async def test_INV_21_every_write_operation_records_an_event(
             "connections.add_mcp_server", alice, name="blog-tools", description="Tools.", url=URL
         )
         await write("connections.test_mcp", alice, connection="blog-tools")
+    import sys
+
+    script = Path(__file__).parents[1] / "attack" / "mcp_stdio_server.py"
+    await write(
+        "connections.add_command_mcp_server", alice, name="notes-tools", description="Notes.",
+        command=f"{sys.executable} {script}",
+    )  # fmt: skip
+    await app.runtime.commands.close()
     await write("connections.allow_tool", alice, connection="blog-tools", tool="create_post")
     await write("connections.deny_tool", alice, connection="blog-tools", tool="create_post")
     browser = "https://fcm.googleapis.com/fcm/send/abc"

@@ -62,7 +62,8 @@ A project reaches the outside world through its connections: secrets, variables 
 - **CON-11 MCP servers started from a command.**
   - A command server is a command line (for example `npx -y …` or `uvx …`), the secrets and variables it needs as environment variables, and an image (the tool image by default, with Node, Python and uv).
   - Each runs in its own container, with no workspace, no install secret and nothing of any agent's, and is reached over standard input and output by the platform only.
-  - It starts on first use, stops after `mcp.command_idle` \[15 min\] unused, and restarts after a crash with the circuit breaker's back-off (LLM-11).
+  - It is tested before it is saved, in a server started for the test and stopped after it. Its variables each name a secret or variable the person can see; their values are read when it starts.
+  - It starts on first use, serves one call at a time, stops after `mcp.command_idle` \[15 min\] unused, and restarts after a crash with the circuit breaker's back-off (LLM-11).
   - Without a container runtime, a command server runs as a plain process, for development only, with a warning.
   - Adding one is human-only (IF-5.6).
 - **CON-12 MCP tools.**

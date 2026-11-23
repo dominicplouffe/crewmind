@@ -12,10 +12,10 @@ import contextlib
 import ipaddress
 import json
 import socket
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from contextlib import AbstractAsyncContextManager
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Protocol
 from urllib.parse import urlsplit
 
 import httpx2
@@ -354,6 +354,104 @@ async def call_tool(
         raise Unreachable(_reason(error)) from None
     finally:
         await http.aclose()
+    text = _result_text(result)
+    data = text.encode()
+    cut = len(data) > most_bytes
+    if cut:
+        note = f"\n[cut here: the answer had {len(data)} bytes; the first {most_bytes} are shown]"
+        text = data[:most_bytes].decode("utf-8", "ignore") + note
+    return CallResult(bool(getattr(result, "is_error", False)), text, len(data), cut)
+
+
+@dataclass(frozen=True)
+class CommandSpec:
+    """A command server as the runner starts it (CON-11): its own container (or, in
+    development, a process), the command, and only the variables it was given."""
+
+    server_id: str
+    image: str | None
+    argv: tuple[str, ...]
+    environment: dict[str, str]
+
+    def __repr__(self) -> str:  # never shows a value, in a log or a traceback
+        return f"CommandSpec({self.server_id}, {self.argv[:1]}, {sorted(self.environment)})"
+
+
+class CommandRunner(Protocol):
+    """Runs command servers and hands each job a connected MCP client (CON-11)."""
+
+    async def run(
+        self, spec: CommandSpec, job: Callable[[Client], Awaitable[Any]], seconds: float
+    ) -> Any: ...
+
+    async def stop(self, server_id: str) -> None: ...
+
+
+command_runner: list[CommandRunner | None] = [None]
+"""The runner in use, set when the server starts; None where command servers cannot run."""
+
+
+@dataclass(frozen=True)
+class Target:
+    """Where one MCP server is reached: a remote address with its sign-in headers, or a
+    command with its variables."""
+
+    url: str
+    headers: dict[str, str]
+    private_allowed: bool
+    transport: str | None
+    command: CommandSpec | None = None
+
+    def __repr__(self) -> str:
+        return f"Target({self.url or self.command})"
+
+
+async def _command(
+    spec: CommandSpec, job: Callable[[Client], Awaitable[Any]], seconds: float
+) -> Any:
+    runner = command_runner[0]
+    if runner is None:
+        raise Unreachable("command servers cannot run on this install")
+    try:
+        return await runner.run(spec, job, seconds)
+    except Unreachable:
+        raise
+    except TimeoutError:
+        raise Unreachable(f"it did not answer within {int(seconds)} seconds") from None
+    except Exception as error:
+        raise Unreachable(_reason(error)) from None
+
+
+async def probe_target(target: Target, *, seconds: float, description_max: int) -> Probe:
+    """CON-9, CON-11: probe a remote server, or a command server through the runner."""
+    if target.command is None:
+        return await probe(
+            target.url, target.headers, private_allowed=target.private_allowed,
+            seconds=seconds, description_max=description_max, transport=target.transport,
+        )  # fmt: skip
+
+    async def read(client: Client) -> Probe:
+        name, version, tools = await _read(client, description_max)
+        return Probe("stdio", name, version, tools)
+
+    found: Probe = await _command(target.command, read, seconds)
+    return found
+
+
+async def call_target(
+    target: Target, tool: str, arguments: dict[str, Any], *, seconds: float, most_bytes: int
+) -> CallResult:
+    """CON-13: one tool call on either kind of server."""
+    if target.command is None:
+        return await call_tool(
+            target.url, target.headers, tool, arguments, private_allowed=target.private_allowed,
+            seconds=seconds, transport=target.transport, most_bytes=most_bytes,
+        )  # fmt: skip
+
+    async def call(client: Client) -> Any:
+        return await client.call_tool(tool, arguments)
+
+    result = await _command(target.command, call, seconds)
     text = _result_text(result)
     data = text.encode()
     cut = len(data) > most_bytes

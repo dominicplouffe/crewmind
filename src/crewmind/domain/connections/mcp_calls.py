@@ -32,8 +32,8 @@ from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.catalog.rules import Rule, rules
 from crewmind.domain.connections import mcp, service
 from crewmind.domain.connections.mcp import Classification, Permission, ServerState
-from crewmind.domain.connections.mcp_client import CallResult, Unreachable, call_tool
-from crewmind.domain.connections.mcp_sign_in import clock_of, fresh_headers, sessions_of
+from crewmind.domain.connections.mcp_client import CallResult, Unreachable, call_target
+from crewmind.domain.connections.mcp_sign_in import clock_of, sessions_of, target_for
 from crewmind.domain.connections.model import ALL_ROLES, ConnectionState, Kind
 from crewmind.domain.decisions import asks, items
 from crewmind.domain.decisions.items import Settling
@@ -280,18 +280,14 @@ async def _prepare_call(caller: Caller, payload: CallInput, services: Services) 
                 )
             )  # fmt: skip
         try:
-            headers = await fresh_headers(
-                session, store, server, item, now, caller, seconds=seconds
-            )
+            target = await target_for(session, store, server, item, now, caller, seconds=seconds)
         except Unreachable as error:
             return Called(item.id, tool.name, writes, key, None, str(error), seconds)
-        url, private, transport = server.url or "", server.private_allowed, server.transport
     began = time.monotonic()
     try:
-        result = await call_tool(
-            url, headers, payload.tool, payload.arguments, private_allowed=private,
-            seconds=seconds, transport=transport, most_bytes=most,
-        )  # fmt: skip
+        result = await call_target(
+            target, payload.tool, payload.arguments, seconds=seconds, most_bytes=most
+        )
         return Called(item.id, tool.name, writes, key, result, None, time.monotonic() - began)
     except Unreachable as error:
         return Called(item.id, tool.name, writes, key, None, str(error), time.monotonic() - began)

@@ -15,8 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from crewmind.catalog.caller import platform_job
 from crewmind.domain.connections import mcp
-from crewmind.domain.connections.mcp_client import Unreachable, probe
-from crewmind.domain.connections.mcp_sign_in import fresh_headers
+from crewmind.domain.connections.mcp_client import Unreachable, probe_target
+from crewmind.domain.connections.mcp_sign_in import target_for
 from crewmind.domain.connections.model import ConnectionState
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.registry import Scope
@@ -52,7 +52,6 @@ async def refresh_due(
                 select(McpServer)
                 .join(Connection, Connection.id == McpServer.connection_id)
                 .where(
-                    McpServer.kind == "remote",
                     McpServer.state.in_([mcp.ServerState.ACTIVE, mcp.ServerState.FAILING]),
                     Connection.state == ConnectionState.ACTIVE,
                     or_(
@@ -71,17 +70,13 @@ async def refresh_due(
             if server is None or item is None:
                 continue
             try:
-                headers = await fresh_headers(
+                target = await target_for(
                     session, store, server, item, clock(), UPKEEP, seconds=seconds
                 )
             except Unreachable:
                 continue
-            url, private, transport = server.url or "", server.private_allowed, server.transport
         try:
-            found = await probe(
-                url, headers, private_allowed=private, seconds=seconds, description_max=most,
-                transport=transport,
-            )  # fmt: skip
+            found = await probe_target(target, seconds=seconds, description_max=most)
             failure = None
         except Unreachable as error:
             found, failure = None, str(error)

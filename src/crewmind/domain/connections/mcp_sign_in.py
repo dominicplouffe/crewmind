@@ -33,15 +33,21 @@ from crewmind.domain.connections.mcp import (
     AuthKind,
     ServerState,
 )
-from crewmind.domain.connections.mcp_client import Probe, Unreachable, probe
-from crewmind.domain.connections.model import SECRET_OWNER, Kind, Scope
+from crewmind.domain.connections.mcp_client import CommandSpec, Probe, Target, Unreachable, probe
+from crewmind.domain.connections.model import (
+    SECRET_NAME,
+    SECRET_OWNER,
+    ConnectionState,
+    Kind,
+    Scope,
+)
 from crewmind.domain.integrations import alerts
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.registry import Scope as SettingScope
 from crewmind.domain.settings.service import INSTALL_SUBJECT, Subject
 from crewmind.services import CLOCK, SESSIONS, Services, services_of
 from crewmind.storage.events import event_type
-from crewmind.storage.models import Connection, McpServer, McpSignIn
+from crewmind.storage.models import Connection, ConnectionVariable, McpServer, McpSignIn
 
 CON_10 = rules.register(
     Rule("CON-10", "An MCP sign-in finishes only in the browser session that started it.")
@@ -382,6 +388,35 @@ async def fresh_headers(
         raise Unreachable(f"{item.name} needs someone to sign in again") from None
     await store_tokens(session, store, server, tokens, now)
     return {"Authorization": f"Bearer {tokens.access}"}
+
+
+async def target_for(
+    session: AsyncSession, store: SecretStore, server: McpServer, item: Connection, now: datetime,
+    caller: Caller, *, seconds: float, force: bool = False,
+) -> Target:  # fmt: skip
+    """CON-9, CON-11: how to reach the server now. For a remote server, its address and fresh
+    sign-in headers; for a command server, its command and the values of only the variables
+    it was given, read from their connections."""
+    if server.kind != "command":
+        headers = await fresh_headers(
+            session, store, server, item, now, caller, seconds=seconds, force=force
+        )
+        return Target(server.url or "", headers, server.private_allowed, server.transport)
+    values: dict[str, str] = {}
+    for env, connection_id in (server.environment or {}).items():
+        source = await session.get(Connection, str(connection_id))
+        if source is None or source.state != ConnectionState.ACTIVE:
+            raise Unreachable(f"the connection it needs for {env} is gone or expired")
+        if source.kind == Kind.VARIABLE:
+            variable = await session.get(ConnectionVariable, source.id)
+            value = variable.value if variable is not None else None
+        else:
+            value = await store.reveal(session, (SECRET_OWNER, source.id), SECRET_NAME)
+        if value is None:
+            raise Unreachable(f"the connection it needs for {env} has no value")
+        values[str(env)] = value
+    spec = CommandSpec(server.connection_id, server.image, tuple(server.command or []), values)
+    return Target("", {}, False, None, spec)
 
 
 async def needs_sign_in(

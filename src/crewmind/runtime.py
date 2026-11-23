@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from crewmind.catalog.execute import Clock, Executor, utc_now
 from crewmind.catalog.registry import load_domain_modules
 from crewmind.domain.accounts.credentials import Authenticator
+from crewmind.domain.connections import mcp_client
 from crewmind.domain.connections.delivery import Masker, given_runs, masker_for_run
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
@@ -18,12 +19,14 @@ from crewmind.domain.memory.engine import InProcessEngine, Mem0Engine
 from crewmind.domain.models.service import SeatResolver, provider_is_saturated
 from crewmind.domain.projects.access import MembershipAccess
 from crewmind.domain.secrets.store import SecretStore
-from crewmind.domain.settings.service import SettingsService
+from crewmind.domain.settings.registry import Scope as SettingScope
+from crewmind.domain.settings.service import INSTALL_SUBJECT, SettingsService, Subject
 from crewmind.gateway.mock import MockProvider
 from crewmind.gateway.service import Gateway
 from crewmind.live import StreamHub
 from crewmind.runner.check_sandbox import ContainerCheckRunner, ProcessCheckRunner
 from crewmind.runner.containers import install_id
+from crewmind.runner.mcp_commands import CommandPool
 from crewmind.services import CLOCK, SESSIONS, Services
 from crewmind.storage.engine import create_engine
 
@@ -41,6 +44,7 @@ class Runtime:
     run_authenticator: RunAuthenticator
     mock: MockProvider
     gateway: Gateway
+    commands: CommandPool
     hub: StreamHub
 
     async def masker(self, run_id: str) -> Masker:
@@ -55,6 +59,7 @@ class Runtime:
             return await masker_for_run(session, SecretStore(self.config.master_key_file), run_id)
 
     async def close(self) -> None:
+        await self.commands.close()
         await self.engine.dispose()
 
 
@@ -98,7 +103,23 @@ def build_runtime(
     services.wired["gateway"] = gateway
     services.wired[SESSIONS] = sessions
     services.wired[CLOCK] = clock
+
+    async def command_idle() -> float:
+        async with sessions() as session:
+            install = Subject(SettingScope.INSTALL, INSTALL_SUBJECT)
+            return float(await services.settings.get(session, install, "mcp.command_idle"))
+
+    commands = CommandPool(
+        containers=config.sandbox_mode == "container",
+        idle_seconds=command_idle,
+        default_image=SANDBOX_IMAGE,
+        install_id=install_id(config.data_dir),
+        cpus=config.sandbox_cpus,
+        memory_bytes=config.sandbox_memory,
+    )
+    mcp_client.command_runner[0] = commands
     return Runtime(
+        commands=commands,
         hub=hub,
         settings=services.settings,
         run_authenticator=RunAuthenticator(sessions),
