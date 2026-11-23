@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   actionOf,
+  elapsedWords,
+  secondsSince,
   draftingStreamUrl,
   initialConversation,
   lastLineId,
@@ -130,16 +132,21 @@ describe("actionOf", () => {
     expect(actionOf(event("line", line(5)))).toEqual({ type: "line", line: line(5) });
     expect(actionOf(event("reply", { text: "Who " }))).toEqual({ type: "reply", text: "Who " });
     expect(actionOf(event("state", { state: "created" }))).toEqual({ type: "changed" });
-    expect(actionOf(event("working", { working: "Writing the draft" }))).toEqual({
+    const since = "2030-01-07T09:00:00+00:00";
+    expect(actionOf(event("working", { working: "Writing the draft", since }))).toEqual({
       type: "working",
       text: "Writing the draft",
+      since,
     });
-    // What the Founder is doing is shown until its finished words arrive.
+    // What the Founder is doing, and since when, is shown until its finished words arrive.
     const busy = reduceConversation(
       { ...initialConversation, view: view([line(1)]) },
-      { type: "working", text: "Writing the draft" },
+      { type: "working", text: "Writing the draft", since },
     );
-    expect(busy.working).toBe("Writing the draft");
+    expect([busy.working, busy.workingSince]).toEqual(["Writing the draft", since]);
+    expect(secondsSince(since, Date.parse(since) + 40_000)).toBe(40);
+    expect(secondsSince("", 0)).toBeNull();
+    expect([elapsedWords(40), elapsedWords(125)]).toEqual(["40 s", "2 min 5 s"]);
   });
 
   it("ignores what it cannot read", () => {

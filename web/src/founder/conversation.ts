@@ -12,6 +12,8 @@ export interface ConversationState {
   reply: string;
   /** What the Founder is doing right now, in its own plain words, while it works on a turn. */
   working: string;
+  /** When the Founder started doing it, as the server's clock put it. */
+  workingSince: string;
   /** Whether the live stream is connected. */
   live: boolean;
   /** Whether the stream has dropped at least once since the page opened. */
@@ -24,6 +26,7 @@ export const initialConversation: ConversationState = {
   view: null,
   reply: "",
   working: "",
+  workingSince: "",
   live: false,
   dropped: false,
   stale: 0,
@@ -34,7 +37,7 @@ export type ConversationAction =
   | { type: "view"; view: Drafting }
   | { type: "line"; line: Line }
   | { type: "reply"; text: string }
-  | { type: "working"; text: string }
+  | { type: "working"; text: string; since: string }
   | { type: "changed" }
   | { type: "live"; live: boolean };
 
@@ -58,22 +61,23 @@ export function reduceConversation(state: ConversationState, action: Conversatio
       );
       const view = later.length > 0 ? { ...action.view, lines: [...action.view.lines, ...later] } : action.view;
       const waiting = view.waiting_for === "the Founder";
-      return { ...state, view, reply: waiting ? state.reply : "", working: waiting ? state.working : "" };
+      if (waiting) return { ...state, view };
+      return { ...state, view, reply: "", working: "", workingSince: "" };
     }
     case "line": {
       if (!state.view) return state;
       // The Founder's finished words replace the words shown while it wrote them.
       const finished = action.line.author === "founder" && !isQuestion(action.line);
       const reply = finished ? "" : state.reply;
-      const working = finished ? "" : state.working;
-      if (state.view.lines.some((line) => line.id === action.line.id)) return { ...state, reply, working };
+      const doing = finished ? { working: "", workingSince: "" } : {};
+      if (state.view.lines.some((line) => line.id === action.line.id)) return { ...state, reply, ...doing };
       const lines = [...state.view.lines, action.line].sort((a, b) => a.id - b.id);
-      return { ...state, reply, working, view: { ...state.view, lines } };
+      return { ...state, reply, ...doing, view: { ...state.view, lines } };
     }
     case "reply":
       return { ...state, reply: state.reply + action.text };
     case "working":
-      return { ...state, working: action.text };
+      return { ...state, working: action.text, workingSince: action.since };
     case "changed":
       return { ...state, stale: state.stale + 1 };
     case "live":
@@ -101,10 +105,23 @@ export function actionOf(event: SseEvent): ConversationAction | null {
     return typeof text === "string" ? { type: "reply", text } : null;
   }
   if (event.event === "working") {
-    const text = (payload as { working?: unknown }).working;
-    return typeof text === "string" ? { type: "working", text } : null;
+    const { working, since } = payload as { working?: unknown; since?: unknown };
+    if (typeof working !== "string") return null;
+    return { type: "working", text: working, since: typeof since === "string" ? since : "" };
   }
   return event.event === "state" ? { type: "changed" } : null;
+}
+
+/** How long something has taken, in the fewest words: "40 s", "2 min 5 s". */
+export function elapsedWords(seconds: number): string {
+  const whole = Math.max(0, Math.floor(seconds));
+  return whole < 60 ? `${whole} s` : `${Math.floor(whole / 60)} min ${whole % 60} s`;
+}
+
+/** Seconds between two moments, or null when the start is not a time. */
+export function secondsSince(since: string, now: number): number | null {
+  const started = Date.parse(since);
+  return Number.isNaN(started) ? null : (now - started) / 1000;
 }
 
 export function draftingStreamUrl(draftingId: string, afterLine: number): string {

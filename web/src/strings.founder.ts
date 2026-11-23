@@ -61,7 +61,8 @@ export const founder = {
     writing: "The Founder is writing.",
     writingLabel: "The Founder is writing",
     waitingForFounder: "The Founder is working on it. This page updates by itself.",
-    founderIsWorking: (doing: string): string => `The Founder is working: ${doing}…`,
+    founderIsWorking: (doing: string, elapsed: string): string =>
+      `The Founder is working: ${doing}…${elapsed ? ` (${elapsed})` : ""}`,
     failureTitle: "The Founder could not answer.",
     failureNext: "Send your message again to try once more.",
     message: "Message to the Founder",

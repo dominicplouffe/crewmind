@@ -61,9 +61,13 @@ class FounderWorker:
                 )
             )
         for drafting_id in due:
-            await self._turn.take(
-                drafting_id, self._publisher(drafting_id), self._progress(drafting_id)
-            )
+            try:
+                await self._turn.take(
+                    drafting_id, self._publisher(drafting_id), self._progress(drafting_id)
+                )
+            finally:
+                if self._hub is not None:
+                    self._hub.release(f"drafting:{drafting_id}")
             await self._finish_quick(drafting_id)
         return len(due)
 
@@ -79,13 +83,15 @@ class FounderWorker:
         return publish
 
     def _progress(self, drafting_id: str):
-        """P17: what the Founder is doing, step by step, to whoever is watching."""
+        """P17: what the Founder is doing and since when, step by step, to whoever is
+        watching and to whoever starts watching while it is still doing it."""
         if self._hub is None:
             return None
-        hub = self._hub
+        hub, clock = self._hub, self._clock
 
         def publish(text: str) -> None:
-            hub.publish(f"drafting:{drafting_id}", {"working": text})
+            told = {"working": text, "since": clock().isoformat()}
+            hub.hold(f"drafting:{drafting_id}", told)
 
         return publish
 

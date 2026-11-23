@@ -21,6 +21,7 @@ import { QuickProgress } from "./QuickProgress";
 import { Readiness } from "./Readiness";
 import { StartForm } from "./StartForm";
 import { useDrafting } from "./useDrafting";
+import { WorkingLine } from "./WorkingLine";
 
 function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
   const words = t.founder;
@@ -66,9 +67,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         ) : null}
         <Conversation lines={visibleLines(view.lines, talking ? view.questions : [])} reply={reply} />
         {stage === "founder" && !reply ? (
-          <p className="quiet" role="status" data-testid="waiting-for-founder">
-            {state.working ? words.talk.founderIsWorking(state.working) : words.talk.waitingForFounder}
-          </p>
+          <WorkingLine doing={state.working} since={state.workingSince} />
         ) : null}
         {view.failure && view.state === "drafting" && stage !== "founder" ? (
           isNoModelFailure(view.failure) ? (

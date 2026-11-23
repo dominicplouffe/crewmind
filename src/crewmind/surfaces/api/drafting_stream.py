@@ -28,7 +28,7 @@ def topic(drafting_id: str) -> str:
 
 def live_event(told: dict[str, Any]) -> str:
     """The Founder's words as it writes them (`reply`), or what it is doing while it
-    works (`working`). Both are live only: neither is stored (FND-1, P17)."""
+    works and since when (`working`). Both are live only: neither is stored (FND-1, P17)."""
     return sse("working" if "working" in told else "reply", told)
 
 
@@ -45,6 +45,10 @@ async def drafting_stream(
     queue = hub.subscribe(topic(drafting_id))
     idle, seen = 0.0, ""
     try:
+        doing = hub.holding(topic(drafting_id))
+        if doing is not None:
+            # Whoever opens or reloads the page mid-turn is told what the Founder is doing.
+            yield live_event(doing)
         while stop is None or not stop.is_set():
             stored: list[str] = []
             async with executor.sessions() as session:
