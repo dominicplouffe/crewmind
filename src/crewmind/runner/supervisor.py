@@ -22,7 +22,10 @@ from crewmind.domain.conversation import sessions as chat_sessions
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.model import HEARTBEAT_EVERY, RunKind
 from crewmind.domain.execution.runs import Lease
+from crewmind.domain.models.service import SECRET_OWNER
+from crewmind.domain.secrets.store import SecretStore
 from crewmind.domain.settings.service import SettingsService
+from crewmind.gateway.registry import LOOP
 from crewmind.jobs.nudge import nudge, pause
 from crewmind.runner.sandbox import Sandbox, SandboxSpec
 from crewmind.storage.models import Artifact, Project, Seat
@@ -45,6 +48,7 @@ class Runner:
         blobs: artifacts.BlobStore,
         workers: int,
         heartbeat_seconds: float = HEARTBEAT_EVERY.total_seconds(),
+        secrets: SecretStore | None = None,
     ) -> None:
         self.id = f"runner-{uuid.uuid4().hex[:8]}"
         self._sessions = sessions
@@ -56,6 +60,7 @@ class Runner:
         self._blobs = blobs
         self._workers = workers
         self._heartbeat_seconds = heartbeat_seconds
+        self._secrets = secrets
         self._tasks: set[asyncio.Task[None]] = set()
 
     @property
@@ -86,6 +91,14 @@ class Runner:
         while self._tasks:
             await asyncio.gather(*list(self._tasks), return_exceptions=True)
 
+    async def _login(self, lease: Lease) -> str | None:
+        """The login a command-line agent needs, for a run that one drives (LLM-8). Every
+        other run is given no model credential at all (P3, INV-6)."""
+        if lease.harness == LOOP or lease.credential_id is None or self._secrets is None:
+            return None
+        async with self._sessions() as session:
+            return await self._secrets.reveal(session, (SECRET_OWNER, lease.credential_id), "key")
+
     async def _execute(self, lease: Lease, warm: tuple[str, int] | None = None) -> None:
         spec = SandboxSpec(
             run_id=lease.run_id,
@@ -94,6 +107,10 @@ class Runner:
             api_url=self._api_url,
             workspace=self._workspaces / lease.project_id,
             warm=warm,
+            harness=lease.harness,
+            model=lease.model,
+            effort=lease.effort,
+            login=await self._login(lease),
         )
         spec.workspace.mkdir(parents=True, exist_ok=True)
         await self._before(lease, spec.workspace)

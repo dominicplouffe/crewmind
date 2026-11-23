@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import os
+import signal
 import sys
 import threading
 from collections.abc import Callable, Sequence
@@ -18,6 +19,7 @@ from typing import Any, Protocol
 
 import httpx
 
+from crewmind.gateway.registry import LOOP
 from crewmind.runner.agent import DONE, WARM_FLAG, Stop, agent_loop
 from crewmind.runner.containers import (
     CONTAINER_PATH,
@@ -25,6 +27,7 @@ from crewmind.runner.containers import (
     RUN_LABEL,
     WORKSPACE,
     confinement,
+    container_user,
     docker_client,
     hand_over,
     host_of,
@@ -42,6 +45,13 @@ class SandboxSpec:
     warm: tuple[str, int] | None = None
     """For a chat run: the agent and the generation of its chat session. A sandbox that
     keeps warm processes reuses one for the same pair (MSG-11)."""
+    harness: str = LOOP
+    """What drives the model in this run, pinned at lease (EXE-6, LLM-8)."""
+    model: str = ""
+    effort: str = ""
+    login: str | None = None
+    """The login of a command-line agent, for a run that one drives. It is the one model
+    credential that enters a sandbox (LLM-8, INV-6): such an agent cannot use the gateway."""
 
 
 class SandboxHandle(Protocol):
@@ -58,16 +68,43 @@ class Sandbox(Protocol):
     async def start(self, spec: SandboxSpec) -> SandboxHandle: ...
 
 
+HARNESS_MODULES = {
+    LOOP: "crewmind.runner.agent",
+    "claude_code": "crewmind.runner.cli.claude",
+    "codex": "crewmind.runner.cli.codex",
+    "gemini_cli": "crewmind.runner.cli.gemini",
+    "opencode": "crewmind.runner.cli.opencode",
+}
+"""The module that runs each harness inside the sandbox (LLM-8). Every one but the loop
+drives a vendor's own command-line agent."""
+
+PRIVATE_DIR = "/run/crewmind"
+PRIVATE_DIR_BYTES = 64 * 1024**2
+"""EXE-13: where a command-line agent keeps its login and its own state in a container: a
+small, non-executable in-memory filesystem outside the workspace, gone with the run."""
+
+
+def harness_command(spec: SandboxSpec, python: str = "python") -> list[str]:
+    return [python, "-I", "-m", HARNESS_MODULES[spec.harness]]
+
+
 def sandbox_environment(spec: SandboxSpec) -> dict[str, str]:
     """Everything a sandbox process is given. Built from nothing, never from the server's
-    own environment, so no secret can ride along (INV-6, EXE-13)."""
-    return {
+    own environment, so no secret can ride along (INV-6, EXE-13). A run driven by a
+    command-line agent is also given that agent's login, and nothing else of the server."""
+    environment = {
         "CREWMIND_RUN_TOKEN": spec.token,
         "CREWMIND_AGENT_API": spec.api_url,
         "PATH": os.defpath,
         "HOME": str(spec.workspace),
         "LANG": "C.UTF-8",
     }
+    if spec.harness != LOOP:
+        environment["CREWMIND_MODEL"] = spec.model
+        environment["CREWMIND_EFFORT"] = spec.effort
+    if spec.login is not None:
+        environment["CREWMIND_HARNESS_LOGIN"] = spec.login
+    return environment
 
 
 class _TaskHandle:
@@ -120,6 +157,10 @@ class _ProcessHandle:
         return await self._process.wait()
 
     async def kill(self) -> None:
+        # The harness leads a process group of its own, so a command-line agent it
+        # started, and anything that agent started, ends with it.
+        with contextlib.suppress(ProcessLookupError, PermissionError):
+            os.killpg(self._process.pid, signal.SIGKILL)
         with contextlib.suppress(ProcessLookupError):
             self._process.kill()
         await self._process.wait()
@@ -168,21 +209,24 @@ class UnisolatedSandbox:
     async def _spawn(self, spec: SandboxSpec, *flags: str) -> asyncio.subprocess.Process:
         spec.workspace.mkdir(parents=True, exist_ok=True)
         piped = asyncio.subprocess.PIPE if flags else asyncio.subprocess.DEVNULL
+        environment = {**sandbox_environment(spec), "PYTHONPATH": os.pathsep.join(sys.path)}
+        if spec.harness != LOOP:
+            # A command-line agent is found where the server's user installed it.
+            environment["PATH"] = os.environ.get("PATH", os.defpath)
         return await asyncio.create_subprocess_exec(
-            sys.executable,
-            "-I",
-            "-m",
-            "crewmind.runner.agent",
+            *harness_command(spec, sys.executable),
             *flags,
             cwd=spec.workspace,
-            env={**sandbox_environment(spec), "PYTHONPATH": os.pathsep.join(sys.path)},
+            env=environment,
             stdin=piped,
             stdout=piped,
             stderr=asyncio.subprocess.DEVNULL,
+            start_new_session=True,
         )
 
     async def start(self, spec: SandboxSpec) -> SandboxHandle:
-        if spec.warm is None:
+        if spec.warm is None or spec.harness != LOOP:
+            # A command-line agent starts fresh for every run; only the loop stays warm.
             return _ProcessHandle(await self._spawn(spec))
         seat_id, generation = spec.warm
         if seat_id in self._answering:
@@ -230,10 +274,6 @@ class UnisolatedSandbox:
         }
 
 
-HARNESS_COMMAND = ("python", "-I", "-m", "crewmind.runner.agent")
-"""What a sandbox container runs: the harness loop from the agent image (LLM-8)."""
-
-
 class _ContainerHandle:
     def __init__(self, container: Any, release: Callable[[], None]) -> None:
         self._container = container
@@ -273,10 +313,10 @@ class ContainerSandbox:
         install_id: str,
         cpus: int,
         memory_bytes: int,
-        command: Sequence[str] = HARNESS_COMMAND,
+        command: Sequence[str] | None = None,
     ) -> None:
         self._docker: Any = docker_client()
-        self._command = list(command)
+        self._command = list(command) if command is not None else None
         self._server: Any | None = own_container(self._docker)
         self._image = image
         self._install_id = install_id
@@ -340,19 +380,24 @@ class ContainerSandbox:
     async def start(self, spec: SandboxSpec) -> SandboxHandle:
         spec.workspace.mkdir(parents=True, exist_ok=True)
 
+        user, group = container_user()
+        private = f"size={PRIVATE_DIR_BYTES},mode=0700,uid={user},gid={group},noexec,nosuid"
+
         def run() -> Any:
             hand_over(spec.workspace)
             with self._networks:
                 return self._docker.containers.run(
                     self._image,
-                    self._command,
+                    self._command or harness_command(spec),
                     detach=True,
                     init=True,
                     environment={
                         **sandbox_environment(spec),
                         "HOME": WORKSPACE,
                         "PATH": CONTAINER_PATH,
+                        "CREWMIND_PRIVATE_DIR": PRIVATE_DIR,
                     },
+                    tmpfs={PRIVATE_DIR: private},
                     working_dir=WORKSPACE,
                     volumes={str(spec.workspace): {"bind": WORKSPACE, "mode": "rw"}},
                     network=self._join(spec.project_id, spec.api_url),

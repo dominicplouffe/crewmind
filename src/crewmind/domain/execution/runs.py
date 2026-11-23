@@ -104,6 +104,9 @@ class Lease:
     token: str
     harness: str
     timeout: timedelta
+    model: str = ""
+    effort: str = ""
+    credential_id: str | None = None
 
 
 def subject(project: Project) -> Subject:
@@ -299,6 +302,9 @@ async def lease(
                 token=plain,
                 harness=pinned.harness,
                 timeout=timedelta(seconds=int(values["run.timeout"])),
+                model=pinned.model,
+                effort=pinned.effort,
+                credential_id=pinned.credential_id,
             )
         )
     return leases

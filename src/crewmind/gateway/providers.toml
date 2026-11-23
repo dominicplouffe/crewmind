@@ -104,3 +104,56 @@ native_search = false
 default_harness = "loop"
 classes = [["frontier", "frontier"], ["balanced", "balanced"], ["fast", "fast"]]
 default_lineup = { frontier = "mock-frontier", balanced = "mock-balanced", fast = "mock-fast" }
+
+# Logins of vendors' own command-line agents (LLM-2, LLM-8). The credential is a login,
+# not an API key: the agent runs inside the sandbox and holds it there, so the gateway
+# makes no call with it. `default_harness` names the agent. A lineup entry of "default"
+# means the agent's own default model.
+
+[providers.claude_code]
+label = "Claude Code (subscription login)"
+prefix = "claude_code"
+needs_base_url = false
+images = true
+native_search = true
+default_harness = "claude_code"
+credential = "login"
+login_hint = "Run `claude setup-token` on your own machine and paste the token it prints."
+classes = [["fable|opus", "frontier"], ["sonnet", "balanced"], ["haiku", "fast"]]
+default_lineup = { frontier = "opus", balanced = "sonnet", fast = "haiku" }
+
+[providers.codex]
+label = "Codex (ChatGPT login)"
+prefix = "codex"
+needs_base_url = false
+images = true
+native_search = true
+default_harness = "codex"
+credential = "login"
+login_hint = "Run `codex login` on your own machine and paste the contents of ~/.codex/auth.json."
+classes = []
+default_lineup = { frontier = "default", balanced = "default", fast = "default" }
+
+[providers.gemini_cli]
+label = "Gemini CLI (Google login)"
+prefix = "gemini_cli"
+needs_base_url = false
+images = true
+native_search = true
+default_harness = "gemini_cli"
+credential = "login"
+login_hint = "Sign in with `gemini` on your own machine and paste the contents of ~/.gemini/oauth_creds.json."
+classes = [["flash-lite", "fast"], ["flash", "balanced"], ["pro", "frontier"]]
+default_lineup = { frontier = "default", balanced = "default", fast = "default" }
+
+[providers.opencode]
+label = "OpenCode (its own login)"
+prefix = "opencode"
+needs_base_url = false
+images = false
+native_search = false
+default_harness = "opencode"
+credential = "login"
+login_hint = "Run `opencode auth login` on your own machine and paste the contents of ~/.local/share/opencode/auth.json."
+classes = []
+default_lineup = { frontier = "default", balanced = "default", fast = "default" }

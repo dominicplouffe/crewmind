@@ -22,6 +22,7 @@ from crewmind.domain.execution.runs import Pinned, Wait
 from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import SettingsService, Subject
 from crewmind.gateway.registry import (
+    LOOP,
     Effort,
     ModelClass,
     ProviderInfo,
@@ -43,9 +44,17 @@ from crewmind.storage.models import (
 LLM_6 = rules.register(
     Rule("LLM-6", "A seat runs only if a credential pays it and it can do its job.")
 )
+LLM_8 = rules.register(
+    Rule("LLM-8", "The gateway never calls a model with a login, and meters every other call.")
+)
 LLM_2 = rules.register(Rule("LLM-2", "Model credentials are named, encrypted and never shown."))
 
 SECRET_OWNER = "model_credential"
+KIND_KEY = "model"
+"""An API key: the gateway holds it and makes every call with it (LLM-2, P3)."""
+KIND_LOGIN = "subscription"
+"""The login of a vendor's command-line agent, which runs inside the sandbox (LLM-2, LLM-8)."""
+PAYING_KINDS = (KIND_KEY, KIND_LOGIN)
 MOCK = "mock"
 SEARCH_PROVIDERS = ("brave",)
 
@@ -220,13 +229,20 @@ async def platform_credential(
     session: AsyncSession, project: Project, now: datetime
 ) -> ModelCredential | None:
     """The credential that pays the platform's own calls for a project: its primary, or
-    the fallback while the primary's breaker is open (LLM-7, LLM-14)."""
+    the fallback while the primary's breaker is open (LLM-7, LLM-14). The platform calls
+    models through the gateway, so only an API key can pay: a login is passed over (LLM-8)."""
     attached = await _attached(session, project.id)
-    chosen = attached.get((Use.PRIMARY, ""))
-    fallback = attached.get((Use.FALLBACK, ""))
+    usable = {use: row for (use, _), row in attached.items() if row.kind == KIND_KEY}
+    chosen, fallback = usable.get(Use.PRIMARY), usable.get(Use.FALLBACK)
     if chosen is not None and not breaker_allows(chosen, now) and fallback is not None:
         return fallback
     return chosen or fallback
+
+
+async def paid_by_login_only(session: AsyncSession, project_id: str) -> bool:
+    """Whether the project has credentials and every one is a login (LLM-8, LLM-14)."""
+    attached = await _attached(session, project_id)
+    return bool(attached) and all(row.kind == KIND_LOGIN for row in attached.values())
 
 
 class SeatResolver:
@@ -250,7 +266,7 @@ class SeatResolver:
         credential = await paying_credential(session, project, seat, now)
         if credential is None:
             if self._mock_default:
-                return Pinned(MOCK, f"mock-{model_class}", None, "loop", effort)
+                return Pinned(MOCK, f"mock-{model_class}", None, LOOP, effort)
             raise Refusal(
                 "no_credential",
                 "no credential on the project pays for this seat.",
@@ -276,7 +292,9 @@ class SeatResolver:
             )
         seat.substitution = None
         if seat.override_model:
-            return Pinned(provider.name, seat.override_model, credential.id, "loop", effort)
+            return Pinned(
+                provider.name, seat.override_model, credential.id, provider.default_harness, effort
+            )
         lineup = await lineup_of(session, credential)
         actual = nearest_class(model_class, set(lineup))
         if actual is None:

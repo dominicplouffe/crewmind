@@ -7,6 +7,7 @@ import tomllib
 from enum import StrEnum
 from functools import cache
 from importlib import resources
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
@@ -39,6 +40,15 @@ class ProviderInfo(BaseModel):
     default_harness: str
     classes: tuple[tuple[str, ModelClass], ...]
     default_lineup: dict[ModelClass, str]
+    credential: Literal["key", "login"] = "key"
+    """The shape of its credential (LLM-1): an API key the gateway holds, or the login of
+    a vendor's own command-line agent, which runs inside the sandbox (LLM-2, LLM-8)."""
+    login_hint: str = ""
+    """What a person pastes as a login credential, in plain words."""
+
+    @property
+    def is_login(self) -> bool:
+        return self.credential == "login"
 
     def classify(self, model: str) -> ModelClass | None:
         """The class of a model id, or None when no pattern knows it (LLM-4)."""
@@ -55,6 +65,13 @@ def providers() -> dict[str, ProviderInfo]:
         name: ProviderInfo.model_validate({"name": name, **fields})
         for name, fields in tomllib.loads(text)["providers"].items()
     }
+
+
+CLI_DEFAULT_MODEL = "default"
+"""A lineup entry that means: the command-line agent's own default model (LLM-4, P12)."""
+
+LOOP = "loop"
+"""The vendor-neutral harness loop, which reaches models through the gateway (LLM-8)."""
 
 
 def _version_key(model: str) -> tuple[int, ...]:

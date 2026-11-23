@@ -78,7 +78,7 @@ async def credentials_of(session: AsyncSession, person_id: str) -> list[str]:
         .where(
             ModelCredential.owner_id == person_id,
             ModelCredential.state == "active",
-            ModelCredential.kind == "model",
+            ModelCredential.kind.in_(("model", "subscription")),
         )
         .order_by(ModelCredential.name)
     )

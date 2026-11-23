@@ -22,6 +22,7 @@ from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
+from crewmind.domain.secrets.store import SecretStore
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.founder import FounderWorker
@@ -122,6 +123,7 @@ def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKE
         workspaces=runtime.config.data_dir / "workspaces",
         blobs=runtime.services.blobs,
         workers=workers,
+        secrets=SecretStore(runtime.config.master_key_file),
     )
 
 

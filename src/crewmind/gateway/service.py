@@ -23,10 +23,14 @@ from crewmind.domain.execution import runs
 from crewmind.domain.execution.context_pack import output_standard
 from crewmind.domain.execution.model import CAP_WARNING_SHARE, RunKind
 from crewmind.domain.models.service import (
+    KIND_KEY,
+    KIND_LOGIN,
     LLM_6,
+    LLM_8,
     MOCK,
     SECRET_OWNER,
     lineup_of,
+    paid_by_login_only,
     platform_credential,
     provider_of,
     record_auth_failure,
@@ -41,7 +45,14 @@ from crewmind.domain.settings.service import INSTALL_SUBJECT, SettingsService, S
 from crewmind.gateway import outbound
 from crewmind.gateway.litellm_provider import is_auth_error, is_transient_error
 from crewmind.gateway.mock import MockProvider
-from crewmind.gateway.protocol import CompletionRequest, CompletionResponse, Turn
+from crewmind.gateway.protocol import (
+    CompletionRequest,
+    CompletionResponse,
+    HarnessReport,
+    ReportOutcome,
+    TokenUsage,
+    Turn,
+)
 from crewmind.gateway.registry import ModelClass, nearest_class, providers
 from crewmind.live import StreamHub
 from crewmind.storage.models import LedgerLine, ModelCredential, Project, Run, RunStep, Seat
@@ -114,6 +125,14 @@ class Gateway:
             if credential_id is not None:
                 credential = await session.get(ModelCredential, credential_id)
                 assert credential is not None
+                if credential.kind == KIND_LOGIN:
+                    raise Refusal(
+                        "login_credential",
+                        f"This run is paid by {credential.name}, the login of a command-line "
+                        "agent. The gateway makes no model call with a login.",
+                        rule=LLM_8.id,
+                        hint="The agent calls its own provider and reports what it used.",
+                    )
                 base_url = credential.base_url
                 key = await self._secrets.reveal(session, (SECRET_OWNER, credential.id), "key")
         on_delta: Callable[[str], None] | None = None
@@ -200,6 +219,98 @@ class Gateway:
                 )
         return response
 
+    async def report(self, token: str | None, told: HarnessReport) -> ReportOutcome:
+        """What a command-line agent says about its own model calls (LLM-8, LLM-9, GOV-6).
+
+        Only a run paid by a login may report: every other run is metered here, on what
+        the gateway itself saw, and a report from one is refused (P9). The usage is booked
+        like any model call, the text is streamed to people watching a chat, a failure
+        feeds the circuit breaker, and at the per-run cap the agent is told to stop."""
+        now = self._clock()
+        async with self._sessions() as session, session.begin():
+            run = await runs.run_for_token(session, token)
+            if run is None:
+                raise unauthenticated()
+            credential = (
+                await session.get(ModelCredential, run.credential_id) if run.credential_id else None
+            )
+            if credential is None or credential.kind != KIND_LOGIN:
+                raise Refusal(
+                    "not_a_login_run",
+                    "This run's model calls are metered at the gateway. Only a run on a "
+                    "command-line agent's login reports its own usage.",
+                    rule=LLM_8.id,
+                    hint="Call the gateway for a model; it does the metering.",
+                )
+            project = await session.get(Project, run.project_id)
+            seat = await session.get(Seat, run.seat_id)
+            assert project is not None
+            assert seat is not None
+            run_id, credential_id = run.id, credential.id
+            if told.login is not None:
+                await self._secrets.put(
+                    session,
+                    (SECRET_OWNER, credential.id),
+                    "key",
+                    told.login.get_secret_value(),
+                    now,
+                )
+            if told.usage is not None:
+                if record_success(credential):
+                    await conversation.platform_line(
+                        session,
+                        project.id,
+                        f"The credential {credential.name} is working again.",
+                        now,
+                        detail={"kind": "breaker closed"},
+                    )
+                await budget.record(
+                    session,
+                    self._settings,
+                    project,
+                    Usage(**told.usage.model_dump()),
+                    now,
+                    run_id=run.id,
+                    seat_id=run.seat_id,
+                    credential_id=credential.id,
+                    provider=run.provider or credential.provider,
+                    model=run.model or "",
+                )
+                run.reached_model = True
+            if told.usage is not None or told.text:
+                session.add(
+                    RunStep(
+                        run_id=run.id,
+                        kind=MODEL_CALL,
+                        data={
+                            "text": told.text,
+                            "tool_calls": [],
+                            "usage": (told.usage or TokenUsage()).model_dump(),
+                            "reported_by": run.harness,
+                        },
+                        at=now,
+                    )
+                )
+            if told.text and run.kind == RunKind.CHAT:
+                self._hub.publish(
+                    project.id,
+                    {"type": "reply", "run_id": run.id, "seat": seat.name, "text": told.text},
+                )
+            await session.flush()
+            used = await self._wake_tokens(session, run)
+            cap = run.max_tokens
+        if told.failure is not None:
+            await self._failure(run_id, credential_id, told.failure)
+        at_cap = cap is not None and used >= cap
+        return ReportOutcome(
+            run_tokens_used=used,
+            run_tokens_cap=cap,
+            stop=at_cap,
+            reason=f"This run has used {used:,} tokens and its cap is {cap:,} (`run.max_tokens`)."
+            if at_cap
+            else "",
+        )
+
     async def platform_call(self, project_id: str, purpose: str, system: str, prompt: str) -> str:
         """A model call the platform itself makes for a project: shortening an order,
         extracting memories (LLM-14, LLM-15, P3, P9).
@@ -219,6 +330,14 @@ class Gateway:
                     hint="Raise the budget to continue.",
                 )
             credential = await platform_credential(session, project, now)
+            if credential is None and await paid_by_login_only(session, project.id):
+                raise Refusal(
+                    "platform_needs_a_key",
+                    "This project is paid by the login of a command-line agent. The platform's "
+                    "own model calls go through the server, which needs an API key.",
+                    rule=LLM_6.id,
+                    hint="Add an API-key credential as the project's fallback.",
+                )
             provider = providers()[MOCK]
             model, key, base_url = f"mock-{ModelClass.FAST}", None, None
             if credential is not None:
@@ -297,6 +416,16 @@ class Gateway:
             )
             provider = providers()[MOCK]
             model, key, base_url = f"mock-{wanted}", None, None
+            if credential is not None and credential.kind != KIND_KEY:
+                raise Refusal(
+                    "founder_needs_a_key",
+                    f"The Founder is set to use {credential.name}, which is the login of a "
+                    "command-line agent. The Founder calls its model through the server, "
+                    "which needs an API key.",
+                    rule=LLM_6.id,
+                    hint="An admin sets the Founder's model in Settings, under Founder, to a "
+                    "credential that is an API key.",
+                )
             if credential is not None:
                 provider = provider_of(credential)
                 lineup = await lineup_of(session, credential)
@@ -363,6 +492,12 @@ class Gateway:
         return response
 
     async def _failed(self, run_id: str, credential_id: str | None, error: Exception) -> None:
+        if is_auth_error(error):
+            await self._failure(run_id, credential_id, "auth")
+        elif is_transient_error(error):
+            await self._failure(run_id, credential_id, "transient")
+
+    async def _failure(self, run_id: str, credential_id: str | None, failure: str) -> None:
         """Account for a provider failure: transient ones feed the circuit breaker, and
         authentication failures count toward pausing the project (LLM-11, PRJ-2)."""
         if credential_id is None:
@@ -375,7 +510,7 @@ class Gateway:
             assert run is not None
             project = await session.get(Project, run.project_id)
             assert project is not None
-            if is_auth_error(error):
+            if failure == "auth":
                 if record_auth_failure(credential) and project.state in HOLDABLE:
                     await lifecycle.add_hold(
                         session,
@@ -393,7 +528,7 @@ class Gateway:
                         now,
                         detail={"kind": "credential dead", "alarm": True},
                     )
-            elif is_transient_error(error) and record_transient_failure(credential, now):
+            elif record_transient_failure(credential, now):
                 minutes = credential.breaker_cooloff_seconds // 60
                 await conversation.platform_line(
                     session,

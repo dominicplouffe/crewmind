@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Literal
 
 from pydantic import BaseModel, Field, SecretStr
@@ -55,7 +56,10 @@ SEAT_OVERRIDDEN = event_type("seat.model_overridden", "A seat's model choice was
 class AddCredentialInput(BaseModel):
     name: str = Field(min_length=1, max_length=100, description="A name to refer to it by.")
     provider: str = Field(description="A provider from `models providers`, or brave for search.")
-    key: SecretStr = Field(description="The API key. It is encrypted and never shown again.")
+    key: SecretStr = Field(
+        description="The API key, or for a command-line agent its login: the token or the "
+        "contents of its login file. It is encrypted and never shown again."
+    )
     base_url: str | None = Field(
         default=None, description="The endpoint, where the provider needs one."
     )
@@ -127,6 +131,8 @@ class ProviderItem(BaseModel):
     needs_base_url: bool
     images: bool
     ceiling: int | None
+    credential: str = Field(description="key, or login for a command-line agent (LLM-2).")
+    login_hint: str = Field(description="What to paste as a login, in plain words.")
 
 
 class ProviderList(BaseModel):
@@ -138,12 +144,53 @@ class CeilingInput(BaseModel):
     max_concurrent: int = Field(ge=1, le=1000, description="Runs allowed at once, install-wide.")
 
 
+LOGIN_FILES = ("codex", "gemini_cli", "opencode")
+"""Providers whose login is a file of JSON, pasted whole (LLM-2)."""
+
+
+def _kind_of(payload: AddCredentialInput, is_search: bool) -> str:
+    """The credential's kind, from its provider (LLM-2). A login pasted in the wrong shape
+    is refused here, where the person can fix it, and not in an agent's first run."""
+    if is_search:
+        return "search"
+    provider = providers()[payload.provider]
+    if not provider.is_login:
+        return service.KIND_KEY
+    if payload.provider in LOGIN_FILES:
+        try:
+            pasted = json.loads(payload.key.get_secret_value())
+        except ValueError:
+            pasted = None
+        if not isinstance(pasted, dict):
+            raise Refusal(
+                "login_not_readable",
+                f"That is not the login file of {provider.label}: it is not a JSON object.",
+                rule=LLM_2.id,
+                hint=provider.login_hint,
+            )
+    return service.KIND_LOGIN
+
+
+def _refuse_login(row: ModelCredential, action: str) -> None:
+    """LLM-8: the gateway makes no call with a login, so it cannot list its models or
+    test it. The command-line agent holds it, inside the sandbox."""
+    if row.kind == service.KIND_LOGIN:
+        raise Refusal(
+            "login_credential",
+            f"{row.name} is the login of a command-line agent, so the server cannot {action} "
+            "with it. Its first run shows whether it works.",
+            rule=LLM_2.id,
+            hint="To choose its models, override the lineup.",
+        )
+
+
 def _store(context: Context) -> SecretStore:
     return SecretStore(services_of(context).master_key_file)
 
 
 async def _item(context: Context, row: ModelCredential) -> CredentialItem:
-    lineup = await service.lineup_of(context.session, row) if row.kind == "model" else {}
+    paying = row.kind in service.PAYING_KINDS
+    lineup = await service.lineup_of(context.session, row) if paying else {}
     return CredentialItem(
         name=row.name,
         provider=row.provider,
@@ -208,7 +255,7 @@ async def add_credential(context: Context, payload: AddCredentialInput) -> Crede
     row = ModelCredential(
         name=payload.name,
         provider=payload.provider,
-        kind="search" if is_search else "model",
+        kind=_kind_of(payload, is_search),
         base_url=payload.base_url,
         owner_id=context.caller.actor_id,
         state=CredentialState.ACTIVE,
@@ -296,6 +343,7 @@ async def delete_credential(context: Context, payload: CredentialRef) -> Credent
 async def refresh_lineup(context: Context, payload: CredentialRef) -> CredentialItem:
     """LLM-4: lineups are picked automatically from the models the credential can reach."""
     row = await _mine(context, payload.name)
+    _refuse_login(row, "read its model list")
     key = await _store(context).reveal(context.session, (SECRET_OWNER, row.id), "key")
     models = await outbound.list_models(service.provider_of(row), key, row.base_url)
     lineup = await service.set_lineup(context.session, row, models, context.now)
@@ -357,6 +405,7 @@ async def override_lineup(context: Context, payload: OverrideLineupInput) -> Cre
 async def smoke(context: Context, payload: CredentialRef) -> SmokeResult:
     """LLM-10: one tiny real call, metered on the install's ledger."""
     row = await _mine(context, payload.name)
+    _refuse_login(row, "make a test call")
     provider = service.provider_of(row)
     lineup = await service.lineup_of(context.session, row)
     if not lineup:
@@ -548,6 +597,8 @@ async def list_providers(context: Context, payload: Empty) -> ProviderList:
                 needs_base_url=info.needs_base_url,
                 images=info.images,
                 ceiling=ceilings.get(info.name),
+                credential=info.credential,
+                login_hint=info.login_hint,
             )
             for info in providers().values()
         ]

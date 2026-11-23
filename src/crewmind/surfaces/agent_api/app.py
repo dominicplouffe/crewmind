@@ -24,7 +24,7 @@ from crewmind.catalog.surfaces import Surface, exposed_on
 from crewmind.domain.execution import runs
 from crewmind.domain.execution.agent import RunAuthenticator
 from crewmind.domain.settings.service import SettingsService
-from crewmind.gateway.protocol import CompletionRequest, ToolSpec
+from crewmind.gateway.protocol import CompletionRequest, HarnessReport, ToolSpec
 from crewmind.gateway.service import Gateway
 from crewmind.storage.models import RunStep
 
@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 AGENT_PREFIX = "/agent/v1"
 GATEWAY_PATH = "/gateway/v1/complete"
+REPORT_PATH = "/gateway/v1/report"
 TOOL_CALL = "tool call"
 
 
@@ -165,6 +166,16 @@ def add_agent_api(
             )
         return JSONResponse(response.model_dump(mode="json"))
 
+    async def report(request: Request, payload: HarnessReport) -> JSONResponse:
+        """What a command-line agent reports about its own model calls (LLM-8, LLM-9)."""
+        try:
+            outcome = await gateway.report(bearer(request), payload)
+        except Refusal as refusal:
+            status = 401 if refusal.envelope.kind is RefusalKind.UNAUTHENTICATED else 403
+            return JSONResponse(refusal.envelope.model_dump(), status_code=status)
+        return JSONResponse(outcome.model_dump(mode="json"))
+
+    router.add_api_route(REPORT_PATH, report, methods=["POST"], include_in_schema=False)
     router.add_api_route(f"{AGENT_PREFIX}/tools", tools, methods=["GET"], include_in_schema=False)
     router.add_api_route(GATEWAY_PATH, complete, methods=["POST"], include_in_schema=False)
 

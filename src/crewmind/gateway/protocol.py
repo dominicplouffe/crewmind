@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 
 
 class ToolSpec(BaseModel):
@@ -35,10 +35,32 @@ class CompletionRequest(BaseModel):
 
 
 class TokenUsage(BaseModel):
-    input: int = 0
-    output: int = 0
-    cache_write: int = 0
-    cache_read: int = 0
+    input: int = Field(default=0, ge=0)
+    output: int = Field(default=0, ge=0)
+    cache_write: int = Field(default=0, ge=0)
+    cache_read: int = Field(default=0, ge=0)
+
+
+class HarnessReport(BaseModel):
+    """What a command-line agent reports about its own model calls (LLM-8, LLM-9). Such an
+    agent holds its login and calls its provider itself, so the gateway is told, not asked."""
+
+    usage: TokenUsage | None = Field(default=None, description="Tokens since the last report.")
+    text: str = Field(default="", description="What the model wrote since the last report.")
+    failure: Literal["auth", "transient"] | None = Field(
+        default=None, description="The provider refused the login, or is failing or out of plan."
+    )
+    detail: str = Field(default="", max_length=2000)
+    login: SecretStr | None = Field(
+        default=None, description="The login, when the agent renewed it during the run."
+    )
+
+
+class ReportOutcome(BaseModel):
+    run_tokens_used: int
+    run_tokens_cap: int | None
+    stop: bool = Field(description="The run is at its cap: end the agent now (GOV-6).")
+    reason: str = ""
 
 
 class CompletionResponse(BaseModel):
