@@ -1,7 +1,8 @@
 """Secrets encrypted at rest under the install master key (ACC-6, NFR-12, INV-6).
 
-Values are sealed with AES-256-GCM. Each row records which key sealed it, so a rotation
-can be checked and an interrupted one finished.
+Values are sealed with AES-256-GCM. Each value is bound to its owner and name as associated
+data, so a sealed value moved onto another row no longer opens. Each row records which key
+sealed it, so a rotation can be checked and an interrupted one finished.
 """
 
 from __future__ import annotations
@@ -60,12 +61,22 @@ class MasterKey:
         with os.fdopen(descriptor, "w", encoding="ascii") as file:
             file.write(base64.b64encode(self._raw).decode("ascii"))
 
-    def seal(self, value: str) -> tuple[bytes, bytes]:
+    def seal(self, value: str, bound_to: bytes | None = None) -> tuple[bytes, bytes]:
         nonce = secrets.token_bytes(_NONCE_BYTES)
-        return nonce, self._cipher.encrypt(nonce, value.encode(), None)
+        return nonce, self._cipher.encrypt(nonce, value.encode(), bound_to)
 
-    def open(self, nonce: bytes, ciphertext: bytes) -> str:
-        return self._cipher.decrypt(nonce, ciphertext, None).decode()
+    def open(self, nonce: bytes, ciphertext: bytes, bound_to: bytes | None = None) -> str:
+        return self._cipher.decrypt(nonce, ciphertext, bound_to).decode()
+
+
+def binding(owner_kind: str, owner_id: str, name: str) -> bytes:
+    """What a value is sealed to: its owner and its name (CON-2, finding 10 of the phase 7.B
+    review). The separator cannot occur in any of the three."""
+    return "\x1f".join((owner_kind, owner_id, name)).encode()
+
+
+def _binding_of(row: StoredSecret) -> bytes:
+    return binding(row.owner_kind, row.owner_id, row.name)
 
 
 def ensure_master_key(path: Path) -> bool:
@@ -88,7 +99,7 @@ class SecretStore:
         self, session: AsyncSession, owner: tuple[str, str], name: str, value: str, now: datetime
     ) -> None:
         key = MasterKey.read(self._key_file)
-        nonce, ciphertext = key.seal(value)
+        nonce, ciphertext = key.seal(value, binding(owner[0], owner[1], name))
         row = await self._row(session, owner, name)
         if row is None:
             row = StoredSecret(
@@ -98,16 +109,56 @@ class SecretStore:
                 nonce=nonce,
                 ciphertext=ciphertext,
                 key_id=key.id,
+                bound=True,
                 created_at=now,
             )
             session.add(row)
         else:
-            row.nonce, row.ciphertext, row.key_id = nonce, ciphertext, key.id
+            row.nonce, row.ciphertext, row.key_id, row.bound = nonce, ciphertext, key.id, True
 
     async def reveal(self, session: AsyncSession, owner: tuple[str, str], name: str) -> str | None:
+        """The value, for the platform's own use. A value that cannot be opened as sealed to
+        this row is refused, never returned."""
         key = MasterKey.read(self._key_file)
         row = await self._row(session, owner, name)
-        return None if row is None else key.open(row.nonce, row.ciphertext)
+        if row is None:
+            return None
+        if not row.bound:
+            return self._bind(key, row)
+        try:
+            return key.open(row.nonce, row.ciphertext, _binding_of(row))
+        except InvalidTag:
+            raise Refusal(
+                "secret_unreadable",
+                f"The secret {row.name} cannot be read: it was not sealed for this place.",
+                rule=ACC_6.id,
+                hint="Replace its value.",
+            ) from None
+
+    async def delete(self, session: AsyncSession, owner: tuple[str, str], name: str) -> None:
+        row = await self._row(session, owner, name)
+        if row is not None:
+            await session.delete(row)
+
+    @staticmethod
+    def _bind(key: MasterKey, row: StoredSecret) -> str:
+        """A value stored before values were bound to their row: open it, and seal it again,
+        bound. The caller's transaction keeps the change."""
+        value = key.open(row.nonce, row.ciphertext)
+        row.nonce, row.ciphertext = key.seal(value, _binding_of(row))
+        row.key_id, row.bound = key.id, True
+        return value
+
+    async def bind_all(self, session: AsyncSession) -> int:
+        """Seal every value stored before values were bound to their row. Run once when the
+        server starts; safe to repeat. Returns how many were sealed again."""
+        key = MasterKey.read(self._key_file)
+        rows = list(
+            await session.scalars(select(StoredSecret).where(StoredSecret.bound.is_(False)))
+        )
+        for row in rows:
+            self._bind(key, row)
+        return len(rows)
 
     async def rotate(self, session: AsyncSession) -> int:
         """Re-encrypt every secret under a new key, all or nothing (ACC-6).
@@ -121,7 +172,7 @@ class SecretStore:
         rows = list(await session.scalars(select(StoredSecret)))
         for row in rows:
             try:
-                value = old.open(row.nonce, row.ciphertext)
+                value = old.open(row.nonce, row.ciphertext, _binding_of(row) if row.bound else None)
             except InvalidTag:
                 raise Refusal(
                     "secret_unreadable",
@@ -130,8 +181,8 @@ class SecretStore:
                     rule=ACC_6.id,
                     hint="Restore the matching key from a backup, then rotate again.",
                 ) from None
-            row.nonce, row.ciphertext = new.seal(value)
-            row.key_id = new.id
+            row.nonce, row.ciphertext = new.seal(value, _binding_of(row))
+            row.key_id, row.bound = new.id, True
         new.write(self.pending_key_file)
         return len(rows)
 

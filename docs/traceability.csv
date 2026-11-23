@@ -216,7 +216,7 @@ ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_secrets.py,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
 ACC-8,Your name,06-16-accounts-ACC.md,7,yes,done,test_ACC_8_a_person_sets_only_their_own_name,auth.set_name; the web sets it in Settings and first-run setup.
 CON-1,Scopes and ownership,06-17-connections-CON.md,7B,yes,not started,,
-CON-2,Secrets,06-17-connections-CON.md,7B,yes,not started,,
+CON-2,Secrets,06-17-connections-CON.md,7B,yes,partial,test_CON_2_a_sealed_value_moved_to_another_row_does_not_open,Values are sealed to their owner and name (7B.0). The rest of CON-2 arrives in 7B.1
 CON-3,Variables,06-17-connections-CON.md,7B,yes,not started,,
 CON-4,Attachment and grants,06-17-connections-CON.md,7B,yes,not started,,
 CON-5,Needs and starting,06-17-connections-CON.md,7B,yes,not started,,

@@ -22,6 +22,7 @@ from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
+from crewmind.domain.secrets.store import SecretStore
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
 from crewmind.jobs.founder import FounderWorker
@@ -112,6 +113,17 @@ def build_sandbox(runtime: Runtime) -> Sandbox:
     raise ValueError(f"sandbox mode {config.sandbox_mode} is not available yet")
 
 
+async def bind_stored_secrets(runtime: Runtime) -> None:
+    """Seal any secret stored before values were bound to their row (CON-2), before the
+    server serves anything."""
+    if not runtime.config.master_key_file.exists():
+        return
+    async with runtime.sessions() as session, session.begin():
+        bound = await SecretStore(runtime.config.master_key_file).bind_all(session)
+    if bound:
+        logger.info("sealed %d stored secrets to their owner and name", bound)
+
+
 def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKERS) -> Runner:
     return Runner(
         runtime.sessions,
@@ -140,6 +152,7 @@ def create_app(
 
     @contextlib.asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
+        await bind_stored_secrets(runtime)
         tasks: list[asyncio.Task[None]] = []
         if run_scheduler:
             scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)

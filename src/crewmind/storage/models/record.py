@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Index, Integer, LargeBinary, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Index, Integer, LargeBinary, String, Text, UniqueConstraint, false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from crewmind.storage.models.base import Base, SequenceId, UtcDateTime, new_id
@@ -76,4 +76,7 @@ class StoredSecret(Base):
     nonce: Mapped[bytes] = mapped_column(LargeBinary)
     ciphertext: Mapped[bytes] = mapped_column(LargeBinary)
     key_id: Mapped[str] = mapped_column(String(16))
+    bound: Mapped[bool] = mapped_column(default=False, server_default=false())
+    """Sealed with its owner and name as associated data (CON-2). Values stored before
+    phase 7.B are not, until the server binds them at start."""
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
