@@ -106,3 +106,68 @@ export function webAddress(url: string): string | null {
     return null;
   }
 }
+
+/** The board's columns, left to right, and the server states each one holds. */
+export const BOARD_COLUMNS = [
+  { id: "ready", states: ["ready"] },
+  { id: "progress", states: ["claimed"] },
+  { id: "review", states: ["review", "checking"] },
+  { id: "blocked", states: ["blocked"] },
+  { id: "done", states: CLOSED_STATES },
+] as const;
+
+export type ColumnId = (typeof BOARD_COLUMNS)[number]["id"] | "other";
+
+export interface BoardColumn<T> {
+  id: ColumnId;
+  tasks: T[];
+}
+
+export interface BoardTaskLike extends TaskLike {
+  requirement_id?: number | null;
+}
+
+/**
+ * Tasks in board columns. Every known column is listed, even when empty; a state this page does not
+ * know goes to an "other" column at the end, never dropped. Open work is listed oldest first (by id),
+ * closed work newest first. With a requirement, only its tasks are placed.
+ */
+export function boardColumns<T extends BoardTaskLike>(tasks: readonly T[], requirementId: number | null = null): BoardColumn<T>[] {
+  const shown = requirementId === null ? tasks : tasks.filter((task) => task.requirement_id === requirementId);
+  const known = new Set<string>(BOARD_COLUMNS.flatMap((column) => [...column.states]));
+  const columns: BoardColumn<T>[] = BOARD_COLUMNS.map((column) => {
+    const states: readonly string[] = column.states;
+    const inColumn = shown.filter((task) => states.includes(task.state));
+    inColumn.sort((a, b) => (column.id === "done" ? b.id - a.id : a.id - b.id));
+    return { id: column.id, tasks: inColumn };
+  });
+  const other = shown.filter((task) => !known.has(task.state)).sort((a, b) => a.id - b.id);
+  if (other.length > 0) columns.push({ id: "other", tasks: other });
+  return columns;
+}
+
+export interface RequirementProgress {
+  /** Tasks under the requirement that are closed as done (killed tasks are not counted at all). */
+  done: number;
+  total: number;
+  /** Who holds its open work, in the order first seen. */
+  owners: string[];
+}
+
+/** How far the tasks under one requirement have got, and who holds them. */
+export function requirementProgress(tasks: readonly (BoardTaskLike & { claimant: string | null })[], requirementId: number): RequirementProgress {
+  const mine = tasks.filter((task) => task.requirement_id === requirementId && task.state !== "killed");
+  const owners: string[] = [];
+  for (const task of mine) {
+    if (task.claimant && !isClosed(task.state) && !owners.includes(task.claimant)) owners.push(task.claimant);
+  }
+  return { done: mine.filter((task) => isClosed(task.state)).length, total: mine.length, owners };
+}
+
+/**
+ * Whether a card shows its check label: once there is something to say beyond "not yet checked", or
+ * when the task closed without a check. On open work "not yet checked" goes without saying.
+ */
+export function showsCheckLabel(task: { state: string; label: string }): boolean {
+  return task.label !== "not yet checked" || isClosed(task.state);
+}

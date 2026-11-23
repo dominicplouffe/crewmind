@@ -1,25 +1,35 @@
 /**
- * The company made visible: the chairman, the CEO, and each team with its members (CHAT-12,
- * CHAT-18, EXE-4). Each agent is a card with what it is doing now and what it has used; a card
- * opens the agent's sheet.
+ * The company made visible: the chairman, the CEO with any side seats beside it, and the teams side
+ * by side, each with its members (CHAT-12, CHAT-18, EXE-4). Each agent is a card with what it is
+ * doing now (from its runs and the tasks it holds) and its share of the crew's tokens; a card opens
+ * the agent's sheet. When the teams no longer fit side by side, the org turns into an indented list
+ * so its lines stay true.
  */
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { Users } from "lucide-react";
 import type { Header } from "../api/client";
 import { useAuth } from "../auth";
 import { ErrorNote } from "../components/common";
-import { fromNow, tokens } from "../lib/humanize";
+import { AgentText } from "../panels/board/parts";
+import { fromNow, share, tokens } from "../lib/humanize";
 import { crew } from "../strings.crew";
 import { Avatar } from "../ui/Avatar";
+import { Meter } from "../ui/Progress";
 import { Skeleton } from "../ui/Skeleton";
-import { Pill } from "../ui/Status";
 import { AgentSheet } from "./AgentSheet";
 import { useCrew } from "./data";
-import { orgTree, statusCounts, type CrewMember } from "./logic";
-import { STATUS_TONE } from "./tone";
+import { SUMMARY_ORDER, orgTree, roleLine, statusCounts, tokenShare, type CrewMember } from "./logic";
+import { StatusFace } from "./parts";
 
 /** Seats already shown once this session, so the entrance plays only when a seat first appears. */
 const seen = new Map<string, Set<string>>();
+
+/** Layout only: the narrowest a team column may get before the org turns into a list. */
+const COLUMN_MIN_REM = 13;
+/** Layout only: the gap between team columns (matches --space-4). */
+const COLUMN_GAP_REM = 1;
+/** Layout only: the width at which a side seat fits beside the CEO. */
+const SIDE_BESIDE_REM = 50;
 
 interface Props {
   projectId: string;
@@ -29,20 +39,51 @@ interface Props {
   onOpenRun(runId: string): void;
 }
 
+/** The width of an element in rem, kept up to date as it resizes. */
+function useWidthRem(ref: RefObject<HTMLElement>, shown: boolean): number | null {
+  const [width, setWidth] = useState<number | null>(null);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const rem = (): number => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const measure = (): void => setWidth(element.getBoundingClientRect().width / rem());
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref, shown]);
+  return width;
+}
+
 function AgentCard({
   member,
+  all,
   fresh,
   order,
   featured = false,
+  showLead,
   onOpen,
 }: {
   member: CrewMember;
+  all: readonly CrewMember[];
   fresh: boolean;
   order: number;
   featured?: boolean;
+  showLead: boolean;
   onOpen(): void;
 }): JSX.Element {
-  const status = crew.status[member.status] ?? member.status;
+  const part = tokenShare(member, all);
+  const shareText = share(member.tokens, all.reduce((sum, one) => sum + one.tokens, 0));
+  // An idle agent's sentence already says when it was last active; its runs are said instead.
+  const when =
+    member.status === "working"
+      ? crew.activeNow
+      : member.status === "idle"
+        ? crew.runs(member.runs)
+        : member.lastActive
+          ? crew.lastActive(fromNow(member.lastActive))
+          : crew.neverActive;
   return (
     <button
       type="button"
@@ -50,33 +91,37 @@ function AgentCard({
       style={fresh ? ({ "--i": order } as CSSProperties) : undefined}
       onClick={onOpen}
       data-testid="crew-card"
-      aria-label={crew.open(member.name, member.role)}
+      data-status={member.status}
     >
       <span className="crew-card-top">
-        <Avatar name={member.name} size={featured ? "xl" : "lg"} status={member.status} />
+        <StatusFace name={member.name} status={member.status} size={featured ? "lg" : "md"} />
         <span className="crew-card-who">
-          <span className="crew-card-name">{member.name}</span>
-          <span className="crew-card-role">
-            {member.lead ? <span className="badge">{crew.lead}</span> : null}
-            {member.role}
+          <span className="crew-card-name">
+            {member.name}
+            {showLead ? <span className="badge">{crew.lead}</span> : null}
           </span>
+          {member.role.trim().toLowerCase() !== member.name.trim().toLowerCase() ? (
+            <span className="crew-card-role" title={member.role}>
+              {roleLine(member.name, member.role)}
+            </span>
+          ) : null}
         </span>
-        <Pill tone={STATUS_TONE[member.status]} live={member.status === "working"}>
-          {status}
-        </Pill>
       </span>
-      <span className="crew-card-now">{member.now}</span>
-      <span className="crew-card-meta tabular">
-        <span>{crew.tokensUsed(tokens(member.tokens))}</span>
-        <span aria-hidden="true">·</span>
-        <span>{crew.runs(member.runs)}</span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {member.status === "working"
-            ? crew.activeNow
-            : member.lastActive
-              ? crew.lastActive(fromNow(member.lastActive))
-              : crew.neverActive}
+      <span className="crew-card-now">
+        {member.now}
+        {member.doing ? <span className="crew-card-doing"> · {member.doing}</span> : null}
+      </span>
+      {member.reason ? (
+        <span className="crew-card-reason">
+          <span className="visually-hidden">{crew.reason}: </span>
+          <AgentText text={member.reason} />
+        </span>
+      ) : null}
+      <span className="crew-card-foot">
+        <Meter value={Math.round(part * 1000)} max={1000} label={crew.shareLabel(member.name, shareText)} />
+        <span className="crew-card-meta tabular">
+          <span>{crew.share(tokens(member.tokens), shareText)}</span>
+          <span>{when}</span>
         </span>
       </span>
     </button>
@@ -85,14 +130,16 @@ function AgentCard({
 
 function CrewSkeleton(): JSX.Element {
   return (
-    <div className="crew-org" aria-busy="true">
+    <div className="org org-columns" aria-busy="true" style={{ "--n": 3 } as CSSProperties}>
       <Skeleton lines={1} label={crew.loading} />
-      <div className="crew-grid">
+      <div className="org-teams">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="crew-card skeleton-card" aria-hidden="true">
-            <span className="skeleton crew-skel-avatar" />
-            <span className="skeleton line" />
-            <span className="skeleton line" style={{ width: "60%" }} />
+          <div key={index} className="org-team" aria-hidden="true">
+            <div className="crew-card skeleton-card">
+              <span className="skeleton crew-skel-avatar" />
+              <span className="skeleton line" />
+              <span className="skeleton line" style={{ width: "60%" }} />
+            </div>
           </div>
         ))}
       </div>
@@ -100,13 +147,35 @@ function CrewSkeleton(): JSX.Element {
   );
 }
 
+function Tally({ members }: { members: CrewMember[] }): JSX.Element {
+  const counts = statusCounts(members);
+  const entries = SUMMARY_ORDER.map((status) => ({ status, count: counts[status] })).filter((entry) => entry.count > 0);
+  return (
+    <>
+      <ul className="plain crew-tally" aria-label={crew.summaryLabel}>
+        {entries.map((entry) => (
+          <li key={entry.status} className="tabular">
+            <span className={`crew-dot-inline dot-${entry.status}`} aria-hidden="true" />
+            {crew.summary([entry])}
+          </li>
+        ))}
+      </ul>
+      <p className="visually-hidden" aria-live="polite">
+        {crew.summary(entries)}
+      </p>
+    </>
+  );
+}
+
 export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: Props): JSX.Element {
   const { person } = useAuth();
   const data = useCrew(projectId, changes, header);
   const [open, setOpen] = useState<string | null>(null);
+  const orgRef = useRef<HTMLDivElement>(null);
   const members = data.members;
+  const width = useWidthRem(orgRef, Boolean(members && members.length > 0));
   const tree = useMemo(() => (members ? orgTree(members, data.teams) : null), [members, data.teams]);
-  const counts = members ? statusCounts(members) : null;
+  const current = useMemo(() => (members ?? []).filter((member) => member.state !== "stood down"), [members]);
 
   const known = seen.get(projectId) ?? new Set<string>();
   useEffect(() => {
@@ -116,17 +185,31 @@ export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: P
     seen.set(projectId, set);
   }, [members, projectId]);
 
+  const sideBeside = width === null || width >= SIDE_BESIDE_REM;
+  const sideColumn = tree !== null && tree.others.length > 0 && !sideBeside;
+  const columnCount = (tree?.teams.length ?? 0) + (sideColumn ? 1 : 0);
+  const columns = width === null || width >= columnCount * COLUMN_MIN_REM + (columnCount - 1) * COLUMN_GAP_REM;
+
   let order = 0;
-  const card = (member: CrewMember, featured = false): JSX.Element => {
+  const card = (member: CrewMember, options: { featured?: boolean; showLead?: boolean } = {}): JSX.Element => {
     const fresh = !known.has(member.name);
     return (
       <li key={member.name}>
-        <AgentCard member={member} fresh={fresh} order={fresh ? order++ : 0} featured={featured} onOpen={() => setOpen(member.name)} />
+        <AgentCard
+          member={member}
+          all={current}
+          fresh={fresh}
+          order={fresh ? order++ : 0}
+          featured={options.featured}
+          showLead={options.showLead ?? false}
+          onOpen={() => setOpen(member.name)}
+        />
       </li>
     );
   };
 
   const selected = members?.find((member) => member.name === open);
+  const chairman = person?.name ?? crew.you;
 
   return (
     <section className="crew" aria-labelledby="crew-title" data-testid="crew-view">
@@ -135,11 +218,7 @@ export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: P
           <h2 id="crew-title">{crew.title}</h2>
           <p className="quiet">{crew.intro}</p>
         </div>
-        {counts ? (
-          <p className="crew-summary tabular" aria-live="polite">
-            {crew.summary(counts.working, counts.waiting, counts.blocked, counts.idle)}
-          </p>
-        ) : null}
+        {members && members.length > 0 ? <Tally members={current} /> : null}
       </header>
 
       {data.error && !members ? (
@@ -165,48 +244,72 @@ export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: P
       ) : null}
 
       {tree && members && members.length > 0 ? (
-        <div className="crew-org">
-          <div className="crew-tier crew-tier-top">
-            <div className="crew-chairman">
-              <Avatar name={person?.name ?? crew.you} kind="person" size="md" />
-              <span>
-                <span className="crew-card-name">{person?.name ?? crew.you}</span>
-                <span className="crew-card-role">
-                  {crew.chairman} · {crew.you}
+        <div
+          ref={orgRef}
+          className={`org ${columns ? "org-columns" : "org-list"}`}
+          style={{ "--n": Math.max(1, columnCount) } as CSSProperties}
+          aria-label={crew.orgLabel}
+          role="group"
+        >
+          <div className={`org-top${sideBeside && tree.others.length > 0 ? " has-side" : ""}`}>
+            <div className="org-spine">
+              <div className="org-chairman">
+                <Avatar name={chairman} kind="person" size="md" />
+                <span>
+                  <span className="crew-card-name">{chairman}</span>
+                  <span className="crew-card-role">
+                    {crew.chairman} · {crew.you}
+                  </span>
                 </span>
-              </span>
+              </div>
+              {tree.ceo ? (
+                <>
+                  <span className="org-line" aria-hidden="true" />
+                  <ul className="plain org-ceo">{card(tree.ceo, { featured: true })}</ul>
+                </>
+              ) : null}
             </div>
-          </div>
-          {tree.ceo ? (
-            <>
-              <span className="crew-link" aria-hidden="true" />
-              <ul className="plain crew-tier">{card(tree.ceo, true)}</ul>
-            </>
-          ) : null}
-          {tree.teams.length > 0 || tree.others.length > 0 ? <span className="crew-link" aria-hidden="true" /> : null}
-          <div className="crew-groups">
-            {tree.teams.map((team) => (
-              <section key={team.name} className="crew-team" aria-labelledby={`crew-team-${team.name}`}>
-                <h3 id={`crew-team-${team.name}`} className="crew-team-head">
-                  <span>{crew.teamLabel(team.name)}</span>
-                  <span className="quiet">{crew.teamCount(team.members.length + (team.lead ? 1 : 0))}</span>
+            {sideBeside && tree.others.length > 0 ? (
+              <section className="org-side" aria-labelledby="crew-side">
+                <h3 id="crew-side" className="org-side-head">
+                  {crew.side}
+                  <span className="quiet">{crew.sideHint}</span>
                 </h3>
-                <ul className="plain crew-grid">
-                  {team.lead ? card(team.lead) : null}
-                  {team.members.map((member) => card(member))}
-                </ul>
-              </section>
-            ))}
-            {tree.others.length > 0 ? (
-              <section className="crew-team crew-others" aria-labelledby="crew-others">
-                <h3 id="crew-others" className="crew-team-head">
-                  <span>{crew.others}</span>
-                  <span className="quiet">{crew.othersHint}</span>
-                </h3>
-                <ul className="plain crew-grid">{tree.others.map((member) => card(member))}</ul>
+                <ul className="plain org-side-list">{tree.others.map((member) => card(member))}</ul>
               </section>
             ) : null}
           </div>
+
+          {columnCount > 0 ? (
+            <div className="org-teams">
+              <span className="org-bus" aria-hidden="true" />
+              {tree.teams.map((team) => {
+                const size = team.members.length + (team.lead ? 1 : 0);
+                return (
+                  <section key={team.name} className="org-team" aria-labelledby={`crew-team-${team.name}`}>
+                    <h3 id={`crew-team-${team.name}`} className="org-team-head">
+                      <span>{crew.teamLabel(team.name)}</span>
+                      <span className="quiet tabular">{crew.teamCount(size)}</span>
+                    </h3>
+                    <ul className="plain org-team-list">
+                      {team.lead ? card(team.lead, { showLead: size > 1 }) : null}
+                      {team.members.map((member) => card(member))}
+                    </ul>
+                  </section>
+                );
+              })}
+              {sideColumn ? (
+                <section className="org-team org-team-side" aria-labelledby="crew-side">
+                  <h3 id="crew-side" className="org-team-head">
+                    <span>{crew.side}</span>
+                    <span className="quiet">{crew.sideHint}</span>
+                  </h3>
+                  <ul className="plain org-team-list">{tree.others.map((member) => card(member))}</ul>
+                </section>
+              ) : null}
+            </div>
+          ) : null}
+
           {tree.former.length > 0 ? (
             <details className="crew-former">
               <summary>{crew.former(tree.former.length)}</summary>

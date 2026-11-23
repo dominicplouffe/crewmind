@@ -7,7 +7,22 @@ import { fromNow, tokens as tokenWords } from "../lib/humanize";
 import { crew, runWords } from "../strings.crew";
 
 export type Run = Schemas["RunItem"];
-export type CrewStatus = "working" | "waiting" | "blocked" | "idle";
+/**
+ * What an agent is doing, from the server's runs and tasks: a live run (working), a claimed task
+ * between runs (holding), its finished task waiting on a review or check (review), a queued run
+ * (waiting), a paused seat or a blocked task (blocked), or nothing (idle).
+ */
+export type CrewStatus = "working" | "holding" | "review" | "waiting" | "blocked" | "idle";
+
+/** The parts of a task the crew view reads. */
+export interface CrewTask {
+  id: number;
+  title: string;
+  state: string;
+  claimant: string | null;
+  team: string | null;
+  reason: string | null;
+}
 
 export interface CrewMember {
   name: string;
@@ -17,8 +32,16 @@ export interface CrewMember {
   kind: string;
   state: string;
   status: CrewStatus;
+  /** The status in one word or two: "Working", "Blocked", "Paused". */
+  label: string;
   /** One plain sentence: what it is doing now. */
   now: string;
+  /** What a live run is doing when the sentence names a task: "Using web search". */
+  doing: string | null;
+  /** The task the sentence is about, if any. */
+  task: { id: number; title: string } | null;
+  /** Why a task is blocked, as the agent wrote it (untrusted: shown as plain text). */
+  reason: string | null;
   tokens: number;
   runs: number;
   /** When it last did anything, as an ISO time; null if it never ran. */
@@ -30,7 +53,9 @@ export interface CrewMember {
 }
 
 const LIVE = new Set(["leased", "running"]);
-const STATUS_ORDER: Record<CrewStatus, number> = { working: 0, waiting: 1, blocked: 2, idle: 3 };
+const STATUS_ORDER: Record<CrewStatus, number> = { blocked: 0, working: 1, holding: 2, review: 3, waiting: 4, idle: 5 };
+/** Task states in which a finished piece of work waits on someone else's check. */
+const AWAITING = new Set(["review", "checking"]);
 
 /** The latest time a run shows any sign of life. */
 export function runTime(run: Run): string {
@@ -64,10 +89,31 @@ export function reasonWords(reasons: readonly string[]): string {
   return unique.length ? runWords.and(unique) : runWords.something;
 }
 
+/**
+ * The seat a blocked task belongs to. The server clears the claimant when a task is blocked
+ * (WRK-14), so a blocked task without one is shown on its team's lead, or on the team's only
+ * member. Null when neither is known: the task then shows on the board only.
+ */
+export function blockedTaskHolder(task: CrewTask, seats: readonly Seat[]): string | null {
+  if (task.claimant) return task.claimant;
+  if (!task.team) return null;
+  const team = seats.filter((seat) => seat.team === task.team && seat.state !== "stood down" && seat.kind !== "ceo");
+  const lead = team.find((seat) => seat.lead || seat.kind === "lead");
+  if (lead) return lead.name;
+  return team.length === 1 ? (team[0]?.name ?? null) : null;
+}
+
+function quoteList(tasks: readonly CrewTask[]): string {
+  const [first] = tasks;
+  if (!first) return "";
+  return tasks.length === 1 ? crew.now.task(first.title) : crew.now.taskAndMore(first.title, tasks.length - 1);
+}
+
 export function crewMembers(
   roster: { seats: readonly Seat[] } | null | undefined,
   header: Header | null | undefined,
   runs: readonly Run[],
+  tasks: readonly CrewTask[] = [],
   now: number = Date.now(),
 ): CrewMember[] {
   const bySeat = new Map<string, Run[]>();
@@ -76,7 +122,18 @@ export function crewMembers(
     list.push(run);
     bySeat.set(run.seat, list);
   }
-  return (roster?.seats ?? []).map((seat) => {
+  const seats = roster?.seats ?? [];
+  const blockedBy = new Map<string, CrewTask[]>();
+  for (const task of tasks) {
+    if (task.state !== "blocked") continue;
+    const holder = blockedTaskHolder(task, seats);
+    if (holder) blockedBy.set(holder, [...(blockedBy.get(holder) ?? []), task]);
+  }
+  const toReview = tasks.filter((task) => task.state === "review");
+  return seats.map((seat) => {
+    const held = tasks.filter((task) => task.claimant === seat.name && task.state === "claimed");
+    const awaiting = tasks.filter((task) => task.claimant === seat.name && AWAITING.has(task.state));
+    const blocked = blockedBy.get(seat.name) ?? [];
     const own = bySeat.get(seat.name) ?? [];
     const live = header?.now.find((item) => item.seat === seat.name);
     const liveRun = own.find((run) => LIVE.has(run.state));
@@ -91,16 +148,46 @@ export function crewMembers(
     }
 
     let status: CrewStatus;
+    let label: string | null = null;
     let sentence: string;
-    if (live || liveRun) {
-      status = "working";
-      sentence = live ? doingSentence(live.doing, live.run_kind) : doingSentence("thinking", liveRun?.kind ?? "work");
-    } else if (stoodDown) {
+    let doing: string | null = null;
+    let about: CrewTask | null = null;
+    let reason: string | null = null;
+    const runKind = live?.run_kind ?? liveRun?.kind ?? "work";
+    if (stoodDown) {
       status = "idle";
       sentence = crew.now.stoodDown;
+    } else if (live || liveRun) {
+      status = "working";
+      const words = live ? doingSentence(live.doing, live.run_kind) : doingSentence("thinking", runKind);
+      about = runKind === "work" ? (held[0] ?? null) : null;
+      if (about) {
+        sentence = crew.now.workingOn(quoteList(held));
+        doing = words;
+      } else {
+        sentence = words;
+      }
     } else if (paused) {
       status = "blocked";
+      label = crew.status.paused ?? null;
       sentence = crew.now.paused(seat.pause_reason);
+    } else if (blocked.length > 0) {
+      status = "blocked";
+      about = blocked[0] ?? null;
+      sentence = crew.now.blocked(quoteList(blocked));
+      reason = about?.reason ?? null;
+    } else if (held.length > 0) {
+      status = "holding";
+      about = held[0] ?? null;
+      sentence = crew.now.holding(quoteList(held));
+    } else if (awaiting.length > 0) {
+      status = "review";
+      about = awaiting[0] ?? null;
+      sentence = about?.state === "checking" ? crew.now.checking(quoteList(awaiting)) : crew.now.awaitingReview(quoteList(awaiting));
+    } else if (seat.kind === "reviewer" && toReview.length > 0) {
+      status = "holding";
+      about = toReview[0] ?? null;
+      sentence = crew.now.toReview(quoteList(toReview));
     } else if (queued.length > 0) {
       status = "waiting";
       sentence = crew.now.queued(reasonWords(queued.flatMap((run) => run.reasons)));
@@ -117,7 +204,11 @@ export function crewMembers(
       kind: seat.kind,
       state: seat.state,
       status,
+      label: label ?? crew.status[status] ?? status,
       now: sentence,
+      doing,
+      task: about ? { id: about.id, title: about.title } : null,
+      reason,
       tokens: used,
       runs: own.filter((run) => run.state !== "dropped").length,
       lastActive,
@@ -127,6 +218,25 @@ export function crewMembers(
       replies: seat.replies ?? 0,
     };
   });
+}
+
+/**
+ * The role as given, without repeating the name: "CEO / Project Manager" on the seat named CEO
+ * reads "Project Manager". Nothing is added; a role that is only the name is kept whole.
+ */
+export function roleLine(name: string, role: string): string {
+  const parts = role
+    .split(/\s*\/\s*/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const rest = parts.filter((part) => part.toLowerCase() !== name.trim().toLowerCase());
+  return rest.length > 0 && rest.length < parts.length ? rest.join(" · ") : role;
+}
+
+/** Each member's share of the crew's tokens, 0 to 1. */
+export function tokenShare(member: CrewMember, members: readonly CrewMember[]): number {
+  const total = members.reduce((sum, one) => sum + one.tokens, 0);
+  return total <= 0 ? 0 : member.tokens / total;
 }
 
 export interface TeamGroup {
@@ -165,15 +275,13 @@ export function orgTree(members: readonly CrewMember[], teamNames: readonly stri
   return { ceo, teams, others, former };
 }
 
-export interface StatusCounts {
-  working: number;
-  waiting: number;
-  blocked: number;
-  idle: number;
-}
+export type StatusCounts = Record<CrewStatus, number>;
+
+/** The statuses in the order a summary lists them: what needs eyes first. */
+export const SUMMARY_ORDER: readonly CrewStatus[] = ["working", "blocked", "holding", "review", "waiting", "idle"];
 
 export function statusCounts(members: readonly CrewMember[]): StatusCounts {
-  const counts: StatusCounts = { working: 0, waiting: 0, blocked: 0, idle: 0 };
+  const counts: StatusCounts = { working: 0, holding: 0, review: 0, waiting: 0, blocked: 0, idle: 0 };
   for (const member of members) if (member.state !== "stood down") counts[member.status] += 1;
   return counts;
 }

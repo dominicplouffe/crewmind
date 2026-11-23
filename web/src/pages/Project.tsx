@@ -6,7 +6,7 @@
  * cost" from the same data as everywhere else.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { get, post, type Message } from "../api/client";
 import { useAuth } from "../auth";
 import { Composer, type ComposerHandle } from "../chat/Composer";
@@ -20,6 +20,7 @@ import { useProjectChat } from "../chat/useProjectChat";
 import { useUploads } from "../chat/useUploads";
 import type { PaletteItem } from "../components/CommandPalette";
 import { ErrorNote } from "../components/common";
+import { CrewAssembled, markAssembled, shouldShowAssembled } from "../crew/CrewAssembled";
 import { CrewView } from "../crew/CrewView";
 import { Deliverables } from "../deliverables/Deliverables";
 import { AwayNote } from "../desk/AwayNote";
@@ -56,6 +57,8 @@ export function Project(): JSX.Element {
   const [dragging, setDragging] = useState(false);
   const [pendingInsert, setPendingInsert] = useState<string | null>(null);
   const [fileToOpen, setFileToOpen] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useSearchParams();
+  const [assembling, setAssembling] = useState(false);
   const composer = useRef<ComposerHandle>(null);
 
   const status = useLoad(() => get("/v1/projects/status", { project_id: projectId }), [projectId, state.header?.state]);
@@ -64,6 +67,24 @@ export function Project(): JSX.Element {
   const uploads = useUploads(projectId, actions.refresh);
 
   const projectName = status.data?.name ?? t.project.fallbackName;
+
+  // The crew assembles once: right after the Founder starts the project, or the first time the
+  // person opens the Crew tab once a team exists. Never in the middle of other work.
+  const justHired = search.get("crew") === "hired";
+  const seats = roster.data?.seats ?? [];
+  const teams = roster.data?.teams.length ?? 0;
+  useEffect(() => {
+    if (!roster.data || assembling || seats.length === 0) return;
+    if (justHired || (tab === "crew" && teams > 0 && shouldShowAssembled(projectId))) setAssembling(true);
+  }, [roster.data, justHired, tab, teams, projectId, assembling, seats.length]);
+  const doneAssembling = useCallback(() => {
+    markAssembled(projectId);
+    setAssembling(false);
+    if (search.has("crew")) {
+      search.delete("crew");
+      setSearch(search, { replace: true });
+    }
+  }, [projectId, search, setSearch]);
   usePageTitle(projectName);
 
   // A change in the project may add to or clear what waits on the person: ask the desk again.
@@ -355,6 +376,17 @@ export function Project(): JSX.Element {
           ) : null}
         </div>
         <ListeningDialogs listening={listening} />
+        {assembling ? (
+          <CrewAssembled
+            projectId={projectId}
+            seats={seats.map((seat) => ({ name: seat.name, role: seat.role, kind: seat.kind }))}
+            onDone={() => {
+              doneAssembling();
+              goTab("crew");
+            }}
+            onSkip={doneAssembling}
+          />
+        ) : null}
         {needsOpen ? <NeedsSheet projectName={projectName} entries={mine} onClose={() => setNeedsOpen(false)} onChanged={items.onChanged} /> : null}
       </main>
     </ItemsContext.Provider>

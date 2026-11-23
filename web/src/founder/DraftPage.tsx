@@ -51,7 +51,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
   const talking = view.state === "drafting" && !view.quick;
   const start = (): void => {
     void actions.start().then((projectId) => {
-      if (projectId) navigate(`/projects/${projectId}`);
+      if (projectId) navigate(`/projects/${projectId}?crew=hired`);
     });
   };
 

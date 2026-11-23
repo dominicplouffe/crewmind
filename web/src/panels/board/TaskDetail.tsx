@@ -13,39 +13,49 @@ import { AgentText, CheckLabel, StateTag, type BoardTabProps } from "./parts";
 interface Props extends BoardTabProps {
   taskId: number;
   onBack(): void;
+  /**
+   * "sheet" when shown in a sheet that already carries the task's title and a close button: the
+   * back button and the title are left out, and focus stays with the sheet.
+   */
+  variant?: "page" | "sheet";
 }
 
-export function TaskDetail({ projectId, changes, taskId, onBack }: Props): JSX.Element {
+export function TaskDetail({ projectId, changes, taskId, onBack, variant = "page" }: Props): JSX.Element {
   const detail = useLoad(() => get("/v1/tasks/show", { project_id: projectId, task_id: taskId }), [projectId, taskId, changes]);
   const heading = useRef<HTMLHeadingElement>(null);
   const task = detail.data;
   const words = t.board.detail;
   const shown = task !== undefined;
 
+  const inSheet = variant === "sheet";
   useEffect(() => {
-    if (shown) heading.current?.focus();
-  }, [shown]);
+    if (shown && !inSheet) heading.current?.focus();
+  }, [shown, inSheet]);
 
   return (
     <div data-testid="task-detail">
-      <div className="row wrap board-bar">
-        <button type="button" className="button small ghost back-button" onClick={onBack}>
-          <ChevronLeft size={16} aria-hidden="true" />
-          {words.back}
-        </button>
-        <span className="spacer" />
-        <button type="button" className="button small ghost" onClick={detail.reload} disabled={detail.loading}>
-          <RefreshCw size={14} aria-hidden="true" />
-          {t.board.refresh}
-        </button>
-      </div>
+      {inSheet ? null : (
+        <div className="row wrap board-bar">
+          <button type="button" className="button small ghost back-button" onClick={onBack}>
+            <ChevronLeft size={16} aria-hidden="true" />
+            {words.back}
+          </button>
+          <span className="spacer" />
+          <button type="button" className="button small ghost" onClick={detail.reload} disabled={detail.loading}>
+            <RefreshCw size={14} aria-hidden="true" />
+            {t.board.refresh}
+          </button>
+        </div>
+      )}
       <ErrorNote error={detail.error} />
       {detail.loading && !task ? <Loading /> : null}
       {task ? (
         <>
-          <h3 tabIndex={-1} ref={heading}>
-            {words.title(task.id, task.title)}
-          </h3>
+          {inSheet ? null : (
+            <h3 tabIndex={-1} ref={heading}>
+              {words.title(task.id, task.title)}
+            </h3>
+          )}
           <p className="row wrap">
             <StateTag state={task.state} />
             <CheckLabel label={task.label} />

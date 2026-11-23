@@ -8,12 +8,13 @@ import { ErrorNote } from "../components/common";
 import { formatNumber } from "../lib/format";
 import { fromNow, tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
+import { AgentText } from "../panels/board/parts";
 import { crew, runWords } from "../strings.crew";
-import { Avatar } from "../ui/Avatar";
 import { Sheet } from "../ui/Sheet";
 import { Skeleton } from "../ui/Skeleton";
 import { Pill } from "../ui/Status";
 import { recentRuns, runSentence, type CrewMember, type Run } from "./logic";
+import { StatusFace } from "./parts";
 import { STATUS_TONE } from "./tone";
 
 const RECENT_RUNS = 12;
@@ -54,12 +55,21 @@ export function AgentSheet({ projectId, changes, member, runs, onClose, onMessag
       }
     >
       <div className="agent-hero">
-        <Avatar name={member.name} size="xl" status={member.status} />
+        <StatusFace name={member.name} size="xl" status={member.status} />
         <div className="agent-hero-text">
           <Pill tone={STATUS_TONE[member.status]} live={member.status === "working"}>
-            {crew.status[member.status]}
+            {member.label}
           </Pill>
-          <p className="agent-now">{member.now}</p>
+          <p className="agent-now">
+            {member.now}
+            {member.doing ? <span className="quiet"> · {member.doing}</span> : null}
+          </p>
+          {member.reason ? (
+            <p className="crew-card-reason">
+              <span className="visually-hidden">{crew.reason}: </span>
+              <AgentText text={member.reason} />
+            </p>
+          ) : null}
           <p className="quiet tabular">{crew.sheet.usedLine(tokens(member.tokens), member.runs)}</p>
         </div>
       </div>

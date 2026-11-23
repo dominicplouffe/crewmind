@@ -5,15 +5,15 @@
 import { ChevronRight } from "lucide-react";
 import type { Header } from "../api/client";
 import { crew, overview } from "../strings.crew";
-import { Avatar } from "../ui/Avatar";
 import { useCrew } from "./data";
-import { statusCounts, type CrewMember } from "./logic";
+import { SUMMARY_ORDER, statusCounts, type CrewMember } from "./logic";
+import { StatusFace } from "./parts";
 
 /** How many faces the strip shows before "+N". */
 const SHOWN = 6;
 /** Runs from this window are enough to tell who is working or up next. */
 const RECENT_HOURS = 24;
-const ORDER = { working: 0, waiting: 1, blocked: 2, idle: 3 } as const;
+const ORDER: Record<CrewMember["status"], number> = { working: 0, blocked: 1, holding: 2, review: 3, waiting: 4, idle: 5 };
 
 interface Props {
   projectId: string;
@@ -55,14 +55,14 @@ export function CrewStrip({ projectId, changes, header, onOpen }: Props): JSX.El
   }
   const members = ordered(data.members);
   const counts = statusCounts(members);
-  const summary = members.length ? crew.summary(counts.working, counts.waiting, counts.blocked, counts.idle) : crew.emptyTitle;
+  const summary = members.length ? crew.summary(SUMMARY_ORDER.map((status) => ({ status, count: counts[status] }))) : crew.emptyTitle;
   const extra = members.length - SHOWN;
   return (
     <button type="button" className="crew-strip" onClick={onOpen} data-testid="crew-strip">
       <span className="crew-strip-faces" aria-hidden="true">
         {members.slice(0, SHOWN).map((member) => (
-          <span key={member.name} className="crew-strip-face" title={`${member.name}: ${crew.status[member.status]}`}>
-            <Avatar name={member.name} size="sm" status={member.status} />
+          <span key={member.name} className="crew-strip-face" title={`${member.name}: ${member.label}`}>
+            <StatusFace name={member.name} size="sm" status={member.status} />
           </span>
         ))}
         {extra > 0 ? <span className="crew-strip-more">{crew.stripMore(extra)}</span> : null}

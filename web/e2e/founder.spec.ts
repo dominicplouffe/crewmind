@@ -192,7 +192,14 @@ test("creating the project shows what is still missing and offers to start it; s
   await expectNoViolations(page, "a created project, before starting");
 
   await created.getByRole("button", { name: "Start the project" }).click();
-  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+$/);
+  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\?crew=hired$/);
+  // The crew assembles once, then the person meets it on the Crew tab.
+  const assembled = page.getByRole("dialog", { name: "Your crew is ready" });
+  await expect(assembled).toBeVisible();
+  await expectNoViolations(page, "the crew assembled");
+  await assembled.getByRole("button", { name: "Meet the crew" }).click();
+  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\/crew$/);
+  await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
   await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
   // The drafting conversation became the project chat.

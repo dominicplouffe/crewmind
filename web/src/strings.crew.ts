@@ -6,6 +6,16 @@
 const plural = (count: number, one: string, many: string): string => `${count} ${count === 1 ? one : many}`;
 const capital = (text: string): string => text.charAt(0).toUpperCase() + text.slice(1);
 
+/** Status words as a summary counts them: "1 awaiting review", "2 assigned". */
+const crewSummaryWords: Record<string, string> = {
+  working: "working",
+  holding: "assigned",
+  review: "awaiting review",
+  waiting: "up next",
+  blocked: "blocked",
+  idle: "idle",
+};
+
 export const crew = {
   title: "Crew",
   intro: "Everyone working on this project, what each is doing now, and what they have used.",
@@ -20,11 +30,22 @@ export const crew = {
   former: (count: number): string => `Stood down (${count})`,
   status: {
     working: "Working",
+    holding: "Assigned",
+    review: "Awaiting review",
     waiting: "Up next",
-    blocked: "Paused",
+    blocked: "Blocked",
+    paused: "Paused",
     idle: "Idle",
   } as Record<string, string>,
   now: {
+    task: (title: string): string => `“${title}”`,
+    taskAndMore: (title: string, more: number): string => `“${title}” and ${plural(more, "other task", "other tasks")}`,
+    workingOn: (tasks: string): string => `Working on ${tasks}`,
+    holding: (tasks: string): string => `Holding ${tasks}`,
+    blocked: (tasks: string): string => `Blocked on ${tasks}`,
+    awaitingReview: (tasks: string): string => `Waiting for review of ${tasks}`,
+    checking: (tasks: string): string => `Waiting for the check on ${tasks}`,
+    toReview: (tasks: string): string => `To review: ${tasks}`,
     stoodDown: "Stood down",
     paused: (reason: string | null): string => (reason ? `Paused: ${reason}` : "Paused"),
     queued: (why: string): string => `About to start: ${why}`,
@@ -42,18 +63,30 @@ export const crew = {
   neverActive: "Not active yet",
   activeNow: "Active now",
   open: (name: string, role: string): string => `${name}, ${role}. Open details`,
-  summary: (working: number, waiting: number, blocked: number, idle: number): string =>
-    [
-      working ? `${working} working` : "",
-      waiting ? `${waiting} up next` : "",
-      blocked ? `${blocked} paused` : "",
-      idle ? `${idle} idle` : "",
-    ]
-      .filter(Boolean)
+  /** One count per status, in the order given, e.g. "1 working · 1 blocked · 2 idle". */
+  summary: (counts: { status: string; count: number }[]): string =>
+    counts
+      .filter((entry) => entry.count > 0)
+      .map((entry) => `${entry.count} ${(crewSummaryWords[entry.status] ?? entry.status).toLowerCase()}`)
       .join(" · ") || "No one yet",
+  summaryLabel: "The crew by status",
+  reason: "Why",
+  share: (tokens: string, share: string): string => `${tokens} · ${share} of the crew`,
+  shareLabel: (name: string, share: string): string => `${name}'s share of the crew's tokens: ${share}`,
+  side: "Side seat",
+  sideHint: "Works across the teams",
+  reportsTo: "Reports to the CEO",
+  orgLabel: "The crew, from the chairman down",
+  teamsLabel: "Teams",
   stripBefore: "The crew: ",
   stripAfter: ". Open the crew",
   stripMore: (count: number): string => `+${count}`,
+  assembled: {
+    title: "Your crew is ready",
+    line: (count: number): string => `${plural(count, "agent", "agents")} on this project, from the CEO down.`,
+    meet: "Meet the crew",
+    skip: "Skip",
+  },
   emptyTitle: "No crew yet.",
   emptyNext: "Start the project and the CEO hires its team.",
   loading: "Loading the crew…",
