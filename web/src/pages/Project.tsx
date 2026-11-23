@@ -7,7 +7,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { get, post, type Message } from "../api/client";
+import { get, post, type Message, type Schemas } from "../api/client";
 import { useAuth } from "../auth";
 import { Composer, type ComposerHandle } from "../chat/Composer";
 import { ListeningDialogs } from "../chat/ListeningDialogs";
@@ -35,6 +35,7 @@ import { ChatRail } from "../project/ChatRail";
 import { NeedsSheet } from "../project/NeedsSheet";
 import { NeedsStack } from "../project/NeedsStack";
 import { ProjectTop, TAB_ORDER, type ProjectTab } from "../project/ProjectTop";
+import { StartDialog } from "../project/StartDialog";
 import { WorkView } from "../project/WorkView";
 import { usePaletteItems } from "../shell/palette";
 import { useGoShortcuts } from "../shell/useKeySequence";
@@ -56,6 +57,7 @@ export function Project(): JSX.Element {
   const needs = useNeedsYou();
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [needsOpen, setNeedsOpen] = useState(false);
+  const [startWaiting, setStartWaiting] = useState<Schemas["BlockerItem"][] | null>(null);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [dragging, setDragging] = useState(false);
   const [pendingInsert, setPendingInsert] = useState<string | null>(null);
@@ -375,9 +377,28 @@ export function Project(): JSX.Element {
           onTab={goTab}
           onPanel={open}
           onNeeds={() => setNeedsOpen(true)}
-          onAction={(action) => void actions.projectAction(action)}
+          onAction={(action) => {
+            if (action !== "start") {
+              void actions.projectAction(action);
+              return;
+            }
+            // CON-5: show what would hold agents before starting, rather than a refusal after.
+            void get("/v1/projects/readiness", { project_id: projectId })
+              .then((found) => (found.ready ? actions.projectAction("start") : setStartWaiting(found.waiting)))
+              .catch(actions.reportError);
+          }}
         />
         <ErrorNote error={status.error} />
+        {startWaiting ? (
+          <StartDialog
+            waiting={startWaiting}
+            onClose={() => setStartWaiting(null)}
+            onStartWithout={async () => {
+              await actions.projectAction("start", { withoutMissing: true });
+              setStartWaiting(null);
+            }}
+          />
+        ) : null}
         <div className="project-body">
           <div className={tab === "chat" ? "project-view chat-view" : "project-view"} data-testid={`view-${tab}`}>
             {view}

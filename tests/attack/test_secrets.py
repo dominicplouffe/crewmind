@@ -165,3 +165,64 @@ async def test_ACC_6_key_rotation_is_all_or_nothing(app: App) -> None:
     async with app.runtime.sessions() as session:
         assert await store.reveal(session, ("project", "p1"), "key 0") == "value 0"
         assert set(await session.scalars(select(StoredSecret.key_id))) == {new_key}
+
+
+@pytest.mark.attack("CON-2")
+async def test_CON_2_a_sealed_value_moved_to_another_row_does_not_open(app: App) -> None:
+    """CON-2, ACC-6, NFR-12: each value is sealed to its owner and name. Someone who can
+    write to the database and copies one secret's sealed value onto another row, or renames
+    a row, gets a refusal, never the value. A value stored before values were bound is
+    opened once, sealed to its row, and from then on held to the same rule. Rotation keeps
+    every value bound."""
+    key_file = app.runtime.config.master_key_file
+    ensure_master_key(key_file)
+    store = SecretStore(key_file)
+    async with app.runtime.sessions() as session, session.begin():
+        await store.put(
+            session, ("project_secret", "p1"), "wordpress", "app-pass-1234", app.runtime.clock()
+        )
+        await store.put(
+            session, ("model_credential", "c1"), "key", "sk-model-5678", app.runtime.clock()
+        )
+    async with app.runtime.sessions() as session, session.begin():
+        rows = {row.owner_kind: row for row in await session.scalars(select(StoredSecret))}
+        moved = rows["project_secret"]
+        target = rows["model_credential"]
+        target.nonce, target.ciphertext = moved.nonce, moved.ciphertext
+    async with app.runtime.sessions() as session:
+        with pytest.raises(Refusal) as refused:
+            await store.reveal(session, ("model_credential", "c1"), "key")
+    assert refused.value.envelope.code == "secret_unreadable"
+    assert "app-pass" not in refused.value.envelope.message
+
+    # A value sealed before binding existed is bound the first time it is opened.
+    old = MasterKey.read(key_file)
+    nonce, sealed = old.seal("legacy-value-9999")
+    async with app.runtime.sessions() as session, session.begin():
+        session.add(
+            StoredSecret(
+                owner_kind="model_credential", owner_id="c2", name="key", nonce=nonce,
+                ciphertext=sealed, key_id=old.id, bound=False, created_at=app.runtime.clock(),
+            )
+        )  # fmt: skip
+    async with app.runtime.sessions() as session, session.begin():
+        assert await store.bind_all(session) == 1
+    async with app.runtime.sessions() as session:
+        assert await store.reveal(session, ("model_credential", "c2"), "key") == "legacy-value-9999"
+        row = await session.scalar(select(StoredSecret).where(StoredSecret.owner_id == "c2"))
+        assert row is not None
+        assert row.bound is True
+
+    # Rotation is all or nothing: the tampered row stops it, and nothing changes.
+    with pytest.raises(Refusal):
+        async with app.runtime.sessions() as session, session.begin():
+            await store.rotate(session)
+    store.abandon_rotation()
+    async with app.runtime.sessions() as session, session.begin():
+        await store.delete(session, ("model_credential", "c1"), "key")
+    async with app.runtime.sessions() as session, session.begin():
+        await store.rotate(session)
+    store.finish_rotation()
+    async with app.runtime.sessions() as session:
+        assert await store.reveal(session, ("project_secret", "p1"), "wordpress") == "app-pass-1234"
+        assert all(row.bound for row in await session.scalars(select(StoredSecret)))

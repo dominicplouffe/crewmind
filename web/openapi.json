@@ -832,6 +832,29 @@
     "title": "BetView",
     "type": "object"
    },
+   "BlockerItem": {
+    "properties": {
+     "seats": {
+      "description": "The names of the agents who would wait for it.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Seats",
+      "type": "array"
+     },
+     "text": {
+      "description": "What is missing, or why a seat cannot run, in plain words.",
+      "title": "Text",
+      "type": "string"
+     }
+    },
+    "required": [
+     "text",
+     "seats"
+    ],
+    "title": "BlockerItem",
+    "type": "object"
+   },
    "BreakGlassInput": {
     "properties": {
      "person_id": {
@@ -1750,6 +1773,14 @@
      "type": {
       "title": "Type",
       "type": "string"
+     },
+     "waiting": {
+      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).",
+      "items": {
+       "type": "string"
+      },
+      "title": "Waiting",
+      "type": "array"
      }
     },
     "required": [
@@ -1765,6 +1796,7 @@
    "CreatedProject": {
     "properties": {
      "can_start": {
+      "description": "The project is a draft and can be started.",
       "title": "Can Start",
       "type": "boolean"
      },
@@ -1795,6 +1827,14 @@
      "state": {
       "title": "State",
       "type": "string"
+     },
+     "waiting": {
+      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).",
+      "items": {
+       "type": "string"
+      },
+      "title": "Waiting",
+      "type": "array"
      }
     },
     "required": [
@@ -1803,6 +1843,7 @@
      "state",
      "missing",
      "missing_credentials",
+     "waiting",
      "can_start"
     ],
     "title": "CreatedProject",
@@ -6619,6 +6660,29 @@
     "title": "RaiseView",
     "type": "object"
    },
+   "Readiness": {
+    "properties": {
+     "ready": {
+      "description": "Every agent could work if the project started now.",
+      "title": "Ready",
+      "type": "boolean"
+     },
+     "waiting": {
+      "description": "What would hold agents, and who. Starting without it holds exactly them.",
+      "items": {
+       "$ref": "#/components/schemas/BlockerItem"
+      },
+      "title": "Waiting",
+      "type": "array"
+     }
+    },
+    "required": [
+     "ready",
+     "waiting"
+    ],
+    "title": "Readiness",
+    "type": "object"
+   },
    "Receipt": {
     "properties": {
      "completed": {
@@ -8626,35 +8690,6 @@
     "title": "SpendView",
     "type": "object"
    },
-   "StartInput": {
-    "properties": {
-     "brief": {
-      "description": "What you want, in your own words.",
-      "maxLength": 200000,
-      "minLength": 1,
-      "title": "Brief",
-      "type": "string"
-     },
-     "document": {
-      "anyOf": [
-       {
-        "maxLength": 200000,
-        "type": "string"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "The text of a brief to grill first.",
-      "title": "Document"
-     }
-    },
-    "required": [
-     "brief"
-    ],
-    "title": "StartInput",
-    "type": "object"
-   },
    "Step": {
     "properties": {
      "after_seconds": {
@@ -10040,6 +10075,35 @@
     "title": "ExtendInput",
     "type": "object"
    },
+   "crewmind__domain__founder__operations__StartInput": {
+    "properties": {
+     "brief": {
+      "description": "What you want, in your own words.",
+      "maxLength": 200000,
+      "minLength": 1,
+      "title": "Brief",
+      "type": "string"
+     },
+     "document": {
+      "anyOf": [
+       {
+        "maxLength": 200000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The text of a brief to grill first.",
+      "title": "Document"
+     }
+    },
+    "required": [
+     "brief"
+    ],
+    "title": "StartInput",
+    "type": "object"
+   },
    "crewmind__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
@@ -10185,6 +10249,26 @@
      "passed"
     ],
     "title": "RuleInput",
+    "type": "object"
+   },
+   "crewmind__domain__projects__operations__StartInput": {
+    "properties": {
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     },
+     "without_missing": {
+      "default": false,
+      "description": "Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).",
+      "title": "Without Missing",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "project_id"
+    ],
+    "title": "StartInput",
     "type": "object"
    },
    "crewmind__domain__settings__operations__History": {
@@ -13749,7 +13833,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/StartInput"
+        "$ref": "#/components/schemas/crewmind__domain__founder__operations__StartInput"
        }
       }
      },
@@ -17081,6 +17165,51 @@
     ]
    }
   },
+  "/v1/projects/readiness": {
+   "get": {
+    "description": "Requires: project_observer.",
+    "operationId": "projects.readiness",
+    "parameters": [
+     {
+      "description": "The project's id, from `projects list`.",
+      "in": "query",
+      "name": "project_id",
+      "required": true,
+      "schema": {
+       "description": "The project's id, from `projects list`.",
+       "title": "Project Id",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Readiness"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show what the crew would wait for if the project started now, and who.",
+    "tags": [
+     "projects"
+    ]
+   }
+  },
   "/v1/projects/receipt": {
    "get": {
     "description": "Requires: project_observer.",
@@ -17305,7 +17434,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/ProjectRef"
+        "$ref": "#/components/schemas/crewmind__domain__projects__operations__StartInput"
        }
       }
      },

@@ -44,12 +44,23 @@ function Created({ view, created, busy, onStart }: Pick<Props, "view" | "created
               ))}
             </ul>
           )}
+          {created.waiting.length > 0 ? (
+            <>
+              <h3 className="group-title">{words.waitingTitle}</h3>
+              <ul className="checklist" data-testid="crew-waiting">
+                {created.waiting.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+              <p className="quiet">{words.waitingAfter}</p>
+            </>
+          ) : null}
         </>
       ) : null}
       <div className="row wrap">
         {created?.can_start ? (
           <button type="button" className="button primary" disabled={busy} onClick={onStart}>
-            {busy ? words.starting : words.start}
+            {busy ? words.starting : created.waiting.length > 0 ? words.startWithout : words.start}
           </button>
         ) : null}
         {projectId ? (

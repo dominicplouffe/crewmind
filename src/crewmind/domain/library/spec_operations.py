@@ -10,6 +10,7 @@ from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
+from crewmind.domain.connections import holds
 from crewmind.domain.library import transfer
 from crewmind.domain.library.spec import ProjectSpec
 from crewmind.domain.projects.access import view_of
@@ -34,6 +35,11 @@ class Created(BaseModel):
         default_factory=list[str],
         description="Model credentials the spec names that you do not have yet.",
     )
+    waiting: list[str] = Field(
+        default_factory=list[str],
+        description="Who in the crew could not work yet, and why: a connection their role "
+        "needs, or a seat that cannot run (CON-5).",
+    )
 
 
 class CloneInput(ProjectRef):
@@ -53,7 +59,10 @@ async def missing_credentials(context: Context, spec: ProjectSpec) -> list[str]:
     return [] if have else [spec.paying_credential]
 
 
-def _created(project: Project, missing: list[str], names: list[str]) -> Created:
+async def _created(
+    context: Context, project: Project, missing: list[str], names: list[str]
+) -> Created:
+    found = await holds.blockers(context.session, project, context.now, context.caller)
     return Created(
         missing_credentials=names,
         project_id=project.id,
@@ -61,6 +70,7 @@ def _created(project: Project, missing: list[str], names: list[str]) -> Created:
         type=project.type,
         state=project.state,
         missing=missing,
+        waiting=[blocker.text for blocker in found],
     )
 
 
@@ -89,7 +99,7 @@ async def import_spec(context: Context, payload: ProjectSpec) -> Created:
     at any step leaves nothing created. Secret values are never in a spec, so what is
     still missing is listed."""
     project, missing = await transfer.create(context, payload)
-    return _created(project, missing, await missing_credentials(context, payload))
+    return await _created(context, project, missing, await missing_credentials(context, payload))
 
 
 @operation(
@@ -118,4 +128,4 @@ async def clone(context: Context, payload: CloneInput) -> Created:
     project, missing = await transfer.create(
         context, spec.model_copy(update={"name": payload.name, "roles": []})
     )
-    return _created(project, missing, await missing_credentials(context, spec))
+    return await _created(context, project, missing, await missing_credentials(context, spec))

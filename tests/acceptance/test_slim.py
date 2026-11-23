@@ -134,7 +134,12 @@ def demo(install: Install) -> tuple[str, list[dict[str, Any]], str]:
         "settings", "change-project", "--project-id", project,
         "--changes", "run.concurrency=6", "--reason", "More parallel work.",
     )  # fmt: skip
-    assert install.run("projects", "start", "--project-id", project)["state"] == "running"
+    # No model key is added, so the crew cannot work: start says so and names who waits
+    # (PRJ-1, LLM-6, CON-5). The demo starts without it; the record is what it shows.
+    refused = install.run("projects", "start", "--project-id", project, check=False)
+    assert json.loads(refused.stderr)["code"] == "start_blocked"
+    started = install.run("projects", "start", "--project-id", project, "--without-missing")
+    assert started["state"] == "running"
     assert install.run("projects", "hold", "--project-id", project)["state"] == "held"
     assert install.run("projects", "resume", "--project-id", project)["state"] == "running"
     events = install.run("record", "list", "--project-id", project, "--limit", "200")["items"]
@@ -155,8 +160,10 @@ async def events_over_mcp(install: Install, token: str, project: str) -> list[di
 
 def test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process(install: Install) -> None:
     """NFR-23, NFR-2, IF-4.1, IF-4.5, IF-5.1: one process on SQLite serves the whole demo
-    through the real CLI, the API and an MCP client. Secrets go in by standard input, the
-    stored token file is private, and the server refuses a second copy on the same data."""
+    through the real CLI, the API and an MCP client. PRJ-1, CON-5: start without a
+    model key names who waits, and starts without it only when asked. Secrets go in by
+    standard input, the stored token file is private, and the server refuses a second copy
+    on the same data."""
     project, events, token = demo(install)
 
     def of_the_project(items: list[dict[str, Any]]) -> list[dict[str, Any]]:

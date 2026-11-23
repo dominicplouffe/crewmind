@@ -387,6 +387,38 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | denied | allowed | Allow, directly or by approving an agent's request (human-only for write-capable tools, IF-5.6) | Chairman |
 | allowed | denied | Deny | Chairman |
 
+**Connection** (CON-1, CON-2):
+
+| From | To | Trigger | Who |
+| --- | --- | --- | --- |
+| (new) | active | Added | Owner; admin (install); chairman (project) |
+| active | expired | Its expiry date passes; seats that used it are held | Platform |
+| active, expired | active | Value replaced, or expiry date moved | Owner |
+| active, expired | deleted | Deleted, after the projects that use it are listed; their seats that depend on it are held | Owner |
+
+**MCP server** (CON-9 to CON-11):
+
+| From | To | Trigger | Who |
+| --- | --- | --- | --- |
+| (new) | active | Added and its test passes | Owner |
+| (new), active | needs sign-in | OAuth sign-in not done, or a refresh is refused | Platform |
+| needs sign-in | active | Signed in again | Owner |
+| active | failing | The circuit breaker opens (LLM-11) | Platform |
+| failing | active | The half-open probe succeeds | Platform |
+| any but deleted | deleted | Deleted | Owner |
+
+**Need**, per project (CON-5):
+
+| From | To | Trigger | Who |
+| --- | --- | --- | --- |
+| (new) | open | Declared by a role, a spec or an approved agent request | Platform; chairman |
+| open | met | A connection is attached and granted to the roles that need it | Chairman |
+| open | waived | The project starts without it; the seats that need it are held | Chairman |
+| waived | met | The connection is attached; the holds lift | Chairman |
+| met | open | The connection is detached, revoked, deleted or expires | Chairman; owner; platform |
+| open, waived, met | dropped | The roles that needed it leave the roster | Chairman; CEO |
+| dropped | open | A role that needs it joins the roster again | Chairman; CEO |
+
 **Mailbox**, project or agent (INT-6, INT-10):
 
 | From | To | Trigger | Who |

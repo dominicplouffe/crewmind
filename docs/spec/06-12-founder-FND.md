@@ -46,7 +46,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
   - A quick project gets no data sources, secrets, email or integrations, and one credential pays every seat.
   - Status moves through drafting → creating → starting → started, or failed with nothing created.
   - The ledger goes into the CEO's first context pack.
-- **FND-13 After creation.** On every surface: prompt for each missing credential the roster declares, show the setup checklist, and offer to start only when nothing blocks it.
+- **FND-13 After creation.** On every surface: prompt for each missing model credential and each open need of the roster (secrets, variables, MCP servers; CON-5), show the setup checklist, and offer to start only when nothing blocks it, or to start without what is missing with the dependent seats held (CON-5).
 - **FND-14 Doctrine fingerprint.** Each project records a fingerprint of the doctrine it was drafted under. Later doctrine fixes appear as health findings on older projects; they never silently rewrite or block them.
 - **FND-15 Grilling a document.** When the brief arrives as an upload or a long paste, the Founder grills it before drafting from it. A long paste is one of at least `grill.min_characters` \[1,500\]. Each extracted item quotes the document word for word, or it is refused. Passages marked as examples reach the CEO labelled as examples, with the ledger.
   - It extracts the document's content into a list: goals, requirements, constraints, numbers, dates, names, and anything that reads as an example.

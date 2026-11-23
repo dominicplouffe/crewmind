@@ -61,7 +61,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
   - Enter accepts it, a letter picks another option, and free text answers in the user's own words;
   - who pays is never pre-selected;
   - the conversation lives on the server, so it can be resumed elsewhere.
-- **IF-4.7** After creating a project, the CLI asks for any missing credentials the roster needs (hidden input, skippable). It then prints the remaining setup checklist with links, and offers to start the project only when nothing blocks it.
+- **IF-4.7** After creating a project, the CLI asks for any missing model credential and each open need of the roster: secrets by hidden input, variables, and MCP servers by address (skippable; CON-5). It then prints the remaining setup checklist with links, and offers to start the project only when nothing blocks it.
 - **IF-4.8** `crewmind chat [project]` opens a full-screen terminal chat with the same capabilities as the app chat:
   - streaming replies;
   - slash commands and `@` mentions;
@@ -110,7 +110,9 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
 - **IF-5.5 Untrusted content.** All agent-written text returned to a client travels inside a labelled envelope naming its author. Text that contains the envelope's closing marker is defanged before wrapping.
 - **IF-5.6 Human-only verbs.** These require the person, not their model client:
   - allowing a write-capable data-source tool;
-  - creating or revealing a credential value;
+  - creating or revealing a credential value (a secret's value is never revealed to anyone, CON-2);
+  - signing in to an MCP server with OAuth, and adding an MCP server started from a command (CON-10, CON-11);
+  - deleting a connection (CON-1);
   - changing project membership;
   - handing on the chair;
   - deleting a project;

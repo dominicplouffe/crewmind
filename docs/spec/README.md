@@ -37,6 +37,7 @@ Then, as the current phase needs:
 | [06-14-library-LIB.md](06-14-library-LIB.md) | Roles, crews, specs, Agent Skills | LIB |
 | [06-15-integrations-INT.md](06-15-integrations-INT.md) | Webhooks, data sources, Slack, email, A2A | INT |
 | [06-16-accounts-ACC.md](06-16-accounts-ACC.md) | Accounts and access | ACC |
+| [06-17-connections-CON.md](06-17-connections-CON.md) | Secrets, variables and MCP servers | CON |
 | [07-state-machines.md](07-state-machines.md) | Every lifecycle, as transition tables | |
 | [09-interfaces-IF.md](09-interfaces-IF.md) | Catalog, API, CLI, MCP, agent API, parity | IF |
 | [10-background-BG.md](10-background-BG.md) | Jobs and processes | BG |

@@ -21,6 +21,7 @@ from sqlalchemy import event, select
 from crewmind.catalog import catalog
 from crewmind.catalog.caller import Caller, CallerKind, InstanceRole
 from crewmind.catalog.refusal import Refusal
+from crewmind.domain.connections import needs
 from crewmind.domain.decisions import agenda
 from crewmind.domain.install.config import Config
 from crewmind.domain.library.spec import ProjectSpec
@@ -117,6 +118,18 @@ class Drill:
         self.reached = False
         self.run_time = timedelta(0)
 
+    async def _needs(self) -> list[str]:
+        """What the crew will need from outside, assumed in place for the drill (CON-5)."""
+        async with self.runtime.sessions() as session:
+            project = await session.get(Project, self.project_id)
+            assert project is not None
+            wanted = await needs.declared(session, project)
+        return [
+            f"The crew will need the {needs.KIND_WORDS[needs.NeedKind(kind)]} {name}, for "
+            f"{', '.join(sorted(roles))}. The rehearsal assumed it was in place."
+            for (kind, name), roles in sorted(wanted.items())
+        ]
+
     async def _as_chairman(self, operation_name: str, /, **values: Any) -> Any:
         operation = catalog.get(operation_name)
         return await self.runtime.executor.execute(
@@ -139,9 +152,11 @@ class Drill:
             session.add(person)
             await session.flush()
             self.chairman = Caller(CallerKind.PERSON, person.id, role=InstanceRole.ADMIN)
+        needs.assume_met.set(True)
         try:
             created = await self._as_chairman("projects.import_spec", **self.spec.model_dump())
             self.project_id, self.missing = created.project_id, list(created.missing)
+            self.missing += await self._needs()
             await self._set_roster()
             await self._as_chairman("projects.start", project_id=self.project_id)
         except Refusal as refusal:

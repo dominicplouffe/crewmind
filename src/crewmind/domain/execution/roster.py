@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 
 from sqlalchemy import func, select
@@ -197,6 +198,11 @@ async def set_ceo_role(session: AsyncSession, project: Project, role_name: str) 
 REVIEWER_ROLE = "reviewer"
 REVIEWER_SEAT = "Reviewer"
 STAFFING = platform_job("work: reviewer staffing")
+
+RosterHook = Callable[[AsyncSession, Project, datetime], Awaitable[None]]
+roster_hooks: list[RosterHook] = []
+"""Steps run after the roster changes: a team hired, stood down or recalled. The
+connections domain holds the new seats that cannot work yet (CON-5)."""
 
 
 def _set_seat_state(session: AsyncSession, seat: Seat, target: SeatState, now: datetime) -> None:
@@ -413,6 +419,8 @@ async def hire_team(
         now,
         detail={"kind": "team hired", "team": name},
     )
+    for hook in roster_hooks:
+        await hook(session, project, now)
     return team
 
 
@@ -511,4 +519,6 @@ async def set_team_state(
         before={"state": before},
         after={"state": target},
     )
+    for hook in roster_hooks:
+        await hook(session, project, now)
     return team

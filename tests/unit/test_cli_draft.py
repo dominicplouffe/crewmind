@@ -95,10 +95,14 @@ def test_IF_4_6_enter_a_letter_and_free_text_are_sent_as_typed_and_the_talk_resu
     assert printed[-1] == "\nKept. Resume with: crewmind draft --resume d1"
 
 
+WORDPRESS = "The secret wordpress, for blog-writer is missing."
+
+
 def test_IF_4_7_after_creation_missing_credentials_are_asked_for_and_start_is_offered() -> None:
     """IF-4.7, FND-13, IF-4.5: once the ledger is confirmed and the project created, each
     missing credential is asked for with hidden input and may be skipped; what is still
-    missing is listed; starting is offered only when nothing blocks it."""
+    missing is listed; who in the crew would wait is listed, and starting then means starting
+    without it (CON-5)."""
     ledger = [{"settles": "finish_line", "value": "The signed proof", "source": "answer"}]
     created = {
         "project_id": "p1", "name": "Bird guide", "state": "draft", "can_start": False,
@@ -127,9 +131,14 @@ def test_IF_4_7_after_creation_missing_credentials_are_asked_for_and_start_is_of
     assert any("email" in line for line in printed)
     assert printed[-1] == "Started. The project is running."
 
-    blocked = {**created, "missing": [NO_MAIN]}
-    server = Server(view(), results={})
-    made, printed = session(server, secrets=("",))
-    made.after_creation(blocked)
+    # CON-5: who would wait is listed, and starting means starting without it, said so.
+    waiting = {**created, "missing": [], "missing_credentials": [], "waiting": [WORDPRESS]}
+    server = Server(view(), results={"projects.start": {"state": "running"}})
+    made, printed = session(server, "")
+    made.after_creation(waiting)
     assert server.calls == []
-    assert printed[-1] == "\nStart it with `crewmind projects start` once that is done."
+    assert any(WORDPRESS in line for line in printed)
+    assert printed[-1] == "\nStart it with `crewmind projects start` when you are ready."
+    made, printed = session(server, "y")
+    made.after_creation(waiting)
+    assert server.calls == [("projects.start", {"project_id": "p1", "without_missing": True})]

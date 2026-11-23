@@ -88,6 +88,11 @@ async def _mock_resolver(session: AsyncSession, project: Project, seat: Seat) ->
     return Pinned("mock", "mock-1", None, "loop", "medium")
 
 
+SeatGuard = Callable[[AsyncSession, Project, Seat], Awaitable[str | None]]
+seat_guards: list[SeatGuard] = []
+"""Checks before a seat's run is leased. One that returns a reason keeps the run queued:
+the seat is waiting for something, such as a connection its role needs (CON-5)."""
+
 seat_resolver: SeatResolver = _mock_resolver
 """Validates a seat and decides what it runs on (LLM-6, LLM-7). It raises a Refusal when
 the seat cannot run. The model gateway replaces the default."""
@@ -258,6 +263,11 @@ async def lease(
             allowed = await concurrency_limit(session, project.id, int(values["run.concurrency"]))
             if (live or 0) >= allowed:
                 continue
+        waiting = [
+            reason for guard in seat_guards if (reason := await guard(session, project, seat))
+        ]
+        if waiting:
+            continue
         refusal: Refusal | None = None
         pinned: Pinned | None = None
         try:

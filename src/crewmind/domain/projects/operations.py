@@ -49,6 +49,14 @@ class ProjectRef(BaseModel):
     project_id: str = Field(description="The project's id, from `projects list`.")
 
 
+class StartInput(ProjectRef):
+    without_missing: bool = Field(
+        False,
+        description="Start even though some of the crew cannot work yet. They wait, with the "
+        "reason shown, until what they need is added (CON-5).",
+    )
+
+
 class HoldInput(ProjectRef):
     until: datetime | None = Field(None, description="When to resume automatically.")
     note: str | None = Field(None, max_length=1000, description="Why it is held.")
@@ -269,8 +277,9 @@ async def status(context: Context, payload: ProjectRef) -> ProjectStatus:
     authority=Authority.PROJECT_CHAIR,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def start(context: Context, payload: ProjectRef) -> ProjectStatus:
-    """PRJ-1: start is refused unless every start check passes."""
+async def start(context: Context, payload: StartInput) -> ProjectStatus:
+    """PRJ-1, CON-5: start is refused unless every start check passes, or the chairman
+    starts without what is missing."""
     project = view_of(context).project
     if project.state != ProjectState.DRAFT:
         raise Refusal(
@@ -280,7 +289,7 @@ async def start(context: Context, payload: ProjectRef) -> ProjectStatus:
             hint="Resume a held project, or reopen a completed one.",
         )
     for check in lifecycle.start_checks:
-        await check(context.session, project, context.now)
+        await check(context.session, project, context.now, context.caller, payload.without_missing)
     lifecycle.move(
         context.session, project, ProjectState.RUNNING, caller=context.caller, now=context.now
     )

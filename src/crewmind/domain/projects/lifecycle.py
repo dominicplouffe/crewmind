@@ -43,8 +43,10 @@ created_hooks: list[CreatedHook] = []
 """Steps run when a project is created: the execution domain adds the CEO seat and channels."""
 hold_hooks: list[HoldHook] = []
 """Steps run when a hold reason is added, told which reason it was."""
-start_checks: list[ProjectHook] = []
-"""Checks run before a project starts (PRJ-1). Each raises a Refusal to block the start."""
+StartCheck = Callable[[AsyncSession, Project, datetime, Caller, bool], Awaitable[None]]
+start_checks: list[StartCheck] = []
+"""Checks run before a project starts (PRJ-1). Each raises a Refusal to block the start. The
+last argument is the chairman's word to start without what is missing (CON-5)."""
 started_hooks: list[ProjectHook] = []
 """Steps run when a draft project starts: the CEO's first planning run is queued (SPD-3)."""
 stop_hooks: list[ProjectHook] = []

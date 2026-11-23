@@ -3,9 +3,9 @@
 - **INT-1 Signed webhooks.** Each project has signing secrets the chairman provisions. The signature (HMAC-SHA256 of the raw body) and a replay window are checked before parsing. Secrets never reach a run, so agents cannot forge platform-attested evidence. The delivery id gives idempotency.
 - **INT-2 GitHub events** (stars, forks, issues, PRs, comments) become platform-attested evidence. Events sent by accounts the project itself controls are ignored.
 - **INT-3 Generic signed events** carry a description, an optional source URL, a time, optional revenue (in money) and an optional "wake this agent". Revenue lines in the ledger can only come from INT-2 or INT-3.
-- **INT-4 Data sources.**
-  - The chairman connects outside MCP servers, with no auth, a bearer token, or OAuth with PKCE and audience binding.
-  - Their address and token never enter a sandbox; agents reach them only through the platform gateway.
+- **INT-4 MCP servers (data sources).**
+  - The chairman connects outside MCP servers. How they are added, authenticated, started and reached is section 6.17 (CON-9 to CON-13).
+  - Their address, token, header value and OAuth tokens never enter a sandbox; agents reach them only through the platform gateway.
   - Each tool is classified when the source is added: read tools start allowed, write and unknown tools start denied.
   - Only the chairman changes a permission, directly or by approving an agent's request.
   - A denied call never leaves the server and counts toward the run's refusal cap.

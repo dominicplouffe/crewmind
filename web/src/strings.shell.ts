@@ -152,3 +152,17 @@ export const projectLayout = {
   railReview: "Review",
   working: (count: number): string => (count === 0 ? "No one is working" : `${plural(count, "agent", "agents")} working`),
 };
+
+export const startDialog = {
+  title: "Some of the crew can't work yet",
+  lead: (count: number): string =>
+    count === 0
+      ? "Something the crew needs is missing."
+      : `${plural(count, "agent needs", "agents need")} something the project doesn't have yet.`,
+  who: (names: string[]): string => `Waits: ${names.join(", ")}`,
+  after:
+    "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
+  notNow: "Not now",
+  startWithout: "Start without it",
+  starting: "Starting…",
+};

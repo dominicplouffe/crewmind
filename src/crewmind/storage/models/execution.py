@@ -93,6 +93,9 @@ class Seat(Base):
     is_lead: Mapped[bool] = mapped_column(default=False)
     state: Mapped[str] = mapped_column(String(16))
     pause_reason: Mapped[str | None] = mapped_column(Text)
+    held_for: Mapped[list[Any]] = mapped_column(JSON, default=list, server_default="[]")
+    """Why the platform holds this seat: the needs of its role that are not met, or a
+    failed seat check (CON-5, LLM-6). Empty for a seat that is not held."""
     override_class: Mapped[str | None] = mapped_column(String(16))
     override_model: Mapped[str | None] = mapped_column(String(100))
     override_effort: Mapped[str | None] = mapped_column(String(16))

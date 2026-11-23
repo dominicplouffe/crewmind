@@ -1,0 +1,89 @@
+### 6.17 Connections: secrets, variables and MCP servers (CON)
+
+A project reaches the outside world through its connections: secrets, variables and MCP servers. This section says how they are created, owned, granted, used in a run and kept safe. Section 6.15 keeps the per-tool permission rules of MCP servers (INT-4); EXE-13 and EXE-14 point here.
+
+- **CON-1 Scopes and ownership.**
+  - A connection is a **secret**, a **variable** or an **MCP server**, and lives in one of three scopes: the **install** (added by an admin, attachable by anyone), a **person** (added by its owner, attachable to any project they chair), or a **project** (added in that project, used only there).
+  - The owner changes or deletes a person connection; an admin an install connection; the chairman or a co-chair a project connection.
+  - Deleting a connection first lists every project that uses it.
+- **CON-2 Secrets.**
+  - A secret has a name, a one-line description of what it is for (agents read it), and a value.
+  - **Values are write-only.** Once saved, a value is never shown again to anyone, admins included, on any surface. It can be replaced.
+  - A value shorter than `secret.min_length` \[8\] is refused, because it cannot be masked reliably (CON-8).
+  - A secret is used in one of two ways, chosen when it is added:
+    - **sent for you** (the default): crewmind adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
+    - **given to the agent**: placed in the run's sandbox as an environment variable or a file (CON-7), for what cannot be sent for the agent.
+  - A secret may carry an expiry date. The chairman of every project that uses it is told `secret.expiry_warning` \[7 days\] before, and on the day.
+  - Many secrets and variables can be added at once by pasting `KEY=value` lines, reviewed as a table before anything is saved.
+- **CON-3 Variables.** A variable has a name, a description and a plain value. It is shown to members and agents, placed in granted runs as an environment variable, and listed in their context pack.
+- **CON-4 Attachment and grants.**
+  - A project uses a connection only once the chairman attaches it and grants it to roles of the project, or to every role.
+  - When a connection meets a declared need (CON-5), the roles that declared it are granted by default. Otherwise the chairman chooses the roles before attaching.
+  - Two attached connections that would give the same environment variable, file or site to the same role are refused, naming both. Nothing is shadowed silently.
+  - A run receives only what is granted to its seat's role in its own project.
+  - Detaching or revoking takes effect at each seat's next run, and ends its warm chat process.
+- **CON-5 Needs and starting.**
+  - A role declares what it needs by name and kind: a secret (for a site, or given), a variable, or an MCP server. A spec may add needs. An agent may request one.
+  - The platform keeps each project's needs: met by an attached connection, open, or waived for now.
+  - **Start with open needs** shows them, each with a way to add it, and offers to start without them. Starting without them holds exactly the seats whose roles need what is missing, each hold naming the missing connection (EXE-4), and puts one item on the desk. Attaching the connection lifts the hold by itself.
+  - No seat is run while a need of its role is open.
+- **CON-6 Secrets sent for you.**
+  - Every run's HTTP and HTTPS traffic goes through the platform's egress proxy, which identifies the run by its run token.
+  - A connection to a site with no secret sent for this run is passed through untouched, as an opaque tunnel. Nothing else is blocked or read (EXE-14).
+  - A connection to a granted site is opened with a short-lived certificate (`proxy.certificate_life` \[24 h\]) from the install's own certificate authority, which every sandbox trusts. The proxy adds the secret as a header (bearer, basic with a user name, or a named header), replacing any the agent sent, verifies the real site's certificate, and passes the answer back.
+  - The site is the host the request is for, checked against both the TLS server name and the request's `Host`; a mismatch is refused.
+  - The certificate authority's key is a secret and never enters a sandbox.
+  - Programs that ignore the proxy settings or pin certificates cannot use a secret sent for them; the platform says so when the secret is added, and SECURITY.md states it.
+- **CON-7 Secrets given to the agent.**
+  - A text secret becomes an environment variable, a file secret a file on the run's private in-memory filesystem (EXE-13), each under the name set when it was attached.
+  - Names are letters, digits and underscores. Names that change how programs run are refused: `CREWMIND_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`.
+  - The context pack names each one, its description and its variable, never its value.
+- **CON-8 Masking.**
+  - For each live run the platform holds the values it gave to the agent. Every place agent text enters the platform replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
+  - A workspace file that held a value is stored masked, and the chairman is told once, naming the file and the secret.
+  - Masking stops crewmind storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
+- **CON-9 Remote MCP servers.**
+  - Reached over Streamable HTTP, falling back to HTTP with server-sent events for servers that only speak it.
+  - https only, except http to `localhost`.
+  - Public addresses only, through the fetch guard (WRK-12). An admin may allow a private address for one server, with a warning. Link-local and cloud metadata addresses are always refused.
+  - Auth kinds: none; a bearer token; a custom header (a name and a value; `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Cookie` and `Mcp-Session-Id` are refused as names); OAuth (CON-10).
+  - Address, token, header value and OAuth tokens never enter a sandbox (INT-4).
+- **CON-10 MCP OAuth.**
+  - Follows the MCP authorization specification: the server's protected-resource metadata, then its authorization server's metadata; dynamic client registration where offered, otherwise a client id (and secret) the person pastes; authorization code with PKCE S256; a single-use `state` bound to the person's browser session; the resource indicator for audience binding.
+  - The callback is at the install's public https address, so OAuth needs one; the form says so when it is missing.
+  - Access and refresh tokens are secrets. They are refreshed before expiry and after a 401, and a rotated refresh token replaces the old one.
+  - A refused refresh marks the server as needing sign-in and raises one alarm with a way to sign in again. Calls meanwhile return a plain reason to the agent.
+  - The tokens act as the signed-in person's account at that provider; the form says so before sign-in.
+- **CON-11 MCP servers started from a command.**
+  - A command server is a command line (for example `npx -y …` or `uvx …`), the secrets and variables it needs as environment variables, and an image (the tool image by default, with Node, Python and uv).
+  - Each runs in its own container, with no workspace, no install secret and nothing of any agent's, and is reached over standard input and output by the platform only.
+  - It starts on first use, stops after `mcp.command_idle` \[15 min\] unused, and restarts after a crash with the circuit breaker's back-off (LLM-11).
+  - Without a container runtime, a command server runs as a plain process, for development only, with a warning.
+  - Adding one is human-only (IF-5.6).
+- **CON-12 MCP tools.**
+  - A server's tools are listed when it is added, on request, and every `mcp.tools_refresh` \[daily\].
+  - A tool whose annotations say it only reads and is not destructive starts allowed; any other tool starts denied (INT-4, 7.18). The chairman sees every classification and can change it.
+  - A tool that appears later starts by its classification and the chairman is told once. A tool that disappears is kept, marked gone.
+  - Names, descriptions and schemas are untrusted input (P4). Descriptions are cut to `mcp.description_max` \[1,000\] characters.
+- **CON-13 MCP calls in a run.**
+  - A run is offered the allowed tools of the MCP servers granted to its role, through the agent API, and nothing else.
+  - A call to a denied tool never leaves the server, is refused under INT-4, counts toward the refusal cap (EXE-10), and tells the agent it may request access.
+  - A call to a tool not classified as reading is a side effect, recorded under an idempotency key (WRK-16).
+  - Results are untrusted input, cut to `mcp.result_max_bytes` \[64 KB\] with the cut marked. An error result is returned as one and is not a refusal.
+  - Limits: `mcp.call_timeout` \[60 s\] a call, `mcp.max_calls_per_run` \[100\], `mcp.max_calls_per_day` \[1,000\] a project, counted in the ledger. A failing server opens a circuit breaker on the rules of LLM-11.
+- **CON-14 Everyone knows what a project has.**
+  - The Founder lists the connections the chairman can attach, by name and description, states the crew's needs in its first reply, and drafts the grants. The review screen shows each need as met or missing, with a way to add it.
+  - Each run's context pack lists what it may use and what its role needs but lacks.
+  - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny).
+  - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
+- **CON-15 Surfaces.**
+  - The web app has a Connections area in Settings (install and personal) and a Connections tab in each project, sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
+  - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets.
+  - Human-only (IF-5.6): creating or replacing a value, OAuth sign-in, adding a command server, allowing a tool that changes things, deleting a connection. MCP clients see names, kinds and health.
+  - Values are typed only into fields that are never pre-filled, are cleared after saving, and are never put in a URL or browser storage.
+- **CON-16 Records and errors.**
+  - Every change is an event naming its actor, never carrying a value (INV-21).
+  - Run steps record each given secret by name, each header sent for the agent (site, name, method, path without the query, status), and each MCP call (server, tool, masked arguments, outcome, duration, size).
+  - Server logs never contain a value, header value, token or query string; a log filter masks any known value as a second safeguard.
+  - Agents get a plain reason they can act on; the chairman gets one alarm per broken thing, with the fix.
+  - Upkeep re-tests attached MCP servers daily; `doctor` reports servers needing sign-in, a failing proxy and open needs.

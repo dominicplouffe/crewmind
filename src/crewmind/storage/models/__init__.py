@@ -22,6 +22,7 @@ from crewmind.storage.models.artifacts import (
     UploadInProgress,
 )
 from crewmind.storage.models.base import Base, new_id
+from crewmind.storage.models.connections import ProjectNeed
 from crewmind.storage.models.conversation import Channel, Message, ReadPosition
 from crewmind.storage.models.decisions import (
     BriefRun,
@@ -145,6 +146,7 @@ __all__ = [
     "Project",
     "ProjectCredential",
     "ProjectGuard",
+    "ProjectNeed",
     "ProviderCeiling",
     "Purchase",
     "PushSubscription",
