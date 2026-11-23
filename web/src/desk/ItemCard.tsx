@@ -25,6 +25,7 @@ import { ItemFields } from "./ItemFields";
 import { textField, type Item } from "./logic";
 import { Snooze } from "./Snooze";
 import { askerOf, deadlineWords } from "./when";
+import { useAgentName } from "../crew/names";
 
 export interface ItemProject {
   id: string;
@@ -152,7 +153,7 @@ function Details({ item, open, id, onChanged }: { item: Item; open: boolean; id:
 
 /** Who asks, by when, the size, and the project when the list spans several. */
 function Meta({ item, project, size }: { item: Item; project?: ItemProject; size: string | null }): JSX.Element {
-  const asker = askerOf(item.filed_by, item.kind);
+  const asker = askerOf(item.filed_by, item.kind, useAgentName());
   const live = item.actions.length > 0;
   const when = deadlineWords(item.deadline, item.default_outcome);
   const DueIcon = when.urgency === "overdue" ? AlertTriangle : AlarmClock;
@@ -165,7 +166,7 @@ function Meta({ item, project, size }: { item: Item; project?: ItemProject; size
         </Link>
       ) : null}
       <span className="dcard-who">
-        {asker.name ? <Avatar name={asker.name} kind="agent" size="xs" /> : <Sparkles size={13} aria-hidden="true" className="dcard-who-icon" />}
+        {asker.name ? <Avatar name={asker.name} hueKey={asker.seat} kind="agent" size="xs" /> : <Sparkles size={13} aria-hidden="true" className="dcard-who-icon" />}
         <span className="visually-hidden">{asker.line}: </span>
         <span aria-hidden="true">{asker.who}</span>
       </span>

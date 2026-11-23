@@ -10,7 +10,7 @@ import { formatDateTime, formatNumber, formatValue } from "../lib/format";
 import { tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
-import { Avatar } from "../ui/Avatar";
+import { AgentAvatar, useAgentName } from "../crew/names";
 import { Pill } from "../ui/Status";
 import { Empty, Loading } from "./kit";
 import { aboutWords, runSentence, runStateWords, runTone, type RunLike } from "./runWords";
@@ -64,6 +64,7 @@ function TechnicalDetails({ run }: { run: Technical }): JSX.Element {
 function Trace({ projectId, runId, onBack }: { projectId: string; runId: string; onBack(): void }): JSX.Element {
   const trace = useLoad(() => get("/v1/runs/trace", { project_id: projectId, run_id: runId }), [projectId, runId]);
   const data = trace.data;
+  const nameOf = useAgentName();
   return (
     <div data-testid="run-trace" className="run-trace">
       <button type="button" className="button small ghost back-button" onClick={onBack}>
@@ -75,9 +76,9 @@ function Trace({ projectId, runId, onBack }: { projectId: string; runId: string;
       {data ? (
         <>
           <header className="trace-head">
-            <Avatar name={data.seat} kind="agent" size="lg" />
+            <AgentAvatar seat={data.seat} size="lg" />
             <div>
-              <h3 className="trace-title">{runSentence(data)}</h3>
+              <h3 className="trace-title">{runSentence(data, nameOf(data.seat).name)}</h3>
               <p className="quiet">
                 <Pill tone={runTone(data.state)}>{runStateWords(data)}</Pill> · {tokens(data.tokens_counted)}
               </p>
@@ -138,6 +139,7 @@ function Trace({ projectId, runId, onBack }: { projectId: string; runId: string;
 
 export function RunsPanel({ projectId, changes, runId, onSelect }: Props): JSX.Element {
   const runs = useLoad(() => get("/v1/runs/list", { project_id: projectId, limit: 100 }), [projectId, changes]);
+  const nameOf = useAgentName();
   if (runId) return <Trace projectId={projectId} runId={runId} onBack={() => onSelect(undefined)} />;
   const items = runs.data?.items ?? [];
   return (
@@ -148,10 +150,10 @@ export function RunsPanel({ projectId, changes, runId, onSelect }: Props): JSX.E
       <ul className="rows plain">
         {items.map((run) => (
           <li key={run.run_id} className="run-row">
-            <Avatar name={run.seat} kind="agent" size="sm" />
+            <AgentAvatar seat={run.seat} size="sm" />
             <div className="row-main">
               <button type="button" className="row-title" onClick={() => onSelect(run.run_id)}>
-                {runSentence(run)}
+                {runSentence(run, nameOf(run.seat).name)}
                 <ChevronRight size={16} aria-hidden="true" className="row-chevron" />
               </button>
               <p className="row-meta">

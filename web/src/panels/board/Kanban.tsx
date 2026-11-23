@@ -6,9 +6,9 @@
 import { useRef, type CSSProperties } from "react";
 import type { Task } from "../../api/client";
 import { t } from "../../strings";
-import { Avatar } from "../../ui/Avatar";
 import { boardColumns, showsCheckLabel, slug, type BoardColumn, type ColumnId } from "./logic";
 import { AgentText, CheckLabel, StateTag } from "./parts";
+import { AgentAvatar, useAgentName } from "../../crew/names";
 
 /** The state each column is named for; a card in another state also shows its own. */
 const PRIMARY: Record<ColumnId, string | null> = {
@@ -30,6 +30,8 @@ interface Props {
 }
 
 function TaskCard({ task, column, requirement, onOpen }: { task: Task; column: ColumnId; requirement: string | undefined; onOpen(): void }): JSX.Element {
+  const nameOf = useAgentName();
+  const holder = task.claimant ? nameOf(task.claimant).name : null;
   const words = t.board.kanban;
   const ownState = task.state !== PRIMARY[column] && task.state !== task.label;
   return (
@@ -54,9 +56,9 @@ function TaskCard({ task, column, requirement, onOpen }: { task: Task; column: C
       <span className="task-card-foot">
         {task.claimant ? (
           <span className="task-card-who">
-            <Avatar name={task.claimant} size="xs" />
-            <span className="visually-hidden">{words.heldBy(task.claimant)}</span>
-            <span aria-hidden="true">{task.claimant}</span>
+            <AgentAvatar seat={task.claimant} size="xs" />
+            <span className="visually-hidden">{words.heldBy(holder ?? task.claimant)}</span>
+            <span aria-hidden="true">{holder}</span>
           </span>
         ) : (
           <span className="task-card-who quiet">{words.unclaimed}</span>

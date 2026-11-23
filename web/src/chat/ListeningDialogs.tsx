@@ -5,6 +5,7 @@ import { Modal } from "../components/Modal";
 import { t } from "../strings";
 import { snippet } from "./MessageItem";
 import type { Listening } from "./useListening";
+import { useAgentName } from "../crew/names";
 
 interface FormProps {
   label: string;
@@ -66,6 +67,7 @@ function DialogForm({ label, initial, submit, onSubmit, others, onClose }: FormP
 
 export function ListeningDialogs({ listening }: { listening: Listening }): JSX.Element | null {
   const { dialog, close } = listening;
+  const nameOf = useAgentName();
   if (!dialog) return null;
   let title: string;
   let body: ReactNode;
@@ -97,7 +99,7 @@ export function ListeningDialogs({ listening }: { listening: Listening }): JSX.E
       title = t.listening.fixDialog.title;
       body = (
         <>
-          <p className="quiet">{t.listening.fixDialog.intro(message.author)}</p>
+          <p className="quiet">{t.listening.fixDialog.intro(nameOf(message.author).name)}</p>
           <p className="quiet">
             {t.listening.fixDialog.about} <q>{snippet(message.body)}</q>
           </p>

@@ -16,7 +16,7 @@ import {
   setCeoScript,
   setTheme,
   setupToken,
-  typingSeen, openPanel } from "./helpers";
+  typingSeen, openPanel, agentName } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -122,14 +122,43 @@ test("/hold changes the header and /resume changes it back (CHAT-5, CHAT-18)", a
 
 test("@ completes agents, and Up arrow recalls the last message (CHAT-4)", async () => {
   const box = page.getByRole("textbox", { name: "Message" });
+  // An agent is offered by the name it goes by, found by its role too (EXE-18).
+  const ceo = await agentName(page);
   await box.fill("@C");
-  await expect(page.getByRole("option", { name: /@CEO/ })).toBeVisible();
+  await expect(page.getByRole("option", { name: new RegExp(`@${ceo}.*CEO`) })).toBeVisible();
   await box.press("Tab");
-  await expect(box).toHaveValue("@CEO ");
+  await expect(box).toHaveValue(`@${ceo} `);
   await box.fill("");
   await box.press("ArrowUp");
   await expect(box).toHaveValue("Please make a plan");
   await box.fill("");
+});
+
+test("agents go by person-like names, and the chairman renames one from its sheet (EXE-18)", async () => {
+  const ceo = await agentName(page);
+  const reviewer = await agentName(page, "Reviewer");
+  expect(ceo).not.toBe("CEO");
+  expect(reviewer).not.toBe(ceo);
+  const home = page.url();
+  await page.goto(`${home.replace(/\/$/, "")}/crew`);
+  const card = page.getByTestId("crew-card").filter({ hasText: reviewer });
+  await expect(card).toContainText("Reviewer");
+  await card.click();
+  const sheet = page.getByTestId("agent-sheet");
+  await expect(sheet.getByRole("heading", { name: reviewer })).toBeVisible();
+  await sheet.getByTestId("agent-rename-open").click();
+  const input = sheet.getByLabel(`A new name for ${reviewer}`);
+  await input.fill(ceo.toLowerCase());
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet.getByRole("alert")).toContainText(`already called ${ceo.toLowerCase()}`);
+  await input.fill("  Quill  ");
+  await sheet.getByRole("button", { name: "Save" }).click();
+  await expect(sheet.getByTestId("agent-rename")).toHaveCount(0);
+  await expect(sheet.getByRole("heading", { name: "Quill" })).toBeVisible();
+  await expect(page.getByTestId("crew-card").filter({ hasText: "Quill" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.goto(home);
+  await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
 });
 
 test("upload files and preview them: markdown, CSV, and HTML in a locked frame (CHAT-9, CHAT-16)", async () => {
@@ -300,7 +329,7 @@ test("the command palette opens panels; budget, models, settings, runs, activity
   await expect(setting.getByLabel("Agents working at once")).toHaveValue("5");
 
   await openPanel(page, "Runs");
-  await panel.getByRole("button", { name: /CEO replied to your message/ }).first().click();
+  await panel.getByRole("button", { name: new RegExp(`${await agentName(page)} replied to your message`) }).first().click();
   await expect(panel.getByTestId("run-trace")).toContainText("Steps");
   await expect(panel.getByTestId("run-trace")).toContainText("model call");
 

@@ -22,7 +22,11 @@ const SEAT_SPREAD = 720;
 const SEAT_STEP_MAX = 110;
 
 export interface AssembledSeat {
+  /** The seat name: the identity, and the avatar's colour. */
   name: string;
+  /** The name it goes by, shown first (EXE-18). */
+  displayName?: string;
+  /** The role, short: "CEO". */
   role: string;
   kind: string;
 }
@@ -151,11 +155,11 @@ export function CrewAssembled({ projectId, seats, onDone, onSkip }: Props): JSX.
               className={`assembled-seat${y < -0.3 ? " label-above" : ""}${seat.kind === "ceo" ? " is-ceo" : ""}`}
               style={{ "--x": x, "--y": y, animationDelay: `${delay}ms` } as CSSProperties}
             >
-              <Avatar name={seat.name} size="lg" />
+              <Avatar name={seat.displayName ?? seat.name} hueKey={seat.name} size="lg" />
               <span className="assembled-label">
-                <span className="assembled-name">{seat.name}</span>
-                {seat.role.trim().toLowerCase() !== seat.name.trim().toLowerCase() ? (
-                  <span className="assembled-role">{roleLine(seat.name, seat.role)}</span>
+                <span className="assembled-name">{seat.displayName ?? seat.name}</span>
+                {seat.role.trim().toLowerCase() !== (seat.displayName ?? seat.name).trim().toLowerCase() ? (
+                  <span className="assembled-role">{roleLine(seat.displayName ?? seat.name, seat.role)}</span>
                 ) : null}
               </span>
             </span>
@@ -169,7 +173,7 @@ export function CrewAssembled({ projectId, seats, onDone, onSkip }: Props): JSX.
           <ul className="visually-hidden">
             {ordered.map((seat) => (
               <li key={seat.name}>
-                {seat.name}, {seat.role}
+                {seat.displayName ?? seat.name}, {seat.role}
               </li>
             ))}
           </ul>

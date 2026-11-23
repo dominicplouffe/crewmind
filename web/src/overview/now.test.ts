@@ -30,6 +30,12 @@ describe("nowEntries", () => {
     expect(entries[0]?.seat).toBeNull();
   });
 
+  it("EXE-18 names agents by the name they go by, keeping the seat for the avatar", () => {
+    const entries = nowEntries([{ seat: "CEO", run_kind: "chat", doing: "thinking" }], TASKS, (seat) => (seat === "CEO" ? "Lena" : seat));
+    expect(plainText(entries[0]?.parts ?? [])).toContain("Lena");
+    expect(entries[0]?.seat).toBe("CEO");
+  });
+
   it("EXE-4 puts agents at work first, naming the task a work run is on", () => {
     const entries = nowEntries(
       [

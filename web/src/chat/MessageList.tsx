@@ -1,15 +1,13 @@
 /** The scrolling chat: stored messages, local notices, messages being sent, and replies being written. */
 import { MessageCircle } from "lucide-react";
 import { AlertCircle, CheckCircle2, Loader2, RotateCw, Square, X } from "lucide-react";
-import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { get, type Message } from "../api/client";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { Message } from "../api/client";
 import { useAuth } from "../auth";
 import { Markdown, Pre } from "../components/common";
 import { Empty, Loading } from "../panels/kit";
-import { ItemsContext } from "../desk/context";
 import { formatValue } from "../lib/format";
-import { useLoad } from "../lib/useLoad";
-import { Avatar } from "../ui/Avatar";
+import { AgentAvatar, useAgentName } from "../crew/names";
 import { t } from "../strings";
 import { MessageItem, type MessageHandlers } from "./MessageItem";
 import type { ChatState, Notice, PendingMessage, Typing } from "./state";
@@ -22,8 +20,6 @@ interface Props {
   onDismissNotice(key: string): void;
   onInterrupt(): void;
   onEarlier(): Promise<void>;
-  /** Each agent's role by name, for the line under its name. Loaded here when not given. */
-  roles?: Record<string, string>;
 }
 
 const NEAR_BOTTOM_PX = 160;
@@ -107,14 +103,15 @@ function PendingItem({
 }
 
 function TypingItem({ typing, doing, onInterrupt }: { typing: Typing; doing: string | null; onInterrupt(): void }): JSX.Element {
+  const { name } = useAgentName()(typing.seat);
   return (
-    <article className="message from-agent is-bubble is-typing" aria-label={t.chat.typingLabel(typing.seat)} data-testid="typing">
+    <article className="message from-agent is-bubble is-typing" aria-label={t.chat.typingLabel(name)} data-testid="typing">
       <div className="message-gutter">
-        <Avatar name={typing.seat} kind="agent" size="md" status="working" />
+        <AgentAvatar seat={typing.seat} size="md" status="working" />
       </div>
       <div className="message-main">
         <header className="message-head">
-          <span className="author">{typing.seat}</span>
+          <span className="author">{name}</span>
           <span className="message-role typing-doing">
             <span className="typing-dots" aria-hidden="true">
               <span />
@@ -146,7 +143,6 @@ export function MessageList({
   onDismissNotice,
   onInterrupt,
   onEarlier,
-  roles,
 }: Props): JSX.Element {
   const scroller = useRef<HTMLDivElement>(null);
   const stick = useRef(true);
@@ -155,17 +151,6 @@ export function MessageList({
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const { messages, notices, pending, typing, header, cards } = state;
   const myName = useAuth().person?.name;
-  const scope = useContext(ItemsContext);
-  const projectId = roles ? "" : (scope?.projectId ?? "");
-  // The roles only label names, so the roster is asked for once per project, not on every change.
-  const roster = useLoad(
-    () => (projectId ? get("/v1/roster/show", { project_id: projectId }) : Promise.resolve(null)),
-    [projectId],
-  );
-  const roleOf = useMemo(
-    () => roles ?? Object.fromEntries((roster.data?.seats ?? []).map((seat) => [seat.name, seat.role])),
-    [roles, roster.data],
-  );
   const firstId = messages[0]?.id ?? 0;
 
   // Older messages go in above: put the message the person was reading back where it was. Measuring
@@ -257,7 +242,6 @@ export function MessageList({
             order={subjectOf(message, "order", state.orders)}
             request={subjectOf(message, "request", state.requests)}
             example={state.examples[message.id]}
-            role={roleOf[message.author]}
             mine={message.author_kind === "person" && message.author === myName}
           />
           {noticesAfter(message.id, index === messages.length - 1).map((notice) => (

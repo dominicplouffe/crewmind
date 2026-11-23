@@ -16,6 +16,7 @@ import { RelativeTime } from "../chat/RelativeTime";
 import { groupByDay } from "../desk/logic";
 import { Empty, Loading } from "./kit";
 import { listeningLine } from "./memory/PinnedTab";
+import { roleLabel } from "../crew/names";
 
 interface Props {
   projectId: string;
@@ -229,11 +230,11 @@ export function ModelsPanel({ projectId, changes }: Props): JSX.Element {
               const agent = agentOf(seat.seat);
               return (
                 <li key={seat.seat} className="seat-row">
-                  <Avatar name={seat.seat} kind="agent" size="md" />
+                  <Avatar name={seat.name || seat.seat} hueKey={seat.seat} kind="agent" size="md" />
                   <div className="row-main">
-                    <h3 className="row-heading">{seat.seat}</h3>
+                    <h3 className="row-heading">{seat.name || seat.seat}</h3>
                     <p className="quiet">
-                      {agent && agent.role !== seat.seat ? agent.role : (words.seatKinds[seat.kind] ?? seat.kind)}
+                      {agent ? roleLabel(agent) : (words.seatKinds[seat.kind] ?? seat.kind)}
                     </p>
                     <p className="seat-model">{seat.model ? words.runsOn(seat.model, seat.provider ?? "") : words.noModel}</p>
                     <p className="quiet">

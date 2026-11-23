@@ -148,3 +148,19 @@ export function saveProjectUrl(url: string): void {
 export function projectUrl(): string {
   return readFileSync(projectUrlFile, "utf8");
 }
+
+/**
+ * The name an agent goes by in the project the page shows (EXE-18): the CEO and the reviewer draw a
+ * first name, so tests ask the roster rather than assume one.
+ */
+export async function agentName(page: Page, seat = "CEO"): Promise<string> {
+  const projectId = new URL(page.url()).pathname.split("/")[2] ?? "";
+  return page.evaluate(
+    async ([id, wanted]) => {
+      const response = await fetch(`/v1/roster/show?project_id=${encodeURIComponent(id ?? "")}`, { credentials: "same-origin" });
+      const roster = (await response.json()) as { seats: { name: string; display_name: string }[] };
+      return roster.seats.find((item) => item.name === wanted)?.display_name ?? wanted ?? "";
+    },
+    [projectId, seat],
+  );
+}

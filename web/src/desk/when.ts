@@ -4,7 +4,11 @@
  */
 import { fromNow } from "../lib/humanize";
 import { urgencyOf, type Urgency } from "../needs/summary";
+import type { NameOf } from "../crew/names";
 import { t } from "../strings";
+
+/** The CEO's seat name: every project has exactly one (EXE-1). */
+const CEO_SEAT = "CEO";
 
 const WEEK_MS = 6 * 24 * 3600 * 1000;
 
@@ -67,22 +71,35 @@ const CEO_KINDS = new Set([
 export interface Asker {
   /** The name for the avatar, or null for crewmind itself. */
   name: string | null;
+  /** The asking agent's seat, for the avatar's colour, when known. */
+  seat?: string;
   line: string;
   /** Who, in a word: "CEO", "An agent", "crewmind", or the seat's name. */
   who: string;
 }
 
-/** Who is asking, from the item's filer ("agent", "platform", or a seat's name) and its kind. */
-export function askerOf(filedBy: string, kind: string): Asker {
+/** An agent by the name it goes by and its role, when the project's roster is known (EXE-18). */
+function named(seat: string, nameOf?: NameOf): Asker {
+  const words = t.decisions.card.askedBy;
+  const agent = nameOf?.(seat);
+  if (!agent?.role || agent.name === agent.role) return { name: agent?.name ?? seat, seat, line: words.named(agent?.name ?? seat), who: agent?.name ?? seat };
+  return { name: agent.name, seat, line: words.namedRole(agent.name, agent.role), who: t.decisions.compact.who.namedRole(agent.name, agent.role) };
+}
+
+/**
+ * Who is asking, from the item's filer ("agent", "platform", or a seat's name) and its kind.
+ * `nameOf` gives an agent's name and role inside a project; without it the role or seat is shown.
+ */
+export function askerOf(filedBy: string, kind: string, nameOf?: NameOf): Asker {
   const words = t.decisions.card.askedBy;
   const who = t.decisions.compact.who;
   if (filedBy === "platform" || filedBy === "") return { name: null, line: words.platform, who: who.platform };
   if (filedBy === "agent" || filedBy === "ceo") {
-    return CEO_KINDS.has(kind) || filedBy === "ceo"
-      ? { name: "CEO", line: words.ceo, who: who.ceo }
-      : { name: "Agent", line: words.agent, who: who.agent };
+    if (!(CEO_KINDS.has(kind) || filedBy === "ceo")) return { name: "Agent", line: words.agent, who: who.agent };
+    const ceo = nameOf?.(CEO_SEAT);
+    return ceo && ceo.name !== CEO_SEAT ? named(CEO_SEAT, nameOf) : { name: "CEO", seat: CEO_SEAT, line: words.ceo, who: who.ceo };
   }
-  return { name: filedBy, line: words.named(filedBy), who: filedBy };
+  return named(filedBy, nameOf);
 }
 
 /** The kind of decision in plain words. */

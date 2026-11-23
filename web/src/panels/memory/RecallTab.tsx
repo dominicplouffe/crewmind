@@ -85,7 +85,7 @@ export function RecallTab({ projectId, changes, onChanged }: TabProps): JSX.Elem
             ))}
             {(roster.data?.seats ?? []).map((seat) => (
               <option key={`agent ${seat.name}`} value={`agent ${seat.name}`}>
-                {words.agent(seat.name)}
+                {words.agent(seat.display_name || seat.name)}
               </option>
             ))}
           </select>

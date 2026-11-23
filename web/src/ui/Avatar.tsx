@@ -28,6 +28,8 @@ export function initialsOf(name: string): string {
 
 interface Props {
   name: string;
+  /** What picks the colour, when it is not the name: an agent's seat, so a rename keeps its colour. */
+  hueKey?: string;
   kind?: "agent" | "person";
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   /** Shown as a small dot on the corner; the label is given elsewhere in text. */
@@ -35,8 +37,8 @@ interface Props {
   label?: string;
 }
 
-export function Avatar({ name, kind = "agent", size = "md", status = null, label }: Props): JSX.Element {
-  const hue = hueOf(name);
+export function Avatar({ name, hueKey, kind = "agent", size = "md", status = null, label }: Props): JSX.Element {
+  const hue = hueOf(hueKey ?? name);
   return (
     <span
       className={`avatar avatar-${kind} avatar-${size}`}

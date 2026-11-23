@@ -58,7 +58,12 @@ export function Timeline({ days, me }: { days: StoryDay[]; me?: string }): JSX.E
                 <li key={entry.id} className={`ov-event kind-${entry.kind}`}>
                   <span className="ov-event-mark">
                     {entry.who ? (
-                      <Avatar name={entry.who.kind === "person" ? (me ?? entry.who.name) : entry.who.name} kind={entry.who.kind} size="xs" />
+                      <Avatar
+                        name={entry.who.kind === "person" ? (me ?? entry.who.name) : entry.who.name}
+                        hueKey={entry.who.seat}
+                        kind={entry.who.kind}
+                        size="xs"
+                      />
                     ) : (
                       <span className="ov-event-icon" aria-hidden="true">
                         <Icon size={12} />

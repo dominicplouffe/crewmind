@@ -7,6 +7,7 @@ import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { Tag, stateName, useAct, type TabProps } from "./parts";
+import { useAgentName } from "../../crew/names";
 
 export function CorrectionsTab({ projectId, changes, onChanged }: TabProps): JSX.Element {
   const corrections = useLoad(() => get("/v1/corrections/list", { project_id: projectId }), [projectId, changes]);
@@ -16,6 +17,7 @@ export function CorrectionsTab({ projectId, changes, onChanged }: TabProps): JSX
   });
   const items = corrections.data?.items ?? [];
   const words = t.memory.corrections;
+  const nameOf = useAgentName();
 
   return (
     <>
@@ -37,7 +39,7 @@ export function CorrectionsTab({ projectId, changes, onChanged }: TabProps): JSX
               </div>
             </dl>
             <p className="quiet">
-              <Tag>{stateName(words.states, correction.state)}</Tag> {words.agent(correction.agent)}
+              <Tag>{stateName(words.states, correction.state)}</Tag> {words.agent(nameOf(correction.agent).name)}
               {correction.expires_at ? ` · ${words.expires(formatDateTime(correction.expires_at))}` : ""}
             </p>
             {correction.note ? <p className="note">{correction.note}</p> : null}

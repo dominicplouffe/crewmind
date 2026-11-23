@@ -9,6 +9,7 @@ import { fromNow } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
 import { FileView } from "./FileView";
+import { useAgentName } from "../crew/names";
 
 type Kind = Schemas["Kind"];
 const KINDS: Kind[] = ["deliverable", "working", "upload", "report"];
@@ -33,6 +34,7 @@ function FileRow({
 }): JSX.Element {
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
+  const nameOf = useAgentName();
 
   const act = async (work: () => Promise<unknown>): Promise<void> => {
     setBusy(true);
@@ -70,7 +72,7 @@ function FileRow({
         </p>
         <p className="row-meta">
           <span title={formatDateTime(artifact.last_change)}>
-            {t.files.changedAgo(fromNow(artifact.last_change), artifact.last_author)}
+            {t.files.changedAgo(fromNow(artifact.last_change), nameOf(artifact.last_author).name)}
           </span>
           <span>{t.files.versions(artifact.versions)}</span>
           <span>{formatBytes(artifact.size)}</span>

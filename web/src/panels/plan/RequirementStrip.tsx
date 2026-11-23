@@ -8,12 +8,12 @@ import { useState } from "react";
 import type { Task } from "../../api/client";
 import type { DeskEntry } from "../../needs/summary";
 import { t } from "../../strings";
-import { Avatar } from "../../ui/Avatar";
 import { Pill } from "../../ui/Status";
 import { requirementProgress } from "../board/logic";
 import { AgentText } from "../board/parts";
 import { isSettled } from "./logic";
 import { StateTag, type Requirement } from "./parts";
+import { AgentAvatar, useAgentName } from "../../crew/names";
 
 /** Cut and declined requirements are folded away; met ones stay, as progress. */
 function isDropped(state: string): boolean {
@@ -45,7 +45,9 @@ function Row({
   onDecide,
 }: { requirement: Requirement } & Omit<Props, "requirements">): JSX.Element {
   const words = t.plan.work;
+  const nameOf = useAgentName();
   const progress = requirementProgress(tasks, requirement.id);
+  const owners = progress.owners.map((seat) => nameOf(seat).name);
   const waiting = entriesFor(desk, requirement.id);
   const pressed = selected === requirement.id;
   const percent = progress.total === 0 ? 0 : Math.round((progress.done / progress.total) * 100);
@@ -73,12 +75,12 @@ function Row({
         <span className="req-owners">
           {progress.owners.length > 0 ? (
             <>
-              <span className="avatar-stack" aria-hidden="true" title={progress.owners.join(", ")}>
-                {progress.owners.map((name) => (
-                  <Avatar key={name} name={name} size="xs" />
+              <span className="avatar-stack" aria-hidden="true" title={owners.join(", ")}>
+                {progress.owners.map((seat) => (
+                  <AgentAvatar key={seat} seat={seat} size="xs" />
                 ))}
               </span>
-              <span className="visually-hidden">{words.owners(progress.owners.join(", "))}</span>
+              <span className="visually-hidden">{words.owners(owners.join(", "))}</span>
             </>
           ) : null}
         </span>

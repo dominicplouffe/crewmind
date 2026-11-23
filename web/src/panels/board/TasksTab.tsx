@@ -9,12 +9,14 @@ import { t } from "../../strings";
 import { groupTasks, type TaskGroup } from "./logic";
 import { Bar, CheckLabel, StateTag, type BoardTabProps } from "./parts";
 import { TaskDetail } from "./TaskDetail";
+import { useAgentName } from "../../crew/names";
 
 /** Indentation stops growing here, so deep subtasks still fit a phone. */
 const MAX_INDENT = 3;
 
 function Group({ group, onSelect }: { group: TaskGroup<Task>; onSelect(id: number): void }): JSX.Element {
   const words = t.board.tasks;
+  const nameOf = useAgentName();
   return (
     <section data-testid="task-group" data-state={group.state}>
       <h3 className="group-title">
@@ -30,7 +32,7 @@ function Group({ group, onSelect }: { group: TaskGroup<Task>; onSelect(id: numbe
             <p className="quiet row wrap">
               <StateTag state={task.state} />
               <CheckLabel label={task.label} />
-              {task.claimant ? <span>{words.heldBy(task.claimant)}</span> : task.team ? <span>{words.team(task.team)}</span> : null}
+              {task.claimant ? <span>{words.heldBy(nameOf(task.claimant).name)}</span> : task.team ? <span>{words.team(task.team)}</span> : null}
               {task.failures > 0 ? <span data-testid="task-failures">{words.failures(task.failures)}</span> : null}
             </p>
           </li>

@@ -8,6 +8,7 @@ import { snippet } from "../chat/MessageItem";
 import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
 import { Avatar } from "../ui/Avatar";
+import { AgentAvatar, useAgentName } from "../crew/names";
 
 interface Props {
   projectId: string;
@@ -20,6 +21,7 @@ export function SearchPanel({ projectId, onJump, onFile }: Props): JSX.Element {
   const [hits, setHits] = useState<Schemas["SearchHits"] | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
+  const nameOf = useAgentName();
 
   const search = async (event: FormEvent): Promise<void> => {
     event.preventDefault();
@@ -67,10 +69,17 @@ export function SearchPanel({ projectId, onJump, onFile }: Props): JSX.Element {
           <ul className="rows plain">
             {hits.messages.map((message) => (
               <li key={message.id}>
-                <Avatar name={message.author} kind={message.author_kind === "person" ? "person" : "agent"} size="sm" />
+                {message.author_kind === "agent" ? (
+                  <AgentAvatar seat={message.author} size="sm" />
+                ) : (
+                  <Avatar name={message.author} kind={message.author_kind === "person" ? "person" : "agent"} size="sm" />
+                )}
                 <div className="row-main">
                   <button type="button" className="row-title" onClick={() => onJump(message.id)}>
-                    {t.search.jump(message.author, formatDateTime(message.at))}
+                    {t.search.jump(
+                      message.author_kind === "agent" ? nameOf(message.author).name : message.author,
+                      formatDateTime(message.at),
+                    )}
                   </button>
                   <p className="search-hit-text">{snippet(message.body)}</p>
                 </div>

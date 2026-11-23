@@ -22,6 +22,7 @@ import { nowEntries } from "./now";
 import { Load, More, NowList } from "./parts";
 import { Timeline } from "./Timeline";
 import { storyOf } from "./timeline";
+import { useAgentName } from "../crew/names";
 
 const TIMELINE_ENTRIES = 12;
 const LATEST_FILES = 3;
@@ -113,7 +114,11 @@ export function ProjectOverview({ projectId, changes, header, onTab, onPanel, on
     });
   }, [header, status.data, plan.data, tasks.data, budget.data]);
 
-  const now = useMemo(() => (tasks.data ? nowEntries(header?.now ?? [], tasks.data.items) : null), [header, tasks.data]);
+  const nameOf = useAgentName();
+  const now = useMemo(
+    () => (tasks.data ? nowEntries(header?.now ?? [], tasks.data.items, (seat) => nameOf(seat).name) : null),
+    [header, tasks.data, nameOf],
+  );
 
   const days = useMemo(() => {
     if (!feed.data || !tasks.data || !plan.data) return null;
@@ -125,10 +130,11 @@ export function ProjectOverview({ projectId, changes, header, onTab, onPanel, on
         items: items.data?.items ?? [],
         files: files.data?.items ?? [],
         me: person?.person_id ?? null,
+        nameOf: (seat) => nameOf(seat).name,
       },
       TIMELINE_ENTRIES,
     );
-  }, [feed.data, tasks.data, plan.data, items.data, files.data, person]);
+  }, [feed.data, tasks.data, plan.data, items.data, files.data, person, nameOf]);
 
   const hero = (
     <section className="ov-hero" aria-label={story.headline.label} aria-live="polite">

@@ -26,7 +26,7 @@ function ordered(members: CrewMember[]): CrewMember[] {
   const ceoFirst = (member: CrewMember): number => (member.kind === "ceo" ? 0 : 1);
   return members
     .filter((member) => member.state !== "stood down")
-    .sort((a, b) => ceoFirst(a) - ceoFirst(b) || ORDER[a.status] - ORDER[b.status] || a.name.localeCompare(b.name));
+    .sort((a, b) => ceoFirst(a) - ceoFirst(b) || ORDER[a.status] - ORDER[b.status] || a.displayName.localeCompare(b.displayName));
 }
 
 export function CrewStrip({ projectId, changes, header, onOpen }: Props): JSX.Element {
@@ -61,8 +61,8 @@ export function CrewStrip({ projectId, changes, header, onOpen }: Props): JSX.El
     <button type="button" className="crew-strip" onClick={onOpen} data-testid="crew-strip">
       <span className="crew-strip-faces" aria-hidden="true">
         {members.slice(0, SHOWN).map((member) => (
-          <span key={member.name} className="crew-strip-face" title={`${member.name}: ${member.label}`}>
-            <StatusFace name={member.name} size="sm" status={member.status} />
+          <span key={member.name} className="crew-strip-face" title={`${member.displayName}, ${member.roleLabel}: ${member.label}`}>
+            <StatusFace seat={member.name} size="sm" status={member.status} />
           </span>
         ))}
         {extra > 0 ? <span className="crew-strip-more">{crew.stripMore(extra)}</span> : null}

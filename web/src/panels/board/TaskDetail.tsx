@@ -9,6 +9,7 @@ import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { isClosed, whoChecked } from "./logic";
 import { AgentText, CheckLabel, StateTag, type BoardTabProps } from "./parts";
+import { useAgentName } from "../../crew/names";
 
 interface Props extends BoardTabProps {
   taskId: number;
@@ -25,6 +26,7 @@ export function TaskDetail({ projectId, changes, taskId, onBack, variant = "page
   const heading = useRef<HTMLHeadingElement>(null);
   const task = detail.data;
   const words = t.board.detail;
+  const nameOf = useAgentName();
   const shown = task !== undefined;
 
   const inSheet = variant === "sheet";
@@ -116,11 +118,11 @@ export function TaskDetail({ projectId, changes, taskId, onBack, variant = "page
             </div>
             <div>
               <dt>{words.author}</dt>
-              <dd>{task.author}</dd>
+              <dd>{nameOf(task.author).name}</dd>
             </div>
             <div>
               <dt>{words.holder}</dt>
-              <dd>{task.claimant ?? words.nobody}</dd>
+              <dd>{task.claimant ? nameOf(task.claimant).name : words.nobody}</dd>
             </div>
             {task.team ? (
               <div>
@@ -156,7 +158,7 @@ export function TaskDetail({ projectId, changes, taskId, onBack, variant = "page
           <ol className="records plain">
             {task.attempts.map((attempt, index) => (
               <li key={`${attempt.at}-${index}`} data-testid="attempt">
-                <p className="record-text">{words.attempt(index + 1, attempt.by, formatDateTime(attempt.at))}</p>
+                <p className="record-text">{words.attempt(index + 1, nameOf(attempt.by).name, formatDateTime(attempt.at))}</p>
                 <p>
                   <AgentText text={attempt.evidence} />
                 </p>

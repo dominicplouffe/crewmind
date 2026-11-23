@@ -117,12 +117,12 @@ export function ProjectTop({ projectId, name, header, tab, needs, onTab, onPanel
             <>
               <span className="avatar-stack" aria-hidden="true">
                 {working.slice(0, 3).map((work) => (
-                  <Avatar key={work.seat} name={work.seat} size="xs" status="working" />
+                  <Avatar key={work.seat} name={work.name || work.seat} hueKey={work.seat} size="xs" status="working" />
                 ))}
               </span>
               <span>
                 {working.length === 1 && working[0]
-                  ? t.header.working(working[0].seat, doingText(working[0].doing))
+                  ? t.header.working(working[0].name || working[0].seat, doingText(working[0].doing))
                   : projectLayout.working(working.length)}
               </span>
             </>

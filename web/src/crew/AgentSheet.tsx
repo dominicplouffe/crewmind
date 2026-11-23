@@ -2,9 +2,10 @@
  * One agent up close: its role and team, the model it runs on, its listening score (CHAT-12),
  * its recent runs as sentences (each opens the run), and the files it last changed.
  */
-import { ChevronRight, MessageSquare } from "lucide-react";
-import { get } from "../api/client";
-import { ErrorNote } from "../components/common";
+import { ChevronRight, MessageSquare, Pencil } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { get, post } from "../api/client";
+import { ErrorNote, Field } from "../components/common";
 import { formatNumber } from "../lib/format";
 import { fromNow, tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
@@ -14,6 +15,7 @@ import { Sheet } from "../ui/Sheet";
 import { Skeleton } from "../ui/Skeleton";
 import { Pill } from "../ui/Status";
 import { recentRuns, runSentence, type CrewMember, type Run } from "./logic";
+import { mentionOf } from "./names";
 import { StatusFace } from "./parts";
 import { STATUS_TONE } from "./tone";
 
@@ -25,12 +27,69 @@ interface Props {
   changes: number;
   member: CrewMember;
   runs: Run[];
+  /** The person chairs the project, so may rename the agent (EXE-18). The server decides either way. */
+  canRename?: boolean;
   onClose(): void;
-  onMessage(name: string): void;
+  /** Start a message to the agent: `mention` is what to type after the @. */
+  onMessage(mention: string): void;
   onOpenRun(runId: string): void;
+  onRenamed?(): void;
 }
 
-export function AgentSheet({ projectId, changes, member, runs, onClose, onMessage, onOpenRun }: Props): JSX.Element {
+/** The chairman gives the agent another name; the server tidies it and refuses a taken or empty one. */
+function RenameForm({ projectId, member, onDone }: { projectId: string; member: CrewMember; onDone(): void }): JSX.Element {
+  const [value, setValue] = useState(member.displayName);
+  const [error, setError] = useState<unknown>(null);
+  const [saving, setSaving] = useState(false);
+  const submit = async (event: FormEvent): Promise<void> => {
+    event.preventDefault();
+    setSaving(true);
+    setError(null);
+    try {
+      await post("/v1/roster/rename_seat", { project_id: projectId, seat: member.name, display_name: value });
+      onDone();
+    } catch (failure) {
+      setError(failure);
+    } finally {
+      setSaving(false);
+    }
+  };
+  return (
+    <form className="agent-rename stack" onSubmit={(event) => void submit(event)} data-testid="agent-rename">
+      <Field label={crew.sheet.renameLabel(member.displayName)} htmlFor="agent-rename-input">
+        <input
+          id="agent-rename-input"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          maxLength={100}
+          autoFocus
+        />
+      </Field>
+      <ErrorNote error={error} />
+      <div className="row">
+        <button type="submit" className="button primary small" disabled={saving}>
+          {crew.sheet.save}
+        </button>
+        <button type="button" className="button ghost small" onClick={onDone}>
+          {crew.sheet.cancel}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+export function AgentSheet({
+  projectId,
+  changes,
+  member,
+  runs,
+  canRename = false,
+  onClose,
+  onMessage,
+  onOpenRun,
+  onRenamed,
+}: Props): JSX.Element {
+  const [renaming, setRenaming] = useState(false);
   const models = useLoad(() => get("/v1/models/show", { project_id: projectId }), [projectId, changes]);
   const artifacts = useLoad(() => get("/v1/artifacts/list", { project_id: projectId }), [projectId, changes]);
   const model = models.data?.seats.find((seat) => seat.seat === member.name);
@@ -42,20 +101,38 @@ export function AgentSheet({ projectId, changes, member, runs, onClose, onMessag
 
   return (
     <Sheet
-      title={member.name}
-      subtitle={crew.sheet.subtitle(member.role, member.team)}
+      title={member.displayName}
+      subtitle={crew.sheet.subtitle(member.roleLabel, member.team)}
       onClose={onClose}
       size="lg"
       testId="agent-sheet"
       actions={
-        <button type="button" className="button primary small" onClick={() => onMessage(member.name)}>
-          <MessageSquare size={16} aria-hidden="true" />
-          {crew.sheet.message(member.name)}
-        </button>
+        <>
+          {canRename && !renaming ? (
+            <button type="button" className="button small" onClick={() => setRenaming(true)} data-testid="agent-rename-open">
+              <Pencil size={16} aria-hidden="true" />
+              {crew.sheet.rename}
+            </button>
+          ) : null}
+          <button type="button" className="button primary small" onClick={() => onMessage(mentionOf(member.displayName))}>
+            <MessageSquare size={16} aria-hidden="true" />
+            {crew.sheet.message(member.displayName)}
+          </button>
+        </>
       }
     >
+      {renaming ? (
+        <RenameForm
+          projectId={projectId}
+          member={member}
+          onDone={() => {
+            setRenaming(false);
+            onRenamed?.();
+          }}
+        />
+      ) : null}
       <div className="agent-hero">
-        <StatusFace name={member.name} size="xl" status={member.status} />
+        <StatusFace seat={member.name} size="xl" status={member.status} />
         <div className="agent-hero-text">
           <Pill tone={STATUS_TONE[member.status]} live={member.status === "working"}>
             {member.label}
@@ -79,6 +156,13 @@ export function AgentSheet({ projectId, changes, member, runs, onClose, onMessag
           {crew.sheet.about}
         </h3>
         <dl className="pairs">
+          <div>
+            <dt>{crew.sheet.name}</dt>
+            <dd>
+              {member.displayName}
+              {member.displayName !== member.name ? <span className="quiet agent-hint">{crew.sheet.seatName(member.name)}</span> : null}
+            </dd>
+          </div>
           <div>
             <dt>{crew.sheet.role}</dt>
             <dd>{member.role}</dd>

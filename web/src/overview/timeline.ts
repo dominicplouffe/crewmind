@@ -36,6 +36,8 @@ export type StoryKind =
 export interface Who {
   name: string;
   kind: "agent" | "person";
+  /** An agent's seat name, its identity and avatar colour, when `name` is the name it goes by. */
+  seat?: string;
 }
 
 export interface StoryEntry {
@@ -64,6 +66,8 @@ export interface StorySources {
   files: readonly Pick<Artifact, "name" | "kind">[];
   /** The signed-in person's id, so their own actions read "You". */
   me: string | null;
+  /** The name an agent goes by, from its seat name (EXE-18). Without it the seat name is shown. */
+  nameOf?: (seat: string) => string;
 }
 
 /** One event before grouping. `subject` is what a grouped line lists. */
@@ -92,6 +96,7 @@ const TOLD_ELSEWHERE = new Set(["proposed scope"]);
 
 interface Context {
   who(actor: string): Who | null;
+  agent(seat: string): Who;
   task: Map<number, { title: string; claimant: string | null }>;
   requirement: Map<number, string>;
   item: Map<number, Item>;
@@ -161,7 +166,7 @@ const RULES: Record<string, Rule> = {
     const [, author = "", version = "1", name = ""] = match;
     const kind = context.fileKind.get(name);
     if (kind !== undefined && kind !== "deliverable") return null;
-    const who = context.who(item.actor) ?? (author ? { name: author, kind: "agent" as const } : null);
+    const who = context.who(item.actor) ?? (author ? context.agent(author) : null);
     const update = Number(version) > 1;
     return {
       kind: update ? "updated" : "delivered",
@@ -176,7 +181,7 @@ const RULES: Record<string, Rule> = {
     const task = change ? context.task.get(change.id) : undefined;
     if (!change || !task) return null;
     if (change.state === "done") {
-      const who = task.claimant ? { name: task.claimant, kind: "agent" as const } : null;
+      const who = task.claimant ? context.agent(task.claimant) : null;
       return { kind: "finished", who, subject: task.title, groupKey: `finished:${who?.name ?? ""}`, single: timeline.finished(who?.name ?? null, [task.title]) };
     }
     if (change.state === "blocked") {
@@ -277,12 +282,14 @@ function dayLabel(time: number, now: number): string {
 /** The newest `limit` story lines, newest first, grouped by day. */
 export function storyOf(sources: StorySources, limit: number, now: number = Date.now()): StoryDay[] {
   const names = actorNames(sources);
+  const shown = sources.nameOf ?? ((seat: string) => seat);
   const context: Context = {
     who(actor) {
       if (sources.me && actor === sources.me) return { name: timeline.you, kind: "person" };
-      const name = names.get(actor);
-      return name ? { name, kind: "agent" } : null;
+      const seat = names.get(actor);
+      return seat ? { name: shown(seat), kind: "agent", seat } : null;
     },
+    agent: (seat) => ({ name: shown(seat), kind: "agent", seat }),
     task: new Map(sources.tasks.map((task) => [task.id, { title: task.title, claimant: task.claimant }])),
     requirement: new Map(sources.requirements.map((requirement) => [requirement.id, requirement.text])),
     item: new Map(sources.items.map((item) => [item.id, item])),

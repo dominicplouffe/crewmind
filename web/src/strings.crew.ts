@@ -94,6 +94,12 @@ export const crew = {
   sheet: {
     subtitle: (role: string, team: string | null): string => (team ? `${role} · team ${team}` : role),
     message: (name: string): string => `Message ${name}`,
+    name: "Name",
+    rename: "Rename",
+    renameLabel: (name: string): string => `A new name for ${name}`,
+    save: "Save",
+    cancel: "Cancel",
+    seatName: (seat: string): string => `Seat ${seat}`,
     about: "About",
     role: "Role",
     team: "Team",

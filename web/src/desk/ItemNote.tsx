@@ -15,6 +15,7 @@ import { ItemsContext } from "./context";
 import { headlineOf } from "./headline";
 import type { Item } from "./logic";
 import { askerOf } from "./when";
+import { useAgentName } from "../crew/names";
 
 const ICONS: Record<string, LucideIcon> = { "heads-up": Megaphone, flag: AlertTriangle, "mistake report": FileWarning };
 
@@ -69,7 +70,8 @@ export function ChatItemNote({ itemId, fallback, time }: Props): JSX.Element {
   const words = t.decisions.compact.note;
   const Icon = ICONS[item?.kind ?? ""] ?? Megaphone;
   const head = item ? headlineOf(item) : null;
-  const asker = item ? askerOf(item.filed_by, item.kind) : null;
+  const nameOf = useAgentName();
+  const asker = item ? askerOf(item.filed_by, item.kind, nameOf) : null;
   const tone = item?.kind === "flag" ? "is-warning" : "";
   const acknowledged = item?.state === "acknowledged";
 

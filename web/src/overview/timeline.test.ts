@@ -114,7 +114,7 @@ describe("storyOf", () => {
       "The sign-up form works.",
     ]);
     expect(entries[3]?.details).toEqual(["providers.csv", "signup.ts"]);
-    expect(entries[0]?.who).toEqual({ name: "Priya", kind: "agent" });
+    expect(entries[0]?.who).toEqual({ name: "Priya", kind: "agent", seat: "Priya" });
     expect(entries[0]?.when).toBe("2 minutes ago");
   });
 

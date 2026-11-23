@@ -28,7 +28,7 @@ import { ChatItemCard } from "../desk/ItemCard";
 import { ChatItemNote } from "../desk/ItemNote";
 import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
-import { Avatar } from "../ui/Avatar";
+import { AgentAvatar, useAgentName } from "../crew/names";
 import { ActionCard } from "./ActionCard";
 import { Markers, StatusActions, detailOf, isReopenLine, type MessageDetail } from "./MessageExtras";
 import { MessageMenu, type MenuAction } from "./MessageMenu";
@@ -63,8 +63,6 @@ interface Props {
   request?: ReopenRequest;
   /** An example mark set or removed on this page; otherwise the message's own detail says. */
   example?: boolean;
-  /** The author's role, for an agent ("CEO / Project Manager"), when the roster is known. */
-  role?: string;
   /** The signed-in person wrote it: their name shows as "You". */
   mine?: boolean;
 }
@@ -127,9 +125,14 @@ function MessageItemInner({
   order,
   request,
   example,
-  role,
   mine,
 }: Props): JSX.Element {
+  const nameOf = useAgentName();
+  // An agent is shown by the name it goes by, its role beside it (EXE-18); the stored author is its seat.
+  const agent = message.author_kind === "agent" ? nameOf(message.author) : null;
+  const author = agent?.name ?? message.author;
+  const role = agent?.role;
+  const parentAuthor = parent ? (parent.author_kind === "agent" ? nameOf(parent.author).name : parent.author) : "";
   const detail = detailOf(message);
   const foldable = message.author_kind === "agent" && isLong(message.body);
   const [open, setOpen] = useState(false);
@@ -149,7 +152,7 @@ function MessageItemInner({
   const menu = compact ? [] : menuActions(message, isExample, handlers);
 
   const toolbar = (
-    <div className="message-actions" role="group" aria-label={t.chat.actionsLabel(message.author)}>
+    <div className="message-actions" role="group" aria-label={t.chat.actionsLabel(author)}>
       {detail.kind === "upload" && detail.artifact ? (
         <button type="button" className="message-action has-text" onClick={() => handlers.onPreview(detail.artifact ?? "")}>
           <Eye size={ICON} aria-hidden="true" />
@@ -160,7 +163,7 @@ function MessageItemInner({
         <button type="button" className="message-action" title={t.chat.reply} onClick={() => handlers.onReply(message)}>
           <CornerUpLeft size={ICON} aria-hidden="true" />
           <span className="visually-hidden">
-            {t.chat.reply} {t.chat.toAuthor(message.author)}
+            {t.chat.reply} {t.chat.toAuthor(author)}
           </span>
         </button>
       ) : null}
@@ -184,11 +187,11 @@ function MessageItemInner({
         >
           <Workflow size={ICON} aria-hidden="true" />
           <span className="visually-hidden">
-            {t.chat.trace} {t.chat.traceOf(message.author)}
+            {t.chat.trace} {t.chat.traceOf(author)}
           </span>
         </button>
       ) : null}
-      {menu.length > 0 ? <MessageMenu author={message.author} actions={menu} /> : null}
+      {menu.length > 0 ? <MessageMenu author={author} actions={menu} /> : null}
     </div>
   );
   const hasTools =
@@ -204,7 +207,7 @@ function MessageItemInner({
         <CornerUpLeft size={13} aria-hidden="true" />
         <span className="visually-hidden">{t.chat.jumpToParent} </span>
         <span className="reply-quote-text">
-          {t.chat.inReplyTo(parent.author)} <q>{snippet(parent.body)}</q>
+          {t.chat.inReplyTo(parentAuthor)} <q>{snippet(parent.body)}</q>
         </span>
       </button>
     ) : null;
@@ -224,7 +227,7 @@ function MessageItemInner({
       id={compact ? undefined : `message-${message.id}`}
       className={`message from-${message.author_kind} ${isStatus ? "is-status" : ""} ${className}`}
       tabIndex={-1}
-      aria-label={t.chat.messageLabel(message.author, formatDateTime(message.at))}
+      aria-label={t.chat.messageLabel(author, formatDateTime(message.at))}
       data-testid={`message-${message.author_kind}`}
     >
       {children}
@@ -249,7 +252,7 @@ function MessageItemInner({
         <div className="system-row">
           <Icon size={14} aria-hidden="true" className="system-icon" />
           <div className="system-text">
-            <span className="visually-hidden">{message.author}: </span>
+            <span className="visually-hidden">{author}: </span>
             <Markdown source={message.body} className="inline" />
           </div>
           <Markers detail={detail} example={isExample} />
@@ -275,7 +278,7 @@ function MessageItemInner({
           {/* A decision card says who asks and by when itself; crewmind's name and the time stay in the line's label. */}
           {hasItemCard ? null : (
             <header className="message-head">
-              <span className="author">{message.author}</span>
+              <span className="author">{author}</span>
               <RelativeTime at={message.at} className="message-time" />
               <Markers detail={detail} example={isExample} />
             </header>
@@ -303,12 +306,12 @@ function MessageItemInner({
     <>
       {isPerson ? null : (
         <div className="message-gutter">
-          <Avatar name={message.author} kind="agent" size="md" />
+          <AgentAvatar seat={message.author} size="md" />
         </div>
       )}
       <div className="message-main">
         <header className="message-head">
-          <span className="author">{mine ? t.chat.you : message.author}</span>
+          <span className="author">{mine ? t.chat.you : author}</span>
           {!isPerson && role ? <span className="message-role">{role}</span> : null}
           <RelativeTime at={message.at} className="message-time" />
           <Markers detail={detail} example={isExample} />

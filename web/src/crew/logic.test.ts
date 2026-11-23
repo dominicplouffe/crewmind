@@ -348,6 +348,12 @@ describe("runSentence", () => {
     expect(sentence.text).not.toMatch(/notice:|·\s*finished/);
   });
 
+  it("EXE-18 names the agent by the name it goes by", () => {
+    expect(runSentence(run("CEO"), NOW, () => "Maya").text).toBe("Maya worked on a directive, 9 minutes ago · 100 tokens");
+    const [member] = crewMembers({ seats: [seat("CEO", { kind: "ceo", display_name: "Maya", role: "CEO / Project Manager" })] }, null, []);
+    expect(member).toMatchObject({ name: "CEO", displayName: "Maya", roleLabel: "CEO" });
+  });
+
   it("keeps the raw values for the technical fold", () => {
     const sentence = runSentence(run("CEO", { state: "failed", end_detail: "boom" }), NOW);
     expect(sentence.technical).toMatchObject({ kind: "work", state: "failed", reasons: "notice: directive issued", detail: "boom" });

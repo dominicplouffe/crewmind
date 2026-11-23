@@ -27,7 +27,12 @@ const ORDER: Record<NowStatus, number> = { working: 0, blocked: 1, review: 2, ch
 type Working = Pick<Header["now"][number], "seat" | "run_kind" | "doing">;
 type TaskLike = Pick<Task, "id" | "title" | "state" | "claimant" | "reason" | "team">;
 
-export function nowEntries(working: readonly Working[], tasks: readonly TaskLike[]): NowEntry[] {
+/** `nameOf` gives the name an agent goes by (EXE-18); the entry's `seat` stays the identity. */
+export function nowEntries(
+  working: readonly Working[],
+  tasks: readonly TaskLike[],
+  nameOf: (seat: string) => string = (seat) => seat,
+): NowEntry[] {
   const entries: NowEntry[] = [];
   const busy = new Set<string>();
   const claimedBy = new Map<string, TaskLike>();
@@ -43,7 +48,7 @@ export function nowEntries(working: readonly Working[], tasks: readonly TaskLike
       key: `run-${run.seat}`,
       seat: run.seat,
       status: "working",
-      parts: story.now.working(run.seat, task?.title ?? null),
+      parts: story.now.working(nameOf(run.seat), task?.title ?? null),
       note: doingSentence(run.doing, run.run_kind),
       noteIsAgentText: false,
     });
@@ -66,7 +71,7 @@ export function nowEntries(working: readonly Working[], tasks: readonly TaskLike
         seat: task.claimant,
         status: task.state,
         parts: task.state === "review" ? story.now.review(task.title) : story.now.checking(task.title),
-        note: task.claimant ? story.now.from(task.claimant) : task.team ? story.now.team(task.team) : null,
+        note: task.claimant ? story.now.from(nameOf(task.claimant)) : task.team ? story.now.team(task.team) : null,
         noteIsAgentText: false,
       });
     } else if (task.state === "claimed" && task.claimant && !busy.has(task.claimant)) {
@@ -74,7 +79,7 @@ export function nowEntries(working: readonly Working[], tasks: readonly TaskLike
         key,
         seat: task.claimant,
         status: "claimed",
-        parts: story.now.claimed(task.claimant, task.title),
+        parts: story.now.claimed(nameOf(task.claimant), task.title),
         note: story.now.claimedNote,
         noteIsAgentText: false,
       });

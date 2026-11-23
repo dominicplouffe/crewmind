@@ -16,8 +16,11 @@ export interface CompletionOption {
 }
 
 export interface MentionTarget {
+  /** What is inserted after the @: an agent's name, such as "Maya". */
   name: string;
   detail: string;
+  /** Other words that find it as you type, such as its seat name "CEO". */
+  aliases?: readonly string[];
 }
 
 function startsWithFold(candidate: string, typed: string): boolean {
@@ -51,7 +54,7 @@ export function mentionCompletion(text: string, cursor: number, targets: Mention
   const rest = text.slice(cursor);
   const tail = /^[^\s@]*/.exec(rest)?.[0] ?? "";
   const options = targets
-    .filter((target) => startsWithFold(target.name, typed))
+    .filter((target) => [target.name, ...(target.aliases ?? [])].some((word) => startsWithFold(word, typed)))
     .map((target) => ({ value: `@${target.name}`, detail: target.detail }));
   return options.length === 0 ? null : { kind: "mention", start, end: cursor + tail.length, options };
 }

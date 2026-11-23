@@ -6,6 +6,7 @@ import { Lock } from "lucide-react";
 import type { Artifact } from "../api/client";
 import { fromNow } from "../lib/humanize";
 import { deliverables as words } from "../strings.crew";
+import { AgentAvatar, useAgentName } from "../crew/names";
 import { Avatar } from "../ui/Avatar";
 import { Pill, type Tone } from "../ui/Status";
 import type { AuthorKind } from "./logic";
@@ -17,9 +18,10 @@ export function statusWord(status: string): string {
   return words.status[status] ?? status;
 }
 
-export function madeBy(item: Artifact, author: AuthorKind, me: string | undefined): string {
+/** `shown` is the name the author goes by, for an agent (EXE-18). */
+export function madeBy(item: Artifact, author: AuthorKind, me: string | undefined, shown?: string): string {
   if (author === "platform") return words.writtenByPlatform;
-  const who = me && item.last_author === me ? words.you : item.last_author;
+  const who = me && item.last_author === me ? words.you : (shown ?? item.last_author);
   return item.kind === "upload" ? words.uploadedBy(who) : words.madeBy(who);
 }
 
@@ -33,7 +35,8 @@ interface Props {
 }
 
 export function DeliverableCard({ projectId, item, author, me, compact = false, onOpen }: Props): JSX.Element {
-  const made = madeBy(item, author, me);
+  const agent = useAgentName()(item.last_author);
+  const made = madeBy(item, author, me, author === "agent" ? agent.name : undefined);
   return (
     <article className={`deliv-card${compact ? " compact" : ""}`} data-testid="deliverable">
       <Thumb projectId={projectId} item={item} />
@@ -56,8 +59,10 @@ export function DeliverableCard({ projectId, item, author, me, compact = false, 
           {item.superseded_by ? <span className="badge">{words.superseded}</span> : null}
         </div>
         <p className="deliv-meta">
-          {author === "platform" ? null : (
-            <Avatar name={item.last_author} kind={author === "agent" ? "agent" : "person"} size="xs" />
+          {author === "platform" ? null : author === "agent" ? (
+            <AgentAvatar seat={item.last_author} size="xs" />
+          ) : (
+            <Avatar name={item.last_author} kind="person" size="xs" />
           )}
           <span className="deliv-meta-text">
             {made}

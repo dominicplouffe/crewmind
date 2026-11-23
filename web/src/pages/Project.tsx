@@ -22,6 +22,7 @@ import type { PaletteItem } from "../components/CommandPalette";
 import { ErrorNote } from "../components/common";
 import { CrewAssembled, markAssembled, shouldShowAssembled } from "../crew/CrewAssembled";
 import { CrewView } from "../crew/CrewView";
+import { AgentNamesProvider, mentionOf, roleLabel } from "../crew/names";
 import { Deliverables } from "../deliverables/Deliverables";
 import { AwayNote } from "../desk/AwayNote";
 import { ItemsContext, type ItemsScope } from "../desk/context";
@@ -175,16 +176,18 @@ export function Project(): JSX.Element {
 
   const mentions = useMemo<MentionTarget[]>(
     () => [
-      ...(roster.data?.seats ?? []).map((seat) => ({ name: seat.name, detail: t.composer.seatDetail(seat.role) })),
+      ...(roster.data?.seats ?? [])
+        .filter((seat) => seat.state !== "stood down")
+        .map((seat) => ({
+          name: mentionOf(seat.display_name || seat.name),
+          detail: t.composer.seatDetail(roleLabel(seat)),
+          aliases: [seat.name],
+        })),
       ...(roster.data?.teams ?? []).map((team) => ({ name: team, detail: t.composer.teamDetail })),
     ],
     [roster.data],
   );
   const commands = useMemo(() => help.data?.commands ?? {}, [help.data]);
-  const roles = useMemo(
-    () => (roster.data ? Object.fromEntries(roster.data.seats.map((seat) => [seat.name, seat.role])) : undefined),
-    [roster.data],
-  );
   const myName = useAuth().person?.name;
   const history = useMemo(
     () =>
@@ -272,11 +275,13 @@ export function Project(): JSX.Element {
           projectId={projectId}
           changes={state.changes}
           header={state.header}
-          onMessage={(name) => {
-            setPendingInsert(`@${name} `);
+          canRename={status.data?.your_role === "chairman" || status.data?.your_role === "co-chair"}
+          onMessage={(mention) => {
+            setPendingInsert(`@${mention} `);
             goTab("chat");
           }}
           onOpenRun={(runId) => setPanel({ id: "runs", runId })}
+          onRenamed={roster.reload}
         />
       );
       break;
@@ -320,7 +325,6 @@ export function Project(): JSX.Element {
             ) : (
             <MessageList
               state={state}
-              roles={roles}
               handlers={handlers}
               onRetry={actions.retry}
               onDismissPending={actions.dismissPending}
@@ -359,6 +363,7 @@ export function Project(): JSX.Element {
   }
 
   return (
+    <AgentNamesProvider seats={roster.data?.seats}>
     <ItemsContext.Provider value={items}>
       <main className={panel ? "project-shell has-panel" : "project-shell"} aria-labelledby="project-title">
         <ProjectTop
@@ -393,7 +398,7 @@ export function Project(): JSX.Element {
         {assembling ? (
           <CrewAssembled
             projectId={projectId}
-            seats={seats.map((seat) => ({ name: seat.name, role: seat.role, kind: seat.kind }))}
+            seats={seats.map((seat) => ({ name: seat.name, displayName: seat.display_name, role: roleLabel(seat), kind: seat.kind }))}
             onDone={() => {
               doneAssembling();
               goTab("crew");
@@ -404,5 +409,6 @@ export function Project(): JSX.Element {
         {needsOpen ? <NeedsSheet projectName={projectName} entries={mine} onClose={() => setNeedsOpen(false)} onChanged={items.onChanged} /> : null}
       </main>
     </ItemsContext.Provider>
+    </AgentNamesProvider>
   );
 }

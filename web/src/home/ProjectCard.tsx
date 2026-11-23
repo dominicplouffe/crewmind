@@ -73,11 +73,11 @@ export function ProjectCard({ project }: { project: Project }): JSX.Element {
           <>
             <span className="avatar-stack" aria-hidden="true">
               {working.slice(0, 4).map((work) => (
-                <Avatar key={work.seat} name={work.seat} size="xs" status="working" />
+                <Avatar key={work.seat} name={work.name || work.seat} hueKey={work.seat} size="xs" status="working" />
               ))}
             </span>
             <span className="project-card-doing">
-              <AgentText text={home.workingOn(first.seat, first.doing)} />
+              <AgentText text={home.workingOn(first.name || first.seat, first.doing)} />
               {working.length > 1 ? <span className="quiet"> {home.andMore(working.length - 1)}</span> : null}
             </span>
           </>

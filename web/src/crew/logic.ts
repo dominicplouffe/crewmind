@@ -5,6 +5,7 @@
 import type { Header, Schemas, Seat } from "../api/client";
 import { fromNow, tokens as tokenWords } from "../lib/humanize";
 import { crew, runWords } from "../strings.crew";
+import { roleLabel } from "./names";
 
 export type Run = Schemas["RunItem"];
 /**
@@ -25,8 +26,14 @@ export interface CrewTask {
 }
 
 export interface CrewMember {
+  /** The seat name: the identity runs, tasks and chat authors use. */
   name: string;
+  /** The name it goes by, shown first: "Maya" (EXE-18). */
+  displayName: string;
+  /** The role as the library names it: "CEO / Project Manager". */
   role: string;
+  /** The role, short, shown under the name: "CEO". */
+  roleLabel: string;
   team: string | null;
   lead: boolean;
   kind: string;
@@ -198,7 +205,9 @@ export function crewMembers(
 
     return {
       name: seat.name,
+      displayName: seat.display_name || seat.name,
       role: seat.role,
+      roleLabel: roleLabel(seat),
       team: seat.team,
       lead: seat.lead,
       kind: seat.kind,
@@ -255,7 +264,9 @@ export interface OrgTree {
 }
 
 function byStatusThenName(a: CrewMember, b: CrewMember): number {
-  return STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.name.localeCompare(b.name, undefined, { numeric: true });
+  return (
+    STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || a.displayName.localeCompare(b.displayName, undefined, { numeric: true })
+  );
 }
 
 /** Chairman (drawn by the view) → CEO → teams, each lead first, then members; side seats apart. */
@@ -311,8 +322,11 @@ const TONES: Record<string, RunSentence["tone"]> = {
   reaped: "warning",
 };
 
-/** One run as a sentence; the raw kind, state and reasons are kept for a "technical details" fold. */
-export function runSentence(run: Run, now: number = Date.now()): RunSentence {
+/**
+ * One run as a sentence; the raw kind, state and reasons are kept for a "technical details" fold.
+ * `nameOf` gives the name the agent goes by (EXE-18); without it the seat name is used.
+ */
+export function runSentence(run: Run, now: number = Date.now(), nameOf?: (seat: string) => string): RunSentence {
   const what = reasonWords(run.reasons);
   let action: string;
   const work = runWords.work[run.state];
@@ -327,7 +341,7 @@ export function runSentence(run: Run, now: number = Date.now()): RunSentence {
   else when = fromNow(runTime(run), now);
 
   const tokens = run.tokens_counted > 0 ? tokenWords(run.tokens_counted) : "";
-  const text = `${run.seat} ${action}, ${when}${tokens ? ` · ${tokens}` : ""}`;
+  const text = `${nameOf ? nameOf(run.seat) : run.seat} ${action}, ${when}${tokens ? ` · ${tokens}` : ""}`;
   return {
     seat: run.seat,
     action,

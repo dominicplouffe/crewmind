@@ -37,11 +37,11 @@ export interface RunLike {
   ended_at?: string | null;
 }
 
-/** "CEO worked on a directive". */
-export function runSentence(run: Pick<RunLike, "seat" | "kind" | "reasons">): string {
+/** "Maya worked on a directive". `name` is the name the agent goes by (EXE-18); the seat name otherwise. */
+export function runSentence(run: Pick<RunLike, "seat" | "kind" | "reasons">, name?: string): string {
   const about = aboutWords(run.reasons);
   const doing = t.runs.doing[run.kind];
-  return t.runs.sentence(run.seat, doing ? doing(about) : t.runs.doingOther(run.kind, about));
+  return t.runs.sentence(name ?? run.seat, doing ? doing(about) : t.runs.doingOther(run.kind, about));
 }
 
 /** "finished 4 minutes ago", "working now", "waiting to start". */

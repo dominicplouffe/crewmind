@@ -19,6 +19,7 @@ import { FileIcon, Load, NowList } from "../overview/parts";
 import { story } from "../strings.overview";
 import { Meter } from "../ui/Progress";
 import type { ProjectTab } from "./ProjectTop";
+import { useAgentName } from "../crew/names";
 
 const NOW_SHOWN = 4;
 const FILES_SHOWN = 3;
@@ -39,7 +40,11 @@ export function ChatRail({ projectId, changes, header, needs, onNeeds, onTab, on
   const files = useLoad(() => get("/v1/artifacts/list", { project_id: projectId }), [projectId, changes]);
   const budget = useLoad(() => get("/v1/budget/show", { project_id: projectId }), [projectId, changes]);
   const plan = useLoad(() => get("/v1/plan/show", { project_id: projectId }), [projectId, changes]);
-  const now = useMemo(() => (tasks.data ? nowEntries(header?.now ?? [], tasks.data.items) : []), [header, tasks.data]);
+  const nameOf = useAgentName();
+  const now = useMemo(
+    () => (tasks.data ? nowEntries(header?.now ?? [], tasks.data.items, (seat) => nameOf(seat).name) : []),
+    [header, tasks.data, nameOf],
+  );
 
   return (
     <aside className="chat-rail rail" aria-label={words.label}>

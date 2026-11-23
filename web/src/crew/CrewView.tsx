@@ -18,7 +18,7 @@ import { Meter } from "../ui/Progress";
 import { Skeleton } from "../ui/Skeleton";
 import { AgentSheet } from "./AgentSheet";
 import { useCrew } from "./data";
-import { SUMMARY_ORDER, orgTree, roleLine, statusCounts, tokenShare, type CrewMember } from "./logic";
+import { SUMMARY_ORDER, orgTree, statusCounts, tokenShare, type CrewMember } from "./logic";
 import { StatusFace } from "./parts";
 
 /** Seats already shown once this session, so the entrance plays only when a seat first appears. */
@@ -35,8 +35,13 @@ interface Props {
   projectId: string;
   changes: number;
   header: Header | null;
-  onMessage(name: string): void;
+  /** The person chairs the project, so the agent sheet offers a rename (EXE-18). */
+  canRename?: boolean;
+  /** Start a message: `mention` is what to type after the @. */
+  onMessage(mention: string): void;
   onOpenRun(runId: string): void;
+  /** An agent was renamed: the page reloads the roster its names come from. */
+  onRenamed?(): void;
 }
 
 /** The width of an element in rem, kept up to date as it resizes. */
@@ -94,15 +99,15 @@ function AgentCard({
       data-status={member.status}
     >
       <span className="crew-card-top">
-        <StatusFace name={member.name} status={member.status} size={featured ? "lg" : "md"} />
+        <StatusFace seat={member.name} status={member.status} size={featured ? "lg" : "md"} />
         <span className="crew-card-who">
           <span className="crew-card-name">
-            {member.name}
+            {member.displayName}
             {showLead ? <span className="badge">{crew.lead}</span> : null}
           </span>
-          {member.role.trim().toLowerCase() !== member.name.trim().toLowerCase() ? (
+          {member.roleLabel.trim().toLowerCase() !== member.displayName.trim().toLowerCase() ? (
             <span className="crew-card-role" title={member.role}>
-              {roleLine(member.name, member.role)}
+              {member.roleLabel}
             </span>
           ) : null}
         </span>
@@ -118,7 +123,7 @@ function AgentCard({
         </span>
       ) : null}
       <span className="crew-card-foot">
-        <Meter value={Math.round(part * 1000)} max={1000} label={crew.shareLabel(member.name, shareText)} />
+        <Meter value={Math.round(part * 1000)} max={1000} label={crew.shareLabel(member.displayName, shareText)} />
         <span className="crew-card-meta tabular">
           <span>{crew.share(tokens(member.tokens), shareText)}</span>
           <span>{when}</span>
@@ -167,7 +172,7 @@ function Tally({ members }: { members: CrewMember[] }): JSX.Element {
   );
 }
 
-export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: Props): JSX.Element {
+export function CrewView({ projectId, changes, header, canRename, onMessage, onOpenRun, onRenamed }: Props): JSX.Element {
   const { person } = useAuth();
   const data = useCrew(projectId, changes, header);
   const [open, setOpen] = useState<string | null>(null);
@@ -325,6 +330,11 @@ export function CrewView({ projectId, changes, header, onMessage, onOpenRun }: P
           changes={changes}
           member={selected}
           runs={data.runs}
+          canRename={canRename}
+          onRenamed={() => {
+            data.reload();
+            onRenamed?.();
+          }}
           onClose={() => setOpen(null)}
           onMessage={(name) => {
             setOpen(null);

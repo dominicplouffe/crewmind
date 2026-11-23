@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { namesOf } from "../crew/names";
 import { askerOf, deadlineWords, kindLabel } from "./when";
 
 const NOW = Date.parse("2026-11-22T12:00:00Z");
@@ -28,10 +29,20 @@ describe("a decision card's deadline in words (HUM-2)", () => {
 
 describe("who asks, and what kind of decision it is", () => {
   it("names the CEO for kinds it files, and crewmind for its own", () => {
-    expect(askerOf("agent", "proposed scope")).toEqual({ name: "CEO", line: "The CEO asks", who: "CEO" });
+    expect(askerOf("agent", "proposed scope")).toEqual({ name: "CEO", seat: "CEO", line: "The CEO asks", who: "CEO" });
     expect(askerOf("agent", "assist")).toEqual({ name: "Agent", line: "An agent asks", who: "An agent" });
     expect(askerOf("platform", "verdict")).toEqual({ name: null, line: "crewmind asks", who: "crewmind" });
     expect(askerOf("researcher", "approval: tool permission").line).toBe("researcher asks");
+  });
+
+  it("names an agent by the name it goes by, its role second (EXE-18)", () => {
+    const nameOf = namesOf([
+      { name: "CEO", display_name: "Maya", kind: "ceo", role: "CEO / Project Manager", team: null, lead: false, state: "active", pause_reason: null },
+      { name: "research-1", display_name: "Lena", kind: "worker", role: "Researcher", team: "research", lead: true, state: "active", pause_reason: null },
+    ]);
+    expect(askerOf("agent", "proposed scope", nameOf)).toEqual({ name: "Maya", seat: "CEO", line: "Maya, the CEO, asks", who: "Maya · CEO" });
+    expect(askerOf("research-1", "approval: tool permission", nameOf).line).toBe("Lena, the Researcher, asks");
+    expect(askerOf("ghost", "question", nameOf).who).toBe("ghost");
   });
 
   it("uses plain labels for kinds", () => {

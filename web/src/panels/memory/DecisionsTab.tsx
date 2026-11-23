@@ -8,6 +8,7 @@ import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, Tag, TextForm, stateName, useAct, type TabProps } from "./parts";
+import { useAgentName } from "../../crew/names";
 
 interface Props extends TabProps {
   onJump(messageId: number): void;
@@ -27,6 +28,7 @@ export function DecisionsTab({ projectId, changes, onChanged, onJump, onFile }: 
   const items = decisions.data?.items ?? [];
   const asked = requests.data?.items ?? [];
   const words = t.memory.decisions;
+  const nameOf = useAgentName();
 
   const change = (work: () => Promise<Decision>): Promise<boolean> =>
     act.run(async () => {
@@ -42,7 +44,7 @@ export function DecisionsTab({ projectId, changes, onChanged, onJump, onFile }: 
           <ul className="records plain">
             {asked.map((request) => (
               <li key={request.id} data-testid="reopen-request">
-                <p className="record-text">{words.request(request.by, request.decision_id, topicOf(request))}</p>
+                <p className="record-text">{words.request(nameOf(request.by).name, request.decision_id, topicOf(request))}</p>
                 <p>{request.reason}</p>
                 <p className="quiet">
                   {words.evidence}:{" "}

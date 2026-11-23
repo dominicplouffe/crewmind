@@ -8,9 +8,9 @@ import { previewKind, type PreviewKind } from "../lib/files";
 import type { Loaded } from "../lib/useLoad";
 import { AgentText } from "../panels/board/parts";
 import { story, type Part } from "../strings.overview";
-import { Avatar } from "../ui/Avatar";
 import { Skeleton } from "../ui/Skeleton";
 import type { NowEntry, NowStatus } from "./now";
+import { AgentAvatar } from "../crew/names";
 
 /** Names in bold; titles written by agents or people as plain text (P4). */
 export function Sentence({ parts }: { parts: readonly Part[] }): JSX.Element {
@@ -34,7 +34,7 @@ const AVATAR_STATUS: Record<NowStatus, "working" | "waiting" | "blocked" | "idle
 };
 
 function NowMark({ entry }: { entry: NowEntry }): JSX.Element {
-  if (entry.seat) return <Avatar name={entry.seat} size="sm" status={AVATAR_STATUS[entry.status]} />;
+  if (entry.seat) return <AgentAvatar seat={entry.seat} size="sm" status={AVATAR_STATUS[entry.status]} />;
   const Icon = entry.status === "blocked" ? OctagonAlert : entry.status === "review" ? Eye : CircleDot;
   return (
     <span className={`ov-mark mark-${entry.status}`} aria-hidden="true">

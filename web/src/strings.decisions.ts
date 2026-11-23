@@ -111,6 +111,7 @@ export const decisions = {
       agent: "An agent asks",
       platform: "crewmind asks",
       named: (name: string): string => `${name} asks`,
+      namedRole: (name: string, role: string): string => `${name}, the ${role}, asks`,
     },
     when: {
       decideBy: (when: string, relative: string): string => `Decide by ${when} · ${relative}`,
@@ -235,7 +236,12 @@ export const decisions = {
     noHistory: "No history yet.",
     historyLine: (actor: string, what: string): string => `${actor}: ${what}`,
     loadingHistory: "Loading the history…",
-    who: { ceo: "CEO", agent: "An agent", platform: "crewmind" },
+    who: {
+      ceo: "CEO",
+      agent: "An agent",
+      platform: "crewmind",
+      namedRole: (name: string, role: string): string => `${name} · ${role}`,
+    },
     discuss: "Discuss in chat",
     /** The one quiet line a card becomes once it is settled. */
     settled: {
