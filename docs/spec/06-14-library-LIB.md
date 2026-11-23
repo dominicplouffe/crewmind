@@ -22,7 +22,7 @@
   - controlled domains;
   - integrations needed;
   - embedded custom roles;
-  - credential names with role scopes.
+  - the connections it needs (secrets, variables, MCP servers) by name and kind, with role scopes. Creating the project attaches each one the creator can see, granted to those roles (CON-4); the others are open needs (CON-5).
 
   **Secret values never appear in a spec, export, clone or backup of a project.** A spec that carries a value where a credential name belongs is refused. A spec with any problem creates nothing. What a spec asks for that the install does not have (a credential, an integration) is listed as still missing; it does not stop the import. A spec embeds custom roles only; shipped roles are named.
 - **LIB-5 One format.** A spec can be imported, exported from a live project, cloned, rehearsed and graded. Every surface uses this one format.

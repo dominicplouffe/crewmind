@@ -136,6 +136,8 @@ async def test_LIB_5_a_spec_goes_round_and_a_bad_one_creates_nothing(app: App) -
             assert exported["settings"]["run.concurrency"] == 6
         elif key == "deadline":
             assert exported["deadline"]["source"] == value["source"]
+        elif key == "credentials":
+            assert exported[key] == [{"kind": "secret", **grant} for grant in value]
         else:
             assert exported[key] == value, key
 

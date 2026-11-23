@@ -53,7 +53,7 @@ async def test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule(app: A
     from crewmind.domain.founder.tools import TOOLS
 
     assert sorted(TOOLS) == sorted(
-        ["search_library", "list_credentials", "fetch_url", "read_upload", "grade_goal",
+        ["search_library", "list_connections", "fetch_url", "read_upload", "grade_goal",
          "rehearse_spec", "ask", "propose_spec"]
     )  # fmt: skip
     owner = await app.person("owner@example.com")

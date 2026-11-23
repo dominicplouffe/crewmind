@@ -162,6 +162,18 @@ export const founder = {
     ruleHit: (rule: string, code: string, message: string): string =>
       message || (rule ? `${rule}: ${code}` : code),
   },
+  needs: {
+    title: "What the crew needs",
+    intro: "Secrets, variables and MCP servers the roles of this draft use.",
+    kinds: { secret: "secret", variable: "variable", mcp_server: "MCP server" } as Record<string, string>,
+    line: (kind: string, roles: string[]): string => `${kind}, for ${roles.join(", ")}`,
+    attached: "You have it; attached at creation",
+    notGranted: "You have it; not granted yet",
+    missing: "Missing",
+    add: "Add what's missing in Connections",
+    newTab: "(opens in a new tab)",
+    addAfter: "You can also add it after the project is created. Only the agents who need it wait.",
+  },
   ready: {
     title: "Is it ready?",
     notReady: "Not ready yet",
@@ -181,6 +193,7 @@ export const founder = {
     waitingTitle: "Some of the crew can't work yet",
     waitingAfter:
       "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
+    addMissing: "Add what's missing",
     starting: "Starting…",
     open: "Open the project",
     later: "Open it without starting",

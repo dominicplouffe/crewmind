@@ -53,6 +53,13 @@ function Created({ view, created, busy, onStart }: Pick<Props, "view" | "created
                 ))}
               </ul>
               <p className="quiet">{words.waitingAfter}</p>
+              {projectId ? (
+                <p>
+                  <Link to={`/projects/${projectId}?panel=connections`} data-testid="add-missing">
+                    {words.addMissing}
+                  </Link>
+                </p>
+              ) : null}
             </>
           ) : null}
         </>

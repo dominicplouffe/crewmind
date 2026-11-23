@@ -2,6 +2,12 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.30 (23 Nov 2026): connections, part 7B.7
+
+- **FND-2, FND-9, CON-14:** the Founder's credential tool lists connections too, by name, kind and description; the draft lists every need of the roster as had or missing.
+- **LIB-4, CON-4:** a spec's grants name connections of any kind; creating the project attaches each one the creator can see to the roles named, and the rest stay open needs.
+- **CON-14:** a run's context pack lists the sites its secrets are sent to, its MCP tools, and what its role needs but lacks; a project whose connection broke shows it in its health, with the fix.
+
 ## Revision 2.29 (23 Nov 2026): connections, part 7B.5
 
 - **CON-11:** a command server is tested before it is saved, in a server started for the test and stopped after it; its variables name secrets or variables the person can see, read when it starts; it serves one call at a time.

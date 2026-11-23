@@ -5,7 +5,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
 - **FND-1 Chat.** Drafting happens in the chat (CHAT-1), and the conversation becomes the project chat after creation. It is stored on the server and can be resumed from any surface. Each turn streams. Failures are recorded on the conversation, never lost. Before the project exists the conversation is kept as its own record; at creation its lines are copied into the project chat in order. A document is attached to it as text. Every tool call of the Founder that a rule refuses is kept on the conversation, with the rule.
 - **FND-2 Tools.** The Founder runs on the platform's drafting model (LLM-14), is metered like every model call but against the install's own account, so it counts against no project budget (INV-8), and has exactly these tools:
   - search roles and crews;
-  - list credentials by name;
+  - list the model credentials and the connections the chairman can attach, by name and description (CON-14);
   - fetch a URL (as untrusted data);
   - read uploads;
   - grade a goal;
@@ -36,7 +36,7 @@ The Founder is a platform assistant whose only deliverable is a **project spec**
 - **FND-9 Roster.**
   - Derived from the goal: find matching roles and crews, then cut to the smallest team that can do the work in parallel. Cut for redundancy, never for timidity.
   - A plan-adversary seat is always staffed on Deliver and Operate. A reviewer seat is staffed whenever independent read is on.
-  - The draft states up front which credentials the roster needs.
+  - The draft states up front which credentials and connections the roster needs, which the chairman has, and drafts their grants (CON-14).
 - **FND-10 Settings.**
   - The Founder sets only what it can justify, with a one-line reason each. It sets the budget (a range, GOV-4) and quality by name, and leaves the other settings at their defaults unless the goal demands otherwise.
   - It drafts Deliver's first requirement as a first usable version (SPD-4), and Explore's bets with short windows (SPD-7).

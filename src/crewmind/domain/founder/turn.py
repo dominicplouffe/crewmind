@@ -14,6 +14,7 @@ from crewmind.catalog import catalog
 from crewmind.catalog.caller import Caller, CallerKind, InstanceRole
 from crewmind.catalog.execute import Clock, Context, Executor
 from crewmind.catalog.refusal import Refusal
+from crewmind.domain.connections import drafted
 from crewmind.domain.founder import drafting as state
 from crewmind.domain.founder import grammar, tree
 from crewmind.domain.founder import model as m
@@ -35,7 +36,7 @@ CALLS_MOST = 16
 
 WORKING_ON = {
     "search_library": "Looking through the role library for a crew",
-    "list_credentials": "Checking who can pay",
+    "list_connections": "Checking what you have",
     "fetch_url": "Reading a web page",
     "read_upload": "Reading your document",
     "grade_goal": "Grading the goal",
@@ -170,8 +171,11 @@ class FounderTurn:
             "A team's `role` is one of these slugs. Search only for what is not here.",
             *(
                 f"- {role.slug} ({role.seat_kind}): {role.description[:ROLE_WORDS]}"
+                + (f" Needs: {', '.join(role.credential_names)}." if role.credential_names else "")
                 for role in roles
             ),
+            "",
+            *await self._connections(session, drafting),
             "",
             "# The current draft",
         ]
@@ -189,6 +193,20 @@ class FounderTurn:
                 "go straight to the next questions.",
             ]
         return known
+
+    async def _connections(self, session: AsyncSession, drafting: Drafting) -> list[str]:
+        """FND-9, CON-14: what the chairman can attach, by name and description, so the
+        Founder can state the crew's needs in its first reply and draft the grants."""
+        items = drafted.listed(await drafted.attachable(session, drafting.person_id))
+        return [
+            "# Connections the chairman can attach",
+            "A role's needs are secrets by name. In your first reply, say what the crew needs "
+            "from outside and which of it the chairman already has. Grant each need the "
+            "chairman has in the spec's `credentials` (name, kind, roles): creating the "
+            "project attaches it. A need the chairman lacks stays listed with a way to add it.",
+            *(f"- {item.name} ({item.kind}): {item.description}" for item in items),
+            *([] if items else ["None yet."]),
+        ]
 
     async def _history(self, session: AsyncSession, drafting: Drafting) -> list[Turn]:
         turns: list[Turn] = []

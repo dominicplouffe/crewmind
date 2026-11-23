@@ -94,6 +94,26 @@ async def sending_for(session: AsyncSession, store: SecretStore, run: Run) -> di
     return found
 
 
+async def sites_for(session: AsyncSession, run: Run) -> list[tuple[Connection, list[str]]]:
+    """CON-14: each secret sent for this run and the sites it goes to, by name only, for
+    its context pack. No value is read."""
+    seat = await session.get(Seat, run.seat_id)
+    role = await session.get(Role, seat.role_id) if seat is not None else None
+    if role is None:
+        return []
+    found: list[tuple[Connection, list[str]]] = []
+    for link, item in await service.attached(session, run.project_id):
+        roles = [str(granted) for granted in link.roles or []]
+        if item.kind != Kind.SECRET or item.state != ConnectionState.ACTIVE:
+            continue
+        if not (ALL_ROLES in roles or role.slug in roles):
+            continue
+        secret = await session.get(ConnectionSecret, item.id)
+        if secret is not None and secret.delivery == Delivery.SENT_FOR_YOU:
+            found.append((item, [str(site) for site in secret.sites or []]))
+    return found
+
+
 async def sending_for_token(
     session: AsyncSession, store: SecretStore, token: str | None
 ) -> RunSending | None:

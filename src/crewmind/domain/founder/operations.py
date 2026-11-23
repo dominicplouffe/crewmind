@@ -15,7 +15,7 @@ from crewmind.catalog.define import PERSON_AND_MCP, Empty, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.refusal import Refusal
-from crewmind.domain.connections import holds
+from crewmind.domain.connections import drafted, holds
 from crewmind.domain.conversation import service as conversation
 from crewmind.domain.founder import drafting as state
 from crewmind.domain.founder import model as m
@@ -121,6 +121,10 @@ class DraftingView(BaseModel):
         description="Tool calls of the Founder that a rule refused."
     )
     project_id: str | None
+    needs: list[drafted.DraftNeed] = Field(
+        default_factory=list[drafted.DraftNeed],
+        description="What the drafted crew needs from outside, and whether you have it (FND-9).",
+    )
 
 
 class DraftingItem(BaseModel):
@@ -198,6 +202,9 @@ async def view(context: Context, drafting: Drafting) -> DraftingView:
         not_ready_because=missing,
         rules_hit=list(drafting.rules_hit or []),
         project_id=drafting.project_id,
+        needs=await drafted.draft_needs(
+            session, drafting.person_id, (drafting.draft or {}).get("spec")
+        ),
     )
 
 

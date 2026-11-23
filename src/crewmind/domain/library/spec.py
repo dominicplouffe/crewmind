@@ -60,11 +60,15 @@ class SpecTeam(BaseModel):
 
 
 class CredentialGrant(BaseModel):
-    """A credential the project needs, by name, and the roles that receive it."""
+    """A connection the project needs, by name and kind, and the roles that receive it
+    (LIB-4, CON-4, CON-14)."""
 
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=100)
+    kind: Literal["secret", "variable", "mcp_server"] = Field(
+        default="secret", description="secret, variable or mcp_server."
+    )
     roles: list[Slug] = Field(default_factory=list[str])
 
     @model_validator(mode="before")

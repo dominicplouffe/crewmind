@@ -11,6 +11,7 @@ import { settingsWords } from "../strings.settings";
 import { AcceptRest } from "./AcceptRest";
 import { Conversation } from "./Conversation";
 import { DraftComposer } from "./DraftComposer";
+import { DraftNeeds } from "./DraftNeeds";
 import { DraftSummary } from "./DraftSummary";
 import { FounderSetupNote, isNoModelFailure, lastSaid } from "./FounderSetupNote";
 import { GoalGrade } from "./GoalGrade";
@@ -103,6 +104,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         <Ledger ledger={view.ledger} />
         <GoalGrade grade={gradeOf(view.grade)} />
         <DraftSummary draft={draft} rehearsal={view.rehearsal} rulesHit={view.rules_hit} />
+        <DraftNeeds needs={view.needs ?? []} />
       </aside>
     </div>
   );

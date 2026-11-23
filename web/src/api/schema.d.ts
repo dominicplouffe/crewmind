@@ -931,6 +931,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/add_command_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add an MCP server started from a command, in its own container; tested first.
+         * @description Requires: person.
+         */
+        post: operations["connections.add_command_mcp_server"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/connections/add_mcp_server": {
         parameters: {
             query?: never;
@@ -4668,6 +4688,51 @@ export interface components {
              */
             project_id: string;
         };
+        /** AddCommandInput */
+        AddCommandInput: {
+            /**
+             * Command
+             * @description The command line, such as `npx -y some-mcp`.
+             */
+            command: string;
+            /**
+             * Description
+             * @description What it is for.
+             */
+            description: string;
+            /**
+             * Environment
+             * @description Each environment variable the server needs, and the secret or variable (by name or id) that fills it.
+             */
+            environment?: {
+                [key: string]: string;
+            };
+            /**
+             * Image
+             * @description The container image. By default, the tool image (Node, Python, uv).
+             */
+            image?: string | null;
+            /**
+             * Name
+             * @description What it is called, such as filesystem.
+             */
+            name: string;
+            /**
+             * Project Id
+             * @description The project it belongs to (project scope), or to attach it to at once.
+             */
+            project_id?: string | null;
+            /**
+             * Roles
+             * @description With a project: the roles that may use it, or *. By default, the roles that need it.
+             */
+            roles?: string[] | null;
+            /**
+             * @description person (yours, for any project you chair), project, or install (admins).
+             * @default person
+             */
+            scope?: components["schemas"]["Scope"];
+        };
         /** AddCredentialInput */
         AddCredentialInput: {
             /**
@@ -5926,9 +5991,17 @@ export interface components {
         };
         /**
          * CredentialGrant
-         * @description A credential the project needs, by name, and the roles that receive it.
+         * @description A connection the project needs, by name and kind, and the roles that receive it
+         *     (LIB-4, CON-4, CON-14).
          */
         CredentialGrant: {
+            /**
+             * Kind
+             * @description secret, variable or mcp_server.
+             * @default secret
+             * @enum {string}
+             */
+            kind?: "secret" | "variable" | "mcp_server";
             /** Name */
             name: string;
             /** Roles */
@@ -6256,6 +6329,31 @@ export interface components {
              */
             question_id: number;
         };
+        /** DraftNeed */
+        DraftNeed: {
+            /**
+             * Granted
+             * @description The draft grants it, so creating the project attaches it.
+             */
+            granted: boolean;
+            /**
+             * Have
+             * @description You have a connection by this name and kind to attach.
+             */
+            have: boolean;
+            /**
+             * Kind
+             * @description secret, variable or mcp_server.
+             */
+            kind: string;
+            /** Name */
+            name: string;
+            /**
+             * Roles
+             * @description The roles of the draft that need it.
+             */
+            roles: string[];
+        };
         /** DraftingItem */
         DraftingItem: {
             /** Drafting Id */
@@ -6308,6 +6406,11 @@ export interface components {
             ledger: components["schemas"]["LedgerLine"][];
             /** Lines */
             lines: components["schemas"]["Line"][];
+            /**
+             * Needs
+             * @description What the drafted crew needs from outside, and whether you have it (FND-9).
+             */
+            needs?: components["schemas"]["DraftNeed"][];
             /** Not Ready Because */
             not_ready_because: string[];
             /** Project Id */
@@ -11457,6 +11560,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "connections.add_command_mcp_server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCommandInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionView"];
                 };
             };
             /** @description Validation Error */
