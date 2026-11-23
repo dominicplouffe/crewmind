@@ -11,6 +11,10 @@ Newest first. One line per change, citing the ids touched.
 
 - **ACC-8 (new):** a person sets their own display name (`auth.set_name`, every surface); the change is recorded. The web showed the seeded "Admin" with no way to change it. Confirm: Q-021.
 
+## Revision 2.21 (23 Nov 2026): a draft can be discarded
+
+- **7.19, FND-1:** a drafting conversation gains the state discarded. The person who started it may discard it; it leaves their list of unfinished drafts and no project comes of it (owner, 23 Nov 2026).
+
 ## Revision 2.20 (22 Nov 2026): one count of what waits on you
 
 - **HUM-10, CHAT-18:** open action cards are on the desk, and the project header's "waiting on you" is the caller's desk for that project, snoozes included. The header used to count open action cards only, so it said "nothing" while proposed scope waited on the desk. Confirm the action-card addition: Q-020.

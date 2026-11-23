@@ -75,6 +75,7 @@ _CREATE = (
     "founder.answer",
     "founder.accept_rest",
     "founder.create",
+    "founder.discard",
 )
 _CONFIGURE_GROUPS = ("roster", "settings", "models", "credentials", "roles", "crews")
 _STEER_GROUPS = (

@@ -15,6 +15,7 @@ class DraftingState(StrEnum):
     STARTING = "starting"
     STARTED = "started"
     FAILED = "failed"
+    DISCARDED = "discarded"
 
 
 D = DraftingState
@@ -30,6 +31,7 @@ DRAFTING_MACHINE = StateMachine(
         (D.STARTING, D.STARTED),
         (D.CREATING, D.FAILED),
         (D.STARTING, D.FAILED),
+        (D.DRAFTING, D.DISCARDED),
     },
 )
 

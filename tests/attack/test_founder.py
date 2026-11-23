@@ -6,8 +6,10 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+from sqlalchemy import select
 
 from crewmind.catalog.refusal import Refusal
+from crewmind.storage.models import Event
 from tests.attack.harness import assert_refused
 from tests.founder_support import (
     BRIEF,
@@ -669,3 +671,33 @@ def test_FND_2_misplaced_fields_are_put_right_not_refused() -> None:
     assert changed({"name": "A", "quality": "best"}, {"name": "B", "quality": None}) == {
         "name": "B"
     }
+
+
+@pytest.mark.attack("7.19")
+async def test_7_19_a_draft_is_discarded_only_by_the_person_who_started_it(app: App) -> None:
+    """7.19, FND-1, INV-5: the person who started a draft discards it. It takes no further
+    turn, nothing more can be said in it, and it cannot be discarded twice. Nobody else
+    can discard it, or learn that it exists."""
+    owner = await app.person("owner@example.com")
+    stranger = await app.person("stranger@example.com")
+    await credential(app, owner, "main")
+    script(app, {"text": "What is the finish line?"})
+    started = await app.ok("founder.start", owner, brief=BRIEF)
+    ref = {"drafting_id": started["drafting_id"]}
+
+    assert (await app.call("founder.discard", stranger, **ref)).status_code == 404
+    gone = await app.ok("founder.discard", owner, **ref)
+    assert (gone["state"], gone["waiting_for"]) == ("discarded", "nobody")
+    async with app.runtime.sessions() as session:
+        changes = await session.scalars(
+            select(Event).where(Event.type == "drafting.state_changed").order_by(Event.id)
+        )
+        last = list(changes)[-1]
+    # INV-21: the change is in the record, with who made it.
+    assert (last.before, last.after) == ({"state": "drafting"}, {"state": "discarded"})
+    assert last.actor_id == owner.person_id
+    assert await app.founder.tick() == 0
+    listed = await app.ok("founder.list", owner)
+    assert [item["state"] for item in listed["items"]] == ["discarded"]
+    for name, more in (("founder.discard", {}), ("founder.say", {"body": "One more thing."})):
+        assert_refused(await app.call(name, owner, **ref, **more), rule="7.19", code="not_drafting")
