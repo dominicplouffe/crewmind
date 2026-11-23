@@ -50,6 +50,10 @@ services:
       # Where sandboxes reach the server. The server joins each project's network under
       # this name (EXE-12).
       CREWMIND_AGENT_API_URL: http://server:8420
+      # Limits of each agent's container. On a host with fewer CPUs than this, a
+      # container is given all the host has.
+      CREWMIND_SANDBOX_CPUS: ${CREWMIND_SANDBOX_CPUS:-2}
+      CREWMIND_SANDBOX_MEMORY: ${CREWMIND_SANDBOX_MEMORY:-2147483648}
     volumes:
       # Sandboxes are started by the host's container runtime, so a workspace must have
       # the same path on the host and in the server.
