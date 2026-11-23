@@ -22,7 +22,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - When a connection meets a declared need (CON-5), the roles that declared it are granted by default. Otherwise the chairman chooses the roles before attaching.
   - Two attached connections that would give the same environment variable, file or site to the same role are refused, naming both. Nothing is shadowed silently.
   - A run receives only what is granted to its seat's role in its own project.
-  - Detaching or revoking takes effect at each seat's next run, and ends its warm chat process.
+  - Detaching, revoking, replacing or changing takes effect at each seat's next run, and ends its warm chat process.
 - **CON-5 Needs and starting.**
   - A role declares what it needs by name and kind: a secret (for a site, or given), a variable, or an MCP server. A spec may add needs. An agent may request one.
   - The platform keeps each project's needs: met by an attached connection, open, or waived for now.
@@ -36,11 +36,12 @@ A project reaches the outside world through its connections: secrets, variables 
   - The certificate authority's key is a secret and never enters a sandbox.
   - Programs that ignore the proxy settings or pin certificates cannot use a secret sent for them; the platform says so when the secret is added, and SECURITY.md states it.
 - **CON-7 Secrets given to the agent.**
-  - A text secret becomes an environment variable, a file secret a file on the run's private in-memory filesystem (EXE-13), each under the name set when it was attached.
+  - A text secret becomes an environment variable, a file secret a file on the run's private in-memory filesystem (EXE-13), each under the name set when it was attached. Variables reach runs the same way (CON-3).
+  - The values reach the run's harness over the run's own authenticated channel when the run starts, and only the commands it runs receive them. They are never put in a container's settings. File secrets are in the directory named by `CREWMIND_SECRETS_DIR`, removed when the run ends. The run's trace names each one, never its value.
   - Names are letters, digits and underscores. Names that change how programs run are refused: `CREWMIND_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`.
   - The context pack names each one, its description and its variable, never its value.
 - **CON-8 Masking.**
-  - For each live run the platform holds the values it gave to the agent. Every place agent text enters the platform replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
+  - For each live run the platform holds the values it gave to the agent. Every place agent text enters the platform (every agent API call and every model request, before anything reads them, and the workspace snapshot) replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
   - A workspace file that held a value is stored masked, and the chairman is told once, naming the file and the secret.
   - Masking stops crewmind storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
 - **CON-9 Remote MCP servers.**

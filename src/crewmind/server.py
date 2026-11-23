@@ -22,6 +22,7 @@ from crewmind.catalog.execute import unauthenticated
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
+from crewmind.domain.connections import delivery
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
@@ -134,6 +135,7 @@ def build_runner(runtime: Runtime, sandbox: Sandbox, workers: int = RUNNER_WORKE
         workspaces=runtime.config.data_dir / "workspaces",
         blobs=runtime.services.blobs,
         workers=workers,
+        masks=runtime.masker,
     )
 
 
@@ -152,6 +154,7 @@ def create_app(
 
     @contextlib.asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
+        delivery.install_log_masking()
         await bind_stored_secrets(runtime)
         tasks: list[asyncio.Task[None]] = []
         if run_scheduler:
@@ -208,7 +211,13 @@ def create_app(
     )
     app.router.lifespan_context = lifespan
     add_agent_api(
-        app, catalog, runtime.executor, runtime.run_authenticator, runtime.gateway, runtime.settings
+        app,
+        catalog,
+        runtime.executor,
+        runtime.run_authenticator,
+        runtime.gateway,
+        runtime.settings,
+        runtime.masker,
     )
     add_file_routes(app, runtime.executor, runtime.authenticator, runtime.services)
     add_oauth_routes(app, runtime.executor, runtime.config.base_url)

@@ -2,6 +2,12 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.25 (23 Nov 2026): connections, part 7B.2
+
+- **CON-7, CON-3:** given secrets and variables reach the harness over the run's own channel when the run starts and only the commands it runs receive them, never a container's settings; file secrets are in `CREWMIND_SECRETS_DIR`, removed when the run ends.
+- **CON-4:** replacing or changing a granted connection also ends the seat's warm chat process.
+- **CON-8:** the ingress points are named: every agent API call and model request, before anything reads them, and the workspace snapshot.
+
 ## Revision 2.24 (23 Nov 2026): connections, part 7B.1
 
 - **CON-1:** connection names: a letter first, then letters, digits, `_`, `-` and `.`; unique per owner whatever their case; a need is met by a same-kind connection whose name matches whatever its case.

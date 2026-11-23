@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 from importlib import resources
 from typing import Any
@@ -23,6 +24,10 @@ from crewmind.domain.projects.model import LIFTED_BY, Hold
 from crewmind.domain.settings.service import SettingsService
 from crewmind.domain.work import board
 from crewmind.storage.models import Role, Run, Seat, Team, Wake
+
+Section = Callable[[AsyncSession, AgentView], Awaitable[str | None]]
+added_sections: list[Section] = []
+"""Sections other domains add after "Who you are": what the run is given (CON-7)."""
 
 
 def output_standard() -> str:
@@ -142,6 +147,11 @@ async def build(
         f"# Who you are\n\nYou are {_called(seat)}, the {view.role.name}. "
         f"Channels: {channels}.\n\nThe crew:\n{roster}"
     )
+
+    for section in added_sections:
+        added = await section(session, view)
+        if added:
+            sections.append(added)
 
     handed = await notices.deliver(session, seat.id, run.id)
     if handed:

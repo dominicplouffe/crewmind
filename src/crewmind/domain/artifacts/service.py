@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import mimetypes
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
@@ -288,6 +289,10 @@ def _workspace_files(workspace: Path) -> list[tuple[str, Path]]:
     return found
 
 
+Mask = Callable[[bytes], tuple[bytes, list[str]]]
+"""Masks a file's content: the content with given secrets replaced, and their names."""
+
+
 def lock_in_workspace(workspace: Path, locked: list[str]) -> None:
     """Make locked files read-only where the sandbox will see them (ART-5)."""
     for name in locked:
@@ -304,13 +309,30 @@ async def snapshot_workspace(
     workspace: Path,
     author: Author,
     now: datetime,
+    mask: Mask | None = None,
 ) -> list[str]:
     """ART-2: at the end of a run, every file in the workspace that changed becomes a new
     version of a working artifact. A locked file an agent changed is put back (ART-5).
-    At the storage quota the snapshot is skipped, with a line in the chat (ART-6)."""
+    At the storage quota the snapshot is skipped, with a line in the chat (ART-6).
+    With `mask`, a file that held a given secret is stored masked, in the workspace too,
+    and the chairman is told, naming the file and the secret (CON-8)."""
     changed: list[str] = []
     for name, path in await asyncio.to_thread(_workspace_files, workspace):
         content = await asyncio.to_thread(path.read_bytes)
+        if mask is not None:
+            masked, found = mask(content)
+            if found:
+                content = masked
+                await asyncio.to_thread(path.write_bytes, masked)
+                await conversation.platform_line(
+                    session,
+                    project.id,
+                    f"{author.shown_as or author.name} wrote the value of "
+                    f"{', '.join(found)} into {name}. It was replaced with [secret: NAME] "
+                    "there and in the saved file.",
+                    now,
+                    detail={"kind": "secret masked in a file", "artifact": name, "secrets": found},
+                )
         artifact = await named(session, project.id, name)
         if artifact is not None and artifact.locked:
             history = await versions(session, artifact)

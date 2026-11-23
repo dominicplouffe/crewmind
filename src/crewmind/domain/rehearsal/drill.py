@@ -201,7 +201,7 @@ class Drill:
         api = build_api(catalog, runtime.executor, runtime.authenticator, base_url="http://drill")
         add_agent_api(
             api, catalog, runtime.executor, runtime.run_authenticator, runtime.gateway,
-            runtime.settings,
+            runtime.settings, runtime.masker,
         )  # fmt: skip
         runner = Runner(
             runtime.sessions,
@@ -213,6 +213,7 @@ class Drill:
             blobs=runtime.services.blobs,
             workers=RUNNER_SLOTS,
             heartbeat_seconds=0.05,
+            masks=runtime.masker,
         )
         dispatcher = Dispatcher(runtime.sessions, runtime.settings, self.clock)
         jobs = (

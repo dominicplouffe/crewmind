@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
 from enum import StrEnum
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,9 +72,14 @@ def _move(
     )
 
 
+FingerprintPart = Callable[[AsyncSession, Project, Seat], Awaitable[Any]]
+fingerprint_parts: list[FingerprintPart] = []
+"""More a session restarts on, from other domains: the connections granted (CON-4)."""
+
+
 async def fingerprint(session: AsyncSession, project: Project, seat: Seat, now: datetime) -> str:
     """What a session restarts on: the credential that pays, the role's grants and brief,
-    and the standing orders (MSG-11)."""
+    the standing orders (MSG-11), and what else other domains add (CON-4)."""
     role = await session.get(Role, seat.role_id)
     credential = await paying_credential(session, project, seat, now)
     current = await pinned.pinned_for(session, project, seat)
@@ -82,6 +89,7 @@ async def fingerprint(session: AsyncSession, project: Project, seat: Seat, now: 
         "grants": sorted(str(tool) for tool in role.tools) if role else [],
         "brief": role.charter if role else "",
         "orders": [order.text for order in current.orders],
+        "more": [await part(session, project, seat) for part in fingerprint_parts],
     }
     return hashlib.sha256(json.dumps(parts, sort_keys=True).encode()).hexdigest()
 

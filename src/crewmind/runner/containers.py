@@ -54,13 +54,20 @@ def hand_over(directory: Path) -> None:
             os.chown(path, user, group)
 
 
+PRIVATE_DIR = "/run/crewmind"
+"""The in-memory filesystem a container gives a run for its file secrets (CON-7)."""
+
+
 def confinement() -> dict[str, Any]:
-    """EXE-12: no root, no capabilities, and no way to gain privileges."""
+    """EXE-12: no root, no capabilities, and no way to gain privileges. Secrets given to
+    the agent as files live on an in-memory filesystem that ends with the container
+    (CON-7, EXE-13)."""
     user, group = container_user()
     return {
         "user": f"{user}:{group}",
         "security_opt": ["no-new-privileges"],
         "cap_drop": ["ALL"],
+        "tmpfs": {PRIVATE_DIR: "rw,noexec,nosuid,nodev,mode=1777"},
     }
 
 
