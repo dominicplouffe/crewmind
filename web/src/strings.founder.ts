@@ -60,7 +60,8 @@ export const founder = {
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
     writing: "The Founder is writing.",
     writingLabel: "The Founder is writing",
-    waitingForFounder: "Waiting for the Founder. This page updates by itself.",
+    waitingForFounder: "The Founder is working on it. This page updates by itself.",
+    founderIsWorking: (doing: string): string => `The Founder is working: ${doing}…`,
     failureTitle: "The Founder could not answer.",
     failureNext: "Send your message again to try once more.",
     message: "Message to the Founder",
@@ -151,8 +152,9 @@ export const founder = {
     rehearsal: "Rehearsal",
     rehearsalNone: "This draft has not been rehearsed yet.",
     rulesHit: "Rules the Founder ran into",
-    rulesHitIntro: "A rule refused these steps of the Founder. Nothing you need to do.",
-    ruleHit: (rule: string, code: string): string => (rule ? `${rule}: ${code}` : code),
+    rulesHitIntro: "The server did not accept these steps of the Founder, and told it why. Nothing you need to do.",
+    ruleHit: (rule: string, code: string, message: string): string =>
+      message || (rule ? `${rule}: ${code}` : code),
   },
   ready: {
     title: "Is it ready?",

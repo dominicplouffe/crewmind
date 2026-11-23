@@ -10,6 +10,8 @@ export interface ConversationState {
   view: Drafting | null;
   /** The Founder's words as they are produced, until the finished line is stored. */
   reply: string;
+  /** What the Founder is doing right now, in its own plain words, while it works on a turn. */
+  working: string;
   /** Whether the live stream is connected. */
   live: boolean;
   /** Whether the stream has dropped at least once since the page opened. */
@@ -18,13 +20,21 @@ export interface ConversationState {
   stale: number;
 }
 
-export const initialConversation: ConversationState = { view: null, reply: "", live: false, dropped: false, stale: 0 };
+export const initialConversation: ConversationState = {
+  view: null,
+  reply: "",
+  working: "",
+  live: false,
+  dropped: false,
+  stale: 0,
+};
 
 export type ConversationAction =
   | { type: "reset" }
   | { type: "view"; view: Drafting }
   | { type: "line"; line: Line }
   | { type: "reply"; text: string }
+  | { type: "working"; text: string }
   | { type: "changed" }
   | { type: "live"; live: boolean };
 
@@ -47,19 +57,23 @@ export function reduceConversation(state: ConversationState, action: Conversatio
         (line) => line.id > newest,
       );
       const view = later.length > 0 ? { ...action.view, lines: [...action.view.lines, ...later] } : action.view;
-      return { ...state, view, reply: view.waiting_for === "the Founder" ? state.reply : "" };
+      const waiting = view.waiting_for === "the Founder";
+      return { ...state, view, reply: waiting ? state.reply : "", working: waiting ? state.working : "" };
     }
     case "line": {
       if (!state.view) return state;
       // The Founder's finished words replace the words shown while it wrote them.
       const finished = action.line.author === "founder" && !isQuestion(action.line);
       const reply = finished ? "" : state.reply;
-      if (state.view.lines.some((line) => line.id === action.line.id)) return { ...state, reply };
+      const working = finished ? "" : state.working;
+      if (state.view.lines.some((line) => line.id === action.line.id)) return { ...state, reply, working };
       const lines = [...state.view.lines, action.line].sort((a, b) => a.id - b.id);
-      return { ...state, reply, view: { ...state.view, lines } };
+      return { ...state, reply, working, view: { ...state.view, lines } };
     }
     case "reply":
       return { ...state, reply: state.reply + action.text };
+    case "working":
+      return { ...state, working: action.text };
     case "changed":
       return { ...state, stale: state.stale + 1 };
     case "live":
@@ -85,6 +99,10 @@ export function actionOf(event: SseEvent): ConversationAction | null {
   if (event.event === "reply") {
     const text = (payload as { text?: unknown }).text;
     return typeof text === "string" ? { type: "reply", text } : null;
+  }
+  if (event.event === "working") {
+    const text = (payload as { working?: unknown }).working;
+    return typeof text === "string" ? { type: "working", text } : null;
   }
   return event.event === "state" ? { type: "changed" } : null;
 }

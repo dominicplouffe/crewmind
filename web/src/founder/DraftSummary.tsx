@@ -100,7 +100,7 @@ export function DraftSummary({ draft, rehearsal, rulesHit }: Props): JSX.Element
           <p className="quiet">{words.rulesHitIntro}</p>
           <ul>
             {rulesHit.map((hit, index) => (
-              <li key={index}>{words.ruleHit(word(hit.rule), word(hit.code) || word(hit.tool))}</li>
+              <li key={index}>{words.ruleHit(word(hit.rule), word(hit.code) || word(hit.tool), word(hit.message))}</li>
             ))}
           </ul>
         </section>

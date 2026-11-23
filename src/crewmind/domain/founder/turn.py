@@ -29,9 +29,39 @@ logger = logging.getLogger(__name__)
 DRAFT, GRADE = "draft", "grade"
 CALLS_MOST = 16
 """Model calls in one turn. A turn that needs more ends, and says so."""
+
+WORKING_ON = {
+    "search_library": "Looking through the role library for a crew",
+    "list_credentials": "Checking who can pay",
+    "fetch_url": "Reading a web page",
+    "read_upload": "Reading your document",
+    "grade_goal": "Grading the goal",
+    "rehearse_spec": "Rehearsing the draft",
+    "ask": "Writing a question for you",
+    "propose_spec": "Writing the draft",
+}
+"""What the chairman is told the Founder is doing, step by step, so a long turn is never
+silent (P17, FND-1)."""
+
+Told = Callable[[str], None]
+
+
+def working_on(call: ToolCall) -> str:
+    said = WORKING_ON.get(call.name, "Working")
+    if call.name == "fetch_url" and isinstance(call.arguments.get("url"), str):
+        return f"Reading {call.arguments['url'][:80]}"
+    return said
+
+
 CONTEXT_OPERATION = "founder.say"
 
 ROLE = """You are the Founder: a platform assistant whose only deliverable is a project spec.
+You never do the work the chairman describes, and you never write any part of it. You set
+up a project: a crew of agents that will do the work, under a goal, a budget and a finish
+line. Work that repeats (every day, every week) is an operate project; work with an end is
+a deliver project; a question to settle is an explore project. Begin your first reply by
+saying in one sentence what you are setting up: the kind of project, and the crew that
+will do the work.
 You draft a project with the chairman, in conversation. You act only through your tools.
 Draft first, then interview: every question you ask carries your recommended answer, and
 those answers are the draft. Ask one decision per question, worded so that "yes" accepts
@@ -147,15 +177,26 @@ class FounderTurn:
                 assert drafting is not None
                 drafting.rules_hit = [
                     *(drafting.rules_hit or []),
-                    {"tool": call.name, "rule": envelope.rule, "code": envelope.code},
+                    {
+                        "tool": call.name,
+                        "rule": envelope.rule,
+                        "code": envelope.code,
+                        "message": envelope.message,
+                    },
                 ]
             return {"refused": envelope.model_dump(mode="json")}
 
-    async def take(self, drafting_id: str, on_delta: Callable[[str], None] | None = None) -> None:
+    async def take(
+        self,
+        drafting_id: str,
+        on_delta: Callable[[str], None] | None = None,
+        on_step: Told | None = None,
+    ) -> None:
         """Run the Founder until it speaks. A failure is written on the conversation and
-        the turn stays owed, so nothing is lost (FND-1)."""
+        the turn stays owed, so nothing is lost (FND-1). `on_step` is told what the Founder
+        is doing as it works, in plain words (P17)."""
         try:
-            await self._take(drafting_id, on_delta)
+            await self._take(drafting_id, on_delta, on_step or (lambda _: None))
         except Exception as error:
             logger.exception("founder: the turn of %s failed", drafting_id)
             async with self._sessions() as session, session.begin():
@@ -176,14 +217,17 @@ class FounderTurn:
                     {"kind": "failure"},
                 )
 
-    async def _take(self, drafting_id: str, on_delta: Callable[[str], None] | None) -> None:
+    async def _take(
+        self, drafting_id: str, on_delta: Callable[[str], None] | None, on_step: Told
+    ) -> None:
         async with self._sessions() as session:
             drafting = await session.get(Drafting, drafting_id)
             assert drafting is not None
             system = await self._system(session, drafting)
             messages = await self._history(session, drafting)
             calls = drafting.model_calls
-        said = ""
+        said, spoke, refused = "", False, ""
+        on_step("Thinking")
         for _ in range(CALLS_MOST):
             request = CompletionRequest(system=system, messages=messages, tools=TOOL_SPECS)
             response = await self._gateway.founder_call(
@@ -191,14 +235,19 @@ class FounderTurn:
             )
             calls += 1
             if not response.tool_calls:
-                said = response.text
+                said, spoke = response.text, True
                 break
             messages.append(
                 Turn(role="assistant", content=response.text, tool_calls=response.tool_calls)
             )
             for call in response.tool_calls:
+                on_step(working_on(call))
                 result = await self.run_tool(drafting_id, call)
+                if "refused" in result:
+                    refused = str(result["refused"]["message"])
+                    on_step(f"A step was not accepted, so the Founder is fixing it: {refused}")
                 messages.append(Turn(role="tool", content=json.dumps(result), tool_call_id=call.id))
+            on_step("Thinking")
         async with self._sessions() as session, session.begin():
             drafting = await session.get(Drafting, drafting_id)
             assert drafting is not None
@@ -206,3 +255,15 @@ class FounderTurn:
             drafting.turn, drafting.failure = m.IDLE, None
             if said.strip():
                 state.say(session, drafting, m.FOUNDER, said.strip(), self._clock())
+            elif not spoke:
+                # P17: a turn that runs out of steps says so, and says what stopped it.
+                why = f" The last step that was not accepted: {refused}" if refused else ""
+                state.say(
+                    session,
+                    drafting,
+                    m.PLATFORM,
+                    f"The Founder worked through {CALLS_MOST} steps and did not finish this "
+                    f"turn. What it settled is kept.{why} Send a message to have it carry on.",
+                    self._clock(),
+                    {"kind": "out of steps"},
+                )
