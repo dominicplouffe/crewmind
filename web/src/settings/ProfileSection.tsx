@@ -6,6 +6,7 @@ import { settingsWords } from "../strings.settings";
 import { Avatar } from "../ui/Avatar";
 import { Pill } from "../ui/Status";
 import { ChoiceCard } from "./ChoiceCard";
+import { NameForm } from "./NameForm";
 import { PersonalSettings } from "./PersonalSettings";
 
 type Preference = "system" | "light" | "dark";
@@ -38,6 +39,7 @@ export function ProfileSection(): JSX.Element {
             </div>
           </div>
         ) : null}
+        <NameForm />
       </section>
 
       <section className="card settings-card" aria-labelledby="appearance-title">

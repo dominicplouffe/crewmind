@@ -18,6 +18,7 @@ import { FounderForm } from "../settings/FounderForm";
 import { InviteForm, type Invited } from "../settings/InviteForm";
 import { safeReturn } from "../settings/paths";
 import { useProviderLabels } from "../settings/providers";
+import { NameForm } from "../settings/NameForm";
 import { settingsWords } from "../strings.settings";
 import { LogoMark } from "../ui/Logo";
 import { Skeleton } from "../ui/Skeleton";
@@ -237,6 +238,7 @@ export function Welcome(): JSX.Element {
             })}
           </ol>
           <p className="quiet">{words.intro.time}</p>
+          <NameForm compact />
           <div className="welcome-actions">
             <span className="spacer" />
             <button type="button" className="button primary large" onClick={() => go(keys.length > 0 && founderReady ? "goal" : keys.length > 0 ? "founder" : "key")}>

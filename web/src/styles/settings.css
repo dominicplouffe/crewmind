@@ -564,3 +564,8 @@ fieldset.choice-cards.compact { grid-template-columns: repeat(auto-fit, minmax(1
   .choice-card { min-height: var(--control-lg); }
   .key-actions .button.small.icon-only { width: var(--control-lg); }
 }
+
+.name-form { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
+.name-form.compact { margin: var(--space-4) 0 0; }
+.name-form .row input { flex: 1; max-width: 24rem; }
+.name-form .quiet { margin: var(--space-1) 0 0; }

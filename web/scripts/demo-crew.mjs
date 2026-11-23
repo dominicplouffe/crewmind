@@ -64,6 +64,7 @@ async function settle(projectId, label, limit = 60_000) {
 const setup = JSON.parse(readFileSync(join(runDir, "setup.json"), "utf8"));
 await post("/v1/auth/use_link", { link: setup.setup_link, password: PASSWORD });
 if (!(await post("/v1/auth/login", { email: EMAIL, password: PASSWORD }))) process.exit(1);
+await post("/v1/auth/set_name", { name: "Alex Rivera" });
 log("signed in");
 
 // ---- The project and its crew ---------------------------------------------------------------
