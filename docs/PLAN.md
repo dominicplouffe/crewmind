@@ -95,8 +95,8 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Why:** the first real project could not do its job. Nothing accepts a role's secret, nothing connects an MCP server, and nothing stopped it starting. Most real projects need one or the other.
 - **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the crew know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
-- **Plan:** `docs/phases/phase-7b-plan.md`, with the code review that found how this was missed. Waiting for the owner's answers to its questions.
-- **Ids:** EXE-13 (the role-credential half, never built), INT-4 (moved from phase 8), PRJ-1 (the start checks), FND-13, IF-4.7, INV-6 (sandboxes and the scrubber), and a new section of the spec, SEC, once the owner has answered.
+- **Plan:** `docs/phases/phase-7b-plan.md`, with the code review that found how this was missed and the owner's answers (23 Nov 2026).
+- **Ids:** CON-1 to CON-16 (new section 6.17); EXE-13 (the half never built); INT-4 (moved from phase 8); EXE-14 (the egress proxy); PRJ-1 (the start checks); FND-13; IF-4.7; INV-6 (sandboxes and masking).
 
 ## Phase 8: Breadth (after v2.0)
 

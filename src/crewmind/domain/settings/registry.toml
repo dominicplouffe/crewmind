@@ -2,7 +2,7 @@
 # A test fails when this file and Appendix A differ. Change both in the same commit.
 # Durations are in seconds, sizes in bytes, percentages in whole percent.
 
-version = "2.7"
+version = "2.8"
 
 [settings."quality"]
 type = "enum"
@@ -884,6 +884,105 @@ max = 31536000
 used_by = ["ACC-3"]
 spec_default = "30 days"
 spec_range = "1–365 days"
+
+[settings."secret.min_length"]
+type = "int"
+scope = "install"
+default = 8
+min = 8
+max = 64
+used_by = ["CON-2", "CON-8"]
+spec_default = "8"
+spec_range = "8–64"
+
+[settings."secret.expiry_warning"]
+type = "duration"
+scope = "install"
+default = 604800
+min = 86400
+max = 5184000
+used_by = ["CON-2"]
+spec_default = "7 days"
+spec_range = "1–60 days"
+
+[settings."mcp.call_timeout"]
+type = "duration"
+scope = "project"
+default = 60
+min = 5
+max = 600
+used_by = ["CON-13"]
+spec_default = "60 s"
+spec_range = "5 s–10 min"
+
+[settings."mcp.max_calls_per_run"]
+type = "int"
+scope = "project"
+default = 100
+min = 1
+max = 1000
+used_by = ["CON-13"]
+spec_default = "100"
+spec_range = "1–1,000"
+
+[settings."mcp.max_calls_per_day"]
+type = "int"
+scope = "project"
+default = 1000
+min = 10
+max = 100000
+used_by = ["CON-13"]
+spec_default = "1,000"
+spec_range = "10–100,000"
+
+[settings."mcp.result_max_bytes"]
+type = "bytes"
+scope = "project"
+default = 65536
+min = 4096
+max = 1048576
+used_by = ["CON-13"]
+spec_default = "64 KB"
+spec_range = "4 KB–1 MB"
+
+[settings."mcp.description_max"]
+type = "int"
+scope = "install"
+default = 1000
+min = 100
+max = 4000
+used_by = ["CON-12"]
+spec_default = "1,000 characters"
+spec_range = "100–4,000"
+
+[settings."mcp.tools_refresh"]
+type = "enum"
+scope = "install"
+default = "daily"
+choices = ["hourly", "daily", "weekly"]
+used_by = ["CON-12"]
+spec_default = "daily"
+spec_range = "hourly, daily, weekly"
+
+[settings."mcp.command_idle"]
+type = "duration"
+scope = "install"
+default = 900
+min = 60
+max = 86400
+used_by = ["CON-11"]
+spec_default = "15 min"
+spec_range = "1 min–24 h"
+
+[settings."proxy.certificate_life"]
+type = "duration"
+scope = "install"
+default = 86400
+min = 3600
+max = 604800
+used_by = ["CON-6"]
+spec_default = "24 h"
+spec_range = "1–168 h"
 
 [[constraints]]
 id = "warn_before_wrapup"

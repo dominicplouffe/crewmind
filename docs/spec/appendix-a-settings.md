@@ -101,6 +101,16 @@ Values marked "starting default" have no v1 history behind them and are expected
 | `cycle.roll_day` | 0 for weekly; 1 for monthly and quarterly | Weekly: 0–6, 0 = Monday (ISO). Monthly and quarterly: 1–28 | project | PRJ-8 |
 | `cycle.due_time` | The end of the cycle | A time within the cycle | project | PRJ-8 |
 | `token.default_expiry` | 30 days | 1–365 days | person | ACC-3 |
+| `secret.min_length` | 8 | 8–64 | install | CON-2, CON-8 |
+| `secret.expiry_warning` | 7 days | 1–60 days | install | CON-2 |
+| `mcp.call_timeout` | 60 s | 5 s–10 min | project | CON-13 |
+| `mcp.max_calls_per_run` | 100 | 1–1,000 | project | CON-13 |
+| `mcp.max_calls_per_day` | 1,000 | 10–100,000 | project | CON-13 |
+| `mcp.result_max_bytes` | 64 KB | 4 KB–1 MB | project | CON-13 |
+| `mcp.description_max` | 1,000 characters | 100–4,000 | install | CON-12 |
+| `mcp.tools_refresh` | daily | hourly, daily, weekly | install | CON-12 |
+| `mcp.command_idle` | 15 min | 1 min–24 h | install | CON-11 |
+| `proxy.certificate_life` | 24 h | 1–168 h | install | CON-6 |
 
 ### Constraints
 

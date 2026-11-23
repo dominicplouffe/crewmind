@@ -42,7 +42,8 @@ This is the rebuild's whole vocabulary. Each concept has one name, used in the c
 | **Side effect** | An action with consequences outside the platform | Two-phase (declare, then finish) with an idempotency key. Launch side effects carry a watch |
 | **Credential** | A stored secret | Model credential (pays seats, used only by the gateway), role credential, data-source credential, mailbox (managed or manual, INT-6), mail-server admin key, webhook secret. Encrypted; has a health status |
 | **Model gateway** | The platform service every model call passes through | Adds the provider credential, meters tokens, enforces the per-run cap |
-| **Data source** | An outside MCP server the chairman connected | Reached only through the platform gateway; per-tool permissions |
+| **Connection** | Something a project uses to reach the outside world (CON) | A secret (sent for the agent, or given to it), a variable, or an MCP server; in the install, a person's or a project's scope; granted to roles |
+| **MCP server** (data source) | An outside server offering tools over the Model Context Protocol | Remote or started from a command; reached only through the platform gateway; per-tool permissions (INT-4, CON-9 to CON-13) |
 | **Event log** | Append-only record of every state change | The single source for audit, briefs, agenda, feeds, notifications and mirrors |
 | **Mail server** | An install-level connection to a mail server the platform can create mailboxes on | Stalwart first, through a provisioning adapter (INT-6). Its admin key is used only by the mail provisioner |
 | **Skill** | A packaged capability in the open Agent Skills format | Versioned; reviewed before use; pinned by roles; loaded on demand (LIB-6) |

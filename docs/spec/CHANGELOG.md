@@ -2,6 +2,17 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.23 (23 Nov 2026): connections, phase 7.B
+
+- **CON-1 to CON-16 (new section 6.17):** secrets, variables and MCP servers: three scopes (install, person, project), attachment and role grants, write-only values, secrets sent for the agent by the egress proxy as the default, secrets given to the agent with masking, remote and command MCP servers with no auth, bearer, custom header and OAuth, needs and starting without them, the Founder and the crew knowing what a project has, the screens, records and errors. Role secrets were specified only as "injected" (EXE-13) and never built (phase 7.B plan, owner, 23 Nov 2026).
+- **INT-4:** renamed "MCP servers (data sources)"; how servers are added and reached moves to CON-9 to CON-13; the permission rules stay.
+- **EXE-13, EXE-14:** point to CON; the egress proxy blocks and reads nothing except connections to sites with a secret sent for the run.
+- **PRJ-1, FND-13, IF-4.7:** open needs are prompted for, and block the start unless the chairman starts without them, holding the dependent seats.
+- **INV-6:** the exception is secrets given to the agent, masked everywhere agent text is stored or sent to a model.
+- **IF-5.6:** OAuth sign-in to an MCP server, adding a command server and deleting a connection are human-only.
+- **7.18:** state tables for the connection, the MCP server and the need.
+- **Appendix A:** ten settings for secrets, MCP servers and the proxy.
+
 ## Revision 2.22 (23 Nov 2026): agents have names
 
 - **EXE-18 (new):** every agent has a person-like name it is shown by ("Maya, the CEO"), given at hire or drawn from a fixed pool, unique in the project; the chairman renames one with `roster.rename_seat` (every surface, recorded); `@Maya` addresses it; its prompt and context pack name it. The seat name stays the identity, including the stored author of chat messages.

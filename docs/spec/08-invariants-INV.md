@@ -19,7 +19,7 @@ These must hold at all times, under any sequence of API calls, crashes and retri
 - **INV-3** No agent completes, reviews or gives the verdict on work it did, and no agent claims a task whose success test it wrote while another active agent exists (P5, WRK-4, WRK-9). Solo projects are exempt and labelled, for observable tests only (P5).
 - **INV-4** A run token works only for its own run, agent and project, and only while the run is live and not revoked.
 - **INV-5** A person or client that cannot see a project gets the same answer as for a project that does not exist.
-- **INV-6** No secret value, provider key included, appears in any sandbox, agent-facing response, export, clone, spec, rehearsal or log. The only exception is role credentials granted by name (EXE-13), plus the stated subscription-harness exception (LLM-8).
+- **INV-6** No secret value, provider key included, appears in any sandbox, agent-facing response, export, clone, spec, rehearsal or log. The only exceptions are secrets given to the agent and granted to its role (EXE-13, CON-7), which are masked everywhere agent text is stored or sent to a model (CON-8), and the stated subscription-harness exception (LLM-8).
 - **INV-7** Agent-written text is always wrapped as untrusted when it reaches a person's AI client.
 
 **Budget**
