@@ -52,7 +52,7 @@
 - **EXE-11 Records.** Every run stores its trace and the exact system prompt and context pack sent, keyed by run. Tokens are recorded by kind for every ending, including killed, failed and reaped runs.
 - **EXE-12 Sandboxes.**
   - Every run gets a fresh, disposable sandbox.
-  - Required: a container mode, with no privilege escalation, 2 CPUs and 2 GB by default, and an install label so a second install on the same host never adopts another's containers.
+  - Required: a container mode, with no privilege escalation, 2 CPUs and 2 GB by default (a host with fewer CPUs gives a container all it has), and an install label so a second install on the same host never adopts another's containers.
   - Required: the container runs as an unprivileged user with no capabilities: the server's own user, or user 10001 of the agent image when the server itself runs as root.
   - Required: a separate container network per project. When the server is itself a container, it joins each project's network so that project's sandboxes can reach the agent API; a project's network is removed while no sandbox is on it.
   - Optional: a host-jail mode for desktops that hides the home folder, the database, the master key and container sockets, and builds the environment from nothing.
