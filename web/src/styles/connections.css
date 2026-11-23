@@ -157,3 +157,8 @@ li.chip { cursor: default; min-height: 1.5rem; padding: 0 var(--space-2); font-s
 .check-row { display: flex; gap: var(--space-2); align-items: flex-start; margin: 0 0 var(--space-4); font-weight: var(--weight-regular); }
 .check-row input { margin-top: 0.25rem; }
 
+
+/* A command server's environment: a variable name, what fills it, and remove. */
+.env-rows { display: grid; gap: var(--space-2); }
+.env-row { gap: var(--space-2); align-items: center; flex-wrap: nowrap; }
+.env-row input, .env-row select { flex: 1; min-width: 0; }

@@ -113,6 +113,27 @@ describe("AddMcpSheet (CON-9, CON-15)", () => {
     await userEvent.type(screen.getByLabelText("Address"), "x");
     expect(screen.queryByTestId("mcp-probe")).toBeNull();
   });
+
+  it("adds a command server whose variables name a secret, never a typed value (CON-11)", async () => {
+    answers["/v1/connections/list"] = {
+      items: [{ ...server([]), id: "s1", name: "github", kind: "secret", mcp: null }],
+    };
+    answers["/v1/connections/add_command_mcp_server"] = server([]);
+    const onSaved = vi.fn();
+    render(<AddMcpSheet context={{ mode: "settings", scope: "person" }} onClose={vi.fn()} onSaved={onSaved} />);
+    await userEvent.type(screen.getByLabelText("Name", { exact: true }), "gh");
+    await userEvent.type(screen.getByLabelText("What is it for?"), "GitHub tools.");
+    await userEvent.click(screen.getByLabelText(/Command/, { selector: "input[type=radio]" }));
+    expect(screen.queryByLabelText("Address")).toBeNull();
+    await userEvent.type(screen.getByLabelText("Command", { exact: true }), "npx -y github-mcp");
+    await userEvent.click(screen.getByRole("button", { name: /Add a variable/ }));
+    await userEvent.type(screen.getByLabelText("Variable 1 name"), "GITHUB_TOKEN");
+    await userEvent.selectOptions(await screen.findByLabelText("Filled by, for GITHUB_TOKEN"), "s1");
+    await userEvent.click(screen.getByRole("button", { name: "Test and save" }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    const added = calls.find((call) => call.url === "/v1/connections/add_command_mcp_server");
+    expect(added?.body).toMatchObject({ command: "npx -y github-mcp", environment: { GITHUB_TOKEN: "s1" }, image: null });
+  });
 });
 
 describe("McpTools (CON-12, INT-4)", () => {

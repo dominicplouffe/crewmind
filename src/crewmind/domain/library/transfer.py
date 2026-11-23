@@ -12,6 +12,7 @@ from sqlalchemy import select
 from crewmind.catalog import catalog
 from crewmind.catalog.execute import Context
 from crewmind.catalog.refusal import Refusal
+from crewmind.domain.connections import drafted
 from crewmind.domain.execution import roster
 from crewmind.domain.execution.model import SeatKind, TeamState
 from crewmind.domain.library import service
@@ -138,7 +139,8 @@ async def create(context: Context, spec: ProjectSpec) -> tuple[Project, list[str
         "integrations": spec.integrations,
         "credentials": [grant.model_dump() for grant in spec.credentials],
     }
-    return project, await _link_payer(context, project, spec)
+    applied = await drafted.apply_grants(context, project)
+    return project, [*await _link_payer(context, project, spec), *applied.not_attached]
 
 
 async def _credentials(context: Context) -> set[str]:

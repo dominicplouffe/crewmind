@@ -16,6 +16,7 @@ import { AcceptRest } from "./AcceptRest";
 import { Conversation } from "./Conversation";
 import { DecisionRail } from "./DecisionRail";
 import { DraftComposer, type ComposerMode } from "./DraftComposer";
+import { DraftNeeds } from "./DraftNeeds";
 import { DraftRail } from "./DraftRail";
 import { FounderSetupNote, isNoModelFailure, lastSaid } from "./FounderSetupNote";
 import { draftSummary, gradeOf, readinessReasons, stageOf, stepOf, visibleLines, type Drafting as View } from "./logic";
@@ -152,6 +153,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         </main>
         <aside className="draft-right" aria-label={words.page.sideLabel}>
           <DraftRail draft={draft} grade={gradeOf(view.grade)} rehearsal={view.rehearsal} rulesHit={view.rules_hit} />
+          <DraftNeeds needs={view.needs ?? []} />
         </aside>
       </div>
     </div>

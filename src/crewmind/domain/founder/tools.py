@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from crewmind.catalog.execute import Context
 from crewmind.catalog.refusal import Refusal
+from crewmind.domain.connections import drafted
 from crewmind.domain.founder import drafting as state
 from crewmind.domain.founder import grammar, tree
 from crewmind.domain.founder import model as m
@@ -192,9 +193,15 @@ class Toolbox:
             ]
         }
 
-    async def list_credentials(self, _: dict[str, Any]) -> dict[str, Any]:
-        """Names only. A value never reaches the Founder (INV-6)."""
-        return {"credentials": await state.credentials_of(self.session, self.drafting.person_id)}
+    async def list_connections(self, _: dict[str, Any]) -> dict[str, Any]:
+        """FND-2, CON-14: the chairman's model credentials, and the connections they can
+        attach, by name, kind and description. A value never reaches the Founder (INV-6)."""
+        person = self.drafting.person_id
+        items = await drafted.attachable(self.session, person)
+        return {
+            "credentials": await state.credentials_of(self.session, person),
+            "connections": [item.model_dump() for item in drafted.listed(items)],
+        }
 
     async def fetch_url(self, arguments: dict[str, Any]) -> dict[str, Any]:
         """Public addresses only, through the same guard as outside evidence (WRK-12)."""
@@ -496,6 +503,13 @@ class Toolbox:
             "budget": await self._budget_note(spec),
             "rehearsal": rehearsal_note,
             "not_ready_because": await state.not_ready_because(session, drafting),
+            # FND-9, CON-14: what the roster needs from outside, and whether it is granted.
+            "connections_needed": [
+                need.model_dump()
+                for need in await drafted.draft_needs(
+                    session, drafting.person_id, (drafting.draft or {}).get("spec")
+                )
+            ],
         }
 
     async def _check_payer(self, spec: ProjectSpec) -> None:
@@ -512,7 +526,7 @@ class Toolbox:
                 "not_the_chairmans_credential",
                 f"The chairman has no credential named {spec.paying_credential}.",
                 rule=m.FND_3.id,
-                hint="List them with list_credentials.",
+                hint="List them with list_connections.",
             )
         answered = chosen is not None and chosen.source != m.ASSUMPTION
         if len(mine) > 1 and not (answered and chosen and chosen.value == spec.paying_credential):
@@ -547,7 +561,7 @@ class Toolbox:
 Tool = Callable[[Toolbox, dict[str, Any]], Awaitable[dict[str, Any]]]
 TOOLS: dict[str, Tool] = {
     "search_library": Toolbox.search_library,
-    "list_credentials": Toolbox.list_credentials,
+    "list_connections": Toolbox.list_connections,
     "fetch_url": Toolbox.fetch_url,
     "read_upload": Toolbox.read_upload,
     "grade_goal": Toolbox.grade_goal,
@@ -569,8 +583,9 @@ TOOL_SPECS = [
         },
     ),
     ToolSpec(
-        name="list_credentials",
-        description="List the chairman's model credentials, by name.",
+        name="list_connections",
+        description="List the chairman's model credentials, and the secrets, variables and "
+        "MCP servers they can attach, by name, kind and description.",
         input_schema=_OBJECT,
     ),
     ToolSpec(

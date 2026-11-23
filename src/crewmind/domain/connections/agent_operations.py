@@ -13,7 +13,7 @@ from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import Empty, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Principal, Reversibility
-from crewmind.domain.connections import delivery, sending
+from crewmind.domain.connections import delivery, mcp_calls, needs, sending
 from crewmind.domain.execution import context_pack
 from crewmind.domain.execution.agent import AgentView, agent_of
 from crewmind.domain.secrets.store import SecretStore
@@ -96,10 +96,14 @@ async def environment(context: Context, payload: Empty) -> RunEnvironment:
 
 
 async def context_section(session: AsyncSession, view: AgentView) -> str | None:
-    """CON-3, CON-7: the pack names what the run is given, its description and its
-    variable or file; never a secret's value."""
+    """CON-3, CON-7, CON-14: the pack names what the run may use (what it is given, the
+    sites its secrets are sent to, its MCP tools) and what its role needs but lacks; never
+    a secret's value."""
     given = await delivery.given_for_run(session, None, view.run)
-    if not given:
+    sent = await sending.sites_for(session, view.run)
+    tools = await mcp_calls.offered(session, view.run)
+    lacking = needs.unmet_for(await needs.preview(session, view.project), view.role.slug)
+    if not (given or sent or tools or lacking):
         return None
     lines = ["# What you are given", ""]
     for item in given:
@@ -110,11 +114,32 @@ async def context_section(session: AsyncSession, view: AgentView) -> str | None:
         shown = "" if item.secret else f" = {item.value}"
         kind = "secret" if item.secret else "variable"
         lines.append(f"- {item.name} ({kind}, {where}{shown}): {item.description}")
-    lines += [
-        "",
-        "Secrets are available to the commands you run. Never print, write or send a "
-        "secret's value; crewmind replaces it with [secret: NAME] in everything you write.",
-    ]
+    for connection, sites in sent:
+        lines.append(
+            f"- {connection.name} (secret, sent for you to {', '.join(sites)}): "
+            f"{connection.description}"
+        )
+    by_server: dict[str, list[str]] = {}
+    for tool in tools:
+        by_server.setdefault(tool.connection.name, []).append(tool.name)
+    for server, names in by_server.items():
+        lines.append(f"- {server} (MCP server): your tools {', '.join(names)}")
+    if given:
+        lines += [
+            "",
+            "Secrets are available to the commands you run. Never print, write or send a "
+            "secret's value; crewmind replaces it with [secret: NAME] in everything you write.",
+        ]
+    if sent:
+        lines += [
+            "",
+            "A secret sent for you is added by crewmind to your HTTPS requests to its sites: "
+            "call the site without it. You never see its value.",
+        ]
+    if lacking:
+        lines += ["", "Your role needs, and does not have yet:"]
+        lines += [f"- {needs.describe(need)}" for need in lacking]
+        lines.append("Ask the chairman for anything else with agent_request_access.")
     return "\n".join(lines)
 
 

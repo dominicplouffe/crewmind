@@ -85,23 +85,30 @@ async def roles_on_roster(session: AsyncSession, project_id: str) -> list[Role]:
 
 async def declared(session: AsyncSession, project: Project) -> dict[tuple[str, str], set[str]]:
     """Every need of the project, with the roles that have it: what each role on the roster
-    declares, and what the spec it came from asked for (LIB-4)."""
+    declares, and what the spec it came from asked for (LIB-4). Names match whatever their
+    case (CON-1); the first spelling seen is kept."""
     found: dict[tuple[str, str], set[str]] = {}
+    spelled: dict[tuple[str, str], tuple[str, str]] = {}
+
+    def add(kind: str, name: str, roles: set[str]) -> None:
+        key = spelled.setdefault((kind, name.lower()), (kind, name))
+        found.setdefault(key, set()).update(roles)
+
     roster = await roles_on_roster(session, project.id)
     on_roster = {role.slug for role in roster}
     for role in roster:
         for name in role.credential_names or []:
-            found.setdefault((NeedKind.SECRET, str(name)), set()).add(role.slug)
+            add(NeedKind.SECRET, str(name), {role.slug})
     extras: dict[str, Any] = project.extras or {}
     for asked in extras.get("requested", []):
         # CON-14: what an agent asked for and the chairman approved.
         roles = {str(slug) for slug in asked.get("roles", [])} & on_roster
         if roles:
-            found.setdefault((str(asked["kind"]), str(asked["name"])), set()).update(roles)
+            add(str(asked["kind"]), str(asked["name"]), roles)
     for grant in extras.get("credentials", []):
         roles = {str(slug) for slug in grant.get("roles", [])} & on_roster
         if roles:
-            found.setdefault((NeedKind.SECRET, str(grant["name"])), set()).update(roles)
+            add(str(grant.get("kind", NeedKind.SECRET)), str(grant["name"]), roles)
     return found
 
 

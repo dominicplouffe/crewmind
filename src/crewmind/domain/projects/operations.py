@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from datetime import datetime, timedelta
 
 from pydantic import BaseModel, Field
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
@@ -127,7 +129,7 @@ async def _status(context: Context) -> ProjectStatus:
         goal=project.goal,
         holds=[_hold_item(row) for row in holds],
         delete_at=project.delete_at,
-        health=_health(project),
+        health=await _health(context.session, project),
     )
 
 
@@ -138,15 +140,24 @@ OLDER_DOCTRINE = (
 )
 
 
-def _health(project: Project) -> list[str]:
+HealthCheck = Callable[[AsyncSession, Project], Awaitable[list[str]]]
+health_checks: list[HealthCheck] = []
+"""Other findings on a project's health, each with its fix: the connections add theirs
+(CON-14)."""
+
+
+async def _health(session: AsyncSession, project: Project) -> list[str]:
     """FND-14: a later doctrine fix shows as a finding on an older project. It never
     rewrites the project and never blocks it."""
     from crewmind.domain.founder.drafting import doctrine_fingerprint
 
+    found: list[str] = []
     drafted_under = project.doctrine_fingerprint
     if drafted_under is not None and drafted_under != doctrine_fingerprint():
-        return [OLDER_DOCTRINE]
-    return []
+        found.append(OLDER_DOCTRINE)
+    for check in health_checks:
+        found += await check(session, project)
+    return found
 
 
 @operation(

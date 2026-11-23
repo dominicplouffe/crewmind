@@ -1,12 +1,13 @@
 /**
- * Adding a remote MCP server (CON-9, CON-10, CON-15): its address, how crewmind signs in (four
- * cards, each showing only its fields), a test that lists the server's tools before anything is
- * saved, and for OAuth a sign-in at the provider right after saving. A token or header value
- * lives only in its field, never in React state or the page's markup.
+ * Adding an MCP server (CON-9 to CON-11, CON-15). A remote one: its address, how crewmind signs in
+ * (four cards, each showing only its fields), a test that lists the server's tools before anything
+ * is saved, and for OAuth a sign-in at the provider right after saving. A command one: its command
+ * and the secrets or variables that fill its environment, started and tested when saved. A token
+ * or header value lives only in its field, never in React state or the page's markup.
  */
-import { useId, useRef, useState, type FormEvent } from "react";
-import { Globe, KeyRound, LogIn, Tag } from "lucide-react";
-import { post, type Schemas } from "../api/client";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { Globe, KeyRound, LogIn, Tag, Terminal } from "lucide-react";
+import { get, post, type Schemas } from "../api/client";
 import { useAuth } from "../auth";
 import { ErrorNote } from "../components/common";
 import { ChoiceCard } from "../settings/ChoiceCard";
@@ -14,6 +15,7 @@ import { connectionWords } from "../strings.connections";
 import { Pill } from "../ui/Status";
 import { Sheet } from "../ui/Sheet";
 import type { AddContext } from "./AddSheet";
+import { CommandFields, environmentOf, type CommandValue } from "./CommandFields";
 import { RolePicker } from "./RolePicker";
 
 type Item = Schemas["ConnectionView"];
@@ -44,6 +46,9 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
   const [name, setName] = useState(presetName ?? "");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
+  const [where, setWhere] = useState<"remote" | "command">("remote");
+  const [command, setCommand] = useState<CommandValue>({ command: "", image: "", environment: [] });
+  const [sources, setSources] = useState<Item[]>([]);
   const [auth, setAuth] = useState<Auth>("none");
   const [headerName, setHeaderName] = useState("");
   const valueField = useRef<HTMLInputElement>(null);
@@ -65,6 +70,19 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
   });
 
   const changed = (): void => setProbe(null);
+  const projectId = inProject ? context.projectId : null;
+
+  // The secrets and variables a command server's environment can name: loaded when chosen.
+  useEffect(() => {
+    if (where !== "command") return;
+    let live = true;
+    get("/v1/connections/list", projectId ? { project_id: projectId } : {})
+      .then((list) => live && setSources(list.items))
+      .catch(() => live && setSources([]));
+    return () => {
+      live = false;
+    };
+  }, [where, projectId]);
 
   const test = (): void => {
     setBusy("test");
@@ -75,10 +93,30 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
       .finally(() => setBusy(null));
   };
 
+  const saveCommand = (): void => {
+    post("/v1/connections/add_command_mcp_server", {
+      name: name.trim(),
+      description: description.trim(),
+      scope,
+      project_id: projectId,
+      roles: inProject && roles.length > 0 ? roles : null,
+      command: command.command.trim(),
+      image: command.image.trim() || null,
+      environment: environmentOf(command.environment),
+    })
+      .then(onSaved)
+      .catch((reason: unknown) => setError(reason))
+      .finally(() => setBusy(null));
+  };
+
   const save = (event: FormEvent): void => {
     event.preventDefault();
     setBusy("save");
     setError(null);
+    if (where === "command") {
+      saveCommand();
+      return;
+    }
     post("/v1/connections/add_mcp_server", {
       ...target(),
       name: name.trim(),
@@ -105,7 +143,9 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
       .finally(() => setBusy(null));
   };
 
-  const canSave = auth === "oauth" || probe !== null;
+  const remote = where === "remote";
+  const canSave = remote ? auth === "oauth" || probe !== null : command.command.trim() !== "";
+  const saveLabel = remote ? (auth === "oauth" ? words.mcp.saveAndSignIn : words.form.save) : words.command.testAndSave;
   return (
     <Sheet title={words.mcp.addTitle} size="lg" testId="add-mcp" onClose={onClose}>
       <form className="connection-form" onSubmit={save} autoComplete="off">
@@ -120,124 +160,148 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
             {words.form.descriptionHelp}
           </p>
         </div>
-        <div className="field">
-          <label htmlFor={field("url")}>{words.mcp.url}</label>
-          <input
-            id={field("url")}
-            type="url"
-            value={url}
-            onChange={(e) => {
-              setUrl(e.target.value);
-              changed();
-            }}
-            required
-            spellCheck={false}
-            placeholder="https://mcp.example.com/mcp"
-            aria-describedby={field("url-help")}
-          />
-          <p className="quiet" id={field("url-help")}>
-            {words.mcp.urlHelp}
-          </p>
-        </div>
         <fieldset className="choice-cards compact">
-          <legend>{words.mcp.authLegend}</legend>
-          {(["none", "bearer", "header", "oauth"] as const).map((option) => (
+          <legend>{words.mcp.whereLegend}</legend>
+          {(["remote", "command"] as const).map((option) => (
             <ChoiceCard
               key={option}
-              name={field("auth")}
+              name={field("where")}
               value={option}
-              checked={auth === option}
+              checked={where === option}
               onChange={() => {
-                setAuth(option);
+                setWhere(option);
                 changed();
               }}
-              title={words.mcp.auth[option]?.title ?? option}
-              help={words.mcp.auth[option]?.help}
-              icon={ICONS[option]}
+              title={words.mcp.where[option]?.title ?? option}
+              help={words.mcp.where[option]?.help}
+              icon={option === "remote" ? <Globe size={18} /> : <Terminal size={18} />}
             />
           ))}
         </fieldset>
-        {auth === "header" ? (
-          <div className="field">
-            <label htmlFor={field("header")}>{words.form.headerName}</label>
-            <input id={field("header")} value={headerName} onChange={(e) => { setHeaderName(e.target.value); changed(); }} required spellCheck={false} placeholder="X-Api-Key" />
-          </div>
-        ) : null}
-        {auth === "bearer" || auth === "header" ? (
-          <div className="field">
-            <label htmlFor={field("value")}>{auth === "bearer" ? words.mcp.token : words.mcp.headerValue}</label>
-            <input
-              id={field("value")}
-              ref={valueField}
-              type="password"
-              required
-              autoComplete="new-password"
-              spellCheck={false}
-              data-1p-ignore
-              data-lpignore="true"
-              onInput={changed}
-              aria-describedby={field("value-help")}
-            />
-            <p className="quiet" id={field("value-help")}>
-              {words.form.valueHelp}
-            </p>
-          </div>
-        ) : null}
-        {auth === "oauth" ? (
+        {remote ? (
           <>
-            <p className="note note-info small">{words.mcp.oauthNote}</p>
-            <details className="field">
-              <summary>{words.mcp.clientLegend}</summary>
-              <label htmlFor={field("client")}>{words.mcp.clientId}</label>
-              <input id={field("client")} value={clientId} onChange={(e) => setClientId(e.target.value)} spellCheck={false} />
-              <label htmlFor={field("client-secret")}>{words.mcp.clientSecret}</label>
-              <input id={field("client-secret")} ref={clientSecret} type="password" autoComplete="new-password" spellCheck={false} data-1p-ignore />
-            </details>
-          </>
-        ) : null}
-        {person?.role === "admin" ? (
-          <div className="check-row">
+          <div className="field">
+            <label htmlFor={field("url")}>{words.mcp.url}</label>
             <input
-              id={field("private")}
-              type="checkbox"
-              checked={privateNetwork}
+              id={field("url")}
+              type="url"
+              value={url}
               onChange={(e) => {
-                setPrivateNetwork(e.target.checked);
+                setUrl(e.target.value);
                 changed();
               }}
+              required
+              spellCheck={false}
+              placeholder="https://mcp.example.com/mcp"
+              aria-describedby={field("url-help")}
             />
-            <label htmlFor={field("private")}>
-              <strong>{words.mcp.privateNetwork}</strong>
-              <span className="quiet small"> {words.mcp.privateHelp}</span>
-            </label>
+            <p className="quiet" id={field("url-help")}>
+              {words.mcp.urlHelp}
+            </p>
           </div>
-        ) : null}
+          <fieldset className="choice-cards compact">
+            <legend>{words.mcp.authLegend}</legend>
+            {(["none", "bearer", "header", "oauth"] as const).map((option) => (
+              <ChoiceCard
+                key={option}
+                name={field("auth")}
+                value={option}
+                checked={auth === option}
+                onChange={() => {
+                  setAuth(option);
+                  changed();
+                }}
+                title={words.mcp.auth[option]?.title ?? option}
+                help={words.mcp.auth[option]?.help}
+                icon={ICONS[option]}
+              />
+            ))}
+          </fieldset>
+          {auth === "header" ? (
+            <div className="field">
+              <label htmlFor={field("header")}>{words.form.headerName}</label>
+              <input id={field("header")} value={headerName} onChange={(e) => { setHeaderName(e.target.value); changed(); }} required spellCheck={false} placeholder="X-Api-Key" />
+            </div>
+          ) : null}
+          {auth === "bearer" || auth === "header" ? (
+            <div className="field">
+              <label htmlFor={field("value")}>{auth === "bearer" ? words.mcp.token : words.mcp.headerValue}</label>
+              <input
+                id={field("value")}
+                ref={valueField}
+                type="password"
+                required
+                autoComplete="new-password"
+                spellCheck={false}
+                data-1p-ignore
+                data-lpignore="true"
+                onInput={changed}
+                aria-describedby={field("value-help")}
+              />
+              <p className="quiet" id={field("value-help")}>
+                {words.form.valueHelp}
+              </p>
+            </div>
+          ) : null}
+          {auth === "oauth" ? (
+            <>
+              <p className="note note-info small">{words.mcp.oauthNote}</p>
+              <details className="field">
+                <summary>{words.mcp.clientLegend}</summary>
+                <label htmlFor={field("client")}>{words.mcp.clientId}</label>
+                <input id={field("client")} value={clientId} onChange={(e) => setClientId(e.target.value)} spellCheck={false} />
+                <label htmlFor={field("client-secret")}>{words.mcp.clientSecret}</label>
+                <input id={field("client-secret")} ref={clientSecret} type="password" autoComplete="new-password" spellCheck={false} data-1p-ignore />
+              </details>
+            </>
+          ) : null}
+          {person?.role === "admin" ? (
+            <div className="check-row">
+              <input
+                id={field("private")}
+                type="checkbox"
+                checked={privateNetwork}
+                onChange={(e) => {
+                  setPrivateNetwork(e.target.checked);
+                  changed();
+                }}
+              />
+              <label htmlFor={field("private")}>
+                <strong>{words.mcp.privateNetwork}</strong>
+                <span className="quiet small"> {words.mcp.privateHelp}</span>
+              </label>
+            </div>
+          ) : null}
 
-        {auth !== "oauth" ? (
-          <div className="mcp-test">
-            <button type="button" className="button" onClick={test} disabled={busy !== null || !url.trim()}>
-              {busy === "test" ? words.mcp.testing : words.mcp.test}
-            </button>
-            {probe ? (
-              <div className="note note-success" role="status" data-testid="mcp-probe">
-                <p className="note-title">{words.mcp.tested(probe.server_name ?? url, probe.tools.length)}</p>
-                <ul className="plain mcp-probe-tools">
-                  {probe.tools.map((tool) => (
-                    <li key={tool.name}>
-                      <code>{tool.name}</code>{" "}
-                      <Pill tone={tool.reads_only ? "neutral" : "warning"} dot={false}>
-                        {tool.reads_only ? words.mcp.reads : words.mcp.changes}
-                      </Pill>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <p className="quiet small">{words.mcp.testFirst}</p>
-            )}
-          </div>
-        ) : null}
+          {auth !== "oauth" ? (
+            <div className="mcp-test">
+              <button type="button" className="button" onClick={test} disabled={busy !== null || !url.trim()}>
+                {busy === "test" ? words.mcp.testing : words.mcp.test}
+              </button>
+              {probe ? (
+                <div className="note note-success" role="status" data-testid="mcp-probe">
+                  <p className="note-title">{words.mcp.tested(probe.server_name ?? url, probe.tools.length)}</p>
+                  <ul className="plain mcp-probe-tools">
+                    {probe.tools.map((tool) => (
+                      <li key={tool.name}>
+                        <code>{tool.name}</code>{" "}
+                        <Pill tone={tool.reads_only ? "neutral" : "warning"} dot={false}>
+                          {tool.reads_only ? words.mcp.reads : words.mcp.changes}
+                        </Pill>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="quiet small">{words.mcp.testFirst}</p>
+              )}
+            </div>
+          ) : null}
 
+          </>
+        ) : (
+          <CommandFields value={command} sources={sources} onChange={setCommand} />
+        )}
         {inProject ? (
           <>
             <fieldset className="choice-cards compact">
@@ -255,7 +319,7 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
             {words.form.cancel}
           </button>
           <button type="submit" className="button primary" disabled={busy !== null || !canSave || (inProject && roles.length === 0)}>
-            {busy === "save" ? words.form.saving : auth === "oauth" ? words.mcp.saveAndSignIn : words.form.save}
+            {busy === "save" ? (remote ? words.form.saving : words.command.testingAndSaving) : saveLabel}
           </button>
         </div>
       </form>

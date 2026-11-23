@@ -28,6 +28,88 @@
     "title": "AcceptDateInput",
     "type": "object"
    },
+   "AddCommandInput": {
+    "properties": {
+     "command": {
+      "description": "The command line, such as `npx -y some-mcp`.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Command",
+      "type": "string"
+     },
+     "description": {
+      "description": "What it is for.",
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Description",
+      "type": "string"
+     },
+     "environment": {
+      "additionalProperties": {
+       "type": "string"
+      },
+      "description": "Each environment variable the server needs, and the secret or variable (by name or id) that fills it.",
+      "title": "Environment",
+      "type": "object"
+     },
+     "image": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The container image. By default, the tool image (Node, Python, uv).",
+      "title": "Image"
+     },
+     "name": {
+      "description": "What it is called, such as filesystem.",
+      "title": "Name",
+      "type": "string"
+     },
+     "project_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The project it belongs to (project scope), or to attach it to at once.",
+      "title": "Project Id"
+     },
+     "roles": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "With a project: the roles that may use it, or *. By default, the roles that need it.",
+      "title": "Roles"
+     },
+     "scope": {
+      "$ref": "#/components/schemas/Scope",
+      "default": "person",
+      "description": "person (yours, for any project you chair), project, or install (admins)."
+     }
+    },
+    "required": [
+     "name",
+     "description",
+     "command"
+    ],
+    "title": "AddCommandInput",
+    "type": "object"
+   },
    "AddCredentialInput": {
     "properties": {
      "base_url": {
@@ -2677,8 +2759,19 @@
    },
    "CredentialGrant": {
     "additionalProperties": false,
-    "description": "A credential the project needs, by name, and the roles that receive it.",
+    "description": "A connection the project needs, by name and kind, and the roles that receive it\n(LIB-4, CON-4, CON-14).",
     "properties": {
+     "kind": {
+      "default": "secret",
+      "description": "secret, variable or mcp_server.",
+      "enum": [
+       "secret",
+       "variable",
+       "mcp_server"
+      ],
+      "title": "Kind",
+      "type": "string"
+     },
      "name": {
       "maxLength": 100,
       "minLength": 1,
@@ -3469,6 +3562,46 @@
     "title": "DraftAnswerInput",
     "type": "object"
    },
+   "DraftNeed": {
+    "properties": {
+     "granted": {
+      "description": "The draft grants it, so creating the project attaches it.",
+      "title": "Granted",
+      "type": "boolean"
+     },
+     "have": {
+      "description": "You have a connection by this name and kind to attach.",
+      "title": "Have",
+      "type": "boolean"
+     },
+     "kind": {
+      "description": "secret, variable or mcp_server.",
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "roles": {
+      "description": "The roles of the draft that need it.",
+      "items": {
+       "type": "string"
+      },
+      "title": "Roles",
+      "type": "array"
+     }
+    },
+    "required": [
+     "kind",
+     "name",
+     "roles",
+     "have",
+     "granted"
+    ],
+    "title": "DraftNeed",
+    "type": "object"
+   },
    "DraftingItem": {
     "properties": {
      "drafting_id": {
@@ -3607,6 +3740,14 @@
        "$ref": "#/components/schemas/Line"
       },
       "title": "Lines",
+      "type": "array"
+     },
+     "needs": {
+      "description": "What the drafted crew needs from outside, and whether you have it (FND-9).",
+      "items": {
+       "$ref": "#/components/schemas/DraftNeed"
+      },
+      "title": "Needs",
       "type": "array"
      },
      "not_ready_because": {
@@ -14161,6 +14302,48 @@
     "summary": "Reset an at-risk or breached commitment to the current projection.",
     "tags": [
      "commitments"
+    ]
+   }
+  },
+  "/v1/connections/add_command_mcp_server": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "connections.add_command_mcp_server",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AddCommandInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ConnectionView"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add an MCP server started from a command, in its own container; tested first.",
+    "tags": [
+     "connections"
     ]
    }
   },
