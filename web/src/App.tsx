@@ -7,6 +7,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation, useParams 
 import { AuthProvider, useAuth } from "./auth";
 import { ThemeProvider } from "./components/ThemeButton";
 import { DraftPage } from "./founder/DraftPage";
+import { DraftReviewPage } from "./founder/DraftReview";
 import { isApprovalLink } from "./lib/oauth";
 import { NeedsYouProvider } from "./needs/NeedsYou";
 import { AcceptLink } from "./pages/AcceptLink";
@@ -101,6 +102,7 @@ export function App(): JSX.Element {
                 <Route path="/projects/:projectId/:tab" element={<ProjectRoute />} />
                 <Route path="/draft" element={<DraftPage />} />
                 <Route path="/draft/:draftingId" element={<DraftPage />} />
+                <Route path="/draft/:draftingId/review" element={<DraftReviewPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/settings/:section" element={<SettingsPage />} />
               </Route>

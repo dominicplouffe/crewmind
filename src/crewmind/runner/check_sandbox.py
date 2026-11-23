@@ -26,12 +26,14 @@ from crewmind.runner.containers import (
     INSTALL_LABEL,
     WORKSPACE,
     confinement,
+    cpus_granted,
     docker_client,
     hand_over,
 )
 
 CHECK_SECONDS_LIMIT = 300  # WRK-7: the lesser of `run.timeout` and 300 seconds
 CHECK_MEMORY_BYTES = 1024**3  # WRK-7: 1 GB
+CHECK_CPUS = 1  # WRK-7: 1 CPU
 OUTPUT_TAIL_CHARACTERS = 4000  # WRK-7: the platform keeps the tail of the output
 
 
@@ -146,7 +148,8 @@ class ContainerCheckRunner:
 
         def run() -> CheckResult:
             hand_over(directory)
-            container = docker_client().containers.run(
+            client = docker_client()
+            container = client.containers.run(
                 self._image,
                 ["/bin/sh", "-c", command],
                 detach=True,
@@ -155,7 +158,7 @@ class ContainerCheckRunner:
                 volumes={str(directory): {"bind": WORKSPACE, "mode": "rw"}},
                 environment={**check_environment(Path(WORKSPACE)), "PATH": CONTAINER_PATH},
                 network_disabled=True,
-                nano_cpus=1_000_000_000,
+                nano_cpus=cpus_granted(client, CHECK_CPUS),
                 mem_limit=CHECK_MEMORY_BYTES,
                 memswap_limit=CHECK_MEMORY_BYTES,
                 labels={INSTALL_LABEL: self._install_id},

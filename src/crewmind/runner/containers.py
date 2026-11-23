@@ -64,6 +64,20 @@ def confinement() -> dict[str, Any]:
     }
 
 
+NANO = 1_000_000_000
+
+
+def cpus_granted(client: Any, wanted: float) -> int:
+    """The CPU limit to give a container, in Docker's units: what was asked for, or every
+    CPU the host has when it has fewer (EXE-12). Docker refuses a limit above the host's
+    count, and a small host must still be able to run agents."""
+    try:
+        host = int(client.info().get("NCPU") or 0)
+    except Exception:
+        host = 0
+    return int(min(wanted, host) * NANO) if host > 0 else int(wanted * NANO)
+
+
 def docker_client() -> Any:
     import docker  # pyright: ignore[reportMissingTypeStubs]
 

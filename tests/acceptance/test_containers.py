@@ -278,3 +278,21 @@ async def test_WRK_7_a_check_container(
     assert list((tmp_path / "checks").iterdir()) == []
     mine = {"label": f"{INSTALL_LABEL}={install}"}
     assert docker.containers.list(all=True, filters=mine) == []
+
+
+async def test_EXE_12_a_sandbox_starts_when_it_asks_for_more_cpus_than_the_host_has(
+    host: Host,
+) -> None:
+    """EXE-12: a host with fewer CPUs than a sandbox asks for still runs it, on all it has."""
+    greedy = Probe(
+        image=SANDBOX_IMAGE,
+        install_id=host.install,
+        cpus=4096,
+        memory_bytes=2 * GB,
+        command=["/bin/sh", "-c", STAY],
+    )
+    spec = host.spec("project-a", "run-greedy")
+    handle = await greedy.start(spec)
+    granted = host.container_of("run-greedy").attrs["HostConfig"]["NanoCpus"]
+    assert granted == int(host.client.info()["NCPU"]) * 1_000_000_000
+    await handle.kill()

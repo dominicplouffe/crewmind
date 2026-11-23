@@ -16,6 +16,8 @@ const POLL_EVERY_MS = 4000;
 export interface DraftingActions {
   say(body: string): Promise<boolean>;
   answer(questionId: number, answer: string): Promise<boolean>;
+  /** Sends a whole round of answers, in order. Resolves true when the server took them all. */
+  answerAll(answers: { questionId: number; answer: string }[]): Promise<boolean>;
   acceptRest(): Promise<boolean>;
   create(): Promise<boolean>;
   /** Starts the created project. Resolves with its id when it started. */
@@ -120,6 +122,16 @@ export function useDrafting(draftingId: string): DraftingHook {
       say: (body) => show(() => post("/v1/founder/say", { drafting_id: draftingId, body })),
       answer: (questionId, answer) =>
         show(() => post("/v1/founder/answer", { drafting_id: draftingId, question_id: questionId, answer })),
+      answerAll: (answers) =>
+        show(async () => {
+          // The Founder takes its turn after the last answer of the round (FND-4).
+          let view: Drafting | null = null;
+          for (const { questionId, answer } of answers) {
+            view = await post("/v1/founder/answer", { drafting_id: draftingId, question_id: questionId, answer });
+          }
+          if (!view) throw new Error("There was nothing to send.");
+          return view;
+        }),
       acceptRest: () => show(() => post("/v1/founder/accept_rest", { drafting_id: draftingId })),
       async create() {
         const project = await run(() => post("/v1/founder/create", { drafting_id: draftingId, start: false }));

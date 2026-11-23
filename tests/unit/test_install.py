@@ -202,3 +202,25 @@ async def test_NFR_4_backup_and_restore_round_trip(
     owner = await app.login(owner.email)
     projects = (await app.ok("projects.list", owner))["items"]
     assert [project["project_id"] for project in projects] == [kept]
+
+
+def test_EXE_12_a_container_is_given_no_more_cpus_than_the_host_has() -> None:
+    """EXE-12, WRK-7: the CPU limit is what was asked for, or every CPU of a host that has
+    fewer. A one-CPU server must still run agents; Docker refuses a limit above its count."""
+
+    class Host:
+        def __init__(self, cpus: object) -> None:
+            self._cpus = cpus
+
+        def info(self) -> dict[str, object]:
+            if isinstance(self._cpus, Exception):
+                raise self._cpus
+            return {"NCPU": self._cpus}
+
+    one = containers.NANO
+    assert containers.cpus_granted(Host(1), 2) == one
+    assert containers.cpus_granted(Host(8), 2) == 2 * one
+    assert containers.cpus_granted(Host(2), 2) == 2 * one
+    # A runtime that does not say how many it has is asked for what was wanted.
+    assert containers.cpus_granted(Host(0), 2) == 2 * one
+    assert containers.cpus_granted(Host(ConnectionError("no answer")), 2) == 2 * one
