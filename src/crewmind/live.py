@@ -14,6 +14,19 @@ class StreamHub:
 
     def __init__(self) -> None:
         self._subscribers: dict[str, set[asyncio.Queue[dict[str, Any]]]] = {}
+        self._held: dict[str, dict[str, Any]] = {}
+
+    def hold(self, topic: str, payload: dict[str, Any]) -> None:
+        """Publish something that stays true until it is replaced or released, and keep
+        it, so that whoever starts watching later is told it too (P17)."""
+        self._held[topic] = payload
+        self.publish(topic, payload)
+
+    def holding(self, topic: str) -> dict[str, Any] | None:
+        return self._held.get(topic)
+
+    def release(self, topic: str) -> None:
+        self._held.pop(topic, None)
 
     def publish(self, project_id: str, payload: dict[str, Any]) -> None:
         for queue in self._subscribers.get(project_id, ()):

@@ -579,7 +579,11 @@ async def test_FND_1_a_refused_draft_names_every_problem_at_once_and_the_turn_ne
 
     told: list[str] = []
     while not watching.empty():
-        told.append(str(watching.get_nowait().get("working")))
+        step = watching.get_nowait()
+        assert step["since"] == app.runtime.clock().isoformat()
+        told.append(str(step["working"]))
+    # The step is kept only while the turn lasts, for whoever starts watching mid-turn.
+    assert app.runtime.hub.holding(f"drafting:{started['drafting_id']}") is None
     assert told[:2] == ["Thinking", "Writing the draft"]
     assert any(step.startswith("A step was not accepted") for step in told)
 
