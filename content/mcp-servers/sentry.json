@@ -1,0 +1,10 @@
+{
+  "slug": "sentry",
+  "name": "sentry",
+  "title": "Sentry",
+  "description": "Errors, issues and releases in Sentry.",
+  "kind": "remote",
+  "url": "https://mcp.sentry.dev/mcp",
+  "auth_kind": "oauth",
+  "docs": "https://docs.sentry.io/product/sentry-mcp/"
+}

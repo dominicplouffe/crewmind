@@ -268,3 +268,30 @@ The owner asked that each be answered by what a world-class product would do, wh
 5. **Starting with something missing:** start shows what is missing with **Add them now**; **Start without them** holds exactly the seats that need it, with the reason, until it is added. Nobody pays for runs that cannot work, and nobody is blocked from the work that can. *(Changed from a hard refusal.)*
 6. **Install items:** admins only.
 7. **Default grant:** the roles that declared the need; if none did, the chairman picks before attaching.
+
+## Outcome (23 Nov 2026)
+
+Phase 7.B is built in its nine parts (7B.0 to 7B.8). CON-1 to CON-16 are done, with EXE-13, INT-4, INV-6, IF-4.7 and FND-2; PRJ-1, EXE-14 and FND-13 stay partial for reasons outside this phase (below). `docs/traceability.csv` has the tests and a note for each.
+
+**The one thing to know first: the exit demo runs against local stand-ins, not a real install.** `tests/scenarios/test_phase_7b_exit_demo.py` walks every step through the public operations, with a local HTTPS site in place of WordPress, local MCP servers for each auth kind, a local OAuth authorization server, and the command server as a plain process. The command server in its own container is checked separately, on Docker, by `tests/acceptance/test_mcp_containers.py`. The Founder is driven by a scripted model, so a real model naming the needs in its first reply is prompted for, not proven. Before calling this done for real use, run the demo once by hand on a Compose install against a real WordPress and two public MCP servers.
+
+**Exit demo, step by step.**
+
+| Step | Result |
+| --- | --- |
+| 1. The Founder names what the crew needs; the review lists each as missing | Passes, scripted. The prompt carries each role's needs and the chairman's connections; the draft's view lists each need as had or missing, and granted or not |
+| 2. Create works; start says what is missing, and offers to start without it | Passes. Start is refused naming the missing connections; creation lists the agents who would wait |
+| 3. A secret sent for the agent, a variable, and one MCP server of each kind, each tested on save | Passes. Read tools start allowed and write tools denied |
+| 4. The writer posts with plain curl and never holds the password; a read tool works; a denied write tool is refused before the server; the request becomes an approval | Passes |
+| 5. No value anywhere | Passes. Every table, every file of the data directory, every log line, every model request, the export and the clone are scanned for each value and OAuth token, raw, base64 and URL-encoded. OpenTelemetry spans are not built yet (NFR-22, phase 8) |
+| 6. A replaced password is used by the next request; a revoked sign-in raises one alarm | Passes |
+
+**What the leak test found.** A site that echoes the request headers it received carried a secret sent for the agent back into the run's tool output, and from there into the next model request. Values sent for a run are now masked too, with the headers they travel in (CON-8, revision 2.31).
+
+**Still partial, and why.**
+
+- PRJ-1: the budget and email start checks belong to phase 8.
+- EXE-14: a run with no secret sent for it still has open egress; SECURITY.md says so.
+- FND-13: the setup checklist is on the web and in the terminal; Slack belongs to phase 8.
+
+**Known edges** are stated in SECURITY.md: a secret given to the agent can leave with it; programs that ignore proxy settings bypass *sent for you*; an OAuth sign-in acts as the person; a private-network server widens reach; a command server runs third-party code.

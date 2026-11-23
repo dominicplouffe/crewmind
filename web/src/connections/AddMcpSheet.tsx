@@ -16,6 +16,7 @@ import { Pill } from "../ui/Status";
 import { Sheet } from "../ui/Sheet";
 import type { AddContext } from "./AddSheet";
 import { CommandFields, environmentOf, type CommandValue } from "./CommandFields";
+import { PresetPicker, type Preset } from "./PresetPicker";
 import { RolePicker } from "./RolePicker";
 
 type Item = Schemas["ConnectionView"];
@@ -71,6 +72,27 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
 
   const changed = (): void => setProbe(null);
   const projectId = inProject ? context.projectId : null;
+
+  // CON-15: a known server fills in the form; nothing is saved by choosing it.
+  const choosePreset = (preset: Preset | null): void => {
+    changed();
+    if (!preset) return;
+    if (!presetName) setName(preset.name);
+    setDescription(preset.description);
+    if (preset.kind === "command") {
+      setWhere("command");
+      setCommand({
+        command: preset.command ?? "",
+        image: "",
+        environment: (preset.environment ?? []).map((variable) => ({ name: variable.env, source: "" })),
+      });
+      return;
+    }
+    setWhere("remote");
+    setUrl(preset.url ?? "");
+    setAuth(preset.auth_kind ?? "none");
+    setHeaderName(preset.header_name ?? "");
+  };
 
   // The secrets and variables a command server's environment can name: loaded when chosen.
   useEffect(() => {
@@ -149,6 +171,7 @@ export function AddMcpSheet({ context, name: presetName, roles: presetRoles, onC
   return (
     <Sheet title={words.mcp.addTitle} size="lg" testId="add-mcp" onClose={onClose}>
       <form className="connection-form" onSubmit={save} autoComplete="off">
+        <PresetPicker onChoose={choosePreset} />
         <div className="field">
           <label htmlFor={field("name")}>{words.form.name}</label>
           <input id={field("name")} value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} spellCheck={false} readOnly={Boolean(presetName)} />

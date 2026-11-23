@@ -8,6 +8,7 @@ The answer comes only from what is attached to the run's project and granted to 
 from __future__ import annotations
 
 import base64
+import contextlib
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -92,6 +93,22 @@ async def sending_for(session: AsyncSession, store: SecretStore, run: Run) -> di
         for site in secret.sites or []:
             found[str(site)] = Injection(item.id, item.name, str(site), header, shown)
     return found
+
+
+async def sent_values(session: AsyncSession, store: SecretStore, run: Run) -> list[tuple[str, str]]:
+    """CON-8: each value sent for the run, raw and as the header it travels in, by name, so
+    that a site echoing it back cannot carry it to the model."""
+    found: list[tuple[str, str]] = []
+    for injection in (await sending_for(session, store, run)).values():
+        found.append((injection.name, injection.value))
+        scheme, _, credential = injection.value.partition(" ")
+        if credential and scheme in ("Basic", "Bearer"):
+            found.append((injection.name, credential))
+            if scheme == "Basic":
+                with contextlib.suppress(ValueError):
+                    pair = base64.b64decode(credential).decode()
+                    found += [(injection.name, pair), (injection.name, pair.partition(":")[2])]
+    return [(name, value) for name, value in found if value]
 
 
 async def sites_for(session: AsyncSession, run: Run) -> list[tuple[Connection, list[str]]]:

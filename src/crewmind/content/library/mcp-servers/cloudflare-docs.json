@@ -1,0 +1,10 @@
+{
+  "slug": "cloudflare-docs",
+  "name": "cloudflare-docs",
+  "title": "Cloudflare documentation",
+  "description": "Searches Cloudflare's documentation.",
+  "kind": "remote",
+  "url": "https://docs.mcp.cloudflare.com/mcp",
+  "auth_kind": "none",
+  "docs": "https://developers.cloudflare.com/agents/model-context-protocol/"
+}

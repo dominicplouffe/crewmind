@@ -11,5 +11,6 @@ The spec (section 12) keeps v1's content, not its code. What each folder holds:
 | `examples/` | Example project specs | LIB-4, acceptance |
 | `doctrine/` | The Founder's design doctrine | FND, LIB-6 |
 | `goal-grammar/` | The ten-element goal grammar and its examples | FND-7 |
+| `mcp-servers/` | Not from v1: well-known MCP servers, checked 23 Nov 2026, that fill in the add form | CON-15 |
 
 Roles follow LIB-1: no model names or effort levels. They may set `min_class` and a vision requirement instead.

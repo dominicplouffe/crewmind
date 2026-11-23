@@ -1,0 +1,9 @@
+{
+  "slug": "memory",
+  "name": "memory",
+  "title": "Knowledge graph memory",
+  "description": "A small knowledge graph the server keeps while it runs.",
+  "kind": "command",
+  "command": "npx -y @modelcontextprotocol/server-memory",
+  "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory"
+}

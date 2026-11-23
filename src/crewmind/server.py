@@ -25,6 +25,7 @@ from crewmind.catalog.registry import catalog
 from crewmind.domain.accounts.oauth import audience_of
 from crewmind.domain.connections import delivery
 from crewmind.domain.connections.agent_operations import EGRESS
+from crewmind.domain.connections.doctor import record_proxy
 from crewmind.domain.secrets.store import SecretStore
 from crewmind.jobs.alarms import AlarmSender
 from crewmind.jobs.dispatcher import Dispatcher
@@ -143,7 +144,9 @@ async def start_egress(runtime: Runtime) -> EgressProxy | None:
         port = await proxy.start(config.host, config.egress_port)
     except Exception as error:
         logger.error("the egress proxy did not start, so no secret is sent for agents: %s", error)
+        record_proxy(config.data_dir, None, type(error).__name__)
         return None
+    record_proxy(config.data_dir, port, None)
     sandbox_host = urlsplit(config.agent_api).hostname or config.host
     runtime.services.wired[EGRESS] = f"http://{sandbox_host}:{port}"
     logger.info("egress proxy listening on port %d", port)

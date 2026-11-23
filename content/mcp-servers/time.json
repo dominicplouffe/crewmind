@@ -1,0 +1,9 @@
+{
+  "slug": "time",
+  "name": "time",
+  "title": "Time",
+  "description": "The current time and conversions between time zones.",
+  "kind": "command",
+  "command": "uvx mcp-server-time",
+  "docs": "https://github.com/modelcontextprotocol/servers/tree/main/src/time"
+}

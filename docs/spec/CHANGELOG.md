@@ -2,6 +2,12 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.31 (23 Nov 2026): connections, part 7B.8
+
+- **CON-8:** values sent for a run are masked too, with the headers they travel in: a site that echoes the header it received cannot carry the value to the model.
+- **CON-15:** the list of well-known MCP servers ships as library content and an admin edits it per install with files in the data directory.
+- **CON-16:** `doctor` names servers waiting for sign-in or failing, started projects with open needs, and an egress proxy that does not run while a secret is sent for agents, each with its fix.
+
 ## Revision 2.30 (23 Nov 2026): connections, part 7B.7
 
 - **FND-2, FND-9, CON-14:** the Founder's credential tool lists connections too, by name, kind and description; the draft lists every need of the roster as had or missing.

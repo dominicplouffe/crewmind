@@ -1,0 +1,14 @@
+{
+  "slug": "github",
+  "name": "github",
+  "title": "GitHub",
+  "description": "Issues, pull requests, code and repositories on GitHub.",
+  "kind": "remote",
+  "url": "https://api.githubcopilot.com/mcp/",
+  "auth_kind": "bearer",
+  "value_needed": {
+    "name": "github-token",
+    "description": "A GitHub fine-grained personal access token, with only the repositories and permissions the crew needs."
+  },
+  "docs": "https://github.com/github/github-mcp-server"
+}

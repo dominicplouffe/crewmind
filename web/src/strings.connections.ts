@@ -20,6 +20,15 @@ export const connectionWords = {
     project: "Belongs to this project only.",
   },
   kinds: { secret: "Secret", variable: "Variable", mcp_server: "MCP server" },
+  presets: {
+    label: "Start from a known server",
+    none: "None: fill it in myself",
+    help: "Choosing one fills in the address or command and how crewmind signs in. You test it before saving.",
+    secret: (what: string): string => `You need: ${what}`,
+    variable: (env: string, what: string): string => `${env}: ${what}`,
+    docs: (title: string): string => `${title}'s own instructions`,
+    newTab: "(opens in a new tab)",
+  },
   command: {
     warning:
       "A command server runs code from its publisher. crewmind runs it in its own container, with only the variables you give it, never with your workspace or other secrets.",
