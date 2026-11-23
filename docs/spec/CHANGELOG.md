@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.27 (23 Nov 2026): connections, part 7B.4
+
+- **CON-15, IF-5.6:** adding any MCP server and allowing any tool are human-only, not only command servers and changing tools: a model client could otherwise give agents new reach. Testing a server with a value and choosing where a secret is sent are human-only too.
+- **7.18:** the MCP server table lists the states that may be deleted, so it can be checked.
+
 ## Revision 2.26 (23 Nov 2026): connections, part 7B.3
 
 - **CON-6, EXE-14:** only a run with a secret sent for it goes through the egress proxy, so the proxy never stands in the way of ordinary traffic; the proxy connects only to public addresses (WRK-12) and says why it refuses; a secret is never added to plain HTTP; upgrades to a site with a secret are refused; the authority is valid for ten years and certificate validity follows the wall clock; idle connections close after `proxy.idle_timeout`.

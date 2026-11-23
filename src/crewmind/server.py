@@ -184,7 +184,9 @@ def create_app(
         egress = await start_egress(runtime)
         tasks: list[asyncio.Task[None]] = []
         if run_scheduler:
-            scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+            scheduler = Scheduler(
+                runtime.sessions, runtime.clock, runtime.settings, runtime.config.master_key_file
+            )
             dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
             alarms = AlarmSender(runtime.sessions, runtime.clock, runtime.services)
             tasks += [

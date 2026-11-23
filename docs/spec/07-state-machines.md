@@ -405,7 +405,7 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | needs sign-in | active | Signed in again | Owner |
 | active | failing | The circuit breaker opens (LLM-11) | Platform |
 | failing | active | The half-open probe succeeds | Platform |
-| any but deleted | deleted | Deleted | Owner |
+| active, needs sign-in, failing | deleted | Deleted | Owner |
 
 **Need**, per project (CON-5):
 

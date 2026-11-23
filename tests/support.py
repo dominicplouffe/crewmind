@@ -65,7 +65,9 @@ class App:
         add_oauth_routes(self.api, runtime.executor, runtime.config.base_url)
         self._admin: Actor | None = None
         self.dispatcher = Dispatcher(runtime.sessions, runtime.settings, runtime.clock)
-        self.scheduler = Scheduler(runtime.sessions, runtime.clock, runtime.settings)
+        self.scheduler = Scheduler(
+            runtime.sessions, runtime.clock, runtime.settings, runtime.config.master_key_file
+        )
         self.work_jobs = WorkJobs(runtime.sessions, runtime.clock, runtime.services)
         self.planning = PlanningJobs(runtime.sessions, runtime.clock, runtime.services)
         self.founder = FounderWorker(

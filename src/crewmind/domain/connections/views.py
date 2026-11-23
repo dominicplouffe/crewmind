@@ -16,8 +16,33 @@ from crewmind.storage.models import (
     Connection,
     ConnectionSecret,
     ConnectionVariable,
+    McpServer,
+    McpTool,
     ProjectConnection,
 )
+
+
+class McpToolView(BaseModel):
+    name: str
+    title: str | None
+    description: str = Field(description="As the server describes it: untrusted, cut to size.")
+    classification: str = Field(description="read, or write when it may change things.")
+    permission: str = Field(description="allowed or denied.")
+    gone: bool = Field(description="The server no longer offers it.")
+
+
+class McpView(BaseModel):
+    url: str | None
+    transport: str | None
+    auth_kind: str
+    header_name: str | None
+    private_allowed: bool
+    state: str = Field(description="active, needs sign-in, failing or deleted.")
+    server_name: str | None
+    server_version: str | None
+    last_error: str | None = Field(description="Why the last test or call failed.")
+    tools_refreshed_at: datetime | None
+    tools: list[McpToolView]
 
 
 class ConnectionView(BaseModel):
@@ -52,6 +77,7 @@ class ConnectionView(BaseModel):
     changed_at: datetime
     last_used_at: datetime | None = None
     used_in: int = Field(description="How many projects it is attached to.")
+    mcp: McpView | None = Field(default=None, description="For an MCP server: its details.")
     yours: bool = Field(description="You may change or delete it.")
 
 
@@ -89,6 +115,27 @@ async def item_view(session: AsyncSession, caller: Caller, item: Connection) -> 
             view.header_name = secret.header_name
             view.basic_user = secret.basic_user
             view.shape = secret.shape
+    elif item.kind == Kind.MCP_SERVER:
+        server = await session.get(McpServer, item.id)
+        if server is not None:
+            tools = await session.scalars(
+                select(McpTool).where(McpTool.server_id == item.id).order_by(McpTool.name)
+            )
+            view.mcp = McpView(
+                url=server.url, transport=server.transport, auth_kind=server.auth_kind,
+                header_name=server.header_name, private_allowed=server.private_allowed,
+                state=server.state, server_name=server.server_name,
+                server_version=server.server_version, last_error=server.last_error,
+                tools_refreshed_at=server.tools_refreshed_at,
+                tools=[
+                    McpToolView(
+                        name=tool.name, title=tool.title, description=tool.description,
+                        classification=tool.classification, permission=tool.permission,
+                        gone=tool.gone,
+                    )
+                    for tool in tools
+                ],
+            )  # fmt: skip
     elif item.kind == Kind.VARIABLE:
         variable = await session.get(ConnectionVariable, item.id)
         view.value = variable.value if variable is not None else None

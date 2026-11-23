@@ -14,6 +14,7 @@ from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
 from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.connections import attach, service
+from crewmind.domain.connections.mcp import OAUTH_SECRETS, SERVER_MACHINE, ServerState
 from crewmind.domain.connections.model import (
     ADDED,
     CHANGED,
@@ -49,6 +50,7 @@ from crewmind.storage.models import (
     ConnectionSecret,
     ConnectionVariable,
     Event,
+    McpServer,
     Person,
     Project,
 )
@@ -200,7 +202,7 @@ def _use(use: SecretUse, name: str) -> ConnectionSecret:
     return secret
 
 
-async def _new(
+async def new_item(
     context: Context, kind: Kind, placement: Placement, name: str, description: str
 ) -> tuple[Connection, Project | None]:
     check_name(name)
@@ -243,7 +245,7 @@ async def _new(
     return item, project
 
 
-def _recorded(context: Context, item: Connection, extra: dict[str, object]) -> None:
+def record_added(context: Context, item: Connection, extra: dict[str, object]) -> None:
     context.record(
         ADDED,
         subject=("connection", item.id),
@@ -264,7 +266,7 @@ async def add_secret(context: Context, payload: AddSecretInput) -> ConnectionVie
     await service.check_project(context.session, context.caller, payload.project_id)
     value = payload.value.get_secret_value()
     await service.check_value(context.session, services_of(context).settings, value, payload.name)
-    item, project = await _new(context, Kind.SECRET, payload, payload.name, payload.description)
+    item, project = await new_item(context, Kind.SECRET, payload, payload.name, payload.description)
     secret = _use(payload, payload.name)
     secret.connection_id = item.id
     if secret.delivery == Delivery.GIVEN:
@@ -273,7 +275,7 @@ async def add_secret(context: Context, payload: AddSecretInput) -> ConnectionVie
     context.session.add(secret)
     await service.put_value(context.session, _store(context), item, value, context.now)
     await context.session.flush()
-    _recorded(context, item, {"delivery": secret.delivery, "sites": secret.sites})
+    record_added(context, item, {"delivery": secret.delivery, "sites": secret.sites})
     if project is not None:
         await attach.attach(context, project, item, payload.roles, None)
     return await item_view(context.session, context.caller, item)
@@ -289,11 +291,13 @@ async def add_variable(context: Context, payload: AddVariableInput) -> Connectio
     """CON-1, CON-3, CON-4: a plain value, placed in granted runs as an environment variable."""
     await service.check_project(context.session, context.caller, payload.project_id)
     await _check_variable_size(context, payload.value, payload.name)
-    item, project = await _new(context, Kind.VARIABLE, payload, payload.name, payload.description)
+    item, project = await new_item(
+        context, Kind.VARIABLE, payload, payload.name, payload.description
+    )
     item.env_name = check_env_name(payload.env_name or default_env_name(payload.name))
     context.session.add(ConnectionVariable(connection_id=item.id, value=payload.value))
     await context.session.flush()
-    _recorded(context, item, {"env_name": item.env_name})
+    record_added(context, item, {"env_name": item.env_name})
     if project is not None:
         await attach.attach(context, project, item, payload.roles, None)
     return await item_view(context.session, context.caller, item)
@@ -583,7 +587,12 @@ async def delete_connection(context: Context, payload: ConnectionRef) -> Connect
         after={"state": ConnectionState.DELETED, "name": item.name},
     )
     item.state, item.changed_at = ConnectionState.DELETED, context.now
-    await _store(context).delete(context.session, (SECRET_OWNER, item.id), SECRET_NAME)
+    for secret_name in (SECRET_NAME, *OAUTH_SECRETS):
+        await _store(context).delete(context.session, (SECRET_OWNER, item.id), secret_name)
+    server = await context.session.get(McpServer, item.id)
+    if server is not None and server.state != ServerState.DELETED:
+        SERVER_MACHINE.check(server.state, ServerState.DELETED)
+        server.state = ServerState.DELETED
     variable = await context.session.get(ConnectionVariable, item.id)
     if variable is not None:
         variable.value = ""

@@ -82,7 +82,7 @@ A project reaches the outside world through its connections: secrets, variables 
 - **CON-15 Surfaces.**
   - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
   - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets.
-  - Human-only (IF-5.6): creating or replacing a value, OAuth sign-in, adding a command server, allowing a tool that changes things, deleting a connection. MCP clients see names, kinds and health.
+  - Human-only (IF-5.6): creating or replacing a value, choosing where a secret is sent, testing a server with a value, OAuth sign-in, adding any MCP server, allowing any tool, deleting a connection. MCP clients see names, kinds and health, and may deny a tool.
   - Values are typed only into fields that are never pre-filled, are cleared after saving, and are never put in a URL or browser storage.
 - **CON-16 Records and errors.**
   - Every change is an event naming its actor, never carrying a value (INV-21).

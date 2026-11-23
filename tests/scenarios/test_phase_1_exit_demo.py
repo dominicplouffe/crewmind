@@ -298,6 +298,15 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("connections.detach", alice, project_id=project, connection="region")
     await write("connections.import_env", alice, text="TIMEZONE=UTC")
     await write("connections.delete", alice, connection="site-key")
+    from tests.attack.mcp_support import URL, serving
+
+    async with serving():
+        await write(
+            "connections.add_mcp_server", alice, name="blog-tools", description="Tools.", url=URL
+        )
+        await write("connections.test_mcp", alice, connection="blog-tools")
+    await write("connections.allow_tool", alice, connection="blog-tools", tool="create_post")
+    await write("connections.deny_tool", alice, connection="blog-tools", tool="create_post")
     browser = "https://fcm.googleapis.com/fcm/send/abc"
     await write("push.subscribe", alice, endpoint=browser, p256dh="value", auth="value")
     await write("push.unsubscribe", alice, endpoint=browser)
