@@ -135,7 +135,36 @@
 .quick-steps .step-done { color: var(--color-success); }
 .quick-steps .step-todo { color: var(--color-text-muted); }
 .checklist { list-style: "\2610  "; padding-left: 1.5rem; }
-.draft-opening { flex: 2 1 16rem; overflow-wrap: anywhere; }
+.draft-list { list-style: none; padding: 0; margin: var(--space-3) 0; display: grid; gap: var(--space-2); }
+.draft-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.draft-row-main { min-width: 0; }
+.draft-opening {
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow-wrap: anywhere;
+}
+.draft-meta {
+  margin: var(--space-1) 0 0;
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.draft-row-actions { display: flex; gap: var(--space-1); align-items: center; }
+.draft-row > .note, .draft-row > .draft-confirm { grid-column: 1 / -1; margin: 0; }
 
 @media (max-width: 599px) {
   .draft-columns { padding: var(--space-4) var(--space-3) var(--space-8); }

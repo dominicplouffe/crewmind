@@ -405,6 +405,7 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | --- | --- | --- | --- |
 | (new) | drafting | Start a project in chat, CLI or MCP | Person |
 | drafting | created | The chairman confirms the ledger; the project is created in draft and the conversation becomes its chat | Chairman |
+| drafting | discarded | The person who started it discards it. No project comes of it; the conversation stays in the record | Person |
 | drafting | creating | Quick mode accepts all recommendations | Founder |
 | creating | starting | The project is created | Founder |
 | starting | started | The project is running | Founder |

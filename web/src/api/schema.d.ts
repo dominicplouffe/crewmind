@@ -1531,6 +1531,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/founder/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Discard a drafting conversation you no longer want. No project comes of it.
+         * @description Requires: person.
+         */
+        post: operations["founder.discard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/founder/list": {
         parameters: {
             query?: never;
@@ -11089,6 +11109,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreatedProject"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "founder.discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftingRef"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftingView"];
                 };
             };
             /** @description Validation Error */
