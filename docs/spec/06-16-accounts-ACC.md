@@ -12,3 +12,4 @@
   - Lifecycles: section 7.8 to 7.11.
 - **ACC-6 Secrets** are encrypted under an install master key. The server refuses to store or read secrets without that key. Rotating the key re-encrypts everything atomically: if one value fails, nothing changes.
 - **ACC-7 Second factor** (SHOULD, after v2.0, phase 8): TOTP. Single sign-on is a later release. Until a factor ships, SECURITY.md states the gap plainly.
+- **ACC-8 Your name.** A person sets the name they are shown by, and only their own; it is never empty, and the change is in the event log. A first admin is created as "Admin" until they set it.

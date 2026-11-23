@@ -299,6 +299,7 @@ async def test_INV_21_every_write_operation_records_an_event(
     await write("projects.clone", alice, project_id=imported["project_id"], name="A clone")
     await write("people.deactivate", admin, person_id=bob.person_id)
     await write("people.reactivate", admin, person_id=bob.person_id)
+    await write("auth.set_name", alice, name="Alice Martin")
     await write("auth.logout", alice)
 
     writes = {

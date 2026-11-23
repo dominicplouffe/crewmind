@@ -8161,6 +8161,22 @@
     "title": "SetMemberRoleInput",
     "type": "object"
    },
+   "SetNameInput": {
+    "properties": {
+     "name": {
+      "description": "The name you are shown by.",
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name"
+    ],
+    "title": "SetNameInput",
+    "type": "object"
+   },
    "SetRoleInput": {
     "properties": {
      "person_id": {
@@ -11009,6 +11025,48 @@
      }
     },
     "summary": "Sign out. Ends the session on the server.",
+    "tags": [
+     "auth"
+    ]
+   }
+  },
+  "/v1/auth/set_name": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "auth.set_name",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SetNameInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/WhoAmI"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Change the name you are shown by.",
     "tags": [
      "auth"
     ]

@@ -36,9 +36,11 @@ from crewmind.domain.accounts.passwords import hash_password, verify_password
 from crewmind.domain.accounts.people import (
     ACC_1,
     ACC_4,
+    ACC_8,
     LINK_USED,
     PASSWORD_CHANGED,
     PERSON_ACTIVATED,
+    PERSON_RENAMED,
     normalize_email,
     person_by_email,
     person_or_refuse,
@@ -78,6 +80,10 @@ class Done(BaseModel):
 class ChangePasswordInput(BaseModel):
     current_password: SecretStr = Field(description="Your current password.")
     new_password: SecretStr = Field(description="The new password, 12 characters or more.")
+
+
+class SetNameInput(BaseModel):
+    name: str = Field(min_length=1, max_length=200, description="The name you are shown by.")
 
 
 class UseLinkInput(BaseModel):
@@ -203,6 +209,35 @@ async def logout(context: Context, payload: Empty) -> Done:
 )
 async def whoami(context: Context, payload: Empty) -> WhoAmI:
     person = await person_or_refuse(context.session, context.caller.actor_id)
+    return WhoAmI(
+        person_id=person.id,
+        email=person.email,
+        name=person.name,
+        role=person.role,
+        via=context.caller.via,
+    )
+
+
+@operation(
+    "auth.set_name",
+    summary="Change the name you are shown by.",
+    authority=Authority.PERSON,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def set_name(context: Context, payload: SetNameInput) -> WhoAmI:
+    """ACC-8: a person sets their own name, and only their own. The change is recorded."""
+    person = await person_or_refuse(context.session, context.caller.actor_id)
+    name = " ".join(payload.name.split())
+    if not name:
+        raise Refusal("name_is_empty", "Your name needs at least one letter.", rule=ACC_8.id)
+    if name != person.name:
+        context.record(
+            PERSON_RENAMED,
+            subject=("person", person.id),
+            before={"name": person.name},
+            after={"name": name},
+        )
+        person.name = name
     return WhoAmI(
         person_id=person.id,
         email=person.email,

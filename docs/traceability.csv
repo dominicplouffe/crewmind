@@ -213,6 +213,7 @@ ACC-4,Invites and password resets,06-16-accounts-ACC.md,1,yes,partial,tests/atta
 ACC-5,Project membership,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_access.py; tests/attack/test_settings.py,
 ACC-6,Secrets,06-16-accounts-ACC.md,1,yes,done,tests/attack/test_secrets.py,
 ACC-7,Second factor,06-16-accounts-ACC.md,8,later,not started,,
+ACC-8,Your name,06-16-accounts-ACC.md,7,yes,done,test_ACC_8_a_person_sets_only_their_own_name,auth.set_name; the web sets it in Settings and first-run setup.
 INV-1,"No agent action writes any of the following (P7, P5, MSG-3):",08-invariants-INV.md,4,yes,partial,test_scenario_the_rule_breaker_gets_nowhere,"Covered for everything that exists: settings, standing orders, decisions, corrections, a verdict on own work, locked artifacts. Commitments, tool permissions, revenue lines, flags and chairman-authored scope arrive in later phases"
 INV-2,No task reaches done on a command test except by a platform-run check ,08-invariants-INV.md,4,yes,done,test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies; test_WRK_5_a_test_must_fail_first_and_cannot_be_weakened; test_scenario_a_competent_crew_finishes_a_verified_job,
 INV-3,"No agent completes, reviews or gives the verdict on work it did, and n",08-invariants-INV.md,4,yes,done,test_INV_3_a_solo_ceo_may_do_its_own_work_and_it_is_labelled; test_WRK_4_a_task_is_claimed_only_by_whoever_it_is_for; test_WRK_9_nobody_reviews_their_own_work,
