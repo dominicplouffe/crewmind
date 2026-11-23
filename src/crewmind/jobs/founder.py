@@ -61,7 +61,9 @@ class FounderWorker:
                 )
             )
         for drafting_id in due:
-            await self._turn.take(drafting_id, self._publisher(drafting_id))
+            await self._turn.take(
+                drafting_id, self._publisher(drafting_id), self._progress(drafting_id)
+            )
             await self._finish_quick(drafting_id)
         return len(due)
 
@@ -73,6 +75,17 @@ class FounderWorker:
 
         def publish(text: str) -> None:
             hub.publish(f"drafting:{drafting_id}", {"text": text})
+
+        return publish
+
+    def _progress(self, drafting_id: str):
+        """P17: what the Founder is doing, step by step, to whoever is watching."""
+        if self._hub is None:
+            return None
+        hub = self._hub
+
+        def publish(text: str) -> None:
+            hub.publish(f"drafting:{drafting_id}", {"working": text})
 
         return publish
 

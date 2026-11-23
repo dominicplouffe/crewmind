@@ -6,7 +6,7 @@ the rule's name, as for any agent (P1)."""
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
@@ -115,15 +115,59 @@ class Proposal(BaseModel):
     first_bets: list[FirstBet] = Field(default_factory=list[FirstBet])
 
 
+PROBLEMS_SHOWN = 12
+"""How many problems of one refused input are named at once: enough to fix it in one go."""
+
+
+def problems_of(error: ValidationError) -> str:
+    """Every problem of a refused input, each with the field it is in. Naming only the
+    first would cost the model one call per mistake (FND-1)."""
+    found = error.errors()
+    named = [
+        f"{'.'.join(str(part) for part in problem['loc']) or 'the input'}: {problem['msg']}"
+        for problem in found[:PROBLEMS_SHOWN]
+    ]
+    more = len(found) - len(named)
+    return "; ".join(named) + (f"; and {more} more" if more > 0 else "") + "."
+
+
 def _read[T: BaseModel](kind: type[T], arguments: dict[str, Any]) -> T:
     try:
         return kind.model_validate(arguments)
     except ValidationError as error:
-        first = error.errors()[0]
-        where = ".".join(str(part) for part in first["loc"])
         raise Refusal(
-            "invalid_tool_input", f"{where}: {first['msg']}.", hint="Check the tool's input."
+            "invalid_tool_input",
+            f"The tool's input is not valid. {problems_of(error)}",
+            hint="Fix every one of these, then call the tool again.",
         ) from error
+
+
+def without_references(schema: dict[str, Any]) -> dict[str, Any]:
+    """A JSON schema with every `$ref` replaced by what it points to. Some models do not
+    follow references in a tool's schema, and would see no fields at all."""
+    definitions: dict[str, Any] = schema.get("$defs", {})
+
+    def resolved(node: Any) -> Any:
+        if isinstance(node, list):
+            return [resolved(item) for item in cast(list[Any], node)]
+        if not isinstance(node, dict):
+            return node
+        fields = cast(dict[str, Any], node)
+        if "$ref" in fields:
+            target = definitions[str(fields["$ref"]).rsplit("/", 1)[-1]]
+            rest = {key: value for key, value in fields.items() if key != "$ref"}
+            return resolved({**target, **rest})
+        return {key: resolved(value) for key, value in fields.items() if key != "$defs"}
+
+    return resolved(schema)
+
+
+def proposal_schema() -> dict[str, Any]:
+    """What `propose_spec` takes, with the project spec spelled out field by field, so the
+    model is shown the shape of the one thing it is there to write (FND-2, LIB-4)."""
+    schema = without_references(Proposal.model_json_schema())
+    schema["properties"]["spec"] = without_references(ProjectSpec.model_json_schema())
+    return schema
 
 
 class Toolbox:
@@ -380,10 +424,12 @@ class Toolbox:
         try:
             spec = ProjectSpec.model_validate(proposal.spec)
         except ValidationError as error:
-            first = error.errors()[0]
-            where = ".".join(str(part) for part in first["loc"])
             raise Refusal(
-                "spec_invalid", f"The spec is not valid: {where}: {first['msg']}."
+                "spec_invalid",
+                f"The spec is not valid. {problems_of(error)}",
+                rule=transfer.LIB_4.id,
+                hint="Fix every one of these, then call propose_spec again. The tool's "
+                "schema gives every field of a spec.",
             ) from error
         grammar.no_dates(spec.goal)
         problems = await transfer.check(self.context, spec)
@@ -561,7 +607,10 @@ TOOL_SPECS = [
     ToolSpec(
         name="propose_spec",
         description="Propose the project spec, with the value of each decision, a reason "
-        "for each setting, and the first requirement or the first bets.",
-        input_schema=Proposal.model_json_schema(),
+        "for each setting, and the first requirement or the first bets. `spec` has exactly "
+        "the fields the schema gives: at least a name, a goal and a type. A team's `role` "
+        "is a role's slug from search_library. A deliver or operate project needs a team "
+        f"with the role {PLAN_ADVERSARY}.",
+        input_schema=proposal_schema(),
     ),
 ]

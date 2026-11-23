@@ -130,6 +130,16 @@ describe("actionOf", () => {
     expect(actionOf(event("line", line(5)))).toEqual({ type: "line", line: line(5) });
     expect(actionOf(event("reply", { text: "Who " }))).toEqual({ type: "reply", text: "Who " });
     expect(actionOf(event("state", { state: "created" }))).toEqual({ type: "changed" });
+    expect(actionOf(event("working", { working: "Writing the draft" }))).toEqual({
+      type: "working",
+      text: "Writing the draft",
+    });
+    // What the Founder is doing is shown until its finished words arrive.
+    const busy = reduceConversation(
+      { ...initialConversation, view: view([line(1)]) },
+      { type: "working", text: "Writing the draft" },
+    );
+    expect(busy.working).toBe("Writing the draft");
   });
 
   it("ignores what it cannot read", () => {

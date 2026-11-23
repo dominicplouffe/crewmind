@@ -534,3 +534,56 @@ async def test_FND_1_P17_a_founder_with_no_model_says_what_fixes_it(app: App) ->
     line = shown["lines"][-1]["body"]
     assert "Settings" in line
     assert "Send your message again" not in line
+
+
+def test_FND_2_the_spec_tool_shows_every_field_of_a_spec() -> None:
+    """FND-2, LIB-4: the Founder's only deliverable is a spec, so the tool that takes one
+    spells out its fields. No field is behind a reference, which some models do not
+    follow."""
+    import json
+
+    from crewmind.domain.founder.tools import TOOL_SPECS
+
+    schema = next(tool.input_schema for tool in TOOL_SPECS if tool.name == "propose_spec")
+    spec = schema["properties"]["spec"]
+    assert {"name", "goal", "type", "teams", "budget_tokens", "settings"} <= set(spec["properties"])
+    assert set(spec["required"]) == {"name", "goal", "type"}
+    team = spec["properties"]["teams"]["items"]["properties"]
+    assert {"name", "role", "members"} <= set(team)
+    assert "$ref" not in json.dumps(schema)
+
+
+async def test_FND_1_a_refused_draft_names_every_problem_at_once_and_the_turn_never_ends_silent(
+    app: App,
+) -> None:
+    """FND-1, P17, LIB-4: a draft with several mistakes is refused once, with each mistake
+    and its field, and the chairman can read why. While it works the Founder says what it
+    is doing. A turn that runs out of steps says so and says what stopped it."""
+    from crewmind.domain.founder.turn import CALLS_MOST
+
+    owner = await app.person("owner@example.com")
+    await credential(app, owner, "main")
+    wrong = {"name": "Daily posts", "kind": "operate", "teams": [{"name": "Desk"}]}
+    bad = tool("propose_spec", spec=wrong, decisions=DECISIONS)
+    script(app, *[bad] * (CALLS_MOST + 1))
+    started = await app.ok("founder.start", owner, brief=BRIEF)
+    watching = app.runtime.hub.subscribe(f"drafting:{started['drafting_id']}")
+    assert await app.founder.tick() == 1
+
+    shown = await app.ok("founder.show", owner, drafting_id=started["drafting_id"])
+    refused = shown["rules_hit"][0]
+    assert (refused["code"], refused["rule"]) == ("spec_invalid", "LIB-4")
+    for field in ("goal", "type", "kind", "teams.0.role", "teams.0.members"):
+        assert field in refused["message"], field
+    assert len(shown["rules_hit"]) == CALLS_MOST
+
+    told = []
+    while not watching.empty():
+        told.append(watching.get_nowait().get("working"))
+    assert told[:2] == ["Thinking", "Writing the draft"]
+    assert any(step and step.startswith("A step was not accepted") for step in told)
+
+    last = shown["lines"][-1]
+    assert (last["author"], last["detail"]["kind"]) == ("platform", "out of steps")
+    assert "goal" in last["body"]
+    assert shown["waiting_for"] == "you"

@@ -67,7 +67,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         <Conversation lines={visibleLines(view.lines, talking ? view.questions : [])} reply={reply} />
         {stage === "founder" && !reply ? (
           <p className="quiet" role="status" data-testid="waiting-for-founder">
-            {words.talk.waitingForFounder}
+            {state.working ? words.talk.founderIsWorking(state.working) : words.talk.waitingForFounder}
           </p>
         ) : null}
         {view.failure && view.state === "drafting" && stage !== "founder" ? (

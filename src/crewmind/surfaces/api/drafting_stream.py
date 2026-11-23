@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
@@ -23,6 +24,12 @@ from crewmind.surfaces.api.stream import KEEPALIVE_SECONDS, POLL_SECONDS, STREAM
 
 def topic(drafting_id: str) -> str:
     return f"drafting:{drafting_id}"
+
+
+def live_event(told: dict[str, Any]) -> str:
+    """The Founder's words as it writes them (`reply`), or what it is doing while it
+    works (`working`). Both are live only: neither is stored (FND-1, P17)."""
+    return sse("working" if "working" in told else "reply", told)
 
 
 async def drafting_stream(
@@ -65,7 +72,7 @@ async def drafting_stream(
                     seen = now
                     stored.append(sse("state", {"state": drafting.state if drafting else "gone"}))
             while not queue.empty():
-                yield sse("reply", queue.get_nowait())
+                yield live_event(queue.get_nowait())
             for line in stored:
                 yield line
             try:
@@ -76,7 +83,7 @@ async def drafting_stream(
                     idle = 0.0
                     yield ": keep-alive\n\n"
                 continue
-            yield sse("reply", live)
+            yield live_event(live)
     finally:
         hub.unsubscribe(topic(drafting_id), queue)
 
