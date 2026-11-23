@@ -73,13 +73,13 @@ A project reaches the outside world through its connections: secrets, variables 
 - **CON-13 MCP calls in a run.**
   - A run is offered the allowed tools of the MCP servers granted to its role, through the agent API, and nothing else.
   - A call to a denied tool never leaves the server, is refused under INT-4, counts toward the refusal cap (EXE-10), and tells the agent it may request access.
-  - A call to a tool not classified as reading is a side effect, recorded under an idempotency key (WRK-16).
+  - A call to a tool not classified as reading is a side effect, recorded under an idempotency key (WRK-16) made from the server, the tool and its arguments: the same change asked again in the project is not made again, and the agent is told it was done. A chat run cannot use such a tool (INV-23).
   - Results are untrusted input, cut to `mcp.result_max_bytes` \[64 KB\] with the cut marked. An error result is returned as one and is not a refusal.
   - Limits: `mcp.call_timeout` \[60 s\] a call, `mcp.max_calls_per_run` \[100\], `mcp.max_calls_per_day` \[1,000\] a project, counted in the ledger. A failing server opens a circuit breaker on the rules of LLM-11.
 - **CON-14 Everyone knows what a project has.**
   - The Founder lists the connections the chairman can attach, by name and description, states the crew's needs in its first reply, and drafts the grants. The review screen shows each need as met or missing, with a way to add it.
   - Each run's context pack lists what it may use and what its role needs but lacks.
-  - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny).
+  - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny). An approved tool is allowed (by the person, IF-5.6); an approved connection is listed among the project's needs, not yet in place, with Add beside it, holding nobody.
   - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
 - **CON-15 Surfaces.**
   - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.

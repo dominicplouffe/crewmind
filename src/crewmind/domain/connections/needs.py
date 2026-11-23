@@ -93,6 +93,11 @@ async def declared(session: AsyncSession, project: Project) -> dict[tuple[str, s
         for name in role.credential_names or []:
             found.setdefault((NeedKind.SECRET, str(name)), set()).add(role.slug)
     extras: dict[str, Any] = project.extras or {}
+    for asked in extras.get("requested", []):
+        # CON-14: what an agent asked for and the chairman approved.
+        roles = {str(slug) for slug in asked.get("roles", [])} & on_roster
+        if roles:
+            found.setdefault((str(asked["kind"]), str(asked["name"])), set()).update(roles)
     for grant in extras.get("credentials", []):
         roles = {str(slug) for slug in grant.get("roles", [])} & on_roster
         if roles:

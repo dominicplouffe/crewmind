@@ -52,7 +52,7 @@ async def test_CON_12_a_server_is_tested_before_saving_and_only_reading_tools_st
         )  # fmt: skip
         assert probe["server_name"] == "blog tools"
         assert {tool["name"]: tool["reads_only"] for tool in probe["tools"]} == {
-            "list_posts": True, "create_post": False, "wipe": False,
+            "list_posts": True, "create_post": False, "wipe": False, "export_posts": True,
         }  # fmt: skip
         assert (await app.ok("connections.list", owner))["items"] == []
         added = await app.ok(
@@ -64,6 +64,7 @@ async def test_CON_12_a_server_is_tested_before_saving_and_only_reading_tools_st
         "list_posts": ("read", "allowed"),
         "create_post": ("write", "denied"),
         "wipe": ("write", "denied"),
+        "export_posts": ("read", "allowed"),
     }
     assert added["mcp"]["state"] == "active"
     assert HEADER_VALUE not in json.dumps(added)
