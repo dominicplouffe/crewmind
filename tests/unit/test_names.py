@@ -11,21 +11,14 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 OLD = re.compile("crew", re.IGNORECASE)
 
-# Where an old name is the point: history written under it, and the code and tests that
-# carry an install or a file from before the rename.
+# Where an old name is the point: history written under it.
 KEEPS_OLD_NAMES = (
     "docs/spec/CHANGELOG.md",
     "docs/decisions/ADR-0008-project-name.md",
     "docs/decisions/ADR-0011-renamed-nightsquad.md",
     "docs/phases/",
     "docs/rename-plan.md",
-    "src/nightsquad/storage/migrations/versions/",
-    "src/nightsquad/domain/library/legacy.py",
-    "src/nightsquad/domain/install/old_name.py",
-    "deploy/_old_install.sh",
-    "tests/unit/test_storage.py",
     "tests/unit/test_names.py",
-    "tests/attack/test_library.py",
 )
 
 

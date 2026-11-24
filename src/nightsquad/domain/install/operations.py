@@ -20,7 +20,6 @@ from nightsquad.catalog.refusal import Refusal
 from nightsquad.catalog.secret import OneTimeSecret
 from nightsquad.domain.accounts.model import LinkKind, PersonState
 from nightsquad.domain.accounts.people import create_invited, issue_link
-from nightsquad.domain.install import old_name
 from nightsquad.domain.install.account_operations import IF_4_2
 from nightsquad.domain.install.config import NFR_6, Config, ConfigError, load_config
 from nightsquad.domain.install.process import clear_pid, running_server, write_pid
@@ -184,17 +183,6 @@ async def _check_data_dir(config: Config) -> Finding:
     )
 
 
-async def _check_old_name(config: Config) -> Finding:
-    """NFR-5: settings or data still under the name used before ADR-0011."""
-    found = old_name.leftovers(config)
-    return Finding(
-        check="old name",
-        ok=not found,
-        detail=" ".join(found) if found else "Nothing is left from before the rename.",
-        fix="Move each one as the detail says, then run doctor again." if found else None,
-    )
-
-
 async def _check_master_key(config: Config) -> Finding:
     path: Path = config.master_key_file
     try:
@@ -308,7 +296,6 @@ async def doctor(context: Context, payload: Empty) -> DoctorReport:
         return DoctorReport(healthy=False, findings=[finding])
     checks = [
         _check_data_dir,
-        _check_old_name,
         _check_master_key,
         _check_database,
         _check_server,

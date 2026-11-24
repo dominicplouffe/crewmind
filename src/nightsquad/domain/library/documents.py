@@ -15,7 +15,6 @@ from pydantic import (
 
 from nightsquad.catalog.refusal import Refusal
 from nightsquad.catalog.rules import Rule, rules
-from nightsquad.domain.library.legacy import renamed_markers
 from nightsquad.gateway.registry import ModelClass
 
 LIB_1 = rules.register(
@@ -41,7 +40,6 @@ class RoleDoc(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def names_no_model(cls, document: Any) -> Any:
-        document = renamed_markers(document)
         if not isinstance(document, dict):
             return document
         fields = cast(dict[str, Any], document)
@@ -98,12 +96,6 @@ class SquadDoc(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     nightsquad_squad: Literal[1] = 1
-
-    @model_validator(mode="before")
-    @classmethod
-    def old_marker(cls, document: Any) -> Any:
-        return renamed_markers(document)
-
     slug: Slug
     name: str = Field(min_length=1, max_length=200)
     outcome: str = Field(min_length=1, max_length=2000, description="What the squad delivers.")

@@ -15,7 +15,7 @@ down_revision: str | None = "0013"
 
 def upgrade() -> None:
     op.create_table(
-        "crews",
+        "squads",
         sa.Column("id", sa.String(length=32), nullable=False),
         sa.Column("slug", sa.String(length=100), nullable=False),
         sa.Column("name", sa.String(length=200), nullable=False),

@@ -6,10 +6,6 @@
 # and waits until the server is ready. Migrations need no step of their own: the server
 # applies them when it starts, and it is not ready until the schema is current.
 #
-# An install from before the product was renamed is carried onto the new names first
-# (deploy/_old_install.sh). For that one update, pull by hand and run this with
-# --no-pull: the script that starts the pull is the old one.
-#
 # Usage:
 #   deploy/update_single_server.sh               # pull, back up, rebuild, restart
 #   deploy/update_single_server.sh --no-pull     # rebuild what is already checked out
@@ -24,19 +20,17 @@ while [ $# -gt 0 ]; do
     --no-pull)   PULL="no"; shift ;;
     --no-backup) BACKUP="no"; shift ;;
     --dry-run)   DRY="yes"; shift ;;
-    -h|--help)   sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)   sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown argument: $1 (try --help)" >&2; exit 2 ;;
   esac
 done
 
 cd "$(dirname "$0")/.."
 . deploy/_common.sh
-. deploy/_old_install.sh
 
 say "Checking where we are"
 require_repo_root; ok "in the repository root ($REPO)"
 resolve_docker;    ok "docker is usable ($DOCKER)"
-carry_old_install "$([ "$DRY" = "yes" ] && echo dry || echo run)" "$BACKUP"
 load_env;          ok "deploy/.env read"
 
 # ── 1. new code ───────────────────────────────────────────────────────────────

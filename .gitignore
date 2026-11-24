@@ -10,5 +10,3 @@ dist/
 *.sqlite3
 src/nightsquad/embedding_model/
 deploy/.env
-deploy/.env.before-rename
-deploy/.rename-in-progress

@@ -124,26 +124,3 @@ def test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist() -> 
         named = set(re.findall(r"`([a-z_0-9.]+)`", role.charter)) - not_tools
         unknown = {name for name in named if name not in tools and name != "teams.max"}
         assert not unknown, f"{role.slug}: {sorted(unknown)}"
-
-
-async def test_LIB_2_a_file_written_before_the_rename_still_loads(app: App) -> None:
-    """LIB-1, LIB-2, LIB-4, LIB-5: a role, squad or project spec exported before the
-    product was renamed (ADR-0011) carries the old format marker. Saving or checking one
-    works as if it carried the new marker, and what is shown back carries only the new one."""
-    old = "crew" + "mind"
-    owner = await app.person("owner@example.com")
-    saved = await app.ok("roles.save", owner, **{f"{old}_role": 1, **ROLE})
-    assert saved["changed"] is True
-    team = {"name": "Checks", "role": "fact-checker", "members": ["Fay"]}
-    squad = {
-        "slug": "check-it", "name": "Check it", "outcome": "A checked document.",
-        "ceo_role": "ceo", "teams": [team],
-    }  # fmt: skip
-    await app.ok("squads.save", owner, **{f"{old}_crew": 1, **squad})
-    shown = await app.ok("squads.show", owner, squad="check-it")
-    assert shown["nightsquad_squad"] == 1
-    assert f"{old}_crew" not in shown
-    spec = {f"{old}_spec": 1, "name": "From an old file", "goal": "Publish one page.",
-            "type": "deliver"}  # fmt: skip
-    assert (await app.ok("specs.check", owner, **spec))["ok"] in (True, False)
-    assert (await app.call("specs.check", owner, **{**spec, "unknown": 1})).status_code == 422

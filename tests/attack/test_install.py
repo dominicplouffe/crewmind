@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
 
 from nightsquad.catalog.refusal import Refusal
-from nightsquad.domain.install import maintenance, old_name
+from nightsquad.domain.install import maintenance
 from nightsquad.domain.install.config import ConfigError, load_config
 from nightsquad.runtime import Runtime
 from tests.support import App
@@ -21,12 +20,6 @@ def environment(runtime: Runtime, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("NIGHTSQUAD_DATABASE_URL", config.database_url)
     monkeypatch.setenv("NIGHTSQUAD_SANDBOX_MODE", config.sandbox_mode)
     config.data_dir.mkdir(parents=True, exist_ok=True)
-    home = config.data_dir.parent / "home"
-    home.mkdir(exist_ok=True)
-    monkeypatch.setenv("HOME", str(home))
-    monkeypatch.setattr(old_name, "SERVER_STATE_ROOT", home / "no-old-state-root")
-    for name in [name for name in os.environ if name.startswith(old_name.OLD_PREFIX)]:
-        monkeypatch.delenv(name)
 
 
 @pytest.mark.attack("NFR-6")
