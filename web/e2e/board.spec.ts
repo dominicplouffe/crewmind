@@ -350,3 +350,19 @@ test("every Board tab has no WCAG 2 A or AA violations in both themes (NFR-18)",
   }
   await setTheme(page, "light");
 });
+
+test("the chat's rail says who works on what, how far the goal has come, and what it costs, each opening its view (CHAT-18)", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`/projects/${projectId}`);
+  const rail = page.getByRole("complementary", { name: "The company at work" });
+  // A blocked task is shown as blocked, never as a quiet project.
+  await expect(rail.getByTestId("rail-now")).toContainText(VENUE);
+  await expect(rail.getByTestId("rail-now")).toContainText("blocked");
+  await expect(rail.getByTestId("rail-now")).not.toContainText("All quiet");
+  await expect(rail.getByTestId("rail-progress")).toContainText(/\d+ of \d+ requirements? met/);
+  await expect(rail.getByTestId("rail-progress").getByRole("img", { name: /Requirements by stage/ })).toBeVisible();
+  await expect(rail.getByTestId("rail-budget")).toContainText("tokens");
+  await expectNoViolations(page, "chat rail");
+  await rail.getByTestId("rail-progress").getByRole("button", { name: "Plan" }).click();
+  await expect(page).toHaveURL(new RegExp(`/projects/${projectId}/work$`));
+});

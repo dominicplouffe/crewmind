@@ -7,6 +7,8 @@ import {
   draftSummary,
   elementName,
   gradeOf,
+  nowOf,
+  readinessChecks,
   quickSteps,
   readinessReasons,
   sourceTag,
@@ -256,5 +258,66 @@ describe("documentProblem and specFileName", () => {
   it("names the exported file after the project", () => {
     expect(specFileName("Hollin Valley: bird guide!")).toBe("hollin-valley-bird-guide.spec.json");
     expect(specFileName("???")).toBe("project.spec.json");
+  });
+});
+
+describe("readinessChecks: the checklist of FND-5, read from the server's reasons", () => {
+  const statuses = (drafting: Drafting): Record<string, string> =>
+    Object.fromEntries(readinessChecks(drafting).map((check) => [check.key, check.status]));
+
+  it("before a draft, only the draft is to do and the rest waits for it", () => {
+    expect(statuses(view({ draft: null, not_ready_because: ["There is no draft yet."] }))).toEqual({
+      draft: "todo",
+      questions: "later",
+      decisions: "later",
+      goal: "later",
+      rehearsal: "later",
+    });
+  });
+
+  it("each check is open exactly when the server gives a reason for it, with the reason as given", () => {
+    const drafting = view({
+      draft: { name: "Guide" },
+      not_ready_because: [
+        "1 question(s) are waiting for an answer.",
+        "Not yet decided: budget; quality.",
+        "This draft has not been rehearsed.",
+      ],
+    });
+    expect(statuses(drafting)).toEqual({ draft: "done", questions: "todo", decisions: "todo", goal: "done", rehearsal: "todo" });
+    const rehearsal = readinessChecks(drafting).find((check) => check.key === "rehearsal");
+    expect(rehearsal?.reason).toBe("This draft has not been rehearsed.");
+  });
+
+  it("a goal summary from the grader is the goal's reason, and open passages add their own check", () => {
+    const checks = readinessChecks(
+      view({
+        draft: { name: "Guide" },
+        not_ready_because: ["Passages of the document are still unresolved.", "Missing: the finish line."],
+      }),
+    );
+    expect(checks.map((check) => check.key)).toEqual(["draft", "passages", "questions", "decisions", "goal", "rehearsal"]);
+    expect(checks.find((check) => check.key === "goal")?.reason).toBe("Missing: the finish line.");
+  });
+
+  it("a ready draft has every check done", () => {
+    const checks = readinessChecks(view({ draft: { name: "Guide" }, ready: true, not_ready_because: [] }));
+    expect(checks.every((check) => check.status === "done")).toBe(true);
+  });
+});
+
+describe("nowOf: what the page says is happening", () => {
+  it.each([
+    [{ waiting_for: "the Founder", draft: null }, "writing-first"],
+    [{ waiting_for: "the Founder", draft: { name: "Guide" } }, "updating"],
+    [{ questions: [question()] }, "questions"],
+    [{ failure: "The model timed out." }, "failed-turn"],
+    [{}, "your-turn"],
+    [{ ready: true }, "ready"],
+    [{ quick: true }, "quick"],
+    [{ state: "created" }, "created"],
+    [{ state: "failed" }, "ended"],
+  ] as [Partial<Drafting>, string][])("%o is %s", (extra, kind) => {
+    expect(nowOf(view(extra)).kind).toBe(kind);
   });
 });
