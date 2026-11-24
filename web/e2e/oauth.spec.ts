@@ -1,5 +1,5 @@
 /**
- * End-to-end test of approving an AI client (OAuth for MCP) against a real Nightsquad server: a client
+ * End-to-end test of approving an AI client (OAuth for MCP) against a real nightsquad server: a client
  * registers, the server sends the browser to the approval page, the person approves, and the browser
  * is sent back to the client with a one-time code. The approved client is then revoked in Settings.
  * It reuses the signed-in session and an existing project; nothing listens on the client's address.

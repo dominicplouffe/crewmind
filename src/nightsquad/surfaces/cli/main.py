@@ -186,7 +186,7 @@ def _command(source: Catalog, operation: Operation, invoker: Invoker) -> Callabl
             envelope = ErrorEnvelope(
                 kind=RefusalKind.NOT_FOUND,
                 code="server_unreachable",
-                message=f"The Nightsquad server did not answer: {error}",
+                message=f"The nightsquad server did not answer: {error}",
                 hint="Start it with `squad up`, or set NIGHTSQUAD_API to its address.",
             )
             raise _fail(envelope, ExitCode.UNREACHABLE, json_output) from error

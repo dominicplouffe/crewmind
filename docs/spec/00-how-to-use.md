@@ -1,6 +1,6 @@
 ## How to use this document
 
-This is the complete brief for rebuilding Nightsquad in a new, empty repository. It says what the product must do and why, not how v1 did it.
+This is the complete brief for rebuilding nightsquad in a new, empty repository. It says what the product must do and why, not how v1 did it.
 
 - **Audience:** an implementing model or engineer with no access to the v1 code.
 - **Deliberately absent:** v1 source, database schema, endpoint paths and screen layouts. Choose your own; v1's choices are part of what is being replaced. The technology stack is fixed in NFR-24.

@@ -188,7 +188,7 @@ export const plan = {
         `${met} of ${plural(total, "recurring requirement", "recurring requirements")} met on time, in ${runs(runCount)} and ${tokens} tokens.`,
       noScorecard: "No scorecard yet. It is written when the cycle closes.",
       narrativeByCeo: "The CEO's account",
-      narrativeByPlatform: "Account written by Nightsquad",
+      narrativeByPlatform: "Account written by nightsquad",
       setDue: "Change when it is due",
       dueAt: "Due date and time",
       dueSource: "Where does this time come from?",

@@ -1,6 +1,6 @@
 ## 9. Interfaces: chat, API, CLI, MCP, Slack and agent API
 
-Nightsquad must be fully operable from any of its surfaces. The HTTP API is the product's real interface. The app (chat and panels), the CLI, the MCP server and the Slack bridge are all clients of one shared set of operations. Anything a person can do in the app they MUST be able to do from the API and the CLI, and from MCP within the client's scope (exceptions in IF-5.6).
+nightsquad must be fully operable from any of its surfaces. The HTTP API is the product's real interface. The app (chat and panels), the CLI, the MCP server and the Slack bridge are all clients of one shared set of operations. Anything a person can do in the app they MUST be able to do from the API and the CLI, and from MCP within the client's scope (exceptions in IF-5.6).
 
 ### 9.1 One operation catalog, many surfaces
 
@@ -89,7 +89,7 @@ Required command groups (names are suggestions; coverage is required):
 
 ### 9.5 MCP server
 
-Nightsquad is itself an MCP server, so a person can run it from any MCP client.
+nightsquad is itself an MCP server, so a person can run it from any MCP client.
 
 - **IF-5.1 Transport and auth.**
   - Streamable HTTP at one endpoint.

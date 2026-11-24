@@ -48,7 +48,7 @@ share); say what happens next, in words, never by colour alone; keep raw values 
 | 35 | Decision card | delivery sign-off / reserve draw / proposed commitment | Sign-off / Reserve request / Finish date proposal | Same. |
 | 36 | Decision card | Answer by Nov 25, 2026, 10:14 PM. If you do nothing: it is declined. | Decide by Wed 10:14 PM · in 3 days, then (after the recommendation) If you do nothing: it is declined. | Short date plus distance; the default outcome gets its own line. |
 | 37 | Decision card | (no urgency) | Overdue / Due today / Due soon badge, plus "Overdue · was due …" | Urgency in words, not colour alone (WCAG 1.4.1). |
-| 38 | Decision card | (who asks not shown) | The CEO asks / An agent asks / Nightsquad asks, with the asker's avatar | The chairman should know who wants the decision. |
+| 38 | Decision card | (who asks not shown) | The CEO asks / An agent asks / nightsquad asks, with the asker's avatar | The chairman should know who wants the decision. |
 | 39 | Decision card | Recommendation: Accept requirement 1 into scope. | RECOMMENDATION callout | The recommendation is the most useful line; it is set apart. |
 | 40 | Decision card | defaulted / void (state tags) | Decided by default / No longer needed | State names become outcomes. |
 | 41 | Decision card, Desk | (none) | Discuss in chat | A way to talk it over before deciding. |
@@ -58,9 +58,9 @@ share); say what happens next, in words, never by colour alone; keep raw values 
 | 45 | Board | ready (3) | Ready (3), task state as a pill | Sentence case; state scannable. Check labels stay the server's words (rule in strings.board.ts). |
 | 46 | Memory | Project: 34 of 6,000 tokens (bare progress bar) | Project: 34 of 6,000 tokens · 1%, with a meter | Adds the share; the sentence is kept. |
 | 47 | Activity | 22 Nov 2026, 22:14 (per line) | 22 minutes ago, grouped under "Sunday, November 22" | Relative time and day headings are how people scan a feed. |
-| 48 | Activity | (actor id hidden or shown raw) | Your avatar, "Someone in the project", or the Nightsquad mark | Who did it, without showing ids. |
+| 48 | Activity | (actor id hidden or shown raw) | Your avatar, "Someone in the project", or the nightsquad mark | Who did it, without showing ids. |
 | 49 | Activity (server, done) | project: created (project 375c76…). / item: state changed (item 3). | The project was created. / Item 3 is now open. / CEO joined the squad. | Event names are not sentences. Changed in the server's feed wording, with a test that no line reads like an event name. |
-| 50 | Chat | Nightsquad · Nightsquad · 10:14 PM (dashed box) | Centred quiet line with an icon: "Directive 1 to CEO: Plan the landing page. · 30 minutes ago" | Platform lines are context, not conversation. |
+| 50 | Chat | nightsquad · nightsquad · 10:14 PM (dashed box) | Centred quiet line with an icon: "Directive 1 to CEO: Plan the landing page. · 30 minutes ago" | Platform lines are context, not conversation. |
 | 51 | Chat | CEO · agent · 10:14 PM | CEO · CEO / Project Manager · 5 minutes ago, with an avatar | The role says who this agent is; "agent" said nothing. |
 | 52 | Chat | Admin (on your own messages) | You | Your own messages are yours; the account name is noise. |
 | 53 | Chat | Delivered (text) | ✓✓ Delivered | Same word, quieter, with a mark. |

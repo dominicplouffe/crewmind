@@ -79,4 +79,4 @@
   - **Outbound.** An agent whose role grants A2A may send tasks to outside agents on the allowlist, through the platform gateway, as data sources work (INT-4). Endpoint credentials never enter a sandbox. Each outbound task is a side effect (WRK-16) with an idempotency key, and replies are untrusted input.
   - **One allowlist.** The chairman-owned allowlist from INT-10 holds A2A endpoints as well as email addresses and domains. Agents may request entries; only the chairman adds them.
   - **Same guards as email.** The loop guard of INT-10 applies to A2A conversations. Every exchange appears in the project's External panel and the activity feed, and is recorded in the event log.
-  - **Status and streaming.** Long-running A2A tasks stream status into the chat. A Nightsquad project that delegates to another Nightsquad install sees the other side's status the same way.
+  - **Status and streaming.** Long-running A2A tasks stream status into the chat. A nightsquad project that delegates to another nightsquad install sees the other side's status the same way.

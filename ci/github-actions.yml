@@ -1,4 +1,4 @@
-# GitHub Actions workflow for Nightsquad. To turn CI on, copy this file to
+# GitHub Actions workflow for nightsquad. To turn CI on, copy this file to
 # .github/workflows/ci.yml. It is kept here because the coding session that wrote it
 # was not allowed to push workflow files.
 

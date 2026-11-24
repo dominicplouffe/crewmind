@@ -1,4 +1,4 @@
-"""What every Nightsquad container shares: who it runs as, how it is confined, and how it
+"""What every nightsquad container shares: who it runs as, how it is confined, and how it
 reaches the server (EXE-12, WRK-7).
 
 Agent sandboxes and check sandboxes are both containers from the agent image. Neither is

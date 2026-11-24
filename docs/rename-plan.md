@@ -1,4 +1,4 @@
-# Plan: rename crewmind to Nightsquad, and "crew" to "squad"
+# Plan: rename crewmind to nightsquad, and "crew" to "squad"
 
 Status: draft for the owner's approval. Nothing in this plan has been done yet.
 
@@ -17,7 +17,7 @@ There are no substring traps: no word in the repository contains "crew" except t
 
 | Thing | Before | After |
 | --- | --- | --- |
-| Product name in prose | crewmind | Nightsquad |
+| Product name in prose | crewmind | nightsquad |
 | Python package and import root | `crewmind` (`src/crewmind`) | `nightsquad` (`src/nightsquad`) |
 | PyPI / npm name | `crewmind` | `nightsquad` (both free on 24 Nov 2026) |
 | CLI command | `crewmind` | `squad`, with `nightsquad` as a second name for the same entry point (see decision 1) |
@@ -43,8 +43,8 @@ Text that stays as it is: the history in `docs/spec/CHANGELOG.md`, ADR-0008 (mar
 ## Steps (one concern per commit, on branch `claude/lucid-franklin-gwvmmu`)
 
 1. **Decision and spec** `[docs]`
-   - Add ADR-0011 "The project is named Nightsquad", superseding ADR-0008, with the reasons (CrewAI, Paperclip, YokeBot) and the CLI choice.
-   - Edit `docs/spec/`: crewmind becomes Nightsquad, crew becomes squad (LIB-2 "Squad", SPD-9 "No idle squad", FND-2/FND-9 "roles and squads", RHS-1, IF tables, the README index, the title of 06-14).
+   - Add ADR-0011 "The project is named nightsquad", superseding ADR-0008, with the reasons (CrewAI, Paperclip, YokeBot) and the CLI choice.
+   - Edit `docs/spec/`: crewmind becomes nightsquad, crew becomes squad (LIB-2 "Squad", SPD-9 "No idle squad", FND-2/FND-9 "roles and squads", RHS-1, IF tables, the README index, the title of 06-14).
    - Add one line to the spec CHANGELOG. Requirement ids do not change.
 2. **Package move** `[all]`
    - `git mv src/crewmind src/nightsquad`, then rewrite every import.

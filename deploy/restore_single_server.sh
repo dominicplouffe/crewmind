@@ -33,7 +33,7 @@ load_env
 
 # NFR-4: a restore replaces everything, so it needs the word typed, every time.
 printf '\n  This replaces the database, the master key and the artifacts with the backup.\n'
-printf '  What is there now is saved first. Nightsquad stops while it runs.\n\n'
+printf '  What is there now is saved first. nightsquad stops while it runs.\n\n'
 printf '  Type restore to confirm: '
 read -r reply
 [ "$reply" = "restore" ] || die "not confirmed: nothing was changed"
@@ -56,4 +56,4 @@ fi
 say "Starting the server"
 compose up -d --no-build >/dev/null || die "compose up failed"
 wait_for_server 300
-ok "Nightsquad is back, on the restored data: $PUBLIC_URL"
+ok "nightsquad is back, on the restored data: $PUBLIC_URL"

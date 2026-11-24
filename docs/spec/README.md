@@ -1,6 +1,6 @@
-# Nightsquad: Requirements & Specification (revision 2, 21 Nov 2026)
+# nightsquad: Requirements & Specification (revision 2, 21 Nov 2026)
 
-Revision 2 rebuilds Nightsquad chat-first, budgeted in tokens and built for speed. You talk to a project like a coding assistant, it stays inside the token budget you set, and Deliver ships a first usable version early.
+Revision 2 rebuilds nightsquad chat-first, budgeted in tokens and built for speed. You talk to a project like a coding assistant, it stays inside the token budget you set, and Deliver ships a first usable version early.
 
 Owner: Dominic. Requirement ids are stable; cite them in code, tests and commits.
 

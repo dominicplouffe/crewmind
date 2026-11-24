@@ -1,4 +1,4 @@
-/* Nightsquad service worker: caches the app shell and shows alerts. It never caches API answers. */
+/* nightsquad service worker: caches the app shell and shows alerts. It never caches API answers. */
 const CACHE = "nightsquad-shell-v1";
 const SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192.png"];
 const NEVER_CACHED = ["/v1/", "/files/", "/stream/", "/healthz", "/readyz", "/gateway/", "/agent/", "/mcp/"];
@@ -66,7 +66,7 @@ self.addEventListener("push", (event) => {
   } catch (error) {
     payload = { body: event.data ? event.data.text() : "" };
   }
-  const title = typeof payload.title === "string" && payload.title ? payload.title : "Nightsquad";
+  const title = typeof payload.title === "string" && payload.title ? payload.title : "nightsquad";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: typeof payload.body === "string" ? payload.body : "",

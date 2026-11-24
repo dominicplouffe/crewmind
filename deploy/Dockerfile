@@ -1,4 +1,4 @@
-# The Nightsquad server image, for the full-server shape (NFR-2).
+# The nightsquad server image, for the full-server shape (NFR-2).
 # Agent runs use the agent image: deploy/agent.Dockerfile.
 FROM node:22-slim AS web
 WORKDIR /web

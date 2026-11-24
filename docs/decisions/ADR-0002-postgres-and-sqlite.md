@@ -5,7 +5,7 @@
 
 ## Context
 
-The owner wants Nightsquad to run slim when needed. v1 shipped both databases, but SQLite could not run half the migrations, so tests passed for a database nobody deployed.
+The owner wants nightsquad to run slim when needed. v1 shipped both databases, but SQLite could not run half the migrations, so tests passed for a database nobody deployed.
 
 ## Decision
 

@@ -1,5 +1,5 @@
 """Attacks on MCP tools in runs: offered by grant and permission, denied calls never leave
-Nightsquad, access asked for and decided by the person, changes done once, limits and
+nightsquad, access asked for and decided by the person, changes done once, limits and
 records (CON-13, CON-14, INT-4, WRK-16, IF-5.6)."""
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ async def test_CON_13_an_agent_uses_an_allowed_tool_and_its_answer_comes_back_as
     app: App, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """CON-13, CON-16: the run is offered only the allowed tools of the servers granted to
-    it; the call goes through Nightsquad; the answer reaches the model; the trace names the
+    it; the call goes through nightsquad; the answer reaches the model; the trace names the
     server, tool, arguments, outcome, time and size; the ledger counts it."""
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)

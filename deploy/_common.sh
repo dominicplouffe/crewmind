@@ -24,7 +24,7 @@ require_repo_root() {
   local marker
   for marker in pyproject.toml deploy/compose.yaml deploy/Dockerfile deploy/agent.Dockerfile; do
     [ -e "$marker" ] \
-      || die "no ./$marker here: this script must live in deploy/ of a Nightsquad checkout (looked in $PWD)"
+      || die "no ./$marker here: this script must live in deploy/ of a nightsquad checkout (looked in $PWD)"
   done
   REPO="$PWD"
 }

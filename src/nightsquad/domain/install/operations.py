@@ -165,7 +165,7 @@ async def up(context: Context, payload: UpInput) -> Stopped:
         uvicorn.Config(app, host=config.host, port=config.port, log_level="warning")
     )
     write_pid(config.data_dir)
-    print(f"Nightsquad is up at {config.base_url} ({config.database.value})", flush=True)
+    print(f"nightsquad is up at {config.base_url} ({config.database.value})", flush=True)
     try:
         await server.serve()
     finally:

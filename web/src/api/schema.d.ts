@@ -2381,7 +2381,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Load the roles and squads shipped with this version of Nightsquad again.
+         * Load the roles and squads shipped with this version of nightsquad again.
          * @description Requires: admin.
          */
         post: operations["library.reload"];
@@ -2799,7 +2799,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List the providers Nightsquad can use, with any concurrency ceiling.
+         * List the providers nightsquad can use, with any concurrency ceiling.
          * @description Requires: person.
          */
         get: operations["models.providers"];
@@ -4927,7 +4927,7 @@ export interface components {
              */
             basic_user?: string | null;
             /**
-             * @description sent_for_you (Nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
+             * @description sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
              * @default sent_for_you
              */
             delivery?: components["schemas"]["Delivery"];

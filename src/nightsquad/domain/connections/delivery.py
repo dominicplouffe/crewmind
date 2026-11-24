@@ -48,7 +48,7 @@ from nightsquad.storage.models import (
 )
 
 CON_8 = rules.register(
-    Rule("CON-8", "A value given to an agent is masked everywhere agent text enters Nightsquad.")
+    Rule("CON-8", "A value given to an agent is masked everywhere agent text enters nightsquad.")
 )
 
 

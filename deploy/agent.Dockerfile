@@ -1,4 +1,4 @@
-# The Nightsquad agent image: what every agent run and every platform check executes in,
+# The nightsquad agent image: what every agent run and every platform check executes in,
 # in container mode (EXE-12, WRK-7).
 #
 #   docker build -f deploy/agent.Dockerfile -t nightsquad-agent .

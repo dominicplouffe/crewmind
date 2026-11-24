@@ -23,7 +23,7 @@ doctrine and the goal grammar are the same copy the Founder is given (FND-7, IF-
 PROMPTS: dict[str, tuple[str, str]] = {
     "design_a_project": (
         "Design a new project with the chairman",
-        "Help me design a new Nightsquad project. Read the documents design-doctrine and "
+        "Help me design a new nightsquad project. Read the documents design-doctrine and "
         "goal-grammar first and follow them. Start a drafting conversation with "
         "founder_start, giving my brief in my own words, and read it with founder_show. "
         "Put each of the Founder's questions to me with its recommended answer, and send "

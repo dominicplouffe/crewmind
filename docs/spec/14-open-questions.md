@@ -13,4 +13,4 @@ These are decisions this revision could not settle alone. Each has a recommendat
 
 * **Mail servers beyond Stalwart.** Recommendation: ship the Stalwart adapter first, keep the adapter interface small, and add other servers as plug-ins when there is demand. Pin the Stalwart version the adapter is tested against, because its management API changed in 0.16.
 
-- **Default skill sources.** Recommendation: trust no outside skill source by default. Ship Nightsquad's own skills (LIB-6) and let the admin add sources, with every new skill reviewed before use.
+- **Default skill sources.** Recommendation: trust no outside skill source by default. Ship nightsquad's own skills (LIB-6) and let the admin add sources, with every new skill reviewed before use.

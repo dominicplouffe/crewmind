@@ -1,4 +1,4 @@
-/** Builds the app and starts a real Nightsquad server that serves it, for the end-to-end tests. */
+/** Builds the app and starts a real nightsquad server that serves it, for the end-to-end tests. */
 import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

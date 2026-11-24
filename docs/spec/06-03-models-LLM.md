@@ -1,6 +1,6 @@
 ### 6.3 Models and quality (LLM)
 
-Nightsquad is provider-neutral. The chairman chooses **who pays** and a **quality** level; the platform chooses models and effort. Nobody has to pick a model or an effort level unless they open Advanced.
+nightsquad is provider-neutral. The chairman chooses **who pays** and a **quality** level; the platform chooses models and effort. Nobody has to pick a model or an effort level unless they open Advanced.
 
 - **LLM-1 Providers through one gateway.**
   - Every model call passes through the platform's model gateway.
@@ -10,7 +10,7 @@ Nightsquad is provider-neutral. The chairman chooses **who pays** and a **qualit
 - **LLM-2 Model credentials.**
   - Stored encrypted; listed by name only, never by value; can be hidden without being deleted.
   - Two kinds: **API key** and **subscription login**. Both are metered in tokens.
-  - For subscription logins the system shows remaining plan usage (rolling windows) from rate-limit signals already reported, without polling. Whether a provider's terms allow this use is the user's decision; Nightsquad neither blocks nor warns.
+  - For subscription logins the system shows remaining plan usage (rolling windows) from rate-limit signals already reported, without polling. Whether a provider's terms allow this use is the user's decision; nightsquad neither blocks nor warns.
 - **LLM-3 The quality dial.** One project setting, `quality` \[balanced\], decides model class and effort for every seat by the seat's kind:
 
 | Quality | Thinking seats (CEO, leads, reviewers) | Doing seats (workers) |

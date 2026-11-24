@@ -580,7 +580,7 @@ async def show_models(context: Context, payload: ProjectRef) -> ModelsView:
 
 @operation(
     "models.providers",
-    summary="List the providers Nightsquad can use, with any concurrency ceiling.",
+    summary="List the providers nightsquad can use, with any concurrency ceiling.",
     authority=Authority.PERSON,
     reversibility=Reversibility.READ,
 )

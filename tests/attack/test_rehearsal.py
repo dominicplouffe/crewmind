@@ -133,7 +133,7 @@ async def test_RHS_1_the_drill_process_is_given_nothing(
     app: App, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """RHS-1: the process the server starts for a drill is given the spec on standard
-    input and an environment of two names: where Python finds Nightsquad, and the PATH. No
+    input and an environment of two names: where Python finds nightsquad, and the PATH. No
     database address, no key file, no token and no proxy setting reach it; it is started
     isolated from the user's Python settings; and one that outlives
     `rehearsal.max_seconds` is killed and reported."""

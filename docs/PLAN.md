@@ -1,4 +1,4 @@
-# Nightsquad v2 build plan
+# nightsquad v2 build plan
 
 Owner: Dominic. Written 21 Nov 2026 against spec revision 2. Phases follow spec section 13; phase 0 is added before them.
 

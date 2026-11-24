@@ -1,5 +1,5 @@
 /**
- * End-to-end test of decision items against a real Nightsquad server with the mock model: the CEO
+ * End-to-end test of decision items against a real nightsquad server with the mock model: the CEO
  * proposes a requirement, the chairman sees it as a card in the chat and as an entry on the Desk,
  * accepts it from the card, and looks at the decision items and the agenda in the Plan panel.
  * It runs after board.spec.ts (one worker, files in name order) and reuses the signed-in session.

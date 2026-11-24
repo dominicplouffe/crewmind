@@ -72,7 +72,7 @@ async def proxy(app: App, site: Site) -> AsyncIterator[int]:
 
 
 async def come_back(app: App, actor: Actor, address: str, authority: Authority) -> None:
-    """The person agrees at the provider and the browser returns to Nightsquad."""
+    """The person agrees at the provider and the browser returns to nightsquad."""
     query = {key: values[0] for key, values in parse_qs(urlsplit(address).query).items()}
     code = authority.code_for(query)
     async with httpx.AsyncClient(
@@ -200,7 +200,7 @@ async def test_phase_7b_exit_demo(
     shown = await app.ok("connections.show", owner, connection="docs-oauth")
     assert shown["item"]["mcp"]["state"] == "active"
 
-    # 4. The project starts; the writer posts through Nightsquad without holding the password.
+    # 4. The project starts; the writer posts through nightsquad without holding the password.
     await app.ok("projects.start", owner, project_id=project)
     await quiet_start(app, project)
     writer = next(name for name in await seats(app, project) if name == "Wren")
@@ -239,7 +239,7 @@ async def test_phase_7b_exit_demo(
         alarms = list(await session.scalars(select(Alarm.body)))
     assert len([body for body in alarms if "sign in again" in body]) == 1
 
-    # 5. No value is anywhere Nightsquad keeps or says anything.
+    # 5. No value is anywhere nightsquad keeps or says anything.
     values = {
         "password": PASSWORD, "replaced": REPLACED, "basic": f"dom:{PASSWORD}",
         "basic-replaced": f"dom:{REPLACED}", "bearer": BEARER, "header": HEADER, "notes": NOTES,

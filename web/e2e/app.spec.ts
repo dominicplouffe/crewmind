@@ -1,5 +1,5 @@
 /**
- * End-to-end tests against a real Nightsquad server with the mock model.
+ * End-to-end tests against a real nightsquad server with the mock model.
  * Covers CHAT-1 to CHAT-4, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-18 to CHAT-20, ART-3, ART-4, NFR-18.
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -34,7 +34,7 @@ const agentMessages = (): ReturnType<Page["locator"]> => page.getByTestId("messa
 
 test("signed-out visitors are sent to sign in, and the page is accessible (NFR-18)", async () => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Sign in to Nightsquad" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to nightsquad" })).toBeVisible();
   await expectAccessible(page, "sign-in page");
 });
 

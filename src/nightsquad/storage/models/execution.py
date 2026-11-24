@@ -46,7 +46,7 @@ class Role(Base):
     needs_vision: Mapped[bool] = mapped_column(default=False)
     needs_web: Mapped[bool] = mapped_column(default=False)
     source: Mapped[str] = mapped_column(String(16), server_default="starter")
-    """starter (shipped with Nightsquad) or custom (imported, or embedded in a spec)."""
+    """starter (shipped with nightsquad) or custom (imported, or embedded in a spec)."""
     created_at: Mapped[datetime] = mapped_column(UtcDateTime)
 
 

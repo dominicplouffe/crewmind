@@ -1,5 +1,5 @@
 /*
- * The chat: messages, Nightsquad's own lines, cards in the conversation, and the composer.
+ * The chat: messages, nightsquad's own lines, cards in the conversation, and the composer.
  * The composer sits in the flow under the list (never on top of it), so no message is ever hidden
  * behind it; the page uses dynamic viewport units, so it stays above a phone's on-screen keyboard.
  */
@@ -157,7 +157,7 @@
 }
 .typing-stop { margin-left: auto; align-self: center; }
 
-/* Nightsquad's own line that carries a card. */
+/* nightsquad's own line that carries a card. */
 .system-avatar {
   display: grid;
   place-items: center;
@@ -170,7 +170,7 @@
 }
 .message.is-system .author { color: var(--color-text-muted); }
 
-/* Nightsquad's plain line: quiet, centred, with an icon. */
+/* nightsquad's plain line: quiet, centred, with an icon. */
 .message.is-row {
   display: flex;
   flex-direction: column;

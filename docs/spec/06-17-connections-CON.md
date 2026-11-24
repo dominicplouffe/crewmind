@@ -12,7 +12,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - **Values are write-only.** Once saved, a value is never shown again to anyone, admins included, on any surface. It can be replaced.
   - A value shorter than `secret.min_length` \[8\] is refused, because it cannot be masked reliably (CON-8). A value larger than `secret.max_size` \[64 KB\] is refused.
   - A secret is used in one of two ways, chosen when it is added:
-    - **sent for you** (the default): Nightsquad adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
+    - **sent for you** (the default): nightsquad adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
     - **given to the agent**: placed in the run's sandbox as an environment variable or a file (CON-7), for what cannot be sent for the agent.
   - A secret may carry an expiry date, a day in UTC. The chairman of every project that uses it is told `secret.expiry_warning` \[7 days\] before, and on the day. The day after, it expires.
   - Many secrets and variables can be added at once by pasting `KEY=value` lines, reviewed as a table before anything is saved. The review shows each line's name, whether it becomes a secret or a variable (guessed from the name, changeable) and any problem, never a value. Secrets added this way are given to the agent under their own name, as a `.env` file is read by programs.
@@ -44,7 +44,7 @@ A project reaches the outside world through its connections: secrets, variables 
 - **CON-8 Masking.**
   - For each live run the platform holds the values it gave to the agent, and the values sent for it (CON-6) with the headers they travel in, because a site may echo what it received. Every place agent text enters the platform (every agent API call and every model request, before anything reads them, and the workspace snapshot) replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
   - A workspace file that held a value is stored masked, and the chairman is told once, naming the file and the secret.
-  - Masking stops Nightsquad storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
+  - Masking stops nightsquad storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
 - **CON-9 Remote MCP servers.**
   - Reached over Streamable HTTP, falling back to HTTP with server-sent events for servers that only speak it.
   - https only, except http to `localhost`.

@@ -1,6 +1,6 @@
 """Fetch the local embedding model into the package (MEM-2).
 
-The model is shipped inside the Nightsquad package and the Docker image, so memory works
+The model is shipped inside the nightsquad package and the Docker image, so memory works
 offline from the first start. It is too large for the source repository, so the package
 build, the image build and a developer in a source checkout each run:
 

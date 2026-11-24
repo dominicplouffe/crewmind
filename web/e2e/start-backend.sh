@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts a throwaway Nightsquad server for the end-to-end tests.
+# Starts a throwaway nightsquad server for the end-to-end tests.
 #   e2e/start-backend.sh [port] [run directory]
 # It uses the mock model (no paid calls, no network), serves web/dist on the same origin,
 # and writes setup.json (with the admin's setup link) and server.pid into the run directory.
@@ -34,10 +34,10 @@ echo $! > "$RUN_DIR/server.pid"
 
 for _ in $(seq 1 120); do
   if curl -fs "http://127.0.0.1:$PORT/readyz" > /dev/null 2>&1; then
-    echo "Nightsquad is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
+    echo "nightsquad is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
     exit 0
   fi
   sleep 0.5
 done
-echo "Nightsquad did not become ready; see $RUN_DIR/up.log" >&2
+echo "nightsquad did not become ready; see $RUN_DIR/up.log" >&2
 exit 1

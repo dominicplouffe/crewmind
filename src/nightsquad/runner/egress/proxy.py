@@ -35,7 +35,7 @@ CHUNK = 64 * 1024
 """How much is read from a socket at a time."""
 HTTPS_PORT = 443
 HTTP_PORT = 80
-REALM = 'Basic realm="Nightsquad egress"'
+REALM = 'Basic realm="nightsquad egress"'
 DROPPED = {b"proxy-authorization", b"proxy-connection"}
 
 
@@ -184,7 +184,7 @@ class EgressProxy:
             if run is None:
                 await _reply(
                     writer, 407, "Proxy Authentication Required",
-                    "This proxy is for Nightsquad runs. Use the run's own proxy address.",
+                    "This proxy is for nightsquad runs. Use the run's own proxy address.",
                     f"Proxy-Authenticate: {REALM}\r\n",
                 )  # fmt: skip
                 return
@@ -197,7 +197,7 @@ class EgressProxy:
             if run is not None and self.hooks.refused is not None:
                 await self.hooks.refused(run.run_id, str(refused))
             await _reply(
-                writer, 403, "Forbidden", f"Nightsquad's egress proxy refused this: {refused}"
+                writer, 403, "Forbidden", f"nightsquad's egress proxy refused this: {refused}"
             )
         except (TimeoutError, ConnectionError, h11.ProtocolError, ssl.SSLError) as error:
             logger.info("egress: a connection ended: %s", type(error).__name__)

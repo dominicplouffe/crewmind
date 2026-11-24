@@ -58,6 +58,6 @@ describe("urgencyOf", () => {
 
 describe("titled", () => {
   it("puts the count in front of the title", () => {
-    expect(titled("Home · Nightsquad", 2)).toBe("(2) Home · Nightsquad");
+    expect(titled("Home · nightsquad", 2)).toBe("(2) Home · nightsquad");
   });
 });

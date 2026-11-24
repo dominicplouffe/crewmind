@@ -96,13 +96,13 @@
   - Optional paid judges grade planning quality, plain language and sycophancy comparatively. Golden scenarios assert behaviour, never exact prompt wording.
 - **NFR-20** Every rule records how often it refuses and how often a refused call later succeeds, so false refusals are visible. Each phase plan lists which of its rules start in warn-only mode; a rule an invariant cites always enforces. New rules ship in warn-only mode first, unless they guard authority, budget, secrets or side effects.
 - **NFR-21** Code uses the domain names in section 4. No metaphor identifiers, and no comments that narrate incidents.
-- **NFR-22 OpenTelemetry export.** Nightsquad emits OpenTelemetry traces and metrics, following the GenAI semantic conventions, so runs can be watched in tools people already use (Grafana, Langfuse, Datadog and others).
+- **NFR-22 OpenTelemetry export.** nightsquad emits OpenTelemetry traces and metrics, following the GenAI semantic conventions, so runs can be watched in tools people already use (Grafana, Langfuse, Datadog and others).
   - **Spans:** every run, model call, tool call, agent API call, browser action, check, watch, scheduled job and A2A exchange. W3C trace context is carried from dispatcher to runner, harness, gateway and agent API, and onward on outbound A2A calls.
   - **Metrics:** tokens by kind, seat and model; run outcomes; refusals by rule; queue wait; chat latency; budget used against the wall.
   - **Off by default, and never to the vendor.** Export goes over OTLP only to a collector the admin configures (`otel.endpoint`). NFR-1's "no telemetry" still holds: nothing is sent anywhere else.
   - **Content stays home unless chosen.** Prompts and outputs are left out of spans unless `otel.capture_content` \[off\] is on for a project. Secret values are never exported (INV-6).
-  - Nightsquad's own trace store stays the source of truth; the export is a copy.
-- **NFR-23 Slim mode.** Nightsquad can run small, for one person on a laptop or a small virtual machine.
+  - nightsquad's own trace store stays the source of truth; the export is a copy.
+- **NFR-23 Slim mode.** nightsquad can run small, for one person on a laptop or a small virtual machine.
   - **One process** runs the server, scheduler, gateway and one runner, on SQLite, with the bundled local embedding model and Mem0's embedded vector store.
   - **Nothing extra required:** no Postgres, no message broker, and no Slack, email, A2A or OpenTelemetry unless configured.
   - **Sandboxes:** containers when Docker is present; host-jail mode once it ships (phase 8).

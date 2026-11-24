@@ -1,6 +1,6 @@
-# Nightsquad
+# nightsquad
 
-Nightsquad runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. You state a goal in a chat, and the platform staffs a CEO agent and specialist teams and gives them a token budget. They work fast while you stay in charge as chairman.
+nightsquad runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. You state a goal in a chat, and the platform staffs a CEO agent and specialist teams and gives them a token budget. They work fast while you stay in charge as chairman.
 
 This repository is the rebuild (v2). It starts from the specification, with no v1 code.
 

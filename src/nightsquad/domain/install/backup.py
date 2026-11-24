@@ -197,7 +197,7 @@ async def restore(context: Context, payload: RestoreInput) -> RestoreDone:
         except (OSError, tarfile.TarError, ValueError):
             raise Refusal(
                 "archive_unreadable",
-                f"{archive} is not a Nightsquad backup archive.",
+                f"{archive} is not a nightsquad backup archive.",
                 rule=NFR_4.id,
                 hint="Give the path of an archive made by `squad backup`.",
             ) from None

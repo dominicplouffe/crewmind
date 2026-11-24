@@ -1,6 +1,6 @@
 /**
  * First-run setup in the browser, at `/welcome` (LLM-2, LLM-10, LLM-14, FND-2, ACC-2, FND-1):
- * what Nightsquad is, a model key checked with a tiny call, the Founder's key and quality, optional
+ * what nightsquad is, a model key checked with a tiny call, the Founder's key and quality, optional
  * invites, then the goal that starts a drafting conversation. Steps already done are skipped
  * when the person comes back. `?next=/draft/<id>` returns there once the Founder is set up.
  *
@@ -36,7 +36,7 @@ function Frame({ children }: { children: ReactNode }): JSX.Element {
       <header className="welcome-top">
         <span className="welcome-brand">
           <LogoMark size={28} />
-          <span>Nightsquad</span>
+          <span>nightsquad</span>
         </span>
         <Link to="/" className="button ghost">
           {words.exit}

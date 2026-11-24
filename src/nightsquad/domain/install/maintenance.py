@@ -89,7 +89,7 @@ def _git(root: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 
 
 def checkout_root() -> Path | None:
-    """The git checkout Nightsquad runs from, or None when it was installed as a package."""
+    """The git checkout nightsquad runs from, or None when it was installed as a package."""
     package = Path(nightsquad.__file__).resolve().parent
     result = _git(package, "rev-parse", "--show-toplevel")
     return Path(result.stdout.strip()) if result.returncode == 0 else None
@@ -107,7 +107,7 @@ async def update(context: Context, payload: UpdateInput) -> UpdatePlan:
     if root is None:
         raise Refusal(
             "not_a_checkout",
-            "Nightsquad is installed as a package here, not from a source checkout.",
+            "nightsquad is installed as a package here, not from a source checkout.",
             rule=NFR_3.id,
             hint="Run `uv tool upgrade nightsquad`; `squad up` then migrates on start.",
         )

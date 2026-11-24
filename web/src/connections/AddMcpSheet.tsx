@@ -1,5 +1,5 @@
 /**
- * Adding an MCP server (CON-9 to CON-11, CON-15). A remote one: its address, how Nightsquad signs in
+ * Adding an MCP server (CON-9 to CON-11, CON-15). A remote one: its address, how nightsquad signs in
  * (four cards, each showing only its fields), a test that lists the server's tools before anything
  * is saved, and for OAuth a sign-in at the provider right after saving. A command one: its command
  * and the secrets or variables that fill its environment, started and tested when saved. A token

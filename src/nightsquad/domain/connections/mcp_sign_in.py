@@ -1,7 +1,7 @@
 """Signing in to an MCP server, and keeping its tokens fresh (CON-10, CON-14).
 
 The person who owns the server starts the sign-in in their browser; the authorization
-server sends the browser back to Nightsquad's callback with a code. The sign-in's `state`
+server sends the browser back to nightsquad's callback with a code. The sign-in's `state`
 is single use, kept only as a hash, expires, and is bound to the browser session that
 started it. Tokens are secrets of the server's connection; they act as the signed-in
 person's account at that provider.
@@ -108,7 +108,7 @@ def callback_of(base_url: str) -> str:
     if parts.scheme != "https" and not local:
         raise Refusal(
             "oauth_needs_https",
-            "Signing in with OAuth needs Nightsquad's public https address, so the provider can "
+            "Signing in with OAuth needs nightsquad's public https address, so the provider can "
             "send you back.",
             rule=CON_10.id,
             hint="An admin sets NIGHTSQUAD_PUBLIC_URL to the install's https address.",
@@ -226,7 +226,7 @@ async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
         authorize_url=mcp_oauth.authorize_url(
             endpoints, found.client_id, found.redirect, state, challenge
         ),
-        acts_as=f"Nightsquad will act as your account at {urlsplit(endpoints.issuer).hostname} "
+        acts_as=f"nightsquad will act as your account at {urlsplit(endpoints.issuer).hostname} "
         f"when agents use {item.name}.",
     )
 

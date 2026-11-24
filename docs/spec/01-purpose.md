@@ -1,6 +1,6 @@
 ## 1. Purpose, users and the experience bar
 
-Nightsquad runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. A person states a goal in a chat; the platform staffs a CEO agent and specialists, gives them a token budget, and keeps them working fast while the person stays in charge as **chairman**.
+nightsquad runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. A person states a goal in a chat; the platform staffs a CEO agent and specialists, gives them a token budget, and keeps them working fast while the person stays in charge as **chairman**.
 
 ### 1.1 The problem and the thesis
 

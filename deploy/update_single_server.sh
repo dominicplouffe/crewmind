@@ -99,6 +99,6 @@ squad setup >/dev/null || warn "squad setup reported a problem; run it by hand t
 
 say "Done"
 cat <<EOF
-  Nightsquad is at $PUBLIC_URL on $(git rev-parse --short HEAD 2>/dev/null || echo 'the new code').
+  nightsquad is at $PUBLIC_URL on $(git rev-parse --short HEAD 2>/dev/null || echo 'the new code').
   To undo, restore the backup above: deploy/restore_single_server.sh <archive>
 EOF

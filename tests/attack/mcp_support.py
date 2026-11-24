@@ -83,7 +83,7 @@ class Gate:
 async def serving(
     wanted: tuple[str, str] | None = None, server: MCPServer | None = None
 ) -> AsyncGenerator[Gate]:
-    """Serve the test server and make Nightsquad's MCP client reach it in place of DNS."""
+    """Serve the test server and make nightsquad's MCP client reach it in place of DNS."""
     server = server or build_server()
     app = server.streamable_http_app(
         json_response=True,

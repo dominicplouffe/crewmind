@@ -26,7 +26,7 @@ export const founder = {
   },
   page: {
     title: "Start a project",
-    pageTitle: "Start a project · Nightsquad",
+    pageTitle: "Start a project · nightsquad",
     draftTitle: "Draft a project",
     projectsLink: "Projects",
     mainLabel: "Conversation with the Founder",
@@ -60,7 +60,7 @@ export const founder = {
   },
   talk: {
     logLabel: "What was said",
-    authors: { person: "You", founder: "The Founder", platform: "Nightsquad" } as Record<string, string>,
+    authors: { person: "You", founder: "The Founder", platform: "nightsquad" } as Record<string, string>,
     avatarName: "Founder",
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
     writing: "The Founder is writing.",

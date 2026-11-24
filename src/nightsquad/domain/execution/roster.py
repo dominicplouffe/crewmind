@@ -41,7 +41,7 @@ TEAM_MEMBERS_MAX = 12
 
 
 async def ensure_starter_roles(session: AsyncSession, now: datetime) -> None:
-    """Load the library shipped with Nightsquad, once (LIB-3)."""
+    """Load the library shipped with nightsquad, once (LIB-3)."""
     await library.load_starter(session, now)
 
 

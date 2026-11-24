@@ -1,4 +1,4 @@
-# A full Nightsquad server (NFR-1, NFR-2): Postgres with pgvector, the server, and a TLS
+# A full nightsquad server (NFR-1, NFR-2): Postgres with pgvector, the server, and a TLS
 # front. Agent runs and platform checks are sibling containers from the agent image
 # (EXE-12, WRK-7).
 #

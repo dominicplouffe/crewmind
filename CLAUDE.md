@@ -1,6 +1,6 @@
-# Nightsquad: instructions for Claude Code
+# nightsquad: instructions for Claude Code
 
-Nightsquad runs a team of AI agents like a company (chairman, CEO, teams) under rules the agents cannot talk their way out of. This repository is a rebuild from an empty start. The specification in `docs/spec/` is the source of truth.
+nightsquad runs a team of AI agents like a company (chairman, CEO, teams) under rules the agents cannot talk their way out of. This repository is a rebuild from an empty start. The specification in `docs/spec/` is the source of truth.
 
 ## Before any work
 

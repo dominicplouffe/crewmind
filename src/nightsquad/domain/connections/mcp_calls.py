@@ -2,7 +2,7 @@
 platform, and asking for access.
 
 A run is offered the allowed tools of the MCP servers granted to its role, through the agent
-API, and nothing else. A call to a denied tool never leaves Nightsquad. A call to a tool that
+API, and nothing else. A call to a denied tool never leaves nightsquad. A call to a tool that
 may change things is a side effect under an idempotency key (WRK-16), so a retried run never
 does it twice. Results are untrusted input, cut to size. Calls are limited per run and per
 day, counted in the ledger, and recorded in the run's trace with their arguments masked.
@@ -56,7 +56,7 @@ from nightsquad.storage.models import (
 )
 
 CON_13 = rules.register(
-    Rule("CON-13", "An MCP call goes through Nightsquad, within its limits, and is recorded.")
+    Rule("CON-13", "An MCP call goes through nightsquad, within its limits, and is recorded.")
 )
 
 AGENT = frozenset({Principal.AGENT_RUN})

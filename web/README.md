@@ -1,6 +1,6 @@
-# Nightsquad web app
+# nightsquad web app
 
-The browser client for Nightsquad: TypeScript + React, built with Vite. It holds no business rules:
+The browser client for nightsquad: TypeScript + React, built with Vite. It holds no business rules:
 it calls the API and shows what comes back, including the server's own refusal messages and hints.
 
 ## Develop
@@ -10,7 +10,7 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-The dev server proxies `/v1`, `/files`, `/stream` and `/healthz` to a Nightsquad server at
+The dev server proxies `/v1`, `/files`, `/stream` and `/healthz` to a nightsquad server at
 `http://127.0.0.1:8433`. Set `NIGHTSQUAD_API` to use another address. To start a throwaway server
 with the mock model (no paid calls):
 

@@ -137,7 +137,7 @@ async def save_squad(session: AsyncSession, doc: SquadDoc, source: str, now: dat
 
 
 async def load_starter(session: AsyncSession, now: datetime) -> None:
-    """Load the library shipped with Nightsquad. A role whose shipped text has changed gets
+    """Load the library shipped with nightsquad. A role whose shipped text has changed gets
     a new version (LIB-3). Cheap when nothing is missing."""
     roles, squads = starter_roles(), starter_squads()
     have_roles = await session.scalar(

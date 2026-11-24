@@ -1,5 +1,5 @@
 /**
- * End-to-end tests of the Board panel against a real Nightsquad server with the mock model: tasks and
+ * End-to-end tests of the Board panel against a real nightsquad server with the mock model: tasks and
  * their check labels, audit samples, outside evidence and launches.
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
  *

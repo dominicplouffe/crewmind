@@ -251,7 +251,7 @@ async def test_IF_5_8_resources_and_prompts_show_only_what_the_person_may_see(ap
         for name in ("design-doctrine", "goal-grammar"):
             page = await client.read_resource(f"nightsquad://documents/{name}")
             served += page.contents[0].text  # type: ignore[union-attr]
-        for line in ("how a Nightsquad project is drafted", "`failure_deliverable`"):
+        for line in ("how a nightsquad project is drafted", "`failure_deliverable`"):
             assert line in served
             assert line in drafting.doctrine_text()
         prompts = {prompt.name for prompt in (await client.list_prompts()).prompts}

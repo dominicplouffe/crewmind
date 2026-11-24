@@ -205,7 +205,7 @@ async def search(context: Context, payload: SearchInput) -> SearchResult:
 
 @operation(
     "library.reload",
-    summary="Load the roles and squads shipped with this version of Nightsquad again.",
+    summary="Load the roles and squads shipped with this version of nightsquad again.",
     authority=Authority.ADMIN,
     reversibility=Reversibility.REVERSIBLE,
 )

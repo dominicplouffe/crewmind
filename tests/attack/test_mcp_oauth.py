@@ -28,7 +28,7 @@ def master_key(app: App) -> None:
 
 
 async def come_back(app: App, actor: Actor, code: str, state: str) -> httpx.Response:
-    """The browser arriving at Nightsquad's callback, carrying its session cookie."""
+    """The browser arriving at nightsquad's callback, carrying its session cookie."""
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app.api), base_url=app.runtime.config.base_url,
         cookies={SESSION_COOKIE: actor.token},

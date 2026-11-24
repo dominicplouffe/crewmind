@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# deploy_single_server.sh: take a machine with Docker to a running Nightsquad, or bring an
+# deploy_single_server.sh: take a machine with Docker to a running nightsquad, or bring an
 # existing install up on the code that is checked out (NFR-1, NFR-2, NFR-6). Safe to run
 # again: it never replaces a secret, and it keeps the address it was last given.
 #
@@ -154,7 +154,7 @@ printf '%s\n' "$DOCTOR_OUT" | grep -E 'ok=False' | sed 's/^ *- /    ! /' || ok "
 
 say "Running"
 cat <<EOF
-  Nightsquad is at $PUBLIC_URL
+  nightsquad is at $PUBLIC_URL
 EOF
 if [ -n "$LINK" ]; then
   cat <<EOF

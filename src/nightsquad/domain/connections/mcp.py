@@ -1,4 +1,4 @@
-"""MCP servers: their states, their tools' permissions, their health, and how Nightsquad
+"""MCP servers: their states, their tools' permissions, their health, and how nightsquad
 signs in to them (CON-9 to CON-12, INT-4, LLM-11, 7.18)."""
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ def move(
 async def headers_for(
     session: AsyncSession, store: SecretStore, server: McpServer
 ) -> dict[str, str]:
-    """CON-9: how Nightsquad signs in to the server, for its own calls only. The values never
+    """CON-9: how nightsquad signs in to the server, for its own calls only. The values never
     enter a sandbox."""
     owner = (SECRET_OWNER, server.connection_id)
     if server.auth_kind == AuthKind.BEARER:

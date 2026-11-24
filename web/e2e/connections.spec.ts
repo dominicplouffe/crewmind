@@ -1,5 +1,5 @@
 /**
- * End-to-end tests of connections against a real Nightsquad server: Settings → Connections (empty
+ * End-to-end tests of connections against a real nightsquad server: Settings → Connections (empty
  * state, add a secret sent for you, add a variable, paste a .env), and a project's Connections
  * panel (attach with roles). Covers CON-2, CON-3, CON-4, CON-15, NFR-18.
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
@@ -96,7 +96,7 @@ test("a project's Connections panel attaches what is yours, with the roles chose
 
 
 test("an MCP server is tested before saving, then its tools are allowed one by one (CON-9, CON-12, CON-15)", async () => {
-  // Nightsquad's own MCP endpoint is a real server to connect to; a read client token signs in.
+  // nightsquad's own MCP endpoint is a real server to connect to; a read client token signs in.
   const token = await page.evaluate(async () => {
     const response = await fetch("/v1/mcp_clients/mint", {
       method: "POST",
@@ -110,7 +110,7 @@ test("an MCP server is tested before saving, then its tools are allowed one by o
   await page.getByRole("button", { name: /^Add An MCP server/ }).click();
   const sheet = page.getByTestId("add-mcp");
   await sheet.getByLabel("Name", { exact: true }).fill("nightsquad-self");
-  await sheet.getByLabel("What is it for?").fill("Nightsquad's own tools, for the test.");
+  await sheet.getByLabel("What is it for?").fill("nightsquad's own tools, for the test.");
   await sheet.getByLabel("Address", { exact: true }).fill(`${new URL(page.url()).origin}/mcp`);
   await sheet.getByLabel(/Bearer token/).check();
   await sheet.getByLabel("Token", { exact: true }).fill(token);
@@ -124,7 +124,7 @@ test("an MCP server is tested before saving, then its tools are allowed one by o
   await expect(sheet).toBeHidden();
   const row = page.getByTestId("connection").filter({ hasText: "nightsquad-self" });
   await row.locator("summary").click();
-  // Nightsquad marks its own reading tools, so they start allowed; the others start off.
+  // nightsquad marks its own reading tools, so they start allowed; the others start off.
   await expect(row.getByRole("switch", { name: "Allow agenda_show" })).toHaveAttribute("aria-checked", "true");
   await expect(row.getByRole("switch", { name: "Allow projects_hold" })).toHaveAttribute("aria-checked", "false");
   await shot("07-mcp-tools");

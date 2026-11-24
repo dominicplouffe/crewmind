@@ -77,7 +77,7 @@ async def subscribe(context: Context, payload: SubscribeInput) -> Alerts:
             "not_a_push_service",
             "That address is not a browser push service, so alerts cannot be sent to it.",
             rule=push.CHAT_20.id,
-            hint="Turn alerts on from the Nightsquad app in your browser.",
+            hint="Turn alerts on from the nightsquad app in your browser.",
         )
     await context.session.execute(
         delete(PushSubscription).where(PushSubscription.endpoint == payload.endpoint)

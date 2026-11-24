@@ -1,4 +1,4 @@
-"""The memory eval suite (MEM-8): Nightsquad measures its own recall.
+"""The memory eval suite (MEM-8): nightsquad measures its own recall.
 
 A scripted project history is stored in the real engine (Mem0, the local embedding model,
 and the store for the database under test). Each question is worded differently from the

@@ -32,7 +32,7 @@ async def test_CON_11_a_command_server_runs_with_only_its_own_variables_and_serv
 ) -> None:
     """CON-11, CON-12, CON-13: the command is tested before it is saved; it sees the secret
     it was given and nothing of the host's environment; its reading tools are offered to
-    agents, who use them through Nightsquad; it stops when the install closes."""
+    agents, who use them through nightsquad; it stops when the install closes."""
     monkeypatch.setenv("NIGHTSQUAD_HOST_ONLY", "host-value")
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)

@@ -146,7 +146,7 @@ class McpServer(Base):
 
 class McpTool(Base):
     """One tool an MCP server offers, as it described itself (untrusted, P4), with how
-    Nightsquad classified it and whether agents may call it (CON-12, INT-4)."""
+    nightsquad classified it and whether agents may call it (CON-12, INT-4)."""
 
     __tablename__ = "mcp_tools"
     __table_args__ = (UniqueConstraint("server_id", "name"),)

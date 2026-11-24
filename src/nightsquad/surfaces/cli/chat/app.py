@@ -63,7 +63,7 @@ class ChatApp(App[None]):
         super().__init__()
         self._client = client
         self._project_id = project_id
-        self.title = f"Nightsquad: {project_name}"
+        self.title = f"nightsquad: {project_name}"
         self._seen: set[int] = set()
         self._replying: dict[str, str] = {}
         self._tasks: list[asyncio.Task[None]] = []

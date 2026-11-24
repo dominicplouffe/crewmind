@@ -129,12 +129,12 @@ async def context_section(session: AsyncSession, view: AgentView) -> str | None:
         lines += [
             "",
             "Secrets are available to the commands you run. Never print, write or send a "
-            "secret's value; Nightsquad replaces it with [secret: NAME] in everything you write.",
+            "secret's value; nightsquad replaces it with [secret: NAME] in everything you write.",
         ]
     if sent:
         lines += [
             "",
-            "A secret sent for you is added by Nightsquad to your HTTPS requests to its sites: "
+            "A secret sent for you is added by nightsquad to your HTTPS requests to its sites: "
             "call the site without it. You never see its value.",
         ]
     if lacking:

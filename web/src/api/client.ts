@@ -1,4 +1,4 @@
-/** Typed calls to the Nightsquad API. Types come from the generated schema; no rules live here. */
+/** Typed calls to the nightsquad API. Types come from the generated schema; no rules live here. */
 import type { components, paths } from "./schema";
 
 export type Schemas = components["schemas"];
