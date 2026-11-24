@@ -76,6 +76,15 @@ describe("placements: day dividers, groups and reply quotes (CHAT-10, CHAT-11)",
   });
 });
 
+describe("spacing settled with the layout, not left to the stylesheet", () => {
+  it("marks the message a group goes on from, and a notice right under another", () => {
+    const notice = (): Message => message({ author_kind: "platform", author: "crewmind", kind: "status" });
+    const shown = placements([message({}), message({}), notice(), notice(), message({ author_kind: "agent", author: "CEO" })], NOW, WORDS);
+    expect(shown.map((entry) => entry.groupGoesOn)).toEqual([true, false, false, false, false]);
+    expect(shown.map((entry) => entry.noticeAfterNotice)).toEqual([false, false, false, true, false]);
+  });
+});
+
 describe("dayLabel", () => {
   it("gives the date, with the year only when it is not this year", () => {
     expect(dayLabel("2026-03-02T10:00:00", NOW, WORDS)).toContain("March");

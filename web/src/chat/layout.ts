@@ -14,6 +14,19 @@ export interface Placement {
   continued: boolean;
   /** Show the quote of the message this one replies to. */
   quote: boolean;
+  /** The next message goes on this one's group: no space below it. */
+  groupGoesOn: boolean;
+  /** A plain notice right under another, the same day: they sit together as one list. */
+  noticeAfterNotice: boolean;
+}
+
+/** Card-like lines of crewmind's: they show as cards, not as plain notices. */
+const CARD_KINDS = new Set(["action card", "decision item", "standing order proposed", "reopen request", "drafting"]);
+
+/** A plain line of crewmind's, shown as a quiet notice (display only). */
+export function isNotice(message: Message): boolean {
+  const kind = (message.detail as { kind?: unknown } | null)?.kind;
+  return message.kind === "status" && !(typeof kind === "string" && CARD_KINDS.has(kind));
 }
 
 /**
@@ -56,7 +69,7 @@ export function placements(
   now: Date,
   words: { today: string; yesterday: string },
 ): Placement[] {
-  return messages.map((message, index) => {
+  const placed = messages.map((message, index) => {
     const before = index > 0 ? messages[index - 1] : undefined;
     const newDay = before === undefined || dayKey(before.at) !== dayKey(message.at);
     const speaker = speakerOf(message);
@@ -71,6 +84,11 @@ export function placements(
       day: newDay ? dayLabel(message.at, now, words) : null,
       continued,
       quote: message.reply_to !== null && !answersAbove,
+      groupGoesOn: false,
+      noticeAfterNotice: !newDay && before !== undefined && isNotice(before) && isNotice(message),
     };
   });
+  // Worked out here, not by the stylesheet looking at the next message: the list measures where
+  // a message sits to keep the reader's place, and the spacing must be settled before it does.
+  return placed.map((entry, index) => ({ ...entry, groupGoesOn: placed[index + 1]?.continued ?? false }));
 }
