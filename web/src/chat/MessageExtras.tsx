@@ -116,3 +116,20 @@ export function StatusActions({ detail, order, request, handlers }: StatusProps)
   }
   return null;
 }
+
+/** Who said a line of the drafting conversation that was copied into the project chat (FND-1). */
+export type DraftingAuthor = "person" | "founder";
+
+/**
+ * A line of the drafting conversation, copied into the project chat at creation (FND-1): who said
+ * it and the words without the "You: " or "The Founder: " the server puts in front. Null for any
+ * other message. Display only: the stored line is unchanged.
+ */
+export function draftingLine(message: Message): { author: DraftingAuthor; body: string } | null {
+  const detail = message.detail as Record<string, unknown> | null;
+  if (detail?.kind !== "drafting") return null;
+  const author: DraftingAuthor | null = detail.author === "person" ? "person" : detail.author === "founder" ? "founder" : null;
+  if (author === null) return null;
+  const prefix = author === "person" ? "You: " : "The Founder: ";
+  return { author, body: message.body.startsWith(prefix) ? message.body.slice(prefix.length) : message.body };
+}

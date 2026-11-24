@@ -141,6 +141,7 @@ export const t = {
     preview: (name: string): string => `Preview ${name}`,
     showMore: "Show more",
     showLess: "Show less",
+    whileDrafting: "While drafting",
     typingLabel: (seat: string): string => `${seat} is writing a reply`,
     writing: "Writing…",
     stop: "Stop",

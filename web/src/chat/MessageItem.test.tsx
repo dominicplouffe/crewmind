@@ -110,3 +110,32 @@ describe("markers and status buttons", () => {
     expect(screen.getByText("You approved this request.")).toBeTruthy();
   });
 });
+
+describe("lines said while drafting (FND-1)", () => {
+  it("shows a copied drafting line as said, by whom, without the server's prefix, as a record with no actions", () => {
+    show(
+      message({
+        author_kind: "platform",
+        author: "crewmind",
+        kind: "status",
+        body: "The Founder: Here is a first draft.",
+        detail: { kind: "drafting", author: "founder" },
+      }),
+    );
+    const line = screen.getByTestId("message-drafting");
+    expect(line.dataset.author).toBe("founder");
+    expect(line.textContent).toContain("The Founder");
+    expect(line.textContent).toContain("While drafting");
+    expect(line.textContent).toContain("Here is a first draft.");
+    expect(line.textContent).not.toContain("The Founder: Here");
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("puts the person's own drafting words on their side", () => {
+    show(message({ author_kind: "platform", kind: "status", body: "You: A daily post.", detail: { kind: "drafting", author: "person" } }));
+    const line = screen.getByTestId("message-drafting");
+    expect(line.className).toContain("from-person");
+    expect(line.textContent).toContain("A daily post.");
+    expect(line.textContent).not.toContain("You: A daily");
+  });
+});

@@ -30,7 +30,8 @@ import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
 import { AgentAvatar, useAgentName } from "../crew/names";
 import { ActionCard } from "./ActionCard";
-import { Markers, StatusActions, detailOf, isReopenLine, type MessageDetail } from "./MessageExtras";
+import { Markers, StatusActions, detailOf, draftingLine, isReopenLine, type MessageDetail } from "./MessageExtras";
+import { Avatar } from "../ui/Avatar";
 import { MessageMenu, type MenuAction } from "./MessageMenu";
 import { RelativeTime } from "./RelativeTime";
 import type { ListeningHandlers } from "./useListening";
@@ -234,6 +235,41 @@ function MessageItemInner({
     </article>
   );
 
+  // A line said while drafting, before the project existed: shown as said, by whom, and kept as a record.
+  const drafted = draftingLine(message);
+  if (drafted) {
+    const byPerson = drafted.author === "person";
+    const who = byPerson ? t.chat.you : t.founder.talk.authors.founder ?? "";
+    return (
+      <article
+        id={compact ? undefined : `message-${message.id}`}
+        className={`message ${byPerson ? "from-person" : "from-agent"} is-bubble is-drafted`}
+        tabIndex={-1}
+        aria-label={t.chat.messageLabel(who, formatDateTime(message.at))}
+        data-testid="message-drafting"
+        data-author={drafted.author}
+      >
+        {byPerson ? null : (
+          <div className="message-gutter">
+            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" />
+          </div>
+        )}
+        <div className="message-main">
+          <header className="message-head">
+            <span className="author">{who}</span>
+            <RelativeTime at={message.at} className="message-time" />
+            <span className="badge drafted-tag">{t.chat.whileDrafting}</span>
+          </header>
+          <div className="message-content">
+            <div className="body">
+              <Markdown source={drafted.body} />
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   if (hasItemNote && detail.item !== undefined) {
     return article(
       "is-note",
@@ -250,7 +286,9 @@ function MessageItemInner({
       "is-row",
       <>
         <div className="system-row">
-          <Icon size={14} aria-hidden="true" className="system-icon" />
+          <span className="system-gutter">
+            <Icon size={15} aria-hidden="true" className="system-icon" />
+          </span>
           <div className="system-text">
             <span className="visually-hidden">{author}: </span>
             <Markdown source={message.body} className="inline" />

@@ -38,7 +38,7 @@
 
 /* ---------- The list ---------- */
 .messages {
-  --chat-column: 48rem;
+  --chat-column: 56rem;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -63,7 +63,7 @@
   position: relative;
   margin-bottom: var(--space-2);
   border-radius: var(--radius-lg);
-  font-size: var(--text-base);
+  font-size: 1rem;
   line-height: 1.6;
   scroll-margin: var(--space-6);
 }
@@ -172,32 +172,39 @@
 }
 .message.is-system .author { color: var(--color-text-muted); }
 
-/* crewmind's plain line: quiet, centred, with an icon. */
+/* crewmind's plain line: a quiet notice on the same left edge as the messages, its icon in the
+   avatar column, the time at the right. Readable size; never centred. */
 .message.is-row {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: var(--space-3) auto;
-  padding: 0 var(--space-6);
-  font-size: var(--text-sm);
-  line-height: 1.5;
+  align-items: stretch;
+  gap: var(--space-1);
+  margin: var(--space-1) 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-md);
+  line-height: 1.55;
 }
 .system-row {
-  display: block;
-  max-width: 40rem;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   color: var(--color-text-muted);
-  text-align: center;
-  text-wrap: balance;
 }
-.system-row > * { margin-right: var(--space-2); }
-.system-row > :last-child { margin-right: 0; }
-.system-icon { display: inline; vertical-align: -0.15em; color: var(--color-text-muted); }
-.system-text { display: inline; overflow-wrap: anywhere; }
-.system-row .message-time { display: inline-block; }
-.system-text .markdown { display: inline; }
-.system-text .markdown > p { display: inline; margin: 0; }
+.system-gutter { flex: none; display: flex; justify-content: center; width: 2.25rem; padding-top: 0.2rem; }
+.system-icon { color: var(--color-text-faint); }
+.system-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.system-text .markdown > :first-child { margin-top: 0; }
+.system-text .markdown > :last-child { margin-bottom: 0; }
+.system-text .markdown ul, .system-text .markdown ol { margin: var(--space-1) 0; padding-left: 1.25rem; }
+.system-row .badge { flex: none; align-self: center; }
+.system-row .message-time { flex: none; padding-top: 0.1rem; }
+.message.is-row > .reply-quote,
 .message.is-row .status-actions,
-.message.is-row .status-result { justify-content: center; }
+.message.is-row .status-result { margin-left: calc(2.25rem + var(--space-3)); align-self: flex-start; justify-content: flex-start; }
+
+/* A line said while drafting, before the project existed: a record, marked as such. */
+.badge.drafted-tag { font-weight: var(--weight-medium); color: var(--color-text-muted); border-style: dashed; }
+.message.is-drafted.from-agent .message-content { color: var(--color-text); }
 
 /* The reply quote. */
 .reply-quote {
@@ -246,9 +253,6 @@
   transform: none;
 }
 .from-person.is-bubble .message-actions { right: auto; left: var(--space-3); }
-.message.is-row .message-actions { top: auto; bottom: 100%; right: 50%; transform: translateX(50%); }
-.message.is-row:hover .message-actions,
-.message.is-row:focus-within .message-actions { transform: translateX(50%); }
 .message-action {
   display: inline-flex;
   align-items: center;
@@ -319,7 +323,7 @@
     padding: 0;
   }
   .from-person.is-bubble .message-actions { align-self: flex-end; }
-  .message.is-row .message-actions { align-self: center; }
+  .message.is-row .message-actions { margin-left: calc(2.25rem + var(--space-3)); }
   .message:hover .message-actions,
   .message.is-row:hover .message-actions { transform: none; }
   .message-action { min-width: 2.5rem; height: 2.5rem; }
@@ -404,7 +408,7 @@
   padding: var(--space-2) var(--space-5) calc(var(--space-3) + env(safe-area-inset-bottom));
   background: linear-gradient(to bottom, transparent, var(--color-canvas) var(--space-3));
 }
-.composer-inner { position: relative; max-width: 48rem; margin: 0 auto; }
+.composer-inner { position: relative; max-width: var(--chat-column, 56rem); margin: 0 auto; }
 .composer-box {
   display: flex;
   flex-direction: column;

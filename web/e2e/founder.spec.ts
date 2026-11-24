@@ -149,7 +149,7 @@ test("the unfinished draft is listed on the project list and can be gone on with
   const unfinished = page.getByTestId("unfinished");
   await expect(unfinished).toContainText(BRIEF);
   await expectNoViolations(page, "project list with an unfinished draft");
-  await unfinished.getByRole("link", { name: /^Continue/ }).click();
+  await unfinished.getByRole("listitem").filter({ hasText: BRIEF }).getByRole("link", { name: /^Continue/ }).click();
   await expect(page).toHaveURL(draftUrl);
   await expect(card()).toContainText(FIRST_QUESTION);
 });
@@ -213,12 +213,17 @@ test("creating the project shows what is still missing and offers to start it; s
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
   await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
-  // The drafting conversation became the project chat.
-  await expect(page.getByRole("log", { name: "Messages" })).toContainText(`You: ${BRIEF}`);
+  // The drafting conversation became the project chat, shown as what was said and by whom (FND-1).
+  const log = page.getByRole("log", { name: "Messages" });
+  const mine = log.locator('[data-testid="message-drafting"][data-author="person"]').first();
+  await expect(mine).toContainText(BRIEF);
+  await expect(mine).not.toContainText(`You: ${BRIEF}`);
+  await expect(log.locator('[data-testid="message-drafting"][data-author="founder"]').first()).toBeVisible();
+  if (process.env.CREWMIND_E2E_SHOTS) await page.screenshot({ path: `${process.env.CREWMIND_E2E_SHOTS}/project-chat.png` });
 
   await page.goto("/");
   await expect(page.locator("#content").getByRole("link", { name: new RegExp(NAME) })).toBeVisible();
-  await expect(page.getByTestId("unfinished")).toHaveCount(0);
+  await expect(page.getByTestId("unfinished").getByText(BRIEF)).toHaveCount(0);
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
 });
