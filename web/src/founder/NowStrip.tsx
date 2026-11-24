@@ -8,15 +8,11 @@ import { Link } from "react-router-dom";
 import { founder as words } from "../strings.founder";
 import { AcceptRest } from "./AcceptRest";
 import type { Now } from "./logic";
-import { WorkingLine } from "./WorkingLine";
 
 interface Props {
   now: Now;
   draftingId: string;
   busy: boolean;
-  /** What the Founder reports it is doing, and since when, while it works. */
-  working: string;
-  workingSince: string;
   /** Offer "use your recommendations for the rest" (FND-15): only while it is the person's turn. */
   offerRest: boolean;
   onAcceptRest(): Promise<boolean>;
@@ -82,7 +78,7 @@ function Icon({ now }: { now: Now }): JSX.Element {
   return now.kind === "questions" ? <MessageSquareText size={22} aria-hidden="true" /> : <PenLine size={22} aria-hidden="true" />;
 }
 
-export function NowStrip({ now, draftingId, busy, working, workingSince, offerRest, onAcceptRest }: Props): JSX.Element {
+export function NowStrip({ now, draftingId, busy, offerRest, onAcceptRest }: Props): JSX.Element {
   const shown = text(now);
   const tone = TONE[now.kind];
   return (
@@ -99,7 +95,6 @@ export function NowStrip({ now, draftingId, busy, working, workingSince, offerRe
         <p className="now-eyebrow">{words.now.eyebrow}</p>
         <h2 className="now-title">{shown.title}</h2>
         <p className="now-body">{shown.body}</p>
-        {tone === "working" && now.kind !== "quick" ? <WorkingLine doing={working} since={workingSince} /> : null}
       </div>
       <div className="now-actions">
         {now.kind === "questions" ? (

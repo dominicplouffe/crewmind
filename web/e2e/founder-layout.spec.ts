@@ -34,3 +34,32 @@ test("the conversation keeps a readable width beside the decisions and the draft
   }
   await page.context().close();
 });
+
+test("a message to the Founder shows it working at once, until its answer arrives (FND-1, P17)", async ({ browser }) => {
+  setFounderScript(
+    [
+      { text: "I'm setting up a daily post about new AI tools." },
+      { text: "I will use an image model for the hero images.", delay_ms: 4000 },
+    ],
+    [],
+  );
+  const page = await (await browser.newContext({ storageState: STATE_FILE, viewport: { width: 1440, height: 900 } })).newPage();
+  await page.goto("/draft");
+  await page.getByLabel("What do you want done?").fill(BRIEF);
+  await page.getByRole("button", { name: "Start drafting" }).click();
+  const log = page.getByRole("log");
+  await expect(log.getByText("a daily post about new AI tools")).toBeVisible();
+
+  const box = page.getByRole("textbox", { name: "Message to the Founder" });
+  await box.fill("What will you use to create the hero images?");
+  await box.press("Enter");
+  // At once: the Founder is shown working in the conversation, and the box waits for it.
+  await expect(page.getByTestId("founder-thinking")).toBeVisible({ timeout: 3000 });
+  await expect(page.getByTestId("founder-thinking")).toBeInViewport();
+  await expect(page.getByTestId("draft-composer")).toHaveAttribute("data-mode", "working");
+  await expect(page.getByTestId("now")).toHaveAttribute("data-now", /writing-first|updating/);
+  // Then its answer replaces the bubble.
+  await expect(log.getByText("I will use an image model for the hero images.")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("founder-thinking")).toHaveCount(0);
+  await page.context().close();
+});

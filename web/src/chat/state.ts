@@ -7,6 +7,11 @@ export interface PendingMessage {
   body: string;
   replyTo: number | null;
   error: { message: string; hint: string | null } | null;
+  /**
+   * Its stored copy came in over the stream before the send answered: hidden, so the message never
+   * shows twice. It shows again only if the send then fails.
+   */
+  echoed?: boolean;
 }
 
 export interface Typing {
@@ -103,18 +108,34 @@ export function lastMessageId(messages: Message[]): number {
   return messages.length === 0 ? 0 : (messages[messages.length - 1]?.id ?? 0);
 }
 
+/** Marks each message being sent whose stored copy just arrived: same words, same reply. */
+function echo(pending: PendingMessage[], known: Message[], arriving: Message[]): PendingMessage[] {
+  const seen = new Set(known.map((message) => message.id));
+  let changed = pending;
+  for (const message of arriving) {
+    if (seen.has(message.id) || message.author_kind !== "person") continue;
+    const index = changed.findIndex(
+      (item) => !item.echoed && !item.error && item.body === message.body && item.replyTo === message.reply_to,
+    );
+    if (index === -1) continue;
+    changed = changed.map((item, at) => (at === index ? { ...item, echoed: true } : item));
+  }
+  return changed;
+}
+
 export function reduce(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
     case "reset":
       return initialState;
     case "messages": {
       const messages = mergeMessages(state.messages, action.items);
+      const pending = echo(state.pending, state.messages, action.items);
       const doneRuns = new Set(action.items.map((m) => m.run_id).filter((id): id is string => Boolean(id)));
       const doneSeats = new Set(
         action.items.filter((m) => m.author_kind === "agent" && !m.run_id).map((m) => m.author),
       );
       const typing = state.typing.filter((t) => !doneRuns.has(t.runId) && !doneSeats.has(t.seat));
-      return { ...state, messages, typing, loaded: state.loaded || Boolean(action.loaded) };
+      return { ...state, messages, pending, typing, loaded: state.loaded || Boolean(action.loaded) };
     }
     case "history":
       // A page of older messages (or the first page): it also says where the page before it starts.
