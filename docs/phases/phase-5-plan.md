@@ -26,7 +26,7 @@ Each part ends with the suite green on both databases.
 | **5b Dates and Deliver** | Throughput and projection, commitments with no date field, continuous re-projection, scope freeze, target dates, burn rate, raise requests, the CEO reserve, ready and complete with a receipt, reopen, the final gap review (PLN-4 to PLN-9, GOV-4, GOV-5, GOV-10, PRJ-4, PRJ-5, PRJ-6, WRK-11) | The Deliver golden path; the reserve drawn when nearly done and refused when half done; a commitment that turns at risk freezes new scope |
 | **5c Explore** | Bets with kill conditions and dates, the time box, findings and the findings report, expiry and one extension (PRJ-7, SPD-7, 7.4) | The Explore golden path: one bet confirmed with verified evidence, one killed; no new bet in the last fifth of the time box |
 | **5d Operate** | Cycles, recurring requirements, the roll with its scorecard, missed and skipped cycles, the pause after two skipped, metric requirements and "losing ground" (PRJ-8, PLN-11, 7.13) | The Operate golden path over three cycles; a paused project resumes into exactly one new cycle |
-| **5e Speed** | Start at once, parallel by default with the longest chain shown, where the time went, and the slow-start, no-visible-output and idle-seat flags (SPD-1 to SPD-4, SPD-6, SPD-8, SPD-9) | The speed acceptance criterion, measured with real time on a scripted crew |
+| **5e Speed** | Start at once, parallel by default with the longest chain shown, where the time went, and the slow-start, no-visible-output and idle-seat flags (SPD-1 to SPD-4, SPD-6, SPD-8, SPD-9) | The speed acceptance criterion, measured with real time on a scripted squad |
 
 The web app gets a **Plan panel** with part 5b and grows with 5c to 5e: requirements with their dependencies and the longest chain, the projection and commitment, bets, the cycle scorecard, and where the time went.
 
@@ -38,12 +38,12 @@ The web app gets a **Plan panel** with part 5b and grows with 5c to 5e: requirem
 | **The Founder** (phase 7) | Proposing a budget range, staffing enough seats, drafting the "first usable version" requirement, promoting an Explore project to Deliver | The burn rate and projected spend are shown (GOV-4, second half). The CEO writes the first requirement. Promote creates a draft Deliver project whose goal is the findings report; the Founder refines it later |
 | **Data sources** (INT, phase 8) | Metric requirements read "from sources outside the project" (PLN-11) | A metric names a public URL and a pattern for the number; the platform fetches it through the fetch guard |
 | **Questions to the chairman** (HUM-5, phase 6) | SPD-5: a question never blocks; rework is recorded against it | SPD-5 moves to phase 6 |
-| **The spec format for a project** (LIB-4, phase 7) | The reference Deliver project the speed criterion runs | A scripted crew in `acceptance/scripts/`, like phase 4's |
+| **The spec format for a project** (LIB-4, phase 7) | The reference Deliver project the speed criterion runs | A scripted squad in `acceptance/scripts/`, like phase 4's |
 
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/planning/
     model.py           requirement (7.2), bet (7.4), commitment (7.6), cycle (7.13) states
     requirements.py    propose, add, accept, decline, cut, reword, estimate, stage, reopen
@@ -64,7 +64,7 @@ src/crewmind/
     agent_operations.py  the same verbs for the CEO, within its authority
   jobs/planning.py     re-projection, bet expiry, cycle roll, metric readings, speed flags
 web/src/panels/plan/   the Plan panel
-acceptance/scripts/    deliver, explore and operate reference crews
+acceptance/scripts/    deliver, explore and operate reference squads
 ```
 
 `domain/work/tasks.py` asks `planning.readiness` before a task is created. Nothing else in phase 4's code changes shape.
@@ -88,7 +88,7 @@ The lifecycles in sections 7.2, 7.4, 7.6 and 7.13 are added to the drift test.
 
 1. **INV-18 and INV-19 as property tests:** for any sequence of propose, accept, cut, add-dependency and stage moves, no task is ever created under a requirement that is not ready for work, and the graph stays acyclic.
 2. **The arithmetic as pure-function tables:** bias multiplier, plan tokens, throughput, projection, burn rate, reserve eligibility. Every refusal that cites arithmetic shows the numbers, and a test reads them back.
-3. **Three golden-path scenarios,** one per project type, as scripted crews.
+3. **Three golden-path scenarios,** one per project type, as scripted squads.
 4. **The reserve:** drawn when at least 75% of accepted requirements are met and the rest fits; refused, with the arithmetic, when half done, when plan tokens are unknown, and a second time.
 5. **Commitment re-projection:** a table of states against scope and dates; a property test that the date is only ever the projection or a chairman's date.
 6. **Cycle roll:** completed, missed and skipped; resuming a long-paused project opens exactly one cycle.
@@ -121,8 +121,8 @@ None. They guard scope, dates and budget, and INV-18 and INV-19 are invariants.
 
 - **Size.** This phase is about as large as phase 2. See question 1.
 - **Arithmetic nobody can check by eye.** Every figure the product shows or refuses with (projection, plan tokens, reserve) is computed by one pure function and tested as a table.
-- **Real-time tests.** The speed criterion needs wall-clock time. It lives in `tests/acceptance/` with a small crew, so the fast suite stays fast.
-- **Scripted crews need requirement and task ids.** A new project's ids are predictable in a fresh database; the reference scripts depend on that, as phase 4's do.
+- **Real-time tests.** The speed criterion needs wall-clock time. It lives in `tests/acceptance/` with a small squad, so the fast suite stays fast.
+- **Scripted squads need requirement and task ids.** A new project's ids are predictable in a fresh database; the reference scripts depend on that, as phase 4's do.
 
 ## Owner answers (22 Nov 2026)
 

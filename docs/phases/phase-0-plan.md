@@ -6,7 +6,7 @@ Goal (PLAN.md): stand up the guardrails before any feature. No domain features a
 
 1. CI is green on SQLite and on Postgres with the skeleton.
 2. The conformance test fails when an operation is registered without an adapter.
-3. `crewmind --help` runs.
+3. `squad --help` runs.
 4. The spec review is answered (done: spec revision 2.1).
 
 ## Decisions this plan makes
@@ -14,17 +14,17 @@ Goal (PLAN.md): stand up the guardrails before any feature. No domain features a
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Python | 3.12 or later; developed on 3.13 | NFR-24 |
-| Build | `uv`, `hatchling`, source in `src/crewmind` | CLAUDE.md layout |
+| Build | `uv`, `hatchling`, source in `src/nightsquad` | CLAUDE.md layout |
 | Database access | SQLAlchemy 2 async: `aiosqlite` for SQLite, `psycopg` 3 for Postgres. Alembic runs the same URLs synchronously | FastAPI and the asyncio workers are async (NFR-24); one Postgres driver serves both modes |
 | HTTP route shape | One route per operation, derived from its name: `projects.hold` becomes `POST /v1/projects/hold`. Operations of class `read` use `GET` with query parameters | IF-3.1; routes are generated, so the shape is a single rule |
-| CLI command shape | `crewmind <group> <verb>`, generated from the same name. Scalar inputs become options; anything else goes through `--input` as JSON. Every command has `--json` (IF-4.3) | IF-1.2 |
+| CLI command shape | `squad <group> <verb>`, generated from the same name. Scalar inputs become options; anything else goes through `--input` as JSON. Every command has `--json` (IF-4.3) | IF-1.2 |
 | MCP tool shape | One tool per operation, named with underscores (`projects_hold`), input schema from the Pydantic model | IF-1.2 |
 | Settings data | A TOML file in the package, transcribed from Appendix A. A test parses the Appendix A tables and fails on any difference in names, scopes, defaults, ranges or "Used by" | "Loaded from Appendix A as data" without shipping the docs in the wheel; drift cannot pass CI |
 
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   catalog/
     operation.py     Operation: name, input and output models, authority, reversibility,
                      audit actor, slash command, principals, host-local flag, exemptions (IF-1.1)
@@ -38,7 +38,7 @@ src/crewmind/
     registry.py      Typed loader, lookup, value validation against type and range
   surfaces/
     api/app.py       FastAPI app generated from the catalog; maps Refusal to the envelope
-    cli/main.py      Typer app generated from the catalog; `crewmind` entry point
+    cli/main.py      Typer app generated from the catalog; `squad` entry point
     mcp/server.py    MCP server (official SDK) with tools generated from the catalog
   runner/harness/
     base.py          Harness interface (LLM-8): start, stream progress, cancel, capabilities
@@ -63,12 +63,12 @@ No operation is registered in phase 0. Adapters are exercised with sample operat
 | `tests/unit/test_storage.py` | The baseline migration applies on the selected database and the engine answers a query. Runs under `--db=sqlite` and `--db=postgres` |
 | `tests/attack/test_P10_attack_coverage.py` | Every rule in the rule registry has at least one attack test marked with its id. A rule without one fails the check |
 | `tests/attack/harness.py` | Helpers for later phases: call the API as a foreign, forged or missing principal, and assert a refusal by code and rule |
-| `tests/unit/test_cli.py` | `crewmind --help` exits 0 |
+| `tests/unit/test_cli.py` | `squad --help` exits 0 |
 
 ## Tooling
 
 - `ruff check`, `ruff format --check`, `pyright` in strict mode: all clean.
-- `uv run pytest` defaults to SQLite. `--db=postgres` reads `CREWMIND_TEST_POSTGRES_URL`.
+- `uv run pytest` defaults to SQLite. `--db=postgres` reads `NIGHTSQUAD_TEST_POSTGRES_URL`.
 - CI (GitHub Actions): one lint job; one test job per database, with a `pgvector/pgvector:pg16` service for Postgres. The workflow is in `ci/github-actions.yml` and runs once the owner copies it to `.github/workflows/ci.yml`.
 
 ## Not in phase 0

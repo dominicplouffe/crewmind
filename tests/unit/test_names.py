@@ -1,4 +1,4 @@
-"""The product's old names stay out of the repository (NFR-21, ADR-0011)."""
+"""Names used before ADR-0008 stay out of the repository (NFR-21)."""
 
 from __future__ import annotations
 
@@ -9,17 +9,10 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
-OLD = re.compile("crew", re.IGNORECASE)
+OLD = re.compile("crew(?!ai)", re.IGNORECASE)
 
-# Where an old name is the point: history written under it.
-KEEPS_OLD_NAMES = (
-    "docs/spec/CHANGELOG.md",
-    "docs/decisions/ADR-0008-project-name.md",
-    "docs/decisions/ADR-0011-renamed-nightsquad.md",
-    "docs/phases/",
-    "docs/rename-plan.md",
-    "tests/unit/test_names.py",
-)
+# This file names what it looks for.
+KEEPS_OLD_NAMES = ("tests/unit/test_names.py",)
 
 
 def _tracked() -> list[str]:
@@ -33,9 +26,8 @@ def _tracked() -> list[str]:
 
 
 def test_NFR_21_the_old_product_and_concept_names_do_not_come_back() -> None:
-    """NFR-21: the product is nightsquad and the library's ready-made job is a squad. No
-    tracked file name or text file outside the history and the rename's own bridges uses
-    the old names."""
+    """NFR-21: the product is nightsquad and the library's ready-made job is a squad
+    (ADR-0008). No tracked file's name or text uses an earlier name."""
     found: list[str] = []
     for name in _tracked():
         if name.startswith(KEEPS_OLD_NAMES):

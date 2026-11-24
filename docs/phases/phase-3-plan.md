@@ -38,7 +38,7 @@ I installed Mem0 2.2.1 in a scratch environment and read its code. These facts s
 - **SQLite installs can use Qdrant in embedded mode.** The Qdrant client is already a core dependency of Mem0. It runs in-process and stores to a folder, with no server. This answers spec question Q-001.
 - **Keyword-plus-vector search exists on both stores.** Mem0's pgvector store has keyword search; its Qdrant store has BM25 through the `fastembed` library. So MEM-2's hybrid retrieval is met without glue code.
 - **Local embeddings without PyTorch.** Mem0 supports `fastembed`, which runs small ONNX models. That fits review item R-52.
-- **Extraction can go through our gateway.** Mem0 lets a provider be registered. A small adapter makes Mem0's model calls through the crewmind gateway, so they are metered and no key leaves the server (P3).
+- **Extraction can go through our gateway.** Mem0 lets a provider be registered. A small adapter makes Mem0's model calls through the nightsquad gateway, so they are metered and no key leaves the server (P3).
 - **Mem0 sends telemetry by default.** It must be switched off (`MEM0_TELEMETRY=false`) to keep NFR-1. A test will assert no outbound call.
 - **Mem0 keeps its change history in a SQLite file of its own,** even when the vectors are in Postgres. The file will live in the data directory, go into backups, and be purged on forget and on project delete.
 - **Mem0 is heavy to load:** 1.8 seconds and about 140 MB. It will be loaded on first use, never at start, so slim mode keeps its start and idle targets (NFR-23).
@@ -47,7 +47,7 @@ I installed Mem0 2.2.1 in a scratch environment and read its code. These facts s
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/conversation/
     orders.py          standing orders: propose, confirm, edit, discard, retire (MSG-4, 7.17)
     decisions.py       closed decisions and reopen requests (MSG-5, INV-26, 7.17)
@@ -95,7 +95,7 @@ All in the catalog; the surfaces follow from it.
 - `example_marks`: project, message or artifact.
 - `pinned_notes`: project, seat, text.
 - `held_posts`: project, seat, body, due slot.
-- `memory_entries`: project, scope kind and id, the engine's id, source link, dates, untrusted flag, pinned flag. The engine holds the text and the index; this table holds what crewmind governs and shows.
+- `memory_entries`: project, scope kind and id, the engine's id, source link, dates, untrusted flag, pinned flag. The engine holds the text and the index; this table holds what nightsquad governs and shows.
 - `messages` gains a lint marker (`long`, `unclear`) and the reply's quoted question.
 
 The lifecycles are already in section 7.17 and are added to the drift test.
@@ -152,7 +152,7 @@ None. INV-23, INV-25 and INV-26 are invariants, and the rest guard authority. MS
 | Review stops | **One stop, at the full exit demo** |
 | The embedding model | **Shipped inside the package** and the Docker image, so memory works offline from the first start |
 | Who writes a standing order's sentence | The chairman's own words when they fit; a fast model call only to shorten a longer message |
-| Testing real recall here | Allow the model host for the `crewmind` environment and install pgvector locally, so recall is tested on both databases |
+| Testing real recall here | Allow the model host for the project's cloud environment and install pgvector locally, so recall is tested on both databases |
 | Phase 2 leftovers | Both taken in: **"load earlier messages"** in the web app and **warm chat sessions (MSG-11)**. The extractor part of LLM-14 comes with MEM-4 |
 | Review items R-26, R-28, R-23, R-50, R-52 | Accepted as recommended; applied in spec revision 2.9 |
 | Mem0's own history file | Accepted |
