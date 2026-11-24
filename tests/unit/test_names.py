@@ -22,6 +22,7 @@ KEEPS_OLD_NAMES = (
     "src/nightsquad/storage/migrations/versions/",
     "src/nightsquad/domain/library/legacy.py",
     "src/nightsquad/domain/install/old_name.py",
+    "deploy/_old_install.sh",
     "tests/unit/test_storage.py",
     "tests/unit/test_names.py",
     "tests/attack/test_library.py",

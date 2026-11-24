@@ -36,6 +36,7 @@ done
 
 cd "$(dirname "$0")/.."
 . deploy/_common.sh
+. deploy/_old_install.sh
 
 # ── 1. preflight ──────────────────────────────────────────────────────────────
 say "Checking where we are and what we have"
@@ -45,6 +46,8 @@ command -v openssl >/dev/null 2>&1 || die "openssl is missing (it makes the data
     sudo apt-get install -y openssl"
 command -v curl >/dev/null 2>&1 || die "curl is missing.
     sudo apt-get install -y curl"
+# An install from before the rename keeps its password, data and certificates.
+carry_old_install run yes
 
 # ── 2. where people reach it ──────────────────────────────────────────────────
 # People sign in over TLS at one address, the public URL, and nowhere else (NFR-6).
