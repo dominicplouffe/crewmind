@@ -89,7 +89,8 @@
   font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--color-text-muted);
-  padding-right: 7rem;
+  /* Room for the hover actions, but never so much that a narrow column wraps the author's name. */
+  padding-right: min(7rem, 30%);
 }
 .author { font-weight: var(--weight-semibold); color: var(--color-text); font-size: var(--text-md); }
 .message-role { color: var(--color-text-muted); font-size: var(--text-xs); }
@@ -140,6 +141,7 @@
 
 /* An agent writing a reply. */
 .message.is-typing { background: none; }
+.message.is-typing .message-head { padding-right: 0; }
 .typing-doing { display: inline-flex; align-items: center; gap: var(--space-2); }
 .typing-dots { display: inline-flex; gap: 3px; }
 .typing-dots span {

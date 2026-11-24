@@ -306,9 +306,7 @@
 .splash .logo-mark { animation: fade-in var(--duration-slow) var(--ease-out); }
 
 /* ---------- Draft pages inside the shell ---------- */
-.draft-page { padding: var(--space-6) var(--space-8); max-width: var(--content-max); margin: 0 auto; }
-@media (max-width: 899px) {
-  .draft-page { padding: var(--space-4); }
-}
+/* The draft page uses the full width; .draft-shell sets its padding. */
+.draft-page { min-width: 0; }
 
 .project-notes { padding: 0; margin: 0; }

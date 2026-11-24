@@ -110,29 +110,37 @@ test("a short brief gets a draft, its grade, a ledger and one question with a re
 
   await expect(page.getByTestId("draft-heading")).toHaveText(NAME, { timeout: SLOW });
   await expect(page.getByTestId("draft-name")).toHaveText(NAME);
-  await expect(page.getByTestId("draft-team")).toHaveText(["Entries (researcher): Rey, Sol", "Plan review (plan-adversary): Ada"]);
+  await expect(page.getByTestId("draft-team")).toHaveText([/^Entries\s*researcher\s*Rey, Sol$/, /^Plan review\s*plan-adversary\s*Ada$/]);
   await expect(page.getByTestId("draft")).toContainText("THE FINISH LINE is the printer's signed proof");
   await expect(page.getByTestId("grade-summary")).toHaveText("Ready: all ten elements are present.");
   await expect(page.locator('[data-testid="grade-element"][data-grade="present"]')).toHaveCount(10);
   await expect(ledgerLine("who_pays")).toContainText("main");
   await expect(ledgerLine("who_pays")).toContainText("assumed");
-  await expect(page.getByTestId("draft-rehearsal")).toContainText("This draft has not been rehearsed yet.");
+  // Each draft is rehearsed as it is kept (FND-4, FND-11).
+  await expect(page.getByTestId("draft-rehearsal")).toContainText("Runs to its first verified close.");
 
   await expect(card()).toHaveCount(1);
   await expect(card()).toContainText(FIRST_QUESTION);
   await expect(card().getByTestId("question-changes")).toHaveText("What this changes: What counts as finished.");
-  const recommended = card().getByRole("button", { name: /^a\. Yes, the signed proof\s*Recommended$/ });
+  // The recommended answer is already chosen; "Answer it" brings the person to it.
+  const recommended = card().getByRole("radio", { name: /^a\. Yes, the signed proof\s*Recommended$/ });
+  await expect(recommended).toBeChecked();
+  await expect(card().getByRole("radio", { name: "b. No, something else" })).toBeVisible();
+  await page.getByTestId("now").getByRole("button", { name: "Answer it" }).click();
   await expect(recommended).toBeFocused();
-  await expect(card().getByRole("button", { name: "b. No, something else" })).toBeVisible();
   // The open question is shown as its card, not also as a line of the conversation.
   await expect(page.getByTestId("line-founder")).toHaveText([/Here is a first draft\./]);
 
+  // The page leads with what is happening and what to do: here, one question to answer.
+  await expect(page.getByTestId("now")).toHaveAttribute("data-now", "questions");
+  await expect(page.getByTestId("now")).toContainText("The Founder has a question for you.");
   await expect(readiness()).toHaveAttribute("data-stage", "you");
+  await expect(page.locator('[data-testid="check"][data-check="draft"]')).toHaveAttribute("data-status", "done");
+  await expect(page.locator('[data-testid="check"][data-check="questions"]')).toHaveAttribute("data-status", "todo");
   await expect(readiness()).toContainText("1 question is waiting for your answer.");
-  await expect(readiness()).toContainText("This draft has not been rehearsed.");
+  await expect(page.locator('[data-testid="check"][data-check="rehearsal"]')).toHaveAttribute("data-status", "done");
   await expect(page.getByRole("button", { name: "Create the project" })).toHaveCount(0);
   await expectAccessible(page, "drafting with an open question");
-  await recommended.focus();
 });
 
 test("the unfinished draft is listed on the project list and can be gone on with (FND-1)", async () => {
@@ -141,14 +149,13 @@ test("the unfinished draft is listed on the project list and can be gone on with
   const unfinished = page.getByTestId("unfinished");
   await expect(unfinished).toContainText(BRIEF);
   await expectNoViolations(page, "project list with an unfinished draft");
-  await unfinished.getByRole("link", { name: /^Go on/ }).click();
+  await unfinished.getByRole("link", { name: /^Continue/ }).click();
   await expect(page).toHaveURL(draftUrl);
   await expect(card()).toContainText(FIRST_QUESTION);
 });
 
-test("Enter on the card accepts the recommendation; the Founder's reply streams in and asks the next question", async () => {
-  await expect(card().locator('[data-recommended="true"]')).toBeFocused();
-  await page.keyboard.press("Enter");
+test("sending the round with the recommended answer settles it; the Founder's reply streams in and asks the next question", async () => {
+  await page.getByRole("button", { name: "Send my answer" }).click();
   await expect(ledgerLine("finish_line")).toContainText("Yes, the signed proof");
   await expect(ledgerLine("finish_line")).toContainText("your answer");
   // The words arrive a few at a time before the finished line is stored.
@@ -156,7 +163,7 @@ test("Enter on the card accepts the recommendation; the Founder's reply streams 
   await expect(page.getByTestId("line-founder").last()).toContainText("Next: who the guide is for.", { timeout: SLOW });
   await expect(page.getByTestId("founder-reply")).toHaveCount(0);
   await expect(card()).toContainText(SECOND_QUESTION);
-  await expect(card().locator('[data-recommended="true"]')).toBeFocused();
+  await expect(card().getByRole("radio", { name: /^a\. Yes\s*Recommended$/ })).toBeChecked();
 });
 
 test("using the recommendations for the rest asks first, records assumptions, and the rehearsed draft becomes ready (FND-5, FND-11)", async () => {
@@ -180,10 +187,14 @@ test("using the recommendations for the rest asks first, records assumptions, an
   await expect(ledgerLine("finish_line")).toHaveAttribute("data-source", "answer");
   await expect(ledgerLine("budget")).toHaveAttribute("data-source", "assumption");
   await expect(page.getByRole("button", { name: "Use your recommendations for the rest" })).toHaveCount(0);
+  await expect(page.getByTestId("now")).toHaveAttribute("data-now", "ready");
+  await expect(page.locator('[data-testid="check"][data-status="done"]')).toHaveCount(5);
   await expectAccessible(page, "a draft that is ready");
 });
 
 test("creating the project shows what is still missing and offers to start it; starting lands on the project (FND-13)", async () => {
+  await page.getByTestId("go-review").click();
+  await expect(page).toHaveURL(/\/review$/);
   await page.getByRole("button", { name: "Create the project" }).click();
   const created = page.getByTestId("created");
   await expect(created.getByRole("heading", { name: `“${NAME}” is created.` })).toBeFocused();
