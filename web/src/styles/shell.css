@@ -221,13 +221,21 @@
   white-space: nowrap;
 }
 .project-back { display: none; }
+/* The tabs scroll sideways; the More menu sits outside them so its list is not clipped. */
+.project-tabbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 calc(-1 * var(--space-2));
+}
 .project-tabs {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: flex-end;
   gap: var(--space-1);
   overflow-x: auto;
   scrollbar-width: none;
-  margin: 0 calc(-1 * var(--space-2));
 }
 .project-tabs::-webkit-scrollbar { display: none; }
 .project-tab {
@@ -255,7 +263,7 @@
   border-radius: 2px;
   background: var(--color-accent);
 }
-.project-tabs .menu { margin-left: auto; align-self: center; }
+.project-tabbar > .menu { flex: none; }
 .project-body { flex: 1; min-height: 0; display: flex; }
 .project-view { flex: 1; min-width: 0; min-height: 0; overflow: auto; }
 .project-view.chat-view { display: flex; overflow: hidden; }

@@ -179,22 +179,24 @@ export function ProjectTop({ projectId, name, header, tab, needs, onTab, onPanel
       ) : null}
       {header && header.unread > 0 ? <span className="visually-hidden">{t.header.unread(header.unread)}</span> : null}
 
-      <nav className="project-tabs" aria-label={shell.nav.tabsLabel}>
-        {TAB_ORDER.map((id) => (
-          <Link
-            key={id}
-            to={id === "chat" ? `/projects/${projectId}` : `/projects/${projectId}/${id}`}
-            className="project-tab"
-            aria-current={tab === id ? "page" : undefined}
-          >
-            {projectLayout.tabs[id]}
-            {id === "chat" && header && header.unread > 0 && tab !== "chat" ? (
-              <span className="count" aria-hidden="true">
-                {header.unread}
-              </span>
-            ) : null}
-          </Link>
-        ))}
+      <div className="project-tabbar">
+        <nav className="project-tabs" aria-label={shell.nav.tabsLabel}>
+          {TAB_ORDER.map((id) => (
+            <Link
+              key={id}
+              to={id === "chat" ? `/projects/${projectId}` : `/projects/${projectId}/${id}`}
+              className="project-tab"
+              aria-current={tab === id ? "page" : undefined}
+            >
+              {projectLayout.tabs[id]}
+              {id === "chat" && header && header.unread > 0 && tab !== "chat" ? (
+                <span className="count" aria-hidden="true">
+                  {header.unread}
+                </span>
+              ) : null}
+            </Link>
+          ))}
+        </nav>
         <Menu
           label={projectLayout.moreLabel}
           className="button ghost small"
@@ -207,7 +209,7 @@ export function ProjectTop({ projectId, name, header, tab, needs, onTab, onPanel
           }
           items={MORE.map(({ id, icon }) => ({ key: id, label: t.panels.names[id], icon, run: () => onPanel(id) }))}
         />
-      </nav>
+      </div>
     </header>
   );
 }
