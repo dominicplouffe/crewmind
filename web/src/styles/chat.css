@@ -451,7 +451,7 @@
 .composer-send:disabled { opacity: 0.35; }
 .composer-stop { border-radius: var(--radius-full); }
 /* The keys are shown while the person writes, not all the time. */
-.composer-hint {
+.composer .composer-hint {
   margin: var(--space-2) 0 0;
   padding-left: var(--space-1);
   font-size: var(--text-xs);
@@ -514,7 +514,7 @@
   .message.is-system { grid-template-columns: 2rem minmax(0, 1fr); gap: 0 var(--space-2); padding: var(--space-2); }
   .message.is-row { padding: 0 var(--space-2); }
   .composer { padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom)); }
-  .composer-hint { display: none; }
+  .composer .composer-hint { display: none; }
   .action-card { padding: var(--space-4); }
   .from-person.is-bubble .message-main { max-width: 92%; }
 }

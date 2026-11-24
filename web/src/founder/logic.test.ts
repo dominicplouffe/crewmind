@@ -314,6 +314,8 @@ describe("nowOf: what the page says is happening", () => {
     [{ failure: "The model timed out." }, "failed-turn"],
     [{}, "your-turn"],
     [{ ready: true }, "ready"],
+    // A ready draft the person just wrote about: the Founder owes a turn, so it is working.
+    [{ ready: true, waiting_for: "the Founder", draft: { name: "Guide" } }, "updating"],
     [{ quick: true }, "quick"],
     [{ state: "created" }, "created"],
     [{ state: "failed" }, "ended"],

@@ -111,7 +111,7 @@
 }
 .now-title { margin: 0; font-size: var(--text-xl); line-height: var(--leading-tight); }
 .now-body { margin: var(--space-1) 0 0; max-width: 72ch; color: var(--color-text-muted); }
-.now-text [data-testid="waiting-for-founder"] { margin: var(--space-2) 0 0; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.is-thinking [data-testid="waiting-for-founder"] { margin: 0; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 .now-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
 @container (max-width: 47.99rem) {
   .now-strip { grid-template-columns: auto minmax(0, 1fr); padding: var(--space-4); }

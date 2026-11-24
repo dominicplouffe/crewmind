@@ -64,6 +64,8 @@ export const founder = {
     avatarName: "Founder",
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
     writing: "The Founder is writing.",
+    thinking: "thinking",
+    thinkingLabel: "The Founder is working on your message",
     writingLabel: "The Founder is writing",
     waitingForFounder: "The Founder is working on it. This page updates by itself.",
     founderIsWorking: (doing: string, elapsed: string): string =>

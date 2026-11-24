@@ -106,8 +106,9 @@ export function stageOf(view: Drafting): Stage {
   if (view.state === "failed") return "failed";
   if (view.state === "created" || view.state === "started") return "done";
   if (view.quick) return "quick";
-  if (view.ready) return "ready";
-  return view.waiting_for === "the Founder" ? "founder" : "you";
+  // The Founder owes a turn: it is working, even on a draft that was ready before the person spoke.
+  if (view.waiting_for === "the Founder") return "founder";
+  return view.ready ? "ready" : "you";
 }
 
 export interface Reason {

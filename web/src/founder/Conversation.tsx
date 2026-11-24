@@ -5,11 +5,14 @@ import { formatDateTime, formatTime } from "../lib/format";
 import { t } from "../strings";
 import { Avatar } from "../ui/Avatar";
 import type { Line } from "./logic";
+import { WorkingLine } from "./WorkingLine";
 
 interface Props {
   lines: Line[];
   /** The Founder's words so far, while it writes. */
   reply: string;
+  /** The Founder owes a turn and has not started writing: what it is doing, and since when (P17). */
+  thinking?: { doing: string; since: string } | null;
 }
 
 const SIDE: Record<string, string> = { person: "from-person", founder: "from-agent", platform: "is-status" };
@@ -51,7 +54,7 @@ function LineItem({ line }: { line: Line }): JSX.Element {
   );
 }
 
-export function Conversation({ lines, reply }: Props): JSX.Element {
+export function Conversation({ lines, reply, thinking = null }: Props): JSX.Element {
   const words = t.founder.talk;
   const end = useRef<HTMLDivElement>(null);
   const shown = useRef(0);
@@ -64,6 +67,12 @@ export function Conversation({ lines, reply }: Props): JSX.Element {
     }
     shown.current = lines.length;
   }, [lines.length]);
+
+  // When the Founder starts working, bring its bubble into view: the person sees it took the message.
+  const working = thinking !== null;
+  useEffect(() => {
+    if (working) end.current?.scrollIntoView({ block: "nearest" });
+  }, [working]);
 
   return (
     <div className="draft-lines" role="log" aria-live="polite" aria-label={words.logLabel}>
@@ -84,6 +93,28 @@ export function Conversation({ lines, reply }: Props): JSX.Element {
               <div className="body">
                 <Markdown source={reply} />
               </div>
+            </div>
+          </div>
+        </article>
+      ) : thinking ? (
+        <article className="message from-agent is-bubble is-typing is-thinking" aria-label={words.thinkingLabel} data-testid="founder-thinking">
+          <div className="message-gutter">
+            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" status="working" />
+          </div>
+          <div className="message-main">
+            <header className="message-head">
+              <span className="author">{words.authors.founder ?? t.founder.talk.avatarName}</span>
+              <span className="message-role typing-doing">
+                <span className="typing-dots" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                {words.thinking}
+              </span>
+            </header>
+            <div className="message-content">
+              <WorkingLine doing={thinking.doing} since={thinking.since} />
             </div>
           </div>
         </article>

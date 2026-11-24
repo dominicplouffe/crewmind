@@ -288,7 +288,7 @@ export function MessageList({
           ))}
         </div>
       ))}
-      {pending.map((item) => (
+      {pending.filter((item) => !item.echoed || item.error).map((item) => (
         <PendingItem
           key={item.key}
           pending={item}
