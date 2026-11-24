@@ -199,7 +199,7 @@
 .system-row .badge { flex: none; align-self: center; }
 .system-row .message-time { flex: none; padding-top: 0.1rem; }
 /* Notices in a row sit close together, as one list. */
-.message-slot:has(> .message.is-row) + .message-slot:not(:has(.day-divider)) > .message.is-row { margin-top: calc(-1 * var(--space-2)); }
+.message-slot.notice-after-notice > .message.is-row { margin-top: calc(-1 * var(--space-2)); }
 .message.is-row > .reply-quote,
 .message.is-row .status-actions,
 .message.is-row .status-result { margin-left: calc(2.25rem + var(--space-3)); align-self: flex-start; justify-content: flex-start; }
@@ -521,7 +521,7 @@
 
 /* ---------- Groups, days and the way back to the newest ---------- */
 /* A message that goes on the group above: tight to it, the time in the avatar column on hover. */
-.message-slot:has(+ .message-slot.is-continued) > .message { margin-bottom: 0; padding-bottom: var(--space-1); }
+.message-slot.group-goes-on > .message { margin-bottom: 0; padding-bottom: var(--space-1); }
 .message.is-continued { margin-top: 0; padding-top: var(--space-1); }
 .message.from-person.is-bubble.is-continued { margin-top: 0; }
 .gutter-time {
@@ -554,18 +554,18 @@
 .day-divider::after { content: ""; flex: 1; height: 1px; background: var(--color-border-subtle); }
 .message-slot:first-of-type .day-divider { margin-top: 0; }
 
+.messages-frame { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .jump-latest {
-  position: sticky;
-  bottom: var(--space-2);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--space-3);
   z-index: 3;
   display: flex;
   justify-content: center;
-  height: 0;
-  overflow: visible;
   pointer-events: none;
 }
 .jump-latest-button {
-  transform: translateY(-100%);
   pointer-events: auto;
   border-radius: var(--radius-full);
   background: var(--color-surface-raised);

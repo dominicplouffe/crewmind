@@ -33,4 +33,21 @@ describe("the Founder is never silent while it works on a message (FND-1, P17)",
     render(<Conversation lines={[asked]} reply="" thinking={null} />);
     expect(screen.queryByTestId("founder-thinking")).toBeNull();
   });
+
+  it("keeps its dots moving while words arrive and the Founder still works, with what it is doing under them", () => {
+    const { container } = render(
+      <Conversation lines={[asked]} reply="I'm setting up an Operate project." thinking={{ doing: "checking your connections", since: new Date().toISOString() }} />,
+    );
+    const bubble = screen.getByTestId("founder-reply");
+    expect(bubble.querySelector(".typing-dots")).not.toBeNull();
+    expect(bubble.textContent).toContain("writing");
+    expect(screen.getByTestId("waiting-for-founder").textContent).toContain("checking your connections");
+    expect(container.querySelectorAll("article.is-typing")).toHaveLength(1);
+  });
+
+  it("stops the dots once the turn is over, while the finished words wait to be stored", () => {
+    render(<Conversation lines={[asked]} reply="Done." thinking={null} />);
+    expect(screen.getByTestId("founder-reply").querySelector(".typing-dots")).toBeNull();
+    expect(screen.queryByTestId("waiting-for-founder")).toBeNull();
+  });
 });

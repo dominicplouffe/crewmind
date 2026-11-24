@@ -9,7 +9,7 @@ import { Empty, Loading } from "../panels/kit";
 import { formatValue } from "../lib/format";
 import { AgentAvatar, useAgentName } from "../squad/names";
 import { t } from "../strings";
-import { placements } from "./layout";
+import { placements, type Placement } from "./layout";
 import { MessageItem, type MessageHandlers } from "./MessageItem";
 import { useMinute } from "./RelativeTime";
 import type { ChatState, Notice, PendingMessage, Typing } from "./state";
@@ -25,6 +25,8 @@ interface Props {
 }
 
 const NEAR_BOTTOM_PX = 160;
+/** How many frames after loading an earlier page the reader's place is checked again. */
+const SETTLE_FRAMES = 3;
 
 function NoticeItem({ notice, onDismiss }: { notice: Notice; onDismiss(): void }): JSX.Element {
   const entries = notice.data ? Object.entries(notice.data) : [];
@@ -154,7 +156,7 @@ export function MessageList({
   /** Scrolled up, away from the newest message, and how many arrived since. */
   const [away, setAway] = useState(false);
   const [unseen, setUnseen] = useState(0);
-  const lastCount = useRef(0);
+  const lastSeenId = useRef(0);
   const minute = useMinute();
   const { messages, notices, pending, typing, header, cards } = state;
   const myName = useAuth().person?.name;
@@ -169,7 +171,22 @@ export function MessageList({
     if (!element || !was) return;
     held.current = null;
     const anchor = document.getElementById(was.id);
-    if (anchor) element.scrollTop += topIn(element, anchor) - was.top;
+    if (!anchor) return;
+    element.scrollTop += topIn(element, anchor) - was.top;
+    // What settles a frame later (spacing, an image, a font) must not move it either: check again
+    // over the next frames, unless the person has scrolled meanwhile.
+    let frames = SETTLE_FRAMES;
+    let expected = element.scrollTop;
+    let handle = 0;
+    const settle = (): void => {
+      if (element.scrollTop !== expected) return;
+      element.scrollTop += topIn(element, anchor) - was.top;
+      expected = element.scrollTop;
+      frames -= 1;
+      if (frames > 0) handle = requestAnimationFrame(settle);
+    };
+    handle = requestAnimationFrame(settle);
+    return () => cancelAnimationFrame(handle);
   }, [firstId]);
 
   const showEarlier = async (): Promise<void> => {
@@ -200,12 +217,16 @@ export function MessageList({
     [messages, minute],
   );
 
-  // Messages that arrive while the person reads further up are counted on the "jump" button.
+  // Messages that arrive below while the person reads further up are counted on the "jump" button.
+  // An earlier page loaded above is not news.
+  const newestId = messages[messages.length - 1]?.id ?? 0;
   useEffect(() => {
-    const added = messages.length - lastCount.current;
-    lastCount.current = messages.length;
-    if (added > 0 && !stick.current && state.loaded) setUnseen((count) => count + added);
-  }, [messages.length, state.loaded]);
+    const before = lastSeenId.current;
+    lastSeenId.current = newestId;
+    if (before === 0 || newestId <= before || stick.current || !state.loaded) return;
+    const added = messages.filter((message) => message.id > before).length;
+    if (added > 0) setUnseen((count) => count + added);
+  }, [newestId, messages, state.loaded]);
 
   const toLatest = (): void => {
     const element = scroller.current;
@@ -237,68 +258,71 @@ export function MessageList({
   const doingFor = (seat: string): string | null => header?.now.find((work) => work.seat === seat)?.doing ?? null;
 
   return (
-    // The log is focusable so keyboard users can scroll it.
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-    <div className="messages" ref={scroller} onScroll={onScroll} tabIndex={0} role="log" aria-live="polite" aria-label={t.chat.logLabel}>
-      {!state.loaded ? <Loading label={t.chat.loading} /> : null}
-      {state.earlier !== null ? (
-        <button
-          type="button"
-          className="button small earlier"
-          disabled={loadingEarlier}
-          onClick={() => void showEarlier()}
-          data-testid="earlier"
-        >
-          {loadingEarlier ? t.listening.earlierBusy : t.listening.earlier}
-        </button>
-      ) : null}
-      {state.loaded && messages.length === 0 && pending.length === 0 ? (
-        <Empty
-          icon={MessageCircle}
-          title={t.chat.emptyTitle}
-          next={header?.state === "draft" ? t.chat.emptyNextDraft : t.chat.emptyNext}
-        />
-      ) : null}
-      {messages.length === 0
-        ? notices.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)
-        : lead.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)}
-      {messages.map((message: Message, index) => (
-        <div key={message.id} className={shown[index]?.continued ? "message-slot is-continued" : "message-slot"}>
-          {shown[index]?.day ? (
-            <div className="day-divider" role="separator" aria-label={shown[index]?.day ?? ""}>
-              <span>{shown[index]?.day}</span>
-            </div>
-          ) : null}
-          <MessageItem
-            message={message}
-            parent={message.reply_to !== null ? byId.get(message.reply_to) : undefined}
-            card={cardFor(message, cards)}
-            replies={replyCounts.get(message.id) ?? 0}
-            handlers={handlers}
-            order={subjectOf(message, "order", state.orders)}
-            request={subjectOf(message, "request", state.requests)}
-            example={state.examples[message.id]}
-            mine={message.author_kind === "person" && message.author === myName}
-            parentMine={isMine(message.reply_to !== null ? byId.get(message.reply_to) : undefined, myName)}
-            continued={shown[index]?.continued ?? false}
-            showQuote={shown[index]?.quote ?? true}
+    // The "jump" button sits over the list, not in it, so it never moves what is being read.
+    <div className="messages-frame">
+      {/* The log is focusable so keyboard users can scroll it. */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+      <div className="messages" ref={scroller} onScroll={onScroll} tabIndex={0} role="log" aria-live="polite" aria-label={t.chat.logLabel}>
+        {!state.loaded ? <Loading label={t.chat.loading} /> : null}
+        {state.earlier !== null ? (
+          <button
+            type="button"
+            className="button small earlier"
+            disabled={loadingEarlier}
+            onClick={() => void showEarlier()}
+            data-testid="earlier"
+          >
+            {loadingEarlier ? t.listening.earlierBusy : t.listening.earlier}
+          </button>
+        ) : null}
+        {state.loaded && messages.length === 0 && pending.length === 0 ? (
+          <Empty
+            icon={MessageCircle}
+            title={t.chat.emptyTitle}
+            next={header?.state === "draft" ? t.chat.emptyNextDraft : t.chat.emptyNext}
           />
-          {noticesAfter(message.id, index === messages.length - 1).map((notice) => (
-            <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
-          ))}
-        </div>
-      ))}
-      {pending.filter((item) => !item.echoed || item.error).map((item) => (
-        <PendingItem
-          key={item.key}
-          pending={item}
-          onRetry={() => onRetry(item.key)}
-          onDismiss={() => onDismissPending(item.key)}
-        />
-      ))}
-      {typing.map((item) => (
-        <TypingItem key={item.runId} typing={item} doing={doingFor(item.seat)} onInterrupt={onInterrupt} />
-      ))}
+        ) : null}
+        {messages.length === 0
+          ? notices.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)
+          : lead.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)}
+        {messages.map((message: Message, index) => (
+          <div key={message.id} className={slotClass(shown[index])}>
+            {shown[index]?.day ? (
+              <div className="day-divider" role="separator" aria-label={shown[index]?.day ?? ""}>
+                <span>{shown[index]?.day}</span>
+              </div>
+            ) : null}
+            <MessageItem
+              message={message}
+              parent={message.reply_to !== null ? byId.get(message.reply_to) : undefined}
+              card={cardFor(message, cards)}
+              replies={replyCounts.get(message.id) ?? 0}
+              handlers={handlers}
+              order={subjectOf(message, "order", state.orders)}
+              request={subjectOf(message, "request", state.requests)}
+              example={state.examples[message.id]}
+              mine={message.author_kind === "person" && message.author === myName}
+              parentMine={isMine(message.reply_to !== null ? byId.get(message.reply_to) : undefined, myName)}
+              continued={shown[index]?.continued ?? false}
+              showQuote={shown[index]?.quote ?? true}
+            />
+            {noticesAfter(message.id, index === messages.length - 1).map((notice) => (
+              <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
+            ))}
+          </div>
+        ))}
+        {pending.filter((item) => !item.echoed || item.error).map((item) => (
+          <PendingItem
+            key={item.key}
+            pending={item}
+            onRetry={() => onRetry(item.key)}
+            onDismiss={() => onDismissPending(item.key)}
+          />
+        ))}
+        {typing.map((item) => (
+          <TypingItem key={item.runId} typing={item} doing={doingFor(item.seat)} onInterrupt={onInterrupt} />
+        ))}
+      </div>
       {away ? (
         <div className="jump-latest">
           <button type="button" className="button small jump-latest-button" onClick={toLatest} data-testid="jump-latest">
@@ -309,6 +333,17 @@ export function MessageList({
       ) : null}
     </div>
   );
+}
+
+function slotClass(placed: Placement | undefined): string {
+  return [
+    "message-slot",
+    placed?.continued ? "is-continued" : "",
+    placed?.groupGoesOn ? "group-goes-on" : "",
+    placed?.noticeAfterNotice ? "notice-after-notice" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function isMine(message: Message | undefined, myName: string | undefined): boolean {

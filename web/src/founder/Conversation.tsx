@@ -79,42 +79,38 @@ export function Conversation({ lines, reply, thinking = null }: Props): JSX.Elem
       {lines.map((line) => (
         <LineItem key={line.id} line={line} />
       ))}
-      {reply ? (
-        <article className="message from-agent is-bubble is-typing" aria-label={words.writingLabel} data-testid="founder-reply">
+      {reply || thinking ? (
+        // One bubble for the whole turn: its dots move for as long as the Founder owes the turn, its
+        // words appear as they are written, and what it is doing shows under them (P17).
+        <article
+          className={reply ? "message from-agent is-bubble is-typing" : "message from-agent is-bubble is-typing is-thinking"}
+          aria-label={reply ? words.writingLabel : words.thinkingLabel}
+          data-testid={reply ? "founder-reply" : "founder-thinking"}
+        >
           <div className="message-gutter">
-            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" status="working" />
-          </div>
-          <div className="message-main">
-            <header className="message-head">
-              <span className="author">{words.authors.founder ?? t.founder.talk.avatarName}</span>
-              <span className="message-role">{words.writing}</span>
-            </header>
-            <div className="message-content">
-              <div className="body">
-                <Markdown source={reply} />
-              </div>
-            </div>
-          </div>
-        </article>
-      ) : thinking ? (
-        <article className="message from-agent is-bubble is-typing is-thinking" aria-label={words.thinkingLabel} data-testid="founder-thinking">
-          <div className="message-gutter">
-            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" status="working" />
+            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" status={thinking ? "working" : null} />
           </div>
           <div className="message-main">
             <header className="message-head">
               <span className="author">{words.authors.founder ?? t.founder.talk.avatarName}</span>
               <span className="message-role typing-doing">
-                <span className="typing-dots" aria-hidden="true">
-                  <span />
-                  <span />
-                  <span />
-                </span>
-                {words.thinking}
+                {thinking ? (
+                  <span className="typing-dots" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                ) : null}
+                {reply ? words.writingNow : words.thinking}
               </span>
             </header>
             <div className="message-content">
-              <WorkingLine doing={thinking.doing} since={thinking.since} />
+              {reply ? (
+                <div className="body">
+                  <Markdown source={reply} />
+                </div>
+              ) : null}
+              {thinking && (!reply || thinking.doing) ? <WorkingLine doing={thinking.doing} since={thinking.since} /> : null}
             </div>
           </div>
         </article>
