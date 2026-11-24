@@ -1,6 +1,6 @@
-# crewmind
+# Nightsquad
 
-crewmind runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. You state a goal in a chat, and the platform staffs a CEO agent and specialist teams and gives them a token budget. They work fast while you stay in charge as chairman.
+Nightsquad runs a team of AI agents like a company, unattended, for hours to weeks, under rules the agents cannot talk their way out of. You state a goal in a chat, and the platform staffs a CEO agent and specialist teams and gives them a token budget. They work fast while you stay in charge as chairman.
 
 This repository is the rebuild (v2). It starts from the specification, with no v1 code.
 
@@ -33,21 +33,21 @@ uv sync
 ```
 
 ```bash
-uv run python -m crewmind.domain.memory.fetch_model
+uv run python -m nightsquad.domain.memory.fetch_model
 ```
 
 Set up a slim install (one process, SQLite) and start it. `unisolated` runs agents as plain processes with no isolation, which is fine for a first look on a machine you can lose. For agents in containers, use the server install below.
 
 ```bash
-export CREWMIND_SANDBOX_MODE=unisolated
+export NIGHTSQUAD_SANDBOX_MODE=unisolated
 ```
 
 ```bash
-uv run crewmind setup --slim --admin-email you@example.com
+uv run squad setup --slim --admin-email you@example.com
 ```
 
 ```bash
-uv run crewmind up --slim
+uv run squad up --slim
 ```
 
 Open the setup link that `setup` printed, set a password, sign in at `http://127.0.0.1:8420`, and create a project. Use that exact address: the server refuses a browser session from any other, `http://localhost:8420` included.
@@ -55,61 +55,61 @@ Open the setup link that `setup` printed, set a password, sign in at `http://127
 To get real answers, add a model credential in another terminal. The key is read from a file or standard input, never from the command line:
 
 ```bash
-uv run crewmind login --email you@example.com
+uv run squad login --email you@example.com
 ```
 
 ```bash
-uv run crewmind credentials add --name main --provider anthropic --key-file ~/anthropic.key
+uv run squad credentials add --name main --provider anthropic --key-file ~/anthropic.key
 ```
 
 ```bash
-uv run crewmind models set-payer --project-id <id> --credential main
+uv run squad models set-payer --project-id <id> --credential main
 ```
 
 Start the project and say hello, in the browser or in the terminal:
 
 ```bash
-uv run crewmind chat --project Atlas
+uv run squad chat --project Atlas
 ```
 
 To let an AI client of your own work with your projects, mint it a token with the scopes you choose (`read`, `steer`, `create`, `configure`) and point the client at `http://127.0.0.1:8420/mcp`:
 
 ```bash
-uv run crewmind mcp-clients mint --client-name "Desk assistant" --scopes steer
+uv run squad mcp-clients mint --client-name "Desk assistant" --scopes steer
 ```
 
 A client that speaks OAuth can register itself and ask you to approve it instead. Either way, a write that cannot be undone takes two calls, and a few things stay yours alone: membership, credentials and deleting a project.
 
-Without a credential, a project runs on the mock provider, which answers from scripts in `CREWMIND_MOCK_SCRIPT_DIR` and costs nothing.
+Without a credential, a project runs on the mock provider, which answers from scripts in `NIGHTSQUAD_MOCK_SCRIPT_DIR` and costs nothing.
 
 Starting a project wakes its CEO at once to plan. Type `/plan` in the chat, open the Plan panel, or run:
 
 ```bash
-uv run crewmind plan show --project-id <id>
+uv run squad plan show --project-id <id>
 ```
 
-The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. `crewmind desk show` lists everything that waits on you across projects, `crewmind items decide` answers one, `crewmind brief show` gives the last day, and `crewmind agenda show` says what happens next. Add scope yourself with `crewmind requirements add`, and finish a ready Deliver project with `crewmind projects sign-off`.
+The plan lists the requirements (or bets), what is ready for work, the projection, the commitment, the CEO reserve and where the time went. `squad desk show` lists everything that waits on you across projects, `squad items decide` answers one, `squad brief show` gives the last day, and `squad agenda show` says what happens next. Add scope yourself with `squad requirements add`, and finish a ready Deliver project with `squad projects sign-off`.
 
 To draft a project by talking, an admin first names the credential the Founder itself runs on. Then start a conversation in the web app ("Start a project") or in the terminal:
 
 ```bash
-uv run crewmind settings change-install --changes founder.credential=main --reason "The Founder's model."
+uv run squad settings change-install --changes founder.credential=main --reason "The Founder's model."
 ```
 
 ```bash
-uv run crewmind draft
+uv run squad draft
 ```
 
-The Founder drafts first and then asks one decision at a time, each with its recommended answer: Enter accepts it. A pasted or attached brief is grilled before anything is drafted from it. `crewmind draft --quick` lets the Founder decide everything and start the project. To check how well your model grades goals against the hand-graded references:
+The Founder drafts first and then asks one decision at a time, each with its recommended answer: Enter accepts it. A pasted or attached brief is grilled before anything is drafted from it. `squad draft --quick` lets the Founder decide everything and start the project. To check how well your model grades goals against the hand-graded references:
 
 ```bash
-uv run crewmind founder eval --goal acceptance/reference-goal.md --grades acceptance/reference-goal.grades.json --goal acceptance/raw-brief.md --grades acceptance/raw-brief.grades.json
+uv run squad founder eval --goal acceptance/reference-goal.md --grades acceptance/reference-goal.grades.json --goal acceptance/raw-brief.md --grades acceptance/raw-brief.grades.json
 ```
 
-A project is one portable file, a spec. `crewmind projects export` writes it, `projects import-spec` and `projects clone` create from it, and a rehearsal runs it through the real rules with a crew in code, spending nothing:
+A project is one portable file, a spec. `squad projects export` writes it, `projects import-spec` and `projects clone` create from it, and a rehearsal runs it through the real rules with a crew in code, spending nothing:
 
 ```bash
-uv run crewmind projects rehearse --project-id <id>
+uv run squad projects rehearse --project-id <id>
 ```
 
 ## Install on a server
@@ -141,17 +141,17 @@ Each takes `--help`.
 - **The address must match.** Sign in only at the address the script prints. The server refuses a browser session from any other.
 - **The certificate.** The TLS front signs its own certificate, so a browser asks you to accept it once. Until the certificate is trusted, push alerts and the installable app do not work. For a public host name, use `--bind 0.0.0.0 --public-url https://crew.example.com --tls you@example.com` and it gets a certificate from Let's Encrypt.
 - **Docker ignores `ufw`.** A port Docker publishes is open whatever the firewall says. The listen address is what keeps it private.
-- **Back up the master key.** It is `master.key` in the state directory (`/var/lib/crewmind` unless you pass `--state-root`). Without it no stored model key can be read. The backup script includes it.
-- **The `crewmind` command** runs inside the server:
+- **Back up the master key.** It is `master.key` in the state directory (`/var/lib/nightsquad` unless you pass `--state-root`). Without it no stored model key can be read. The backup script includes it.
+- **The `squad` command** runs inside the server:
 
 ```bash
-docker compose -f deploy/compose.yaml exec server crewmind doctor
+docker compose -f deploy/compose.yaml exec server squad doctor
 ```
 
 Model keys are read from a file or from standard input, so pipe one in:
 
 ```bash
-docker compose -f deploy/compose.yaml exec -T server crewmind credentials add --name main --provider anthropic --key-stdin < ~/anthropic.key
+docker compose -f deploy/compose.yaml exec -T server squad credentials add --name main --provider anthropic --key-stdin < ~/anthropic.key
 ```
 
 [SECURITY.md](SECURITY.md) says what a container does and does not contain.
@@ -161,7 +161,7 @@ docker compose -f deploy/compose.yaml exec -T server crewmind credentials add --
 ```bash
 uv sync
 uv run pytest                 # SQLite
-uv run pytest --db=postgres   # reads CREWMIND_TEST_POSTGRES_URL
+uv run pytest --db=postgres   # reads NIGHTSQUAD_TEST_POSTGRES_URL
 uv run ruff check && uv run ruff format --check && uv run pyright
 ```
 

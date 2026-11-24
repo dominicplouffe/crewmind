@@ -11,7 +11,7 @@ import { Avatar } from "../ui/Avatar";
 import { LogoMark } from "../ui/Logo";
 import { roleLine } from "./logic";
 
-const STORAGE_KEY = "crewmind.crew-assembled";
+const STORAGE_KEY = "nightsquad.crew-assembled";
 /** Layout only: seats placed around the centre; the rest are counted. */
 const RING_MAX = 8;
 /** Layout only: above this many seats, roles are left off so names do not collide. */

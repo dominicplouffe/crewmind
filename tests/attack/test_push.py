@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.storage.models import PushSubscription, StoredSecret
+from nightsquad.storage.models import PushSubscription, StoredSecret
 from tests.attack.harness import assert_refused
 from tests.attack.test_budget import BIG
 from tests.push_support import BROWSER, FakePushService, sender

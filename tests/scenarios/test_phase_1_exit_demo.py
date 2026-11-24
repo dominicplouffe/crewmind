@@ -13,15 +13,15 @@ from typing import Any
 import pytest
 from mcp import Client
 
-from crewmind.catalog import Surface, catalog
-from crewmind.catalog.caller import Caller
-from crewmind.catalog.execute import Executor
-from crewmind.catalog.operation import Reversibility
-from crewmind.catalog.surfaces import exposed_on
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.surfaces.cli.invoke import LocalInvoker
-from crewmind.surfaces.cli.main import build_cli
-from crewmind.surfaces.mcp.server import build_mcp
+from nightsquad.catalog import Surface, catalog
+from nightsquad.catalog.caller import Caller
+from nightsquad.catalog.execute import Executor
+from nightsquad.catalog.operation import Reversibility
+from nightsquad.catalog.surfaces import exposed_on
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.surfaces.cli.invoke import LocalInvoker
+from nightsquad.surfaces.cli.main import build_cli
+from nightsquad.surfaces.mcp.server import build_mcp
 from tests.attack.test_models import FakeProvider
 from tests.support import App, OnLoop, agent_call, invoker_for, live_run, run_cli
 
@@ -110,7 +110,7 @@ async def test_INV_21_every_write_operation_records_an_event(
     once here, and each must add at least one event naming its actor."""
     from sqlalchemy import func, select
 
-    from crewmind.storage.models import Event
+    from nightsquad.storage.models import Event
 
     async def events() -> int:
         async with app.runtime.sessions() as session:

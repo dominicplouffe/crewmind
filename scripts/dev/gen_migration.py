@@ -6,8 +6,8 @@ import sqlalchemy
 from alembic.autogenerate import produce_migrations, render_python_code
 from alembic.migration import MigrationContext
 
-from crewmind.storage.migrate import migrate
-from crewmind.storage.models import Base
+from nightsquad.storage.migrate import migrate
+from nightsquad.storage.models import Base
 
 with tempfile.TemporaryDirectory() as d:
     url = f"sqlite:///{d}/x.sqlite"

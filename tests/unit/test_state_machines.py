@@ -9,34 +9,34 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.state_machine import NEW, StateMachine
-from crewmind.domain.accounts.model import (
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.state_machine import NEW, StateMachine
+from nightsquad.domain.accounts.model import (
     LINK_MACHINE,
     MEMBERSHIP_MACHINE,
     PERSON_MACHINE,
     SESSION_MACHINE,
     TOKEN_MACHINE,
 )
-from crewmind.domain.connections.mcp import SERVER_MACHINE, TOOL_MACHINE
-from crewmind.domain.connections.model import CONNECTION_MACHINE
-from crewmind.domain.connections.needs import NEED_MACHINE
-from crewmind.domain.conversation.corrections import CORRECTION_MACHINE
-from crewmind.domain.conversation.decisions import DECISION_MACHINE
-from crewmind.domain.conversation.directives import CARD_MACHINE, DIRECTIVE_MACHINE
-from crewmind.domain.conversation.orders import ORDER_MACHINE
-from crewmind.domain.conversation.sessions import CHAT_SESSION_MACHINE
-from crewmind.domain.decisions.model import ITEM_MACHINE, KIND_SPECIFIC
-from crewmind.domain.execution.model import RUN_MACHINE, SEAT_MACHINE, TEAM_MACHINE
-from crewmind.domain.founder.model import DRAFTING_MACHINE
-from crewmind.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
-from crewmind.domain.planning.model import (
+from nightsquad.domain.connections.mcp import SERVER_MACHINE, TOOL_MACHINE
+from nightsquad.domain.connections.model import CONNECTION_MACHINE
+from nightsquad.domain.connections.needs import NEED_MACHINE
+from nightsquad.domain.conversation.corrections import CORRECTION_MACHINE
+from nightsquad.domain.conversation.decisions import DECISION_MACHINE
+from nightsquad.domain.conversation.directives import CARD_MACHINE, DIRECTIVE_MACHINE
+from nightsquad.domain.conversation.orders import ORDER_MACHINE
+from nightsquad.domain.conversation.sessions import CHAT_SESSION_MACHINE
+from nightsquad.domain.decisions.model import ITEM_MACHINE, KIND_SPECIFIC
+from nightsquad.domain.execution.model import RUN_MACHINE, SEAT_MACHINE, TEAM_MACHINE
+from nightsquad.domain.founder.model import DRAFTING_MACHINE
+from nightsquad.domain.models.service import BREAKER_MACHINE, CREDENTIAL_MACHINE
+from nightsquad.domain.planning.model import (
     BET_MACHINE,
     COMMITMENT_MACHINE,
     CYCLE_MACHINE,
     REQUIREMENT_MACHINE,
 )
-from crewmind.domain.projects.model import (
+from nightsquad.domain.projects.model import (
     HOLDABLE,
     PLATFORM_HOLDS,
     PROJECT_MACHINE,
@@ -44,13 +44,13 @@ from crewmind.domain.projects.model import (
     ProjectState,
     state_under,
 )
-from crewmind.domain.work.model import (
+from nightsquad.domain.work.model import (
     EFFECT_MACHINE,
     EVIDENCE_MACHINE,
     TASK_MACHINE,
     WATCH_MACHINE,
 )
-from crewmind.surfaces.mcp.confirm import CONFIRM_MACHINE
+from nightsquad.surfaces.mcp.confirm import CONFIRM_MACHINE
 
 SECTION_7 = Path(__file__).parents[2] / "docs" / "spec" / "07-state-machines.md"
 PRIOR_STATES = ("draft", "stopped", "completed")

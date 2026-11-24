@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from crewmind.domain.work import fetch
+from nightsquad.domain.work import fetch
 from tests.attack.harness import assert_refused
 from tests.attack.work_support import OBSERVABLE, Crew
 from tests.conftest import FakeClock

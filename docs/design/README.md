@@ -1,4 +1,4 @@
-# crewmind design
+# Nightsquad design
 
 The web app's design: what it should feel like, the system it is built from, and why.
 

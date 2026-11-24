@@ -1,0 +1,28 @@
+{
+  "nightsquad_crew": 1,
+  "slug": "build-it-then-break-it",
+  "name": "Build it, then break it",
+  "outcome": "Something shipped, plus a real attempt to break it that failed.",
+  "ceo_role": "ceo",
+  "domains": [
+    "general"
+  ],
+  "teams": [
+    {
+      "name": "Build",
+      "role": "engineer",
+      "members": [
+        "Mika",
+        "Dev"
+      ]
+    },
+    {
+      "name": "Red Team",
+      "role": "adversary",
+      "members": [
+        "Sasha"
+      ]
+    }
+  ],
+  "estimate": null
+}

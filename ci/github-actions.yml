@@ -1,4 +1,4 @@
-# GitHub Actions workflow for crewmind. To turn CI on, copy this file to
+# GitHub Actions workflow for Nightsquad. To turn CI on, copy this file to
 # .github/workflows/ci.yml. It is kept here because the coding session that wrote it
 # was not allowed to push workflow files.
 
@@ -29,25 +29,25 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_USER: crewmind
-          POSTGRES_PASSWORD: crewmind
-          POSTGRES_DB: crewmind_test
+          POSTGRES_USER: nightsquad
+          POSTGRES_PASSWORD: nightsquad
+          POSTGRES_DB: nightsquad_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U crewmind"
+          --health-cmd "pg_isready -U nightsquad"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      CREWMIND_TEST_POSTGRES_URL: postgresql://crewmind:crewmind@localhost:5432/crewmind_test
+      NIGHTSQUAD_TEST_POSTGRES_URL: postgresql://nightsquad:nightsquad@localhost:5432/nightsquad_test
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --locked
-      - run: uv run python -m crewmind.domain.memory.fetch_model
+      - run: uv run python -m nightsquad.domain.memory.fetch_model
       # The container tests skip without this image (EXE-12, WRK-7).
-      - run: docker build -f deploy/agent.Dockerfile -t crewmind-agent .
+      - run: docker build -f deploy/agent.Dockerfile -t nightsquad-agent .
       - run: uv run pytest --db=${{ matrix.db }}
 
   web:

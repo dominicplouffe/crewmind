@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import Alarm
+from nightsquad.storage.models import Alarm
 from tests.attack.delivery_support import (
     SOLO,
     command_requirement,

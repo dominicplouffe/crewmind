@@ -7,9 +7,9 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.accounts import passwords
-from crewmind.storage.models import BrowserSession, Link, Person, Token
-from crewmind.surfaces.api.app import SESSION_COOKIE
+from nightsquad.domain.accounts import passwords
+from nightsquad.storage.models import BrowserSession, Link, Person, Token
+from nightsquad.surfaces.api.app import SESSION_COOKIE
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
 from tests.support import PASSWORD, App

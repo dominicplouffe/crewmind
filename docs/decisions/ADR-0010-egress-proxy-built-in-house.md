@@ -11,7 +11,7 @@ mitmproxy (MIT licence, version 12.3.1) is the established Python library for th
 
 ## Decision
 
-The egress proxy is a small, single-purpose component written for crewmind on libraries already in the stack: asyncio for connections, `h11` for HTTP/1.1, `cryptography` for the certificate authority and leaf certificates, and the standard `ssl` module for TLS. It:
+The egress proxy is a small, single-purpose component written for Nightsquad on libraries already in the stack: asyncio for connections, `h11` for HTTP/1.1, `cryptography` for the certificate authority and leaf certificates, and the standard `ssl` module for TLS. It:
 
 - relays every connection as an opaque tunnel, except connections to a site that has a secret sent for the connecting run;
 - terminates TLS only for those sites, adds the header, verifies the real site's certificate, and relays the response;

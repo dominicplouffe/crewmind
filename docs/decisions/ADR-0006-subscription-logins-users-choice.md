@@ -9,7 +9,7 @@ Some providers' consumer terms may restrict automated use. The owner's position:
 
 ## Decision
 
-crewmind supports subscription logins without blocking or warning. SECURITY.md still states plainly where a subscription harness cannot use the model gateway.
+Nightsquad supports subscription logins without blocking or warning. SECURITY.md still states plainly where a subscription harness cannot use the model gateway.
 
 ## Consequences
 

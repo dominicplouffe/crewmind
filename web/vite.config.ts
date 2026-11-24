@@ -2,7 +2,7 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const api = process.env.CREWMIND_API ?? "http://127.0.0.1:8433";
+const api = process.env.NIGHTSQUAD_API ?? "http://127.0.0.1:8433";
 const proxy = Object.fromEntries(
   ["/v1", "/files", "/stream", "/healthz"].map((path) => [path, { target: api, changeOrigin: false }]),
 );

@@ -447,7 +447,7 @@ async def test_PLN_10_a_reviewer_that_did_the_work_does_not_rule_on_it(
     async with app.runtime.sessions() as session, session.begin():
         from sqlalchemy import select, update
 
-        from crewmind.storage.models import Seat, Task
+        from nightsquad.storage.models import Seat, Task
 
         reviewer = await session.scalar(select(Seat.id).where(Seat.name == "Reviewer"))
         await session.execute(update(Task).values(claimant_id=reviewer))

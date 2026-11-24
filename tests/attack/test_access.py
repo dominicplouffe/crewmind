@@ -8,13 +8,13 @@ from typing import Any
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from crewmind.catalog import Surface, catalog
-from crewmind.catalog.caller import Authority, Caller, CallerKind, InstanceRole
-from crewmind.catalog.operation import PROJECT_FIELD
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.surfaces import exposed_on
-from crewmind.storage.models import Membership
-from crewmind.surfaces.api.app import route_path
+from nightsquad.catalog import Surface, catalog
+from nightsquad.catalog.caller import Authority, Caller, CallerKind, InstanceRole
+from nightsquad.catalog.operation import PROJECT_FIELD
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.surfaces import exposed_on
+from nightsquad.storage.models import Membership
+from nightsquad.surfaces.api.app import route_path
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
 from tests.support import App, sample_input

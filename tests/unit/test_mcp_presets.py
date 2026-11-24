@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from crewmind.domain.connections.mcp_client import check_url
-from crewmind.domain.connections.presets import FOLDER, shipped
+from nightsquad.domain.connections.mcp_client import check_url
+from nightsquad.domain.connections.presets import FOLDER, shipped
 from tests.support import App
 
 

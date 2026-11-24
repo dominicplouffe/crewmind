@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = Number(process.env.CREWMIND_E2E_PORT ?? 8455);
+const port = Number(process.env.NIGHTSQUAD_E2E_PORT ?? 8455);
 
 export default defineConfig({
   testDir: "e2e",

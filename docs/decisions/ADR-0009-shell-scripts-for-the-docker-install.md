@@ -13,7 +13,7 @@ NFR-24 requires Python for the server, runners, scheduler, gateway, memory, harn
 
 The Docker install is driven by bash scripts in `deploy/`, named as in v1: `deploy_single_server.sh`, `update_single_server.sh`, `backup_single_server.sh`, `restore_single_server.sh` and `kill_single_server.sh`, with shared helpers in `_common.sh`.
 
-The scripts hold no rule of the product. Setting up, backing up, restoring and checking are the server's own operations (`crewmind setup`, `backup`, `restore`, `doctor`), which the scripts call inside the server container. The scripts only do what must happen outside it: Docker, the settings file, git.
+The scripts hold no rule of the product. Setting up, backing up, restoring and checking are the server's own operations (`squad setup`, `backup`, `restore`, `doctor`), which the scripts call inside the server container. The scripts only do what must happen outside it: Docker, the settings file, git.
 
 ## Consequences
 

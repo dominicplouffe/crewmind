@@ -2441,7 +2441,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Load the roles and crews shipped with this version of crewmind again.
+         * Load the roles and crews shipped with this version of Nightsquad again.
          * @description Requires: admin.
          */
         post: operations["library.reload"];
@@ -2859,7 +2859,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List the providers crewmind can use, with any concurrency ceiling.
+         * List the providers Nightsquad can use, with any concurrency ceiling.
          * @description Requires: person.
          */
         get: operations["models.providers"];
@@ -4927,7 +4927,7 @@ export interface components {
              */
             basic_user?: string | null;
             /**
-             * @description sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
+             * @description sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
              * @default sent_for_you
              */
             delivery?: components["schemas"]["Delivery"];
@@ -6067,11 +6067,11 @@ export interface components {
             /** Ceo Role */
             ceo_role: string;
             /**
-             * Crewmind Crew
+             * Nightsquad Crew
              * @default 1
              * @constant
              */
-            crewmind_crew?: 1;
+            nightsquad_crew?: 1;
             /** Domains */
             domains?: string[];
             /** @description Reference runs and tokens for the job, when known (GOV-4). */
@@ -8206,11 +8206,11 @@ export interface components {
             /** Credentials */
             credentials?: components["schemas"]["CredentialGrant"][];
             /**
-             * Crewmind Spec
+             * Nightsquad Spec
              * @default 1
              * @constant
              */
-            crewmind_spec?: 1;
+            nightsquad_spec?: 1;
             deadline?: components["schemas"]["Deadline"] | null;
             /** Goal */
             goal: string;
@@ -8721,11 +8721,11 @@ export interface components {
              */
             credential_names?: string[];
             /**
-             * Crewmind Role
+             * Nightsquad Role
              * @default 1
              * @constant
              */
-            crewmind_role?: 1;
+            nightsquad_role?: 1;
             /** Description */
             description: string;
             /** Domains */
@@ -9850,7 +9850,7 @@ export interface components {
             seat: string;
         };
         /** HistoryLine */
-        crewmind__domain__connections__item_operations__HistoryLine: {
+        nightsquad__domain__connections__item_operations__HistoryLine: {
             /**
              * At
              * Format: date-time
@@ -9864,14 +9864,14 @@ export interface components {
             what: string;
         };
         /** ItemDetail */
-        crewmind__domain__connections__item_operations__ItemDetail: {
+        nightsquad__domain__connections__item_operations__ItemDetail: {
             /**
              * Hidden Uses
              * @description Projects using it that you cannot see.
              */
             hidden_uses: number;
             /** History */
-            history: components["schemas"]["crewmind__domain__connections__item_operations__HistoryLine"][];
+            history: components["schemas"]["nightsquad__domain__connections__item_operations__HistoryLine"][];
             item: components["schemas"]["ConnectionView"];
             /**
              * Used In
@@ -9880,12 +9880,12 @@ export interface components {
             used_in: components["schemas"]["Usage"][];
         };
         /** ItemList */
-        crewmind__domain__connections__item_operations__ItemList: {
+        nightsquad__domain__connections__item_operations__ItemList: {
             /** Items */
             items: components["schemas"]["ConnectionView"][];
         };
         /** DecideInput */
-        crewmind__domain__conversation__decisions__DecideInput: {
+        nightsquad__domain__conversation__decisions__DecideInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -9898,7 +9898,7 @@ export interface components {
             text: string;
         };
         /** RuleInput */
-        crewmind__domain__conversation__decisions__RuleInput: {
+        nightsquad__domain__conversation__decisions__RuleInput: {
             /**
              * Decision Id
              * @description The decision's id, from `decisions list`.
@@ -9916,7 +9916,7 @@ export interface components {
             ruling: string;
         };
         /** AcceptInput */
-        crewmind__domain__conversation__directives__AcceptInput: {
+        nightsquad__domain__conversation__directives__AcceptInput: {
             /**
              * Card Id
              * @description The card's id.
@@ -9934,7 +9934,7 @@ export interface components {
             project_id: string;
         };
         /** History */
-        crewmind__domain__conversation__operations__History: {
+        nightsquad__domain__conversation__operations__History: {
             /**
              * Earlier
              * @description Pass as `before` to read older messages. Absent at the start.
@@ -9946,7 +9946,7 @@ export interface components {
             next?: string | null;
         };
         /** DecideInput */
-        crewmind__domain__decisions__operations__DecideInput: {
+        nightsquad__domain__decisions__operations__DecideInput: {
             /**
              * Action
              * @description One of the item's actions.
@@ -9984,7 +9984,7 @@ export interface components {
             project_id: string;
         };
         /** ExtendInput */
-        crewmind__domain__decisions__operations__ExtendInput: {
+        nightsquad__domain__decisions__operations__ExtendInput: {
             /**
              * Days
              * @description How many days more: 1 to 30.
@@ -10007,7 +10007,7 @@ export interface components {
             reason: string;
         };
         /** HistoryLine */
-        crewmind__domain__decisions__operations__HistoryLine: {
+        nightsquad__domain__decisions__operations__HistoryLine: {
             /** Actor Kind */
             actor_kind: string;
             /**
@@ -10021,7 +10021,7 @@ export interface components {
             what: string;
         };
         /** ItemDetail */
-        crewmind__domain__decisions__operations__ItemDetail: {
+        nightsquad__domain__decisions__operations__ItemDetail: {
             /**
              * Actions
              * @description What you can do with it now.
@@ -10052,7 +10052,7 @@ export interface components {
              */
             filed_by: string;
             /** History */
-            history: components["schemas"]["crewmind__domain__decisions__operations__HistoryLine"][];
+            history: components["schemas"]["nightsquad__domain__decisions__operations__HistoryLine"][];
             /** Id */
             id: number;
             /** If Declined */
@@ -10081,12 +10081,12 @@ export interface components {
             waits_on_you: boolean;
         };
         /** ItemList */
-        crewmind__domain__decisions__operations__ItemList: {
+        nightsquad__domain__decisions__operations__ItemList: {
             /** Items */
             items: components["schemas"]["ItemView"][];
         };
         /** StartInput */
-        crewmind__domain__founder__operations__StartInput: {
+        nightsquad__domain__founder__operations__StartInput: {
             /**
              * Brief
              * @description What you want, in your own words.
@@ -10099,7 +10099,7 @@ export interface components {
             document?: string | null;
         };
         /** ReasonInput */
-        crewmind__domain__planning__delivery_operations__ReasonInput: {
+        nightsquad__domain__planning__delivery_operations__ReasonInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10112,7 +10112,7 @@ export interface components {
             reason: string;
         };
         /** ExtendInput */
-        crewmind__domain__planning__explore_operations__ExtendInput: {
+        nightsquad__domain__planning__explore_operations__ExtendInput: {
             /**
              * Bet Id
              * @description The bet's id, from `plan show`.
@@ -10136,7 +10136,7 @@ export interface components {
             until: string;
         };
         /** AcceptInput */
-        crewmind__domain__planning__operations__AcceptInput: {
+        nightsquad__domain__planning__operations__AcceptInput: {
             /**
              * Anyway
              * @description Accept it even though the plan does not fit the budget.
@@ -10155,7 +10155,7 @@ export interface components {
             requirement_id: number;
         };
         /** ReasonInput */
-        crewmind__domain__planning__operations__ReasonInput: {
+        nightsquad__domain__planning__operations__ReasonInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10173,7 +10173,7 @@ export interface components {
             requirement_id: number;
         };
         /** RuleInput */
-        crewmind__domain__planning__operations__RuleInput: {
+        nightsquad__domain__planning__operations__RuleInput: {
             /**
              * Note
              * @description What you found.
@@ -10196,7 +10196,7 @@ export interface components {
             requirement_id: number;
         };
         /** StartInput */
-        crewmind__domain__projects__operations__StartInput: {
+        nightsquad__domain__projects__operations__StartInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10210,7 +10210,7 @@ export interface components {
             without_missing?: boolean;
         };
         /** History */
-        crewmind__domain__settings__operations__History: {
+        nightsquad__domain__settings__operations__History: {
             /** Items */
             items: components["schemas"]["HistoryItem"][];
             /** Next */
@@ -10959,7 +10959,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__explore_operations__ExtendInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__explore_operations__ExtendInput"];
             };
         };
         responses: {
@@ -11077,7 +11077,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__directives__AcceptInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__directives__AcceptInput"];
             };
         };
         responses: {
@@ -11348,7 +11348,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__conversation__operations__History"];
+                    "application/json": components["schemas"]["nightsquad__domain__conversation__operations__History"];
                 };
             };
             /** @description Validation Error */
@@ -11605,7 +11605,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__delivery_operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__delivery_operations__ReasonInput"];
             };
         };
         responses: {
@@ -12176,7 +12176,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemList"];
+                    "application/json": components["schemas"]["nightsquad__domain__connections__item_operations__ItemList"];
                 };
             };
             /** @description Validation Error */
@@ -12329,7 +12329,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemDetail"];
+                    "application/json": components["schemas"]["nightsquad__domain__connections__item_operations__ItemDetail"];
                 };
             };
             /** @description Validation Error */
@@ -12951,7 +12951,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__decisions__DecideInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__decisions__DecideInput"];
             };
         };
         responses: {
@@ -13081,7 +13081,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__decisions__RuleInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__decisions__RuleInput"];
             };
         };
         responses: {
@@ -13547,7 +13547,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__founder__operations__StartInput"];
+                "application/json": components["schemas"]["nightsquad__domain__founder__operations__StartInput"];
             };
         };
         responses: {
@@ -13809,7 +13809,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__decisions__operations__DecideInput"];
+                "application/json": components["schemas"]["nightsquad__domain__decisions__operations__DecideInput"];
             };
         };
         responses: {
@@ -13842,7 +13842,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__decisions__operations__ExtendInput"];
+                "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ExtendInput"];
             };
         };
         responses: {
@@ -13888,7 +13888,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemList"];
+                    "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ItemList"];
                 };
             };
             /** @description Validation Error */
@@ -13955,7 +13955,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemDetail"];
+                    "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ItemDetail"];
                 };
             };
             /** @description Validation Error */
@@ -16126,7 +16126,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__projects__operations__StartInput"];
+                "application/json": components["schemas"]["nightsquad__domain__projects__operations__StartInput"];
             };
         };
         responses: {
@@ -16461,7 +16461,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__AcceptInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__AcceptInput"];
             };
         };
         responses: {
@@ -16560,7 +16560,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__ReasonInput"];
             };
         };
         responses: {
@@ -16593,7 +16593,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__ReasonInput"];
             };
         };
         responses: {
@@ -16659,7 +16659,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__RuleInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__RuleInput"];
             };
         };
         responses: {
@@ -17296,7 +17296,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__settings__operations__History"];
+                    "application/json": components["schemas"]["nightsquad__domain__settings__operations__History"];
                 };
             };
             /** @description Validation Error */

@@ -7,9 +7,9 @@ from pathlib import Path
 import httpx
 import pytest
 
-from crewmind.catalog import Rule, rules
-from crewmind.catalog.registry import load_domain_modules
-from crewmind.runtime import Runtime
+from nightsquad.catalog import Rule, rules
+from nightsquad.catalog.registry import load_domain_modules
+from nightsquad.runtime import Runtime
 from tests.attack.harness import Attacker, assert_refused, attacked_rules, rules_without_attack
 from tests.support import REFUSED_NAME, Greeter, api_client_factory, sample_api, sample_catalog
 

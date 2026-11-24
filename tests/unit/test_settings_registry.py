@@ -9,7 +9,7 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from crewmind.domain.settings.registry import (
+from nightsquad.domain.settings.registry import (
     Scope,
     Setting,
     SettingValueError,

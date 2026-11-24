@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# kill_single_server.sh: stop crewmind on this machine.
+# kill_single_server.sh: stop Nightsquad on this machine.
 #
 # By default it stops and removes the containers and KEEPS your data: the database
 # volume, deploy/.env and the state directory (master key, artifacts, workspaces) all

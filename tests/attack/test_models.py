@@ -10,11 +10,11 @@ import pytest
 from litellm.exceptions import AuthenticationError, RateLimitError
 from sqlalchemy import select
 
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway import outbound
-from crewmind.gateway.protocol import CompletionResponse, TokenUsage
-from crewmind.runner.sandbox import SandboxSpec, sandbox_environment
-from crewmind.storage.models import Base, ModelCredential
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway import outbound
+from nightsquad.gateway.protocol import CompletionResponse, TokenUsage
+from nightsquad.runner.sandbox import SandboxSpec, sandbox_environment
+from nightsquad.storage.models import Base, ModelCredential
 from tests.attack.harness import assert_refused
 from tests.attack.test_budget import complete, ledger
 from tests.conftest import FakeClock
@@ -133,7 +133,13 @@ async def test_P3_no_sandbox_holds_a_provider_key(app: App, provider: FakeProvid
         run.run_id, project, run.token, "http://127.0.0.1:8420", app.runtime.config.data_dir
     )
     environment = sandbox_environment(spec)
-    assert set(environment) == {"CREWMIND_RUN_TOKEN", "CREWMIND_AGENT_API", "PATH", "HOME", "LANG"}
+    assert set(environment) == {
+        "NIGHTSQUAD_RUN_TOKEN",
+        "NIGHTSQUAD_AGENT_API",
+        "PATH",
+        "HOME",
+        "LANG",
+    }
     assert KEY not in json.dumps(environment)
     seen: list[str] = []
     for name in ("agent.whoami", "agent.context", "agent.list_roles", "agent.read_messages"):
@@ -155,8 +161,8 @@ async def test_LLM_6_a_seat_with_no_way_to_run_is_refused_before_any_token(
     not run. Started without it, those seats are held with the reason and nothing is spent;
     once a credential pays, they work. A hidden credential makes the seat note say so. One
     resolver serves chat and work."""
-    from crewmind.domain.execution import runs
-    from crewmind.domain.models.service import SeatResolver
+    from nightsquad.domain.execution import runs
+    from nightsquad.domain.models.service import SeatResolver
 
     monkeypatch.setattr(
         runs,
@@ -365,7 +371,7 @@ async def test_LLM_12_leasing_looks_past_a_provider_at_its_ceiling(
     for seat in ("CEO", "crew-1", "crew-2", "crew-3"):
         await wake(app, project, seat=seat)
     await app.dispatcher.tick()
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         leases = await runs.lease(session, app.runtime.settings, "r", 10, app.runtime.clock())
@@ -385,7 +391,7 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
     """INT-8, P4, INV-6: a role without the web cannot search; with no service the search
     is refused; searches are counted in the ledger up to `search.max_per_day`; the search
     key is used only by the server; results are labelled as untrusted data."""
-    from crewmind.storage.models import Role
+    from nightsquad.storage.models import Role
 
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"search.max_per_day": 2})
@@ -436,7 +442,7 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
 async def test_EXE_6_a_run_keeps_what_it_was_leased_with(app: App, provider: FakeProvider) -> None:
     """EXE-6: at lease a run pins its model, effort, provider, credential, harness and token
     cap. Changing the seat afterwards changes later runs, not this one."""
-    from crewmind.storage.models import Run
+    from nightsquad.storage.models import Run
 
     owner = await app.person("owner@example.com")
     project = await paid_project(app, owner)

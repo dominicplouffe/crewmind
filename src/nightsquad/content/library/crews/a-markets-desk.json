@@ -1,0 +1,42 @@
+{
+  "nightsquad_crew": 1,
+  "slug": "a-markets-desk",
+  "name": "A markets desk",
+  "outcome": "A recommended book, with the research behind it and a brake on it.",
+  "ceo_role": "cio",
+  "domains": [
+    "markets"
+  ],
+  "teams": [
+    {
+      "name": "Research",
+      "role": "equity-analyst",
+      "members": [
+        "Maya",
+        "Tobias"
+      ]
+    },
+    {
+      "name": "Macro",
+      "role": "macro-analyst",
+      "members": [
+        "Ines"
+      ]
+    },
+    {
+      "name": "Risk",
+      "role": "risk-manager",
+      "members": [
+        "Owen"
+      ]
+    },
+    {
+      "name": "Editorial",
+      "role": "finance-writer",
+      "members": [
+        "Ada"
+      ]
+    }
+  ],
+  "estimate": null
+}

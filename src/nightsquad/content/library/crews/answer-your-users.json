@@ -1,0 +1,28 @@
+{
+  "nightsquad_crew": 1,
+  "slug": "answer-your-users",
+  "name": "Answer your users",
+  "outcome": "Every user question answered, and what they reveal routed back into the plan.",
+  "ceo_role": "ceo",
+  "domains": [
+    "general"
+  ],
+  "teams": [
+    {
+      "name": "Triage",
+      "role": "support",
+      "members": [
+        "Nadia",
+        "Piet"
+      ]
+    },
+    {
+      "name": "Diagnosis",
+      "role": "engineer",
+      "members": [
+        "Mika"
+      ]
+    }
+  ],
+  "estimate": null
+}

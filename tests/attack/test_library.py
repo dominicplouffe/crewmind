@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.library import service
+from nightsquad.domain.library import service
 from tests.attack.harness import assert_refused
 from tests.support import App
 
@@ -108,7 +108,7 @@ def test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist() -> 
     tells an agent to call a tool the agent API does not have."""
     import re
 
-    from crewmind.catalog import catalog, registry
+    from nightsquad.catalog import catalog, registry
 
     registry.load_domain_modules()
     tools = {

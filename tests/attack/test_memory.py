@@ -250,15 +250,15 @@ async def test_MEM_2_without_the_model_memory_refuses_plainly_and_fetches_nothin
     """MEM-2, NFR-1, NFR-9: with no model on disk the engine refuses with the command that
     installs it, opens no connection to fetch one, and a run's context pack is still built
     from pinned memory."""
-    from crewmind.catalog.refusal import Refusal
-    from crewmind.domain.memory import recall
-    from crewmind.storage.models import Seat
+    from nightsquad.catalog.refusal import Refusal
+    from nightsquad.domain.memory import recall
+    from nightsquad.storage.models import Seat
 
     def no_network(self: socket.socket, address: Any) -> None:
         raise AssertionError(f"tried to connect to {address}")
 
     monkeypatch.setattr(socket.socket, "connect", no_network)
-    from crewmind.domain.memory.engine import Mem0Engine
+    from nightsquad.domain.memory.engine import Mem0Engine
 
     built = Mem0Engine(tmp_path / "data", "sqlite:///unused.sqlite", tmp_path / "no-model")
     with pytest.raises(Refusal) as refused:

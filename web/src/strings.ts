@@ -14,7 +14,7 @@ const plural = (count: number, one: string, many: string): string => `${count} $
 
 export const t = {
   app: {
-    name: "crewmind",
+    name: "nightsquad",
     signOut: "Sign out",
   },
   common: {
@@ -36,7 +36,7 @@ export const t = {
     blocked: "Alerts are blocked for this site. Allow notifications in your browser settings.",
   },
   signIn: {
-    title: "Sign in to crewmind",
+    title: "Sign in to nightsquad",
     email: "Email",
     password: "Password",
     submit: "Sign in",
@@ -74,7 +74,7 @@ export const t = {
   },
   project: {
     fallbackName: "Project",
-    pageTitle: (name: string): string => `${name} · crewmind`,
+    pageTitle: (name: string): string => `${name} · nightsquad`,
   },
   header: {
     label: "Project status",
@@ -120,10 +120,10 @@ export const t = {
     emptyNextDraft: "This project has not started. Choose “Start” above, then say what you want done.",
     reconnecting: "Live updates stopped. Checking for new messages every few seconds while reconnecting.",
     messageLabel: (author: string, when: string): string => `${author}, ${when}`,
-    authorKinds: { person: "", agent: "agent", platform: "crewmind" },
+    authorKinds: { person: "", agent: "agent", platform: "nightsquad" },
     you: "You",
     agentRole: "Agent",
-    platformName: "crewmind",
+    platformName: "nightsquad",
     actionsLabel: (author: string): string => `Actions for the message from ${author}`,
     delivered: "Delivered",
     sending: "Sending…",
@@ -201,7 +201,7 @@ export const t = {
     listLabel: "Activity, newest first",
     you: "You",
     person: "Someone in the project",
-    crewmind: "crewmind",
+    Nightsquad: "nightsquad",
     dayLabel: (day: string): string => `Activity on ${day}`,
     emptyTitle: "Nothing has happened yet.",
     emptyNext: "Every change in the project will be listed here. Start the project or send a message.",

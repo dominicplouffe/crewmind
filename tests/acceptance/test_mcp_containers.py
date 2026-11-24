@@ -7,11 +7,11 @@ import shutil
 
 import pytest
 
-from crewmind.domain.connections import mcp_client
-from crewmind.domain.connections.mcp_client import CommandSpec, Target, probe_target
-from crewmind.runner.mcp_commands import SERVER_LABEL, CommandPool
+from nightsquad.domain.connections import mcp_client
+from nightsquad.domain.connections.mcp_client import CommandSpec, Target, probe_target
+from nightsquad.runner.mcp_commands import SERVER_LABEL, CommandPool
 
-IMAGE = "crewmind-server:latest"
+IMAGE = "nightsquad-server:latest"
 SERVER = """
 import os
 from mcp.server import MCPServer
@@ -50,7 +50,7 @@ async def test_CON_11_a_command_server_runs_in_its_own_confined_container(
     not as root, seeing its own variable and nothing of the host's; stopping removes it."""
     import docker  # pyright: ignore[reportMissingTypeStubs]
 
-    monkeypatch.setenv("CREWMIND_HOST_ONLY", "a value only the host has")
+    monkeypatch.setenv("NIGHTSQUAD_HOST_ONLY", "a value only the host has")
 
     async def idle() -> float:
         return 60.0
@@ -73,7 +73,7 @@ async def test_CON_11_a_command_server_runs_in_its_own_confined_container(
         uid, names = result.text.split(" ", 1)
         assert uid != "0"
         assert "ONLY_MINE" in names.split(",")
-        assert "CREWMIND_HOST_ONLY" not in names
+        assert "NIGHTSQUAD_HOST_ONLY" not in names
         client = docker.from_env()
         try:
             assert client.containers.list(filters={"label": f"{SERVER_LABEL}=acceptance-box"})

@@ -9,7 +9,7 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.decisions import items
+from nightsquad.domain.decisions import items
 from tests.attack.delivery_support import SOLO, spend
 from tests.attack.harness import assert_refused
 from tests.attack.test_planning import CHAIRMAN_HOLDS, TASK, plan, propose
@@ -339,7 +339,7 @@ async def test_HUM_1_a_new_kind_is_only_a_registration(app: App) -> None:
         )
     )
     async with app.runtime.sessions() as session, session.begin():
-        from crewmind.storage.models import Project
+        from nightsquad.storage.models import Project
 
         project = await session.get(Project, crew.project)
         assert project is not None
@@ -369,7 +369,7 @@ def test_INV_17_no_registered_kind_defaults_to_a_grant() -> None:
     """INV-17, HUM-3, P6: over every registered kind, the default outcome grants nothing,
     except delivery sign-off and a green status review, which only close the books. A
     tool permission never defaults to allow."""
-    from crewmind.catalog import registry
+    from nightsquad.catalog import registry
 
     registry.load_domain_modules()
     positive_defaults = {

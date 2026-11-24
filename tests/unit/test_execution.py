@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.domain.execution import context_pack, runs
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.domain.execution import context_pack, runs
 from tests.conftest import FakeClock
 from tests.support import App, live_run, running_project, shown_as, wake
 

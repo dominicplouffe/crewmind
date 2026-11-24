@@ -19,7 +19,7 @@ from typing import Any
 
 import httpx
 
-from crewmind.catalog import ErrorEnvelope, Rule
+from nightsquad.catalog import ErrorEnvelope, Rule
 
 ATTACK_DIRECTORY = Path(__file__).parent
 

@@ -1,5 +1,5 @@
 /**
- * End-to-end tests of "listening" against a real crewmind server with the mock model: standing orders,
+ * End-to-end tests of "listening" against a real Nightsquad server with the mock model: standing orders,
  * decisions, corrections, examples, memory, the listening score and history paging.
  * Covers CHAT-8, CHAT-11 to CHAT-13, MSG-4 to MSG-7, MEM-1, MEM-3, MEM-6, NFR-18.
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
@@ -123,7 +123,7 @@ test("a long message is proposed shortened; discard it, and retire an order (MSG
   await ask(long, "Here is the plan");
   await chooseAction(personMessage("Whenever you write for me"), "Pin as a standing order");
   const dialog = page.getByRole("dialog", { name: "Proposed standing order" });
-  await expect(dialog).toContainText("crewmind is shortening it");
+  await expect(dialog).toContainText("nightsquad is shortening it");
   await dialog.getByRole("button", { name: "Decide later" }).click();
   await expect(dialog).toHaveCount(0);
 

@@ -12,7 +12,7 @@ from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import ToolAnnotations
 
-from crewmind.domain.connections import mcp_client
+from nightsquad.domain.connections import mcp_client
 
 URL = "https://mcp.test/mcp"
 TOKEN = "mcp-bearer-token-8812-unguessable"
@@ -83,7 +83,7 @@ class Gate:
 async def serving(
     wanted: tuple[str, str] | None = None, server: MCPServer | None = None
 ) -> AsyncGenerator[Gate]:
-    """Serve the test server and make crewmind's MCP client reach it in place of DNS."""
+    """Serve the test server and make Nightsquad's MCP client reach it in place of DNS."""
     server = server or build_server()
     app = server.streamable_http_app(
         json_response=True,

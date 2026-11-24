@@ -8,7 +8,7 @@ from typing import Any
 
 from sqlalchemy import update
 
-from crewmind.storage.models import LedgerLine, Requirement
+from nightsquad.storage.models import LedgerLine, Requirement
 from tests.attack.work_support import Crew
 from tests.conftest import FakeClock
 from tests.support import App

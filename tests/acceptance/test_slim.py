@@ -1,6 +1,6 @@
 """Slim mode end to end, as a real process (NFR-23, NFR-2, NFR-5, IF-4.1, IF-4.5).
 
-Starts `crewmind up --slim` and drives the phase 1 exit demo with the real `crewmind`
+Starts `squad up --slim` and drives the phase 1 exit demo with the real `squad`
 command and a real MCP client over HTTP.
 """
 
@@ -23,7 +23,7 @@ import sqlalchemy
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 
-from crewmind.storage.engine import sync_url
+from nightsquad.storage.engine import sync_url
 from tests.support import PASSWORD
 
 START_LIMIT_SECONDS = 5  # NFR-23
@@ -42,18 +42,18 @@ class Install:
         self.url = f"http://127.0.0.1:{self.port}"
         self.env = {
             **os.environ,
-            "CREWMIND_DATA_DIR": str(data_dir),
-            "CREWMIND_PORT": str(self.port),
-            "CREWMIND_API": self.url,
+            "NIGHTSQUAD_DATA_DIR": str(data_dir),
+            "NIGHTSQUAD_PORT": str(self.port),
+            "NIGHTSQUAD_API": self.url,
             # The same on a machine with Docker and on one without: a test of container
             # mode names it.
-            "CREWMIND_SANDBOX_MODE": "unisolated",
+            "NIGHTSQUAD_SANDBOX_MODE": "unisolated",
             # A real server process cannot be told that this host has no container
             # runtime, so it is told what an operator would tell it (WRK-7).
-            "CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED": "on",
+            "NIGHTSQUAD_ALLOW_AGENT_CHECKS_UNISOLATED": "on",
         }
-        self.env.pop("CREWMIND_DATABASE_URL", None)
-        self.env.pop("CREWMIND_TOKEN", None)
+        self.env.pop("NIGHTSQUAD_DATABASE_URL", None)
+        self.env.pop("NIGHTSQUAD_TOKEN", None)
         self.data_dir = data_dir
         self.server: subprocess.Popen[str] | None = None
         self.output = ""
@@ -61,7 +61,7 @@ class Install:
     def run(self, *arguments: str, stdin: str | None = None, check: bool = True) -> Any:
         """Run the real command with --json and return its parsed output."""
         result = subprocess.run(
-            [sys.executable, "-m", "crewmind", *arguments, "--json"],
+            [sys.executable, "-m", "nightsquad", *arguments, "--json"],
             env=self.env,
             input=stdin,
             capture_output=True,
@@ -77,7 +77,7 @@ class Install:
         """Start the server and return the seconds until it was ready."""
         started = time.monotonic()
         self.server = subprocess.Popen(
-            [sys.executable, "-m", "crewmind", "up", *flags],
+            [sys.executable, "-m", "nightsquad", "up", *flags],
             env=self.env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -190,7 +190,7 @@ def test_NFR_23_slim_mode_runs_the_exit_demo_in_one_process(install: Install) ->
 
     assert ((install.data_dir / "cli.json").stat().st_mode & 0o077) == 0
     assert ((install.data_dir / "master.key").stat().st_mode & 0o077) == 0
-    assert (install.data_dir / "crewmind.sqlite").exists()
+    assert (install.data_dir / "nightsquad.sqlite").exists()
     assert httpx.get(f"{install.url}/healthz").json() == {"status": "ok"}
     second = install.run("up", "--slim", check=False)
     assert second.returncode == 3
@@ -218,7 +218,7 @@ def test_NFR_23_slim_mode_starts_fast_and_stays_small(install: Install) -> None:
 def test_NFR_23_a_slim_install_moves_to_postgres_with_nothing_lost(
     install: Install, request: pytest.FixtureRequest, database_url: str
 ) -> None:
-    """NFR-23: `crewmind migrate --to postgres` copies every row. The same project, with
+    """NFR-23: `squad migrate --to postgres` copies every row. The same project, with
     its settings and its whole event log, continues on a Postgres server."""
     if request.config.getoption("--db") != "postgres":
         pytest.skip("needs a Postgres database: run with --db=postgres")
@@ -238,7 +238,7 @@ def test_NFR_23_a_slim_install_moves_to_postgres_with_nothing_lost(
     )
     assert "already has rows" in again.stderr
 
-    install.env["CREWMIND_DATABASE_URL"] = database_url
+    install.env["NIGHTSQUAD_DATABASE_URL"] = database_url
     install.start()
     assert (
         install.run("record", "list", "--project-id", project, "--limit", "200")["items"] == events

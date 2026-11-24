@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import LedgerLine, Run
+from nightsquad.storage.models import LedgerLine, Run
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
 from tests.support import App, agent_call, live_run, run_state, running_project, wake
@@ -163,7 +163,7 @@ async def test_INV_8_every_model_call_is_metered_whatever_the_runs_ending(
     for run in (killed, reaped, failed):
         assert (await complete(app, run.token))[0] == 200
 
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         await runs.finish(session, failed.run_id, failed.runner_id, clock.now, failed=True)

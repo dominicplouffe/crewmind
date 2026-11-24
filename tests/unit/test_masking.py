@@ -8,7 +8,7 @@ from urllib.parse import quote, quote_plus
 from hypothesis import given
 from hypothesis import strategies as st
 
-from crewmind.domain.connections.delivery import Given, Masker
+from nightsquad.domain.connections.delivery import Given, Masker
 
 VALUE = "p@ss word/+=&?unguessable"
 

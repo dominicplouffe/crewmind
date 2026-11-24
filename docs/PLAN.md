@@ -1,4 +1,4 @@
-# crewmind v2 build plan
+# Nightsquad v2 build plan
 
 Owner: Dominic. Written 21 Nov 2026 against spec revision 2. Phases follow spec section 13; phase 0 is added before them.
 
@@ -30,12 +30,12 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
   - the attack-test harness;
   - a mock harness stub;
   - the settings registry loaded from Appendix A as data.
-- **Exit:** CI green on both databases with the skeleton. The spec review is answered, the conformance test fails when an operation is registered without an adapter, and `crewmind --help` runs.
+- **Exit:** CI green on both databases with the skeleton. The spec review is answered, the conformance test fails when an operation is registered without an adapter, and `squad --help` runs.
 
 ## Phase 1: Core
 
 - **Goal:** projects exist, are governed by versioned settings, and are reachable from API, CLI and MCP (read).
-- **Exit demo:** in slim mode (`crewmind up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
+- **Exit demo:** in slim mode (`squad up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
 - **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
 - **Partial ids** (spec review R-11):
   - **MCP:** IF-5.1 is delivered here only as minted bearer tokens, and IF-5.2 only as the `read` scope, so the exit demo can use an MCP client. OAuth and the other scopes stay in phase 6.
@@ -45,7 +45,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** talk to a CEO in the chat. It runs real work in a sandbox through the model gateway, metered in tokens, and stops at the wall.
 - **Exit demo:**
-  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
+  - In the web app and in `squad chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
   - An upload becomes an artifact.
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.

@@ -1,4 +1,4 @@
-"""`crewmind chat` in the terminal (IF-4.8, CHAT-3, CHAT-4, CHAT-18)."""
+"""`squad chat` in the terminal (IF-4.8, CHAT-3, CHAT-4, CHAT-18)."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from typing import Any
 import pytest
 from textual.widgets import Input, RichLog, Static
 
-from crewmind.surfaces.cli.chat.app import ChatApp, header_text, message_text
-from crewmind.surfaces.cli.chat.client import ChatClient, ChatError
+from nightsquad.surfaces.cli.chat.app import ChatApp, header_text, message_text
+from nightsquad.surfaces.cli.chat.client import ChatClient, ChatError
 from tests.support import App, api_client_factory, running_project
 
 

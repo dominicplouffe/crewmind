@@ -357,8 +357,8 @@ async def test_CHAT_14_search_header_and_feed(app: App) -> None:
 async def test_MSG_13_every_surface_reads_and_writes_the_same_conversation(app: App) -> None:
     """MSG-13, IF-1.1: a message sent through the API, the command line or a slash command
     lands in the same channel, and a read position set on one surface holds on the others."""
-    from crewmind.catalog import catalog
-    from crewmind.surfaces.cli.main import build_cli
+    from nightsquad.catalog import catalog
+    from nightsquad.surfaces.cli.main import build_cli
     from tests.support import OnLoop, invoker_for, run_cli
 
     owner = await app.person("owner@example.com")

@@ -9,7 +9,7 @@ from typing import Any
 import pytest
 from sqlalchemy import select, update
 
-from crewmind.storage.models import Requirement, RequirementDependency, Task
+from nightsquad.storage.models import Requirement, RequirementDependency, Task
 from tests.attack.harness import assert_refused
 from tests.attack.test_planning import SCOPE, TASK, plan, propose
 from tests.attack.work_support import Crew

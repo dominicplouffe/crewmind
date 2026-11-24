@@ -6,7 +6,7 @@ import asyncio
 import json
 from typing import Any
 
-from crewmind.surfaces.api.stream import project_stream
+from nightsquad.surfaces.api.stream import project_stream
 from tests.attack.harness import assert_refused
 from tests.support import App, live_run, run_state, running_project
 
@@ -137,7 +137,7 @@ async def test_FND_1_a_drafting_turn_streams_its_words_and_then_its_line(app: Ap
     """FND-1, IF-3.6: while the Founder answers, its words arrive on the conversation's
     stream as they are produced, and the finished line follows with an id to resume
     from. The stream belongs to the person drafting."""
-    from crewmind.surfaces.api.drafting_stream import drafting_stream
+    from nightsquad.surfaces.api.drafting_stream import drafting_stream
     from tests.founder_support import BRIEF, script
 
     owner = await app.person("owner@example.com")

@@ -9,7 +9,7 @@ from typing import Any
 
 from sqlalchemy import func, select
 
-from crewmind.storage.models import RunRefusal, Task
+from nightsquad.storage.models import RunRefusal, Task
 from tests.support import App, running_project
 
 SCRIPTS = Path(__file__).parents[2] / "acceptance" / "scripts"

@@ -7,13 +7,13 @@ from typing import Any
 from mcp import Client
 from pydantic import BaseModel
 
-from crewmind.catalog import Catalog, Principal, Reversibility
-from crewmind.catalog.caller import Authority, Caller, CallerKind
-from crewmind.catalog.define import Empty, operation
-from crewmind.catalog.execute import Context
-from crewmind.runtime import Runtime
-from crewmind.surfaces.mcp.server import build_mcp
-from crewmind.surfaces.mcp.untrusted import CLOSING, AgentText, for_ai_client, wrap
+from nightsquad.catalog import Catalog, Principal, Reversibility
+from nightsquad.catalog.caller import Authority, Caller, CallerKind
+from nightsquad.catalog.define import Empty, operation
+from nightsquad.catalog.execute import Context
+from nightsquad.runtime import Runtime
+from nightsquad.surfaces.mcp.server import build_mcp
+from nightsquad.surfaces.mcp.untrusted import CLOSING, AgentText, for_ai_client, wrap
 from tests.support import api_client_factory, sample_api
 
 ATTACK = (

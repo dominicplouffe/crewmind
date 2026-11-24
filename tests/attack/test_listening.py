@@ -9,8 +9,8 @@ import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
-from crewmind.domain.memory.pinned import Pinned
-from crewmind.storage.models import ClosedDecision, Correction, PinnedNote, StandingOrder
+from nightsquad.domain.memory.pinned import Pinned
+from nightsquad.storage.models import ClosedDecision, Correction, PinnedNote, StandingOrder
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
 from tests.support import Actor, App, agent_call, live_run, running_project

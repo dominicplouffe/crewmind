@@ -8,12 +8,12 @@ from typing import Any
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.catalog.operation import CatalogError
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.registry import catalog
-from crewmind.domain.planning import metrics
-from crewmind.domain.planning.model import CYCLE_MACHINE
-from crewmind.storage.models import Cycle
+from nightsquad.catalog.operation import CatalogError
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.registry import catalog
+from nightsquad.domain.planning import metrics
+from nightsquad.domain.planning.model import CYCLE_MACHINE
+from nightsquad.storage.models import Cycle
 from tests.attack.delivery_support import SOLO, command_requirement, meet, set_states, view
 from tests.attack.harness import assert_refused
 from tests.attack.work_support import Crew

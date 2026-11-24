@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from crewmind.catalog import Surface, catalog
-from crewmind.catalog.surfaces import exposed_on
+from nightsquad.catalog import Surface, catalog
+from nightsquad.catalog.surfaces import exposed_on
 from tests.attack.harness import assert_refused
 from tests.support import App, agent_call, live_run, run_state, running_project, wake
 
@@ -32,7 +32,7 @@ async def test_P3_a_run_token_works_only_for_its_own_live_run(app: App) -> None:
     stolen = await app.call("projects.status", run.token, project_id=second)
     assert stolen.status_code == 401
 
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         await runs.finish(session, run.run_id, run.runner_id, app.runtime.clock(), failed=False)
@@ -52,7 +52,7 @@ async def test_INV_4_a_hold_revokes_work_run_tokens_at_once(app: App) -> None:
     assert await run_state(app, run.run_id) == "killed"
     assert (await agent_call(app, run.token, "agent.whoami")).status_code == 401
 
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         alive = await runs.heartbeat(session, run.run_id, run.runner_id, app.runtime.clock())
@@ -173,8 +173,8 @@ async def test_EXE_1_the_roster_is_one_ceo_plus_teams_within_the_limit(app: App)
         await app.call("roster.recall_team", owner, project_id=project, team="review"),
         rule="7.12-team",
     )
-    from crewmind.catalog.refusal import Refusal
-    from crewmind.domain.execution.model import SEAT_MACHINE
+    from nightsquad.catalog.refusal import Refusal
+    from nightsquad.domain.execution.model import SEAT_MACHINE
 
     with pytest.raises(Refusal) as refused:
         SEAT_MACHINE.check("stood down", "paused")

@@ -6,7 +6,7 @@ from collections.abc import Set
 
 import pytest
 
-from crewmind.catalog import (
+from nightsquad.catalog import (
     UNBUILT_SURFACES,
     Catalog,
     Principal,
@@ -15,15 +15,15 @@ from crewmind.catalog import (
     catalog,
     check_conformance,
 )
-from crewmind.catalog.caller import Caller, CallerKind
-from crewmind.catalog.registry import load_domain_modules
-from crewmind.runtime import Runtime
-from crewmind.surfaces.agent_api import app as agent_api
-from crewmind.surfaces.agent_api.app import add_agent_api
-from crewmind.surfaces.api import app as api
-from crewmind.surfaces.cli import main as cli
-from crewmind.surfaces.mcp import server as mcp
-from crewmind.surfaces.slash import adapter as slash
+from nightsquad.catalog.caller import Caller, CallerKind
+from nightsquad.catalog.registry import load_domain_modules
+from nightsquad.runtime import Runtime
+from nightsquad.surfaces.agent_api import app as agent_api
+from nightsquad.surfaces.agent_api.app import add_agent_api
+from nightsquad.surfaces.api import app as api
+from nightsquad.surfaces.cli import main as cli
+from nightsquad.surfaces.mcp import server as mcp
+from nightsquad.surfaces.slash import adapter as slash
 from tests.support import Greeter, invoker_for, operation, sample_api, sample_catalog
 
 ALL_SCOPES = Caller(

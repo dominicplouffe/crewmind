@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from crewmind.domain.settings.service import CONSTRAINTS
-from crewmind.services import Services
+from nightsquad.domain.settings.service import CONSTRAINTS
+from nightsquad.services import Services
 from tests.support import App
 
 REASON = "A reason long enough to count."

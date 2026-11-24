@@ -8,10 +8,10 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.catalog import catalog
-from crewmind.catalog.operation import Principal
-from crewmind.domain.execution import names
-from crewmind.storage.models import Message, Seat
+from nightsquad.catalog import catalog
+from nightsquad.catalog.operation import Principal
+from nightsquad.domain.execution import names
+from nightsquad.storage.models import Message, Seat
 from tests.attack.harness import assert_refused
 from tests.support import App, agent_call, live_run, running_project
 
@@ -29,7 +29,7 @@ def test_EXE_18_the_pool_is_distinct_first_names_that_crews_do_not_use() -> None
 
     assert len(names.POOL) >= 50
     assert len({name.casefold() for name in names.POOL}) == len(names.POOL)
-    crews = resources.files("crewmind.content").joinpath("library", "crews")
+    crews = resources.files("nightsquad.content").joinpath("library", "crews")
     given = {"Maya", "Theo", "Priya", "Fay", "Noor"}
     for entry in crews.iterdir():
         if entry.name.endswith(".json"):

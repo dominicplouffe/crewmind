@@ -7,8 +7,8 @@ import asyncio
 
 from sqlalchemy import select
 
-from crewmind.domain.execution import runs
-from crewmind.storage.models import Notice, Run
+from nightsquad.domain.execution import runs
+from nightsquad.storage.models import Notice, Run
 from tests.conftest import FakeClock
 from tests.support import App, live_run, run_state, running_project, wake
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# deploy_single_server.sh: take a machine with Docker to a running crewmind, or bring an
+# deploy_single_server.sh: take a machine with Docker to a running Nightsquad, or bring an
 # existing install up on the code that is checked out (NFR-1, NFR-2, NFR-6). Safe to run
 # again: it never replaces a secret, and it keeps the address it was last given.
 #
@@ -14,7 +14,7 @@
 #   deploy/deploy_single_server.sh --bind 0.0.0.0 --public-url https://crew.example.com \
 #                                  --tls you@example.com # a public name, real certificate
 #   deploy/deploy_single_server.sh --port 8443           # another TLS port
-#   deploy/deploy_single_server.sh --state-root ~/crewmind-data
+#   deploy/deploy_single_server.sh --state-root ~/nightsquad-data
 #   deploy/deploy_single_server.sh --no-build            # use the images already here
 #
 set -euo pipefail
@@ -51,10 +51,10 @@ command -v curl >/dev/null 2>&1 || die "curl is missing.
 # A bare re-run keeps what the last run chose.
 say "Address"
 ASKED="${BIND}${PORT}"           # set when this run names an address or a port
-BIND="${BIND:-$(env_get CREWMIND_BIND)}";  BIND="${BIND:-127.0.0.1}"
-TLS="${TLS:-$(env_get CREWMIND_TLS)}";     TLS="${TLS:-internal}"
-PORT="${PORT:-$(env_get CREWMIND_TLS_PORT)}"; PORT="${PORT:-443}"
-KEPT_URL="$(env_get CREWMIND_PUBLIC_URL)"
+BIND="${BIND:-$(env_get NIGHTSQUAD_BIND)}";  BIND="${BIND:-127.0.0.1}"
+TLS="${TLS:-$(env_get NIGHTSQUAD_TLS)}";     TLS="${TLS:-internal}"
+PORT="${PORT:-$(env_get NIGHTSQUAD_TLS_PORT)}"; PORT="${PORT:-443}"
+KEPT_URL="$(env_get NIGHTSQUAD_PUBLIC_URL)"
 case "$BIND" in
   127.0.0.1) host="localhost" ;;
   0.0.0.0)   host="" ;;
@@ -96,20 +96,20 @@ fi
 
 # ── 3. settings and secrets (deploy/.env) ─────────────────────────────────────
 say "Settings (deploy/.env)"
-STATE_ROOT="${STATE_ROOT_ARG:-$(env_get CREWMIND_STATE_ROOT)}"
-STATE_ROOT="${STATE_ROOT:-/var/lib/crewmind}"
-if [ -n "$(env_get CREWMIND_DB_PASSWORD)" ]; then
+STATE_ROOT="${STATE_ROOT_ARG:-$(env_get NIGHTSQUAD_STATE_ROOT)}"
+STATE_ROOT="${STATE_ROOT:-/var/lib/nightsquad}"
+if [ -n "$(env_get NIGHTSQUAD_DB_PASSWORD)" ]; then
   ok "the database password is already set; left untouched"
 else
-  env_set CREWMIND_DB_PASSWORD "$(openssl rand -hex 24)"
+  env_set NIGHTSQUAD_DB_PASSWORD "$(openssl rand -hex 24)"
   ok "made a database password"
 fi
-env_set CREWMIND_STATE_ROOT "$STATE_ROOT"
-env_set CREWMIND_PUBLIC_URL "$PUBLIC_URL"
-env_set CREWMIND_PUBLIC_HOST "$PUBLIC_HOST"
-env_set CREWMIND_BIND "$BIND"
-env_set CREWMIND_TLS_PORT "$PORT"
-env_set CREWMIND_TLS "$TLS"
+env_set NIGHTSQUAD_STATE_ROOT "$STATE_ROOT"
+env_set NIGHTSQUAD_PUBLIC_URL "$PUBLIC_URL"
+env_set NIGHTSQUAD_PUBLIC_HOST "$PUBLIC_HOST"
+env_set NIGHTSQUAD_BIND "$BIND"
+env_set NIGHTSQUAD_TLS_PORT "$PORT"
+env_set NIGHTSQUAD_TLS "$TLS"
 ok "written (readable by you only)"
 
 # ── 4. host directory ─────────────────────────────────────────────────────────
@@ -143,18 +143,18 @@ ok "ready: the database answers and its schema is current"
 say "Setup"
 setup=(setup)
 [ -z "$ADMIN_EMAIL" ] || setup+=(--admin-email "$ADMIN_EMAIL")
-SETUP_OUT="$(crewmind "${setup[@]}")" || die "crewmind setup failed: $SETUP_OUT"
+SETUP_OUT="$(nightsquad "${setup[@]}")" || die "squad setup failed: $SETUP_OUT"
 printf '%s\n' "$SETUP_OUT" | grep -E '^\s+- ' | sed 's/^ *- /    /'
 LINK="$(printf '%s\n' "$SETUP_OUT" | sed -n 's/^setup_link: //p')"
 
 # ── 8. check ──────────────────────────────────────────────────────────────────
 say "Checking the install"
-if DOCTOR_OUT="$(crewmind doctor)"; then :; fi
+if DOCTOR_OUT="$(squad doctor)"; then :; fi
 printf '%s\n' "$DOCTOR_OUT" | grep -E 'ok=False' | sed 's/^ *- /    ! /' || ok "doctor finds nothing wrong"
 
 say "Running"
 cat <<EOF
-  crewmind is at $PUBLIC_URL
+  Nightsquad is at $PUBLIC_URL
 EOF
 if [ -n "$LINK" ]; then
   cat <<EOF
@@ -174,8 +174,8 @@ cat <<EOF
   Back up $STATE_ROOT/master.key off this machine: without it no stored
   model key can be read. deploy/backup_single_server.sh saves everything in one file.
 
-  The crewmind command runs inside the server:
-      (cd deploy && $DOCKER compose exec server crewmind --help)
+  The squad command runs inside the server:
+      (cd deploy && $DOCKER compose exec server squad --help)
 
   Update: deploy/update_single_server.sh      Stop: deploy/kill_single_server.sh
 EOF

@@ -10,10 +10,10 @@ import httpx
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.connections.mcp_sign_in import CALLBACK_PATH
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.storage.models import Alarm, Event
-from crewmind.surfaces.api.app import SESSION_COOKIE
+from nightsquad.domain.connections.mcp_sign_in import CALLBACK_PATH
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.storage.models import Alarm, Event
+from nightsquad.surfaces.api.app import SESSION_COOKIE
 from tests.attack.harness import assert_refused
 from tests.attack.oauth_support import Authority, oauth_serving
 from tests.conftest import FakeClock
@@ -28,7 +28,7 @@ def master_key(app: App) -> None:
 
 
 async def come_back(app: App, actor: Actor, code: str, state: str) -> httpx.Response:
-    """The browser arriving at crewmind's callback, carrying its session cookie."""
+    """The browser arriving at Nightsquad's callback, carrying its session cookie."""
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app.api), base_url=app.runtime.config.base_url,
         cookies={SESSION_COOKIE: actor.token},

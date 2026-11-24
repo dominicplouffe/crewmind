@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from crewmind.domain.planning import bets
-from crewmind.storage.models import Project
+from nightsquad.domain.planning import bets
+from nightsquad.storage.models import Project
 from tests.attack.delivery_support import SOLO, command_requirement, meet, set_states, view
 from tests.attack.work_support import OBSERVABLE, Crew
 from tests.conftest import FakeClock
@@ -170,7 +170,7 @@ async def test_scenario_explore_confirms_one_bet_and_kills_another(app: App, sit
     assert (drafting["state"], drafting["waiting_for"]) == ("drafting", "the Founder")
     assert "found worth building" in drafting["lines"][0]["body"]
     async with app.runtime.sessions() as session:
-        from crewmind.storage.models import Drafting
+        from nightsquad.storage.models import Drafting
 
         row = await session.get(Drafting, promoted["drafting_id"])
         assert row is not None

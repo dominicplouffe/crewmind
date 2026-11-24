@@ -1,5 +1,5 @@
 {
-  "crewmind_spec": 1,
+  "nightsquad_spec": 1,
   "name": "A Red Team That Can Block",
   "goal": "Build one small, genuinely robust thing and then prove it is robust by failing to break it. The thing: A COMMAND-LINE TOOL THAT VALIDATES AND NORMALISES CSV FILES AGAINST A SCHEMA — replace that with what I actually want, keeping it small enough that hardening it is the interesting part. Python, standard library only, with tests written using unittest so a fresh container can run them with no installation step. Two teams, and they do not share work: Build writes the code and its tests; Red Team attacks it and never edits it. Red Team's passes are the point of this project — empty and malformed input, boundaries at both ends, unicode and quotes and very long values, running it twice, killing it half way through and running it again, and every claim Build made in its completion notes, falsified specifically. Red Team also attacks the test suite itself: break the code deliberately and confirm the tests notice. Nothing is finished until a full adversarial pass finds nothing new — and if a pass finds nothing, that report IS the deliverable, not a failure to find something.",
   "type": "deliver",

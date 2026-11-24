@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Starts a throwaway crewmind server for the end-to-end tests.
+# Starts a throwaway Nightsquad server for the end-to-end tests.
 #   e2e/start-backend.sh [port] [run directory]
 # It uses the mock model (no paid calls, no network), serves web/dist on the same origin,
 # and writes setup.json (with the admin's setup link) and server.pid into the run directory.
@@ -19,25 +19,25 @@ cat > "$RUN_DIR/scripts/CEO.chat.json" <<'JSON'
 [{"text": "Here is the **plan**:\n\n1. Research\n2. Draft\n\n```python\nprint(1)\n```"}]
 JSON
 
-export CREWMIND_DATA_DIR="$RUN_DIR/data"
-export CREWMIND_PORT="$PORT"
-export CREWMIND_API="http://127.0.0.1:$PORT"
-export CREWMIND_SANDBOX_MODE=unisolated
-export CREWMIND_MOCK_SCRIPT_DIR="$RUN_DIR/scripts"
+export NIGHTSQUAD_DATA_DIR="$RUN_DIR/data"
+export NIGHTSQUAD_PORT="$PORT"
+export NIGHTSQUAD_API="http://127.0.0.1:$PORT"
+export NIGHTSQUAD_SANDBOX_MODE=unisolated
+export NIGHTSQUAD_MOCK_SCRIPT_DIR="$RUN_DIR/scripts"
 # Recall memory runs in the server process: no model files and no network.
-export CREWMIND_MEMORY_ENGINE=in-process
+export NIGHTSQUAD_MEMORY_ENGINE=in-process
 
 cd "$REPO_DIR"
-uv run -q crewmind setup --slim --admin-email dom@example.com --json > "$RUN_DIR/setup.json"
-nohup uv run -q crewmind up --slim > "$RUN_DIR/up.log" 2>&1 &
+uv run -q squad setup --slim --admin-email dom@example.com --json > "$RUN_DIR/setup.json"
+nohup uv run -q squad up --slim > "$RUN_DIR/up.log" 2>&1 &
 echo $! > "$RUN_DIR/server.pid"
 
 for _ in $(seq 1 120); do
   if curl -fs "http://127.0.0.1:$PORT/readyz" > /dev/null 2>&1; then
-    echo "crewmind is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
+    echo "nightsquad is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
     exit 0
   fi
   sleep 0.5
 done
-echo "crewmind did not become ready; see $RUN_DIR/up.log" >&2
+echo "nightsquad did not become ready; see $RUN_DIR/up.log" >&2
 exit 1

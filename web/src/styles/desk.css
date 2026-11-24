@@ -271,7 +271,7 @@ a.button.primary { color: var(--color-accent-text); }
 .dcard.is-slim .dcard-confirm { flex-basis: 100%; }
 .dcard.is-slim:has(.dcard-confirm) { flex-wrap: wrap; }
 
-/* A decision line in the chat: the card beside crewmind's mark; a settled one is a quiet line. */
+/* A decision line in the chat: the card beside Nightsquad's mark; a settled one is a quiet line. */
 .message.is-item .message-content .dcard { margin-top: 0; }
 .message.is-item:has(.dcard.is-closed) { padding-top: 0.125rem; padding-bottom: 0.125rem; margin-bottom: var(--space-1); }
 .message.is-item:has(.dcard.is-closed) .system-avatar { display: none; }

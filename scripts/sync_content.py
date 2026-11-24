@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).parents[1]
-PACKAGED = ROOT / "src" / "crewmind" / "content" / "library"
+PACKAGED = ROOT / "src" / "nightsquad" / "content" / "library"
 
 if __name__ == "__main__":
     for folder in ("roles", "crews", "mcp-servers"):

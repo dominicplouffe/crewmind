@@ -115,7 +115,7 @@ The non-blocking items below stay open and go to the plan of the phase each one 
 
 - **Ref:** IF-4.2; NFR-2; NFR-3; NFR-23.
 - **Quote:** IF-4.2: "bootstrap the first admin or issue a password-reset link, backup, restore, master-key rotation. Nothing else may bypass the API."
-- **Problem:** `crewmind up --slim` (start the server and migrate), the install command (NFR-2), `update` (NFR-3) and `migrate --to postgres` (NFR-23) all touch storage directly, but none is on the list. Read literally, they are forbidden.
+- **Problem:** `squad up --slim` (start the server and migrate), the install command (NFR-2), `update` (NFR-3) and `migrate --to postgres` (NFR-23) all touch storage directly, but none is on the list. Read literally, they are forbidden.
 - **Recommendation:** Extend IF-4.2's list to: install, `up` (start, including migrate-on-start), update, `migrate --to postgres`, bootstrap admin, password-reset link, backup, restore, master-key rotation. Each is marked host-local in the catalog and exempt from the API, MCP and Slack surfaces.
 
 ### R-08 Section 7 is missing most lifecycles

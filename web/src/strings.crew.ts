@@ -221,7 +221,7 @@ export const deliverables = {
   updated: (when: string): string => `Updated ${when}`,
   madeBy: (who: string): string => `Made by ${who}`,
   uploadedBy: (who: string): string => `Uploaded by ${who}`,
-  writtenByPlatform: "Written by crewmind",
+  writtenByPlatform: "Written by nightsquad",
   you: "you",
   locked: "Locked",
   superseded: "Replaced by a newer file",

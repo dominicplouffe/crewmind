@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import BriefRun
+from nightsquad.storage.models import BriefRun
 from tests.attack.delivery_support import SOLO, command_requirement, meet, set_states, spend
 from tests.attack.test_planning import CHAIRMAN_HOLDS, propose
 from tests.attack.work_support import Crew

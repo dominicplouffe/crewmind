@@ -417,7 +417,7 @@
      "delivery": {
       "$ref": "#/components/schemas/Delivery",
       "default": "sent_for_you",
-      "description": "sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
+      "description": "sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
      },
      "description": {
       "description": "What it is for, in one line. Agents read it.",
@@ -2878,10 +2878,10 @@
       "title": "Ceo Role",
       "type": "string"
      },
-     "crewmind_crew": {
+     "nightsquad_crew": {
       "const": 1,
       "default": 1,
-      "title": "Crewmind Crew",
+      "title": "Nightsquad Crew",
       "type": "integer"
      },
      "domains": {
@@ -7613,10 +7613,10 @@
       "title": "Credentials",
       "type": "array"
      },
-     "crewmind_spec": {
+     "nightsquad_spec": {
       "const": 1,
       "default": 1,
-      "title": "Crewmind Spec",
+      "title": "Nightsquad Spec",
       "type": "integer"
      },
      "deadline": {
@@ -8828,10 +8828,10 @@
       "title": "Credential Names",
       "type": "array"
      },
-     "crewmind_role": {
+     "nightsquad_role": {
       "const": 1,
       "default": 1,
-      "title": "Crewmind Role",
+      "title": "Nightsquad Role",
       "type": "integer"
      },
      "description": {
@@ -11605,7 +11605,7 @@
     "title": "Working",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__HistoryLine": {
+   "nightsquad__domain__connections__item_operations__HistoryLine": {
     "properties": {
      "at": {
       "format": "date-time",
@@ -11641,7 +11641,7 @@
     "title": "HistoryLine",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__ItemDetail": {
+   "nightsquad__domain__connections__item_operations__ItemDetail": {
     "properties": {
      "hidden_uses": {
       "description": "Projects using it that you cannot see.",
@@ -11650,7 +11650,7 @@
      },
      "history": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__HistoryLine"
+       "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__HistoryLine"
       },
       "title": "History",
       "type": "array"
@@ -11676,7 +11676,7 @@
     "title": "ItemDetail",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__ItemList": {
+   "nightsquad__domain__connections__item_operations__ItemList": {
     "properties": {
      "items": {
       "items": {
@@ -11692,7 +11692,7 @@
     "title": "ItemList",
     "type": "object"
    },
-   "crewmind__domain__conversation__decisions__DecideInput": {
+   "nightsquad__domain__conversation__decisions__DecideInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -11714,7 +11714,7 @@
     "title": "DecideInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__decisions__RuleInput": {
+   "nightsquad__domain__conversation__decisions__RuleInput": {
     "properties": {
      "decision_id": {
       "description": "The decision's id, from `decisions list`.",
@@ -11742,7 +11742,7 @@
     "title": "RuleInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__directives__AcceptInput": {
+   "nightsquad__domain__conversation__directives__AcceptInput": {
     "properties": {
      "card_id": {
       "description": "The card's id.",
@@ -11774,7 +11774,7 @@
     "title": "AcceptInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__operations__History": {
+   "nightsquad__domain__conversation__operations__History": {
     "properties": {
      "earlier": {
       "anyOf": [
@@ -11813,7 +11813,7 @@
     "title": "History",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__DecideInput": {
+   "nightsquad__domain__decisions__operations__DecideInput": {
     "properties": {
      "action": {
       "description": "One of the item's actions.",
@@ -11891,7 +11891,7 @@
     "title": "DecideInput",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ExtendInput": {
+   "nightsquad__domain__decisions__operations__ExtendInput": {
     "properties": {
      "days": {
       "description": "How many days more: 1 to 30.",
@@ -11924,7 +11924,7 @@
     "title": "ExtendInput",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__HistoryLine": {
+   "nightsquad__domain__decisions__operations__HistoryLine": {
     "properties": {
      "actor_kind": {
       "title": "Actor Kind",
@@ -11960,7 +11960,7 @@
     "title": "HistoryLine",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ItemDetail": {
+   "nightsquad__domain__decisions__operations__ItemDetail": {
     "properties": {
      "actions": {
       "description": "What you can do with it now.",
@@ -12041,7 +12041,7 @@
      },
      "history": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__decisions__operations__HistoryLine"
+       "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__HistoryLine"
       },
       "title": "History",
       "type": "array"
@@ -12120,7 +12120,7 @@
     "title": "ItemDetail",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ItemList": {
+   "nightsquad__domain__decisions__operations__ItemList": {
     "properties": {
      "items": {
       "items": {
@@ -12136,7 +12136,7 @@
     "title": "ItemList",
     "type": "object"
    },
-   "crewmind__domain__founder__operations__StartInput": {
+   "nightsquad__domain__founder__operations__StartInput": {
     "properties": {
      "brief": {
       "description": "What you want, in your own words.",
@@ -12165,7 +12165,7 @@
     "title": "StartInput",
     "type": "object"
    },
-   "crewmind__domain__planning__delivery_operations__ReasonInput": {
+   "nightsquad__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12186,7 +12186,7 @@
     "title": "ReasonInput",
     "type": "object"
    },
-   "crewmind__domain__planning__explore_operations__ExtendInput": {
+   "nightsquad__domain__planning__explore_operations__ExtendInput": {
     "properties": {
      "bet_id": {
       "description": "The bet's id, from `plan show`.",
@@ -12220,7 +12220,7 @@
     "title": "ExtendInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__AcceptInput": {
+   "nightsquad__domain__planning__operations__AcceptInput": {
     "properties": {
      "anyway": {
       "default": false,
@@ -12246,7 +12246,7 @@
     "title": "AcceptInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__ReasonInput": {
+   "nightsquad__domain__planning__operations__ReasonInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12273,7 +12273,7 @@
     "title": "ReasonInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__RuleInput": {
+   "nightsquad__domain__planning__operations__RuleInput": {
     "properties": {
      "note": {
       "anyOf": [
@@ -12312,7 +12312,7 @@
     "title": "RuleInput",
     "type": "object"
    },
-   "crewmind__domain__projects__operations__StartInput": {
+   "nightsquad__domain__projects__operations__StartInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12332,7 +12332,7 @@
     "title": "StartInput",
     "type": "object"
    },
-   "crewmind__domain__settings__operations__History": {
+   "nightsquad__domain__settings__operations__History": {
     "properties": {
      "items": {
       "items": {
@@ -12362,7 +12362,7 @@
   }
  },
  "info": {
-  "title": "crewmind",
+  "title": "nightsquad",
   "version": "1"
  },
  "openapi": "3.1.0",
@@ -13394,7 +13394,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__explore_operations__ExtendInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__explore_operations__ExtendInput"
        }
       }
      },
@@ -13545,7 +13545,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__directives__AcceptInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__directives__AcceptInput"
        }
       }
      },
@@ -14002,7 +14002,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__conversation__operations__History"
+         "$ref": "#/components/schemas/nightsquad__domain__conversation__operations__History"
         }
        }
       },
@@ -14357,7 +14357,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__delivery_operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__delivery_operations__ReasonInput"
        }
       }
      },
@@ -15113,7 +15113,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemList"
+         "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__ItemList"
         }
        }
       },
@@ -15324,7 +15324,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemDetail"
+         "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__ItemDetail"
         }
        }
       },
@@ -16119,7 +16119,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__DecideInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__decisions__DecideInput"
        }
       }
      },
@@ -16293,7 +16293,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__RuleInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__decisions__RuleInput"
        }
       }
      },
@@ -16892,7 +16892,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__founder__operations__StartInput"
+        "$ref": "#/components/schemas/nightsquad__domain__founder__operations__StartInput"
        }
       }
      },
@@ -17236,7 +17236,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__DecideInput"
+        "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__DecideInput"
        }
       }
      },
@@ -17278,7 +17278,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ExtendInput"
+        "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ExtendInput"
        }
       }
      },
@@ -17364,7 +17364,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemList"
+         "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ItemList"
         }
        }
       },
@@ -17462,7 +17462,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemDetail"
+         "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ItemDetail"
         }
        }
       },
@@ -17692,7 +17692,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Load the roles and crews shipped with this version of crewmind again.",
+    "summary": "Load the roles and crews shipped with this version of Nightsquad again.",
     "tags": [
      "library"
     ]
@@ -18674,7 +18674,7 @@
       "description": "Successful Response"
      }
     },
-    "summary": "List the providers crewmind can use, with any concurrency ceiling.",
+    "summary": "List the providers Nightsquad can use, with any concurrency ceiling.",
     "tags": [
      "models"
     ]
@@ -20493,7 +20493,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__projects__operations__StartInput"
+        "$ref": "#/components/schemas/nightsquad__domain__projects__operations__StartInput"
        }
       }
      },
@@ -21102,7 +21102,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__AcceptInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__AcceptInput"
        }
       }
      },
@@ -21228,7 +21228,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__ReasonInput"
        }
       }
      },
@@ -21270,7 +21270,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__ReasonInput"
        }
       }
      },
@@ -21354,7 +21354,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__RuleInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__RuleInput"
        }
       }
      },
@@ -22309,7 +22309,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__settings__operations__History"
+         "$ref": "#/components/schemas/nightsquad__domain__settings__operations__History"
         }
        }
       },

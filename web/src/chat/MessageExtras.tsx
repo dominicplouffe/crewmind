@@ -40,7 +40,7 @@ export function detailOf(message: Message): MessageDetail {
   };
 }
 
-/** Markers in the message head: an example, crewmind's "long" or "unclear" mark, a held report. */
+/** Markers in the message head: an example, Nightsquad's "long" or "unclear" mark, a held report. */
 export function Markers({ detail, example }: { detail: MessageDetail; example: boolean }): JSX.Element {
   const lint = detail.lint ? (t.listening.lint[detail.lint as keyof typeof t.listening.lint] ?? detail.lint) : null;
   return (

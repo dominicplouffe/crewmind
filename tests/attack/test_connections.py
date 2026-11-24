@@ -9,12 +9,12 @@ from hypothesis import given
 from hypothesis import strategies as st
 from sqlalchemy import select
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.domain.connections import holds, needs
-from crewmind.domain.connections.needs import NEED_MACHINE, NeedState
-from crewmind.domain.execution import runs
-from crewmind.domain.execution.model import RunKind
-from crewmind.storage.models import Event, Project, ProjectNeed, Run, Seat
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.domain.connections import holds, needs
+from nightsquad.domain.connections.needs import NEED_MACHINE, NeedState
+from nightsquad.domain.execution import runs
+from nightsquad.domain.execution.model import RunKind
+from nightsquad.storage.models import Event, Project, ProjectNeed, Run, Seat
 from tests.attack.harness import assert_refused
 from tests.support import Actor, App, quiet_start
 

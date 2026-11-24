@@ -11,10 +11,10 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.connections import delivery
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway.protocol import CompletionRequest
-from crewmind.storage.models import ArtifactVersion, Event, Message, Run, RunStep
+from nightsquad.domain.connections import delivery
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway.protocol import CompletionRequest
+from nightsquad.storage.models import ArtifactVersion, Event, Message, Run, RunStep
 from tests.attack.test_connections import blog_project, seats
 from tests.support import Actor, App, agent_call, live_run, quiet_start, wake
 
@@ -101,7 +101,7 @@ async def test_CON_8_a_given_secret_reaches_its_commands_and_nothing_else(
     monkeypatch.setattr(app.runtime.mock, "complete", recording)
     command = (
         'echo "pw=$WP_PASSWORD"; printf %s "$WP_PASSWORD" | base64; '
-        'cat "$CREWMIND_SECRETS_DIR/SITE_CERT"; echo "region=$REGION ceo=[$CEO_KEY]"; '
+        'cat "$NIGHTSQUAD_SECRETS_DIR/SITE_CERT"; echo "region=$REGION ceo=[$CEO_KEY]"; '
         'echo "$WP_PASSWORD" > notes.txt'
     )
     app.script(
@@ -139,7 +139,7 @@ async def test_CON_8_a_given_secret_reaches_its_commands_and_nothing_else(
 
     with caplog.at_level(logging.INFO):
         delivery.install_log_masking()
-        logging.getLogger("crewmind.test").warning("the provider said %s", WP)
+        logging.getLogger("nightsquad.test").warning("the provider said %s", WP)
     assert WP not in caplog.text
     assert "[secret: wordpress]" in caplog.text
 

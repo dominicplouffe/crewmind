@@ -1,6 +1,6 @@
-# crewmind web app
+# Nightsquad web app
 
-The browser client for crewmind: TypeScript + React, built with Vite. It holds no business rules:
+The browser client for Nightsquad: TypeScript + React, built with Vite. It holds no business rules:
 it calls the API and shows what comes back, including the server's own refusal messages and hints.
 
 ## Develop
@@ -10,20 +10,20 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-The dev server proxies `/v1`, `/files`, `/stream` and `/healthz` to a crewmind server at
-`http://127.0.0.1:8433`. Set `CREWMIND_API` to use another address. To start a throwaway server
+The dev server proxies `/v1`, `/files`, `/stream` and `/healthz` to a Nightsquad server at
+`http://127.0.0.1:8433`. Set `NIGHTSQUAD_API` to use another address. To start a throwaway server
 with the mock model (no paid calls):
 
 ```bash
-e2e/start-backend.sh 8433 /tmp/crewmind-dev   # prints when ready; setup link is in <dir>/setup.json
-e2e/stop-backend.sh /tmp/crewmind-dev
+e2e/start-backend.sh 8433 /tmp/nightsquad-dev   # prints when ready; setup link is in <dir>/setup.json
+e2e/stop-backend.sh /tmp/nightsquad-dev
 ```
 
 To see the app with a crew at work, seed a busy demo project on that throwaway server (five agents,
 tasks in every state, delivered files, half the budget spent, decisions waiting):
 
 ```bash
-npm run demo -- http://127.0.0.1:8433 /tmp/crewmind-dev
+npm run demo -- http://127.0.0.1:8433 /tmp/nightsquad-dev
 ```
 
 ## Build
@@ -62,8 +62,8 @@ covers standing orders, decisions, corrections, examples, memory and history pag
 server uses the in-process memory engine, whose search matches by shared words. `e2e/board.spec.ts`
 covers the Board: only agents create tasks, so it scripts the mock CEO and Reviewer (`CEO.work.json`,
 `Reviewer.work.json` in `e2e/.run/scripts`, see `setWorkScript` in `e2e/helpers.ts`) and starts each CEO
-work run with a `/do` directive. Set `CREWMIND_E2E_PORT` to change the port and
-`CREWMIND_E2E_SKIP_BUILD=1` to reuse an existing `dist`. Playwright is pinned to the version
+work run with a `/do` directive. Set `NIGHTSQUAD_E2E_PORT` to change the port and
+`NIGHTSQUAD_E2E_SKIP_BUILD=1` to reuse an existing `dist`. Playwright is pinned to the version
 whose Chromium is already installed; do not run `playwright install`.
 
 ## Design

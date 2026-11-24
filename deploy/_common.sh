@@ -16,15 +16,15 @@ trap on_interrupt INT TERM
 
 ENV_FILE="deploy/.env"
 SERVER_PORT=8420            # the server's plain port, published on 127.0.0.1 only
-AGENT_IMAGE="crewmind-agent"
-INSTALL_LABEL="crewmind.install"
+AGENT_IMAGE="nightsquad-agent"
+INSTALL_LABEL="nightsquad.install"
 
 # The checkout root, judged by the files these scripts need.
 require_repo_root() {
   local marker
   for marker in pyproject.toml deploy/compose.yaml deploy/Dockerfile deploy/agent.Dockerfile; do
     [ -e "$marker" ] \
-      || die "no ./$marker here: this script must live in deploy/ of a crewmind checkout (looked in $PWD)"
+      || die "no ./$marker here: this script must live in deploy/ of a Nightsquad checkout (looked in $PWD)"
   done
   REPO="$PWD"
 }
@@ -69,16 +69,16 @@ env_set() {
 
 load_env() {
   [ -f "$ENV_FILE" ] || die "$ENV_FILE is missing. Run deploy/deploy_single_server.sh first."
-  STATE_ROOT="$(env_get CREWMIND_STATE_ROOT)"; STATE_ROOT="${STATE_ROOT:-/var/lib/crewmind}"
-  PUBLIC_URL="$(env_get CREWMIND_PUBLIC_URL)"; PUBLIC_URL="${PUBLIC_URL:-https://localhost}"
+  STATE_ROOT="$(env_get NIGHTSQUAD_STATE_ROOT)"; STATE_ROOT="${STATE_ROOT:-/var/lib/nightsquad}"
+  PUBLIC_URL="$(env_get NIGHTSQUAD_PUBLIC_URL)"; PUBLIC_URL="${PUBLIC_URL:-https://localhost}"
 }
 
 server_is_running() {
   compose ps --status running --services 2>/dev/null | grep -q '^server$'
 }
 
-# The crewmind command, inside the server container.
-crewmind() { compose exec -T server crewmind "$@"; }
+# The squad command, inside the server container.
+squad() { compose exec -T server squad "$@"; }
 
 # Both images, every time: the agent image is what agent runs execute in, and a stale
 # one runs old harness code.

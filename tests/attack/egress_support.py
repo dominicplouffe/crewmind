@@ -14,7 +14,7 @@ from typing import Any
 
 import h11
 
-from crewmind.domain.connections.authority import Authority
+from nightsquad.domain.connections.authority import Authority
 
 HOSTS = ("wp.test", "other.test")
 

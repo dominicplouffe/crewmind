@@ -69,12 +69,12 @@ const CEO_KINDS = new Set([
 ]);
 
 export interface Asker {
-  /** The name for the avatar, or null for crewmind itself. */
+  /** The name for the avatar, or null for Nightsquad itself. */
   name: string | null;
   /** The asking agent's seat, for the avatar's colour, when known. */
   seat?: string;
   line: string;
-  /** Who, in a word: "CEO", "An agent", "crewmind", or the seat's name. */
+  /** Who, in a word: "CEO", "An agent", "nightsquad", or the seat's name. */
   who: string;
 }
 

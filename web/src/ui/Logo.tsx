@@ -1,5 +1,5 @@
 /**
- * The crewmind mark and wordmark (docs/design/brand.md). The mark is a crew around one mind:
+ * The Nightsquad mark and wordmark (docs/design/brand.md). The mark is a crew around one mind:
  * three members joined to a centre, inside a rounded tile. It reads at 16px and works in one colour.
  */
 import { t } from "../strings";

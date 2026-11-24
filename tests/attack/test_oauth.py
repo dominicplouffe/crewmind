@@ -11,7 +11,7 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import OAuthClient
+from nightsquad.storage.models import OAuthClient
 from tests.attack.harness import assert_refused
 from tests.attack.test_mcp import client_for
 from tests.conftest import FakeClock

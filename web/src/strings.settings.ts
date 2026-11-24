@@ -150,7 +150,7 @@ export const settingWords: Record<string, SettingWords> = {
   },
   "brief.away_after": {
     label: "Catch-up after",
-    help: "After this long away from crewmind, you get a summary of what you missed.",
+    help: "After this long away from Nightsquad, you get a summary of what you missed.",
   },
   "review.every": { label: "Progress review every", help: "How often you're asked to review the project's progress." },
   "agenda.days": { label: "Agenda look-ahead", help: "How many days ahead your agenda shows.", noun: ["day", "days"] },
@@ -196,7 +196,7 @@ export const settingWords: Record<string, SettingWords> = {
   "email.mode": {
     label: "Email",
     help: "Whether agents can send and receive email, and how.",
-    options: { off: "Off", managed: "Managed by crewmind", manual: "Your own mailbox", install_alias: "Shared install address" },
+    options: { off: "Off", managed: "Managed by nightsquad", manual: "Your own mailbox", install_alias: "Shared install address" },
   },
   "email.max_per_day": { label: "Emails per day", help: "The most emails agents may send in a day.", noun: ["email", "emails"] },
   "search.max_per_day": {
@@ -328,8 +328,8 @@ export const groupWords = {
   conversation: { label: "Chat & messages", help: "How agents talk to you." },
   memory: { label: "Memory", help: "What agents remember." },
   founder: { label: "Founder", help: "The agent that drafts new projects with you." },
-  notifications: { label: "Notifications", help: "When and how you hear from crewmind." },
-  integrations: { label: "Email, web & outside tools", help: "What agents may reach outside crewmind." },
+  notifications: { label: "Notifications", help: "When and how you hear from Nightsquad." },
+  integrations: { label: "Email, web & outside tools", help: "What agents may reach outside Nightsquad." },
   files: { label: "Files & storage", help: "File sizes, storage and how long records are kept." },
   privacy: { label: "Privacy & security", help: "Tokens and exported traces." },
   region: { label: "Time zone", help: "Where dates and schedules are anchored." },
@@ -411,7 +411,7 @@ export const settingsWords = {
   },
   page: {
     title: "Settings",
-    documentTitle: "Settings · crewmind",
+    documentTitle: "Settings · nightsquad",
     intro: "Your profile, model keys, people and the rules every project starts from.",
     nav: "Settings sections",
     backToList: "All settings",
@@ -447,10 +447,10 @@ export const settingsWords = {
   },
   notifications: {
     title: "Alerts on this device",
-    body: "Get a notification when a decision needs you or something goes wrong, even when crewmind isn't open.",
+    body: "Get a notification when a decision needs you or something goes wrong, even when Nightsquad isn't open.",
     on: "Alerts are on for this device.",
     off: "Alerts are off for this device.",
-    blocked: "Your browser is blocking notifications from crewmind. Allow them in the browser's site settings, then come back.",
+    blocked: "Your browser is blocking notifications from Nightsquad. Allow them in the browser's site settings, then come back.",
     unavailable: "This browser, or this server, can't send alerts. Try a recent Chrome, Edge, Firefox or Safari on an https address.",
     turnOn: "Turn on alerts",
     turnOff: "Turn off alerts",
@@ -504,7 +504,7 @@ export const settingsWords = {
     failed: "The key was saved, but the test call failed.",
     failedFix: {
       auth: "The provider didn't accept this key. Check that you copied all of it and that it hasn't been revoked.",
-      network: "crewmind couldn't reach the provider. Check the endpoint address and this server's internet access.",
+      network: "nightsquad couldn't reach the provider. Check the endpoint address and this server's internet access.",
       notFound: "The provider doesn't offer the model it tried. Check the endpoint address, or try again later.",
       quota: "The provider refused for billing or rate limits. Check the account's credit and limits.",
       other: "Check the key and the provider, then try again.",
@@ -513,7 +513,7 @@ export const settingsWords = {
     keepAnyway: "Keep it anyway",
     details: "Show technical details",
     nameTaken: (name: string): string => `You already have a key named “${name}”. Choose another name.`,
-    mockNote: "The scripted mock answers from test scripts. Use it only for trying crewmind out.",
+    mockNote: "The scripted mock answers from test scripts. Use it only for trying Nightsquad out.",
   },
   founder: {
     title: "Founder",
@@ -566,7 +566,7 @@ export const settingsWords = {
     inviteSubmit: "Create invite link",
     inviting: "Creating…",
     linkTitle: (name: string): string => `Send this link to ${name}`,
-    linkBody: (until: string): string => `crewmind doesn't send email. The link works once, until ${until}.`,
+    linkBody: (until: string): string => `nightsquad doesn't send email. The link works once, until ${until}.`,
     linkLabel: (name: string): string => `Sign-in link for ${name}`,
     done: "Done",
   },
@@ -593,7 +593,7 @@ export const settingsWords = {
     fixedTitle: "The Founder has a model now.",
   },
   welcome: {
-    documentTitle: "Set up crewmind",
+    documentTitle: "Set up nightsquad",
     steps: "Setup steps",
     stepOf: (current: number, total: number): string => `Step ${current} of ${total}`,
     exit: "Finish later",
@@ -606,7 +606,7 @@ export const settingsWords = {
       goal: "Your goal",
     },
     intro: {
-      title: "Welcome to crewmind",
+      title: "Welcome to nightsquad",
       lead: "A team of AI agents, run like a company. You're the chairman.",
       body: "A few steps and your first project is under way:",
       points: [
@@ -619,7 +619,7 @@ export const settingsWords = {
     },
     key: {
       title: "Add a model key",
-      lead: "Paste an API key from your AI provider. crewmind makes a tiny test call to check it works.",
+      lead: "Paste an API key from your AI provider. Nightsquad makes a tiny test call to check it works.",
       have: "You already have a model key.",
       haveList: "Keys you can use",
       addAnother: "Add another key",

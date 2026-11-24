@@ -69,7 +69,7 @@ export type AuthorKind = "agent" | "person" | "platform";
 /** Who made a file: an agent of the crew, a person (uploads), or the platform (reports). */
 export function authorKind(item: Pick<Artifact, "kind" | "last_author">, seats: ReadonlySet<string>): AuthorKind {
   if (seats.has(item.last_author)) return "agent";
-  if (item.last_author === "platform" || item.last_author === "crewmind") return "platform";
+  if (item.last_author === "platform" || item.last_author === "nightsquad") return "platform";
   if (item.kind === "upload") return "person";
   return item.kind === "report" ? "platform" : "person";
 }

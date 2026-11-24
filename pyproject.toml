@@ -1,5 +1,5 @@
 [project]
-name = "crewmind"
+name = "nightsquad"
 version = "0.0.1"
 description = "Runs a team of AI agents like a company, under rules the agents cannot talk their way out of."
 readme = "README.md"
@@ -29,7 +29,8 @@ dependencies = [
 ]
 
 [project.scripts]
-crewmind = "crewmind.surfaces.cli.main:main"
+squad = "nightsquad.surfaces.cli.main:main"
+nightsquad = "nightsquad.surfaces.cli.main:main"
 
 [dependency-groups]
 dev = [
@@ -47,10 +48,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 # The embedding model is fetched at build time and is not in the repository (MEM-2).
-artifacts = ["src/crewmind/embedding_model/**"]
+artifacts = ["src/nightsquad/embedding_model/**"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/crewmind"]
+packages = ["src/nightsquad"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -78,10 +79,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"src/crewmind/storage/migrations/versions/*" = ["N999"]
+"src/nightsquad/storage/migrations/versions/*" = ["N999"]
 "tests/*" = ["N999", "ASYNC"]  # test modules are named after requirement ids too
 # Host-local commands run alone in their own process, so blocking calls are fine there.
-"src/crewmind/domain/install/*" = ["ASYNC220", "ASYNC221", "ASYNC240"]
+"src/nightsquad/domain/install/*" = ["ASYNC220", "ASYNC221", "ASYNC240"]
 
 [tool.pyright]
 include = ["src", "tests"]

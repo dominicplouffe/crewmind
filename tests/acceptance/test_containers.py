@@ -2,7 +2,7 @@
 
 These tests need a Docker daemon and the agent image:
 
-    docker build -f deploy/agent.Dockerfile -t crewmind-agent .
+    docker build -f deploy/agent.Dockerfile -t nightsquad-agent .
 
 Without either they skip and say so.
 """
@@ -18,10 +18,10 @@ from typing import Any
 
 import pytest
 
-from crewmind.runner.check_sandbox import ContainerCheckRunner
-from crewmind.runner.containers import INSTALL_LABEL, RUN_LABEL, container_user
-from crewmind.runner.sandbox import ContainerSandbox, SandboxHandle, SandboxSpec
-from crewmind.runtime import SANDBOX_IMAGE
+from nightsquad.runner.check_sandbox import ContainerCheckRunner
+from nightsquad.runner.containers import INSTALL_LABEL, RUN_LABEL, container_user
+from nightsquad.runner.sandbox import ContainerSandbox, SandboxHandle, SandboxSpec
+from nightsquad.runtime import SANDBOX_IMAGE
 from tests.acceptance.test_work import finish_a_verified_job
 
 pytestmark = pytest.mark.slow
@@ -117,11 +117,11 @@ def test_EXE_12_a_real_crew_finishes_a_verified_job_in_containers(
     finish_a_verified_job(
         tmp_path,
         {
-            "CREWMIND_SANDBOX_MODE": "container",
+            "NIGHTSQUAD_SANDBOX_MODE": "container",
             # A container reaches a server on this host only at a published address.
-            "CREWMIND_HOST": "0.0.0.0",
-            "CREWMIND_PUBLIC_URL": "https://crewmind.test",
-            "CREWMIND_AGENT_API_URL": "http://host.docker.internal:{port}",
+            "NIGHTSQUAD_HOST": "0.0.0.0",
+            "NIGHTSQUAD_PUBLIC_URL": "https://nightsquad.test",
+            "NIGHTSQUAD_AGENT_API_URL": "http://host.docker.internal:{port}",
         },
     )
 
@@ -149,7 +149,7 @@ async def test_EXE_12_a_sandbox_holds_no_privilege_and_nothing_of_the_host(
     the default CPU and memory limits, the install label, and its project's own network.
     When the run ends, the container and the idle network are gone."""
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-should-never-be-seen")
-    monkeypatch.setenv("CREWMIND_MASTER_KEY_FILE", "/secret/master.key")
+    monkeypatch.setenv("NIGHTSQUAD_MASTER_KEY_FILE", "/secret/master.key")
     (host.root / "master.key").write_text("the-master-key")
     spec = host.spec("project-a")
     handle = await host.sandbox(PROBE % host.root).start(spec)
@@ -169,9 +169,9 @@ async def test_EXE_12_a_sandbox_holds_no_privilege_and_nothing_of_the_host(
     }
     assert facts["user"] != "0"
     environment = {line[4:].split("=", 1)[0] for line in seen if line.startswith("env:")}
-    assert {name for name in environment if "CREWMIND" in name} == {
-        "CREWMIND_RUN_TOKEN",
-        "CREWMIND_AGENT_API",
+    assert {name for name in environment if "NIGHTSQUAD" in name} == {
+        "NIGHTSQUAD_RUN_TOKEN",
+        "NIGHTSQUAD_AGENT_API",
     }
     assert "sk-should-never-be-seen" not in probe.read_text()
     assert "the-master-key" not in probe.read_text()
@@ -183,7 +183,7 @@ async def test_EXE_12_a_sandbox_holds_no_privilege_and_nothing_of_the_host(
     assert not settings["Privileged"]
     assert [bind.split(":")[1] for bind in settings["Binds"]] == ["/workspace"]
     assert container.labels[INSTALL_LABEL] == host.install
-    assert host.networks() == [f"crewmind-{host.install}-project-a"]
+    assert host.networks() == [f"nightsquad-{host.install}-project-a"]
     assert settings["NetworkMode"] == host.networks()[0]
 
     await handle.kill()
@@ -236,7 +236,7 @@ async def test_EXE_12_a_second_install_never_adopts_these_containers(host: Host)
 
 
 NO_NETWORK = "curl -s -m 3 http://host.docker.internal:1; ip route 2>&1 | grep -q default"
-NO_SECRET = "! env | grep -qiE 'crewmind|token|api_key|sk-should'"
+NO_SECRET = "! env | grep -qiE 'nightsquad|token|api_key|sk-should'"
 CHECKS: list[tuple[str, str, bool, str]] = [
     ("passes", "test -f go.txt", True, "exit 0"),
     ("fails", "test -f missing.txt", False, "exit 1"),

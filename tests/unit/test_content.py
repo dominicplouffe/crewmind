@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).parents[2]
-PACKAGED = ROOT / "src" / "crewmind" / "content" / "library"
+PACKAGED = ROOT / "src" / "nightsquad" / "content" / "library"
 
 
 def test_LIB_3_the_packaged_library_is_a_copy_of_the_content_folder() -> None:

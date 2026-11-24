@@ -1,6 +1,6 @@
 # v1 content
 
-Imported on 22 Nov 2026 from `dominicplouffe/yaaf` at commit `b43bb78` (Apache-2.0): 38 roles, 17 crews, 12 example project specs, the design doctrine, the goal grammar and one Founder brief. The roles and crews are converted to the revision 2 formats, with three roles added (generalist, reviewer, gap-reviewer); what the conversion changed and left open is in `docs/spec-questions.md` (Q-012 to Q-015). The server ships a copy in `src/crewmind/content/library/`: run `scripts/sync_content.py` after editing.
+Imported on 22 Nov 2026 from `dominicplouffe/yaaf` at commit `b43bb78` (Apache-2.0): 38 roles, 17 crews, 12 example project specs, the design doctrine, the goal grammar and one Founder brief. The roles and crews are converted to the revision 2 formats, with three roles added (generalist, reviewer, gap-reviewer); what the conversion changed and left open is in `docs/spec-questions.md` (Q-012 to Q-015). The server ships a copy in `src/nightsquad/content/library/`: run `scripts/sync_content.py` after editing.
 
 The spec (section 12) keeps v1's content, not its code. What each folder holds:
 

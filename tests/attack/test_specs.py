@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.secrets.store import ensure_master_key
+from nightsquad.domain.secrets.store import ensure_master_key
 from tests.attack.harness import assert_refused
 from tests.support import App
 

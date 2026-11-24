@@ -1,5 +1,5 @@
 /**
- * End-to-end test of drafting a project with the Founder against a real crewmind server with the
+ * End-to-end test of drafting a project with the Founder against a real Nightsquad server with the
  * mock model (FND-1, FND-3, FND-5, FND-11, FND-13, RHS-4): the chairman says what they want, sees
  * the draft, its grade and the ledger, answers the first question with the recommended answer, has
  * the Founder use its recommendations for the rest, creates the project once the draft is rehearsed

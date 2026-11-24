@@ -81,7 +81,7 @@ class Crew:
 
         from sqlalchemy import select
 
-        from crewmind.storage.models import Run
+        from nightsquad.storage.models import Run
 
         async with self.app.runtime.sessions() as session, session.begin():
             rows = await session.scalars(
@@ -141,7 +141,7 @@ class Crew:
 
     async def finish(self, seat: str) -> None:
         """End the run this agent was last given, as its sandbox would."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         run = handed.pop((self.project, seat), None)
@@ -153,7 +153,7 @@ class Crew:
 
     async def finish_all(self) -> None:
         """End every run this project's agents were given or are waiting to be given."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         stash: dict[tuple[str, str], list[Any]] = self.app.__dict__.get("_live_runs", {})
@@ -169,7 +169,7 @@ class Crew:
 
     async def fail(self, seat: str) -> None:
         """End the run this agent was last given as failed, so it is retried (EXE-8)."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         run = handed.pop((self.project, seat))

@@ -1,4 +1,4 @@
-# The design doctrine — how a crewmind project is drafted
+# The design doctrine — how a Nightsquad project is drafted
 
 This is what anyone drafting a project has to know, whichever door they came
 through: the Founder in the chat, and a model client reading the

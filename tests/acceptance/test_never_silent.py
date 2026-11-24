@@ -28,9 +28,9 @@ def test_INV_24_a_real_server_answers_with_the_provider_down_and_the_project_hel
     down = [{"fail": "The provider is down."}] * 20
     (scripts / "CEO.chat.json").write_text(json.dumps(down))
     install = Install(tmp_path / "data")
-    install.env["CREWMIND_SANDBOX_MODE"] = "unisolated"
-    install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
-    install.env["CREWMIND_MEMORY_ENGINE"] = "in-process"
+    install.env["NIGHTSQUAD_SANDBOX_MODE"] = "unisolated"
+    install.env["NIGHTSQUAD_MOCK_SCRIPT_DIR"] = str(scripts)
+    install.env["NIGHTSQUAD_MEMORY_ENGINE"] = "in-process"
     try:
         setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
         install.start("--slim")

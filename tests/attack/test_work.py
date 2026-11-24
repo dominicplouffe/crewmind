@@ -9,8 +9,8 @@ from typing import Any
 import pytest
 from sqlalchemy import select, update
 
-from crewmind.domain.work import checks
-from crewmind.storage.models import Seat, Task
+from nightsquad.domain.work import checks
+from nightsquad.storage.models import Seat, Task
 from tests.attack.harness import assert_refused
 from tests.attack.work_support import OBSERVABLE, Crew
 from tests.conftest import FakeClock
@@ -245,7 +245,8 @@ async def test_WRK_7_a_check_has_no_token_no_key_and_no_way_to_reach_the_server(
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-should-never-be-seen")
     crew.write(
         "check.sh",
-        "env > seen.txt\n! env | grep -qiE 'crewmind|token|api_key|sk-should' && test -f go.txt\n",
+        "env > seen.txt\n"
+        "! env | grep -qiE 'nightsquad|token|api_key|sk-should' && test -f go.txt\n",
     )
     task = await crew.ok("CEO", "agent.create_task", **COMMAND, team="build")
     crew.write("go.txt", "go")
@@ -376,8 +377,8 @@ async def test_WRK_8_three_failures_block_a_task_and_a_repeat_alarms(app: App) -
 async def test_WRK_9_with_no_reader_but_the_author_a_task_closes_unread(app: App) -> None:
     """WRK-9, INV-3, WRK-15: when the only reviewer seat is the one that did the work, there
     is nobody to read it. The task closes unread, and says so; it is never called reviewed."""
-    from crewmind.domain.work import reviews, tasks
-    from crewmind.domain.work.model import TaskState
+    from nightsquad.domain.work import reviews, tasks
+    from nightsquad.domain.work.model import TaskState
 
     crew = await Crew.start(app)
     task = await crew.task()
@@ -446,7 +447,7 @@ async def test_INV_16_a_claim_with_no_live_run_returns_to_ready(app: App, clock:
     await crew.ok("build-2", "agent.board")
     async with app.runtime.sessions() as session, session.begin():
         lead = await session.scalar(select(Seat.id).where(Seat.name == "build-1"))
-        from crewmind.storage.models import Run
+        from nightsquad.storage.models import Run
 
         await session.execute(
             update(Run).where(Run.seat_id == lead).values(state="finished", ended_at=clock.now)
@@ -596,7 +597,7 @@ async def test_GOV_7_spinning_drops_concurrency_to_one_until_something_changes(a
     """GOV-7: after `spin.window` work runs that change no task and publish no file, the
     project is spinning: the chat says so once and it may run one work run at a time. It
     clears when a run changes work state."""
-    from crewmind.domain.work import board
+    from nightsquad.domain.work import board
 
     crew = await Crew.start(app, settings={"spin.window": 3})
 
@@ -632,7 +633,7 @@ async def test_WRK_5_work_done_in_a_pinned_test_file_is_named_as_the_reason_it_c
     plain words to the worker, and the CEO is told at once, so nobody tries it again blind."""
     from sqlalchemy import select
 
-    from crewmind.storage.models import Notice
+    from nightsquad.storage.models import Notice
 
     crew = await Crew.start(app)
     crew.write("tool.sh", "exit 1\n")

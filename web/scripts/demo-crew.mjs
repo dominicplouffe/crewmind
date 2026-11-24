@@ -1,6 +1,6 @@
 // Seeds a busy demo project on a mock-model server, for design reviews and screenshots.
-//   e2e/start-backend.sh 8460 /tmp/crewmind-demo
-//   node scripts/demo-crew.mjs http://127.0.0.1:8460 /tmp/crewmind-demo
+//   e2e/start-backend.sh 8460 /tmp/nightsquad-demo
+//   node scripts/demo-crew.mjs http://127.0.0.1:8460 /tmp/nightsquad-demo
 // It signs the admin in (setting the password from the setup link on first use), names them,
 // creates "Fieldnotes launch site", hires a crew, and scripts the mock agents through a day of
 // work: requirements proposed and accepted, tasks claimed, written, reviewed and blocked, files
@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { request } from "playwright";
 
-const [base = "http://127.0.0.1:8460", runDir = "/tmp/crewmind-demo"] = process.argv.slice(2);
+const [base = "http://127.0.0.1:8460", runDir = "/tmp/nightsquad-demo"] = process.argv.slice(2);
 const EMAIL = "dom@example.com";
 const PASSWORD = "correct horse battery 9";
 const scripts = join(runDir, "scripts");

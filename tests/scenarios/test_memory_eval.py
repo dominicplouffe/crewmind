@@ -1,4 +1,4 @@
-"""The memory eval suite (MEM-8): crewmind measures its own recall.
+"""The memory eval suite (MEM-8): Nightsquad measures its own recall.
 
 A scripted project history is stored in the real engine (Mem0, the local embedding model,
 and the store for the database under test). Each question is worded differently from the
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from crewmind.domain.memory.engine import Mem0Engine, shipped_model_directory
+from nightsquad.domain.memory.engine import Mem0Engine, shipped_model_directory
 
 SCOPE = "project:eval"
 TOP = 3
@@ -87,7 +87,7 @@ async def test_MEM_8_recall_accuracy_meets_the_recorded_baseline(
     if not any(shipped_model_directory().glob("models--*")):
         pytest.skip(
             "the embedding model is not on disk: run "
-            "`uv run python -m crewmind.domain.memory.fetch_model` first"
+            "`uv run python -m nightsquad.domain.memory.fetch_model` first"
         )
     engine = Mem0Engine(tmp_path / "data", migrated_url)
     ids = [await engine.add(SCOPE, fact, {"source": "eval"}) for fact in HISTORY]

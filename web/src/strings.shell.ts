@@ -108,7 +108,7 @@ export const home = {
   setupMember: "An admin needs to add a model key before the Founder can start projects.",
   setupAction: "Set up now",
   alertsTitle: "Get a ping when you're needed",
-  alertsNext: "Turn on browser alerts and crewmind tells you when a decision waits on you, and nothing else.",
+  alertsNext: "Turn on browser alerts and Nightsquad tells you when a decision waits on you, and nothing else.",
   alertsAction: "Turn on alerts",
   alertsDismiss: "Not now",
   openProject: "Open",

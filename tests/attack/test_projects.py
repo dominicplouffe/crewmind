@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from crewmind.catalog.caller import platform_job
-from crewmind.domain.projects import lifecycle
-from crewmind.domain.projects.model import PROJECT_MACHINE, Hold
-from crewmind.jobs.scheduler import Scheduler
-from crewmind.storage.models import Project
+from nightsquad.catalog.caller import platform_job
+from nightsquad.domain.projects import lifecycle
+from nightsquad.domain.projects.model import PROJECT_MACHINE, Hold
+from nightsquad.jobs.scheduler import Scheduler
+from nightsquad.storage.models import Project
 from tests.attack.harness import assert_refused
 from tests.conftest import FakeClock
 from tests.support import Actor, App

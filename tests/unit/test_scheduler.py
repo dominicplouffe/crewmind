@@ -8,9 +8,9 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from crewmind.jobs import scheduler as jobs
-from crewmind.jobs.scheduler import Scheduler
-from crewmind.storage.models import Event, Project
+from nightsquad.jobs import scheduler as jobs
+from nightsquad.jobs.scheduler import Scheduler
+from nightsquad.storage.models import Event, Project
 from tests.attack.test_projects import delete
 from tests.conftest import FakeClock
 from tests.support import App

@@ -1,5 +1,5 @@
 {
-  "crewmind_spec": 1,
+  "nightsquad_spec": 1,
   "name": "Your First Hour",
   "goal": "Write me one briefing note, about 800 words, that explains RUNNING A MARATHON to someone smart who knows nothing about it. Replace that subject with whatever I actually want to understand before you start planning. The note must cover: what it is and why people care; the three things that trip up beginners, each with what to do instead; a short glossary of the terms I will meet everywhere; and three things to read next, each with one line on who it is for. Plain language — define a term the first time or cut it. It is finished when someone who has never met the subject could read it in five minutes and hold a sensible conversation about it.",
   "type": "deliver",

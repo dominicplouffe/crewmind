@@ -9,7 +9,7 @@ from starlette.applications import Starlette
 from starlette.responses import PlainTextResponse
 from starlette.routing import Route
 
-from crewmind.surfaces.api.web import WebApp
+from nightsquad.surfaces.api.web import WebApp
 
 
 def served(directory: Path | None) -> httpx.AsyncClient:
@@ -18,7 +18,7 @@ def served(directory: Path | None) -> httpx.AsyncClient:
 
     following = Starlette(routes=[Route("/{path:path}", behind, methods=["GET", "POST"])])
     transport = httpx.ASGITransport(app=WebApp(following, directory))
-    return httpx.AsyncClient(transport=transport, base_url="http://crewmind.test")
+    return httpx.AsyncClient(transport=transport, base_url="http://nightsquad.test")
 
 
 def build(tmp_path: Path) -> Path:

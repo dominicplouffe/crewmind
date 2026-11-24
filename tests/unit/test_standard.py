@@ -7,8 +7,8 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from crewmind.domain.conversation import standard
-from crewmind.domain.conversation.speaking import next_slot
+from nightsquad.domain.conversation import standard
+from nightsquad.domain.conversation.speaking import next_slot
 
 NEED = "Need from you: a yes or a no."
 

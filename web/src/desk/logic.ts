@@ -49,7 +49,7 @@ export interface ActionValues {
   option?: number | null;
 }
 
-type DecideBody = Schemas["crewmind__domain__decisions__operations__DecideInput"];
+type DecideBody = Schemas["nightsquad__domain__decisions__operations__DecideInput"];
 
 /**
  * The request for an action, or a sentence saying what is still missing. Only what the person
