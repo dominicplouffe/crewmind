@@ -72,9 +72,6 @@ class Sandbox(Protocol):
 HARNESS_MODULES = {
     LOOP: "crewmind.runner.agent",
     "claude_code": "crewmind.runner.cli.claude",
-    "codex": "crewmind.runner.cli.codex",
-    "gemini_cli": "crewmind.runner.cli.gemini",
-    "opencode": "crewmind.runner.cli.opencode",
 }
 """The module that runs each harness inside the sandbox (LLM-8). Every one but the loop
 drives a vendor's own command-line agent."""

@@ -45,6 +45,8 @@ class ProviderInfo(BaseModel):
     a vendor's own command-line agent, which runs inside the sandbox (LLM-2, LLM-8)."""
     login_hint: str = ""
     """What a person pastes as a login credential, in plain words."""
+    planned: bool = False
+    """Kept for a later phase and not offered yet: no driver runs its agent (docs/PLAN.md)."""
 
     @property
     def is_login(self) -> bool:
@@ -59,12 +61,20 @@ class ProviderInfo(BaseModel):
 
 
 @cache
-def providers() -> dict[str, ProviderInfo]:
+def known_providers() -> dict[str, ProviderInfo]:
+    """Every provider in the registry, planned ones included."""
     text = resources.files(__package__).joinpath("providers.toml").read_text(encoding="utf-8")
     return {
         name: ProviderInfo.model_validate({"name": name, **fields})
         for name, fields in tomllib.loads(text)["providers"].items()
     }
+
+
+@cache
+def providers() -> dict[str, ProviderInfo]:
+    """The providers crewmind offers. A planned one is not offered: a person cannot add its
+    credential, so no run is ever paid by it (P12)."""
+    return {name: info for name, info in known_providers().items() if not info.planned}
 
 
 CLI_DEFAULT_MODEL = "default"

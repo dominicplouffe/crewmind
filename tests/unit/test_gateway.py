@@ -111,3 +111,17 @@ def test_LLM_4_lineups_take_the_newest_model_per_class_and_substitute_downward()
     assert nearest_class(ModelClass.FAST, {ModelClass.FRONTIER}) is ModelClass.FRONTIER
     assert nearest_class(ModelClass.FAST, set()) is None
     assert pick_lineup(anthropic, []) == anthropic.default_lineup
+
+
+def test_LLM_8_every_offered_provider_has_a_harness_that_runs() -> None:
+    """LLM-8, P12: a provider is offered only if a harness runs its agent: its harness is
+    declared and its module imports. A planned one is kept in the registry, not offered."""
+    from crewmind.gateway.registry import known_providers
+    from crewmind.runner.sandbox import HARNESS_MODULES
+
+    for name, info in providers().items():
+        assert info.default_harness in HARNESS_MODULES, name
+        importlib.import_module(HARNESS_MODULES[info.default_harness])
+    planned = {name for name, info in known_providers().items() if info.planned}
+    assert planned == {"codex", "gemini_cli", "opencode"}
+    assert not planned & set(providers())

@@ -463,3 +463,27 @@ async def test_EXE_6_a_run_keeps_what_it_was_leased_with(app: App, provider: Fak
         changes={"run.max_tokens": 200_000}, reason="A smaller cap for later runs.",
     )  # fmt: skip
     assert await pinned() == before
+
+
+@pytest.mark.attack("LLM-2")
+@pytest.mark.parametrize("provider", ["codex", "gemini_cli", "opencode"])
+async def test_LLM_2_a_login_no_agent_can_run_yet_is_neither_listed_nor_accepted(
+    app: App, provider: str
+) -> None:
+    """LLM-2, LLM-8, P12: a login whose agent crewmind cannot run yet is not offered, and
+    adding one by name is refused with the plain reason and what works now, so no run is
+    ever paid by a credential that would fail on its first try."""
+    ensure_master_key(app.runtime.config.master_key_file)
+    owner = await app.person("owner@example.com")
+    listed = {item["name"] for item in (await app.ok("models.providers", owner))["items"]}
+    assert provider not in listed
+    assert "claude_code" in listed
+    refused = assert_refused(
+        await app.call(
+            "credentials.add", owner, name="my-login", provider=provider, key='{"token": "x"}'
+        ),
+        rule="LLM-2",
+        code="provider_not_yet",
+    )
+    assert "not supported yet" in refused.message
+    assert "Claude Code" in str(refused.hint)
