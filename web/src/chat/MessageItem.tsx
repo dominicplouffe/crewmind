@@ -26,7 +26,7 @@ import { Markdown } from "../components/common";
 import { isNote } from "../desk/headline";
 import { ChatItemCard } from "../desk/ItemCard";
 import { ChatItemNote } from "../desk/ItemNote";
-import { formatDateTime } from "../lib/format";
+import { formatDateTime, formatTime } from "../lib/format";
 import { t } from "../strings";
 import { AgentAvatar, useAgentName } from "../crew/names";
 import { ActionCard } from "./ActionCard";
@@ -66,6 +66,12 @@ interface Props {
   example?: boolean;
   /** The signed-in person wrote it: their name shows as "You". */
   mine?: boolean;
+  /** The signed-in person wrote the message this one replies to: the quote says "you". */
+  parentMine?: boolean;
+  /** It goes on the group of the message above (same speaker): no repeated avatar and name. */
+  continued?: boolean;
+  /** Show the quote of the message it replies to; off when that message is the one just above. */
+  showQuote?: boolean;
 }
 
 function isLong(body: string): boolean {
@@ -116,6 +122,15 @@ function systemIcon(detail: MessageDetail): LucideIcon {
   }
 }
 
+/** The time of a message in a group, in the avatar column: shown on hover or focus. */
+function GutterTime({ at }: { at: string }): JSX.Element {
+  return (
+    <time className="gutter-time" dateTime={at} title={formatDateTime(at)}>
+      {formatTime(at)}
+    </time>
+  );
+}
+
 function MessageItemInner({
   message,
   parent,
@@ -127,13 +142,22 @@ function MessageItemInner({
   request,
   example,
   mine,
+  parentMine = false,
+  continued = false,
+  showQuote = true,
 }: Props): JSX.Element {
   const nameOf = useAgentName();
   // An agent is shown by the name it goes by, its role beside it (EXE-18); the stored author is its seat.
   const agent = message.author_kind === "agent" ? nameOf(message.author) : null;
   const author = agent?.name ?? message.author;
   const role = agent?.role;
-  const parentAuthor = parent ? (parent.author_kind === "agent" ? nameOf(parent.author).name : parent.author) : "";
+  const parentAuthor = !parent
+    ? ""
+    : parentMine
+      ? t.chat.youObject
+      : parent.author_kind === "agent"
+        ? nameOf(parent.author).name
+        : parent.author;
   const detail = detailOf(message);
   const foldable = message.author_kind === "agent" && isLong(message.body);
   const [open, setOpen] = useState(false);
@@ -203,7 +227,7 @@ function MessageItemInner({
     menu.length > 0;
 
   const quote =
-    parent && !compact ? (
+    parent && !compact && showQuote ? (
       <button type="button" className="reply-quote" onClick={() => handlers.onJump(parent.id)}>
         <CornerUpLeft size={13} aria-hidden="true" />
         <span className="visually-hidden">{t.chat.jumpToParent} </span>
@@ -230,6 +254,7 @@ function MessageItemInner({
       tabIndex={-1}
       aria-label={t.chat.messageLabel(author, formatDateTime(message.at))}
       data-testid={`message-${message.author_kind}`}
+      data-reply-to={message.reply_to ?? undefined}
     >
       {children}
     </article>
@@ -243,7 +268,7 @@ function MessageItemInner({
     return (
       <article
         id={compact ? undefined : `message-${message.id}`}
-        className={`message ${byPerson ? "from-person" : "from-agent"} is-bubble is-drafted`}
+        className={`message ${byPerson ? "from-person" : "from-agent"} is-bubble is-drafted${continued ? " is-continued" : ""}`}
         tabIndex={-1}
         aria-label={t.chat.messageLabel(who, formatDateTime(message.at))}
         data-testid="message-drafting"
@@ -251,15 +276,21 @@ function MessageItemInner({
       >
         {byPerson ? null : (
           <div className="message-gutter">
-            <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" />
+            {continued ? (
+              <GutterTime at={message.at} />
+            ) : (
+              <Avatar name={t.founder.talk.avatarName} kind="agent" size="md" />
+            )}
           </div>
         )}
         <div className="message-main">
-          <header className="message-head">
-            <span className="author">{who}</span>
-            <RelativeTime at={message.at} className="message-time" />
-            <span className="badge drafted-tag">{t.chat.whileDrafting}</span>
-          </header>
+          {continued ? null : (
+            <header className="message-head">
+              <span className="author">{who}</span>
+              <RelativeTime at={message.at} className="message-time" />
+              <span className="badge drafted-tag">{t.chat.whileDrafting}</span>
+            </header>
+          )}
           <div className="message-content">
             <div className="body">
               <Markdown source={drafted.body} />
@@ -339,26 +370,32 @@ function MessageItemInner({
   }
 
   const isPerson = kind === "person";
+  // In a group the avatar and name show once; the exact time shows beside each message on hover.
+  // A person's message keeps its delivered mark (CHAT-3), and a marked message keeps its marker.
+  const named = !continued;
+  const showHead = named || isExample || Boolean(detail.lint) || (isPerson && !isStatus);
   return article(
-    "is-bubble",
+    continued ? "is-bubble is-continued" : "is-bubble",
     <>
       {isPerson ? null : (
         <div className="message-gutter">
-          <AgentAvatar seat={message.author} size="md" />
+          {continued ? <GutterTime at={message.at} /> : <AgentAvatar seat={message.author} size="md" />}
         </div>
       )}
       <div className="message-main">
-        <header className="message-head">
-          <span className="author">{mine ? t.chat.you : author}</span>
-          {!isPerson && role ? <span className="message-role">{role}</span> : null}
-          <RelativeTime at={message.at} className="message-time" />
-          <Markers detail={detail} example={isExample} />
-          {isPerson && !isStatus ? (
-            <span className="tick" data-testid="delivered">
-              <CheckCheck size={13} aria-hidden="true" /> {t.chat.delivered}
-            </span>
-          ) : null}
-        </header>
+        {showHead ? (
+          <header className={named ? "message-head" : "message-head is-slim"}>
+            {named ? <span className="author">{mine ? t.chat.you : author}</span> : null}
+            {named && !isPerson && role ? <span className="message-role">{role}</span> : null}
+            {named ? <RelativeTime at={message.at} className="message-time" /> : null}
+            <Markers detail={detail} example={isExample} />
+            {isPerson && !isStatus ? (
+              <span className="tick" data-testid="delivered">
+                <CheckCheck size={13} aria-hidden="true" /> {t.chat.delivered}
+              </span>
+            ) : null}
+          </header>
+        ) : null}
         {quote}
         <div className="message-content">{content}</div>
         {foldable ? (

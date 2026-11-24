@@ -268,6 +268,14 @@
 .project-view { flex: 1; min-width: 0; min-height: 0; overflow: auto; }
 .project-view.chat-view { display: flex; overflow: hidden; }
 
+/* The title and the status line: one row on a wide screen, two on a narrow one. */
+.project-headline { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+@media (min-width: 1360px) {
+  .project-headline .project-titlebar { flex-wrap: nowrap; }
+  .project-headline { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-6); }
+  .project-headline .statusline { flex-wrap: nowrap; justify-content: flex-end; min-width: 0; }
+}
+
 /* The status line under the title: state, needs-you, who is working, budget. */
 .statusline {
   display: flex;

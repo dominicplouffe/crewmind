@@ -139,3 +139,31 @@ describe("lines said while drafting (FND-1)", () => {
     expect(line.textContent).not.toContain("You: A daily");
   });
 });
+
+describe("groups and reply quotes (CHAT-3, CHAT-10, CHAT-11)", () => {
+  it("shows a grouped agent message without its avatar and name, and its time on hover", () => {
+    show(message({ author_kind: "agent", author: "CEO", body: "And one more thing." }), { continued: true });
+    const item = screen.getByTestId("message-agent");
+    expect(item.className).toContain("is-continued");
+    expect(item.querySelector(".author")).toBeNull();
+    expect(item.querySelector(".gutter-time")).not.toBeNull();
+    // The name stays in the message's label for screen readers.
+    expect(item.getAttribute("aria-label")).toContain("CEO");
+  });
+
+  it("keeps the delivered mark on a person's grouped message", () => {
+    show(message({}), { continued: true });
+    expect(screen.getByTestId("delivered")).toBeTruthy();
+    expect(screen.getByTestId("message-person").querySelector(".author")).toBeNull();
+  });
+
+  it("quotes a reply's question only when asked to, and says “you” for the signed-in person's words", () => {
+    const parent = message({ id: 2, body: "Are you there?" });
+    show(message({ author_kind: "agent", author: "CEO", reply_to: 2 }), { parent, parentMine: true });
+    expect(screen.getByRole("button", { name: /In reply to you/ })).toBeTruthy();
+    cleanup();
+    show(message({ author_kind: "agent", author: "CEO", reply_to: 2 }), { parent, showQuote: false });
+    expect(screen.queryByRole("button", { name: /In reply to/ })).toBeNull();
+    expect(screen.getByTestId("message-agent").dataset.replyTo).toBe("2");
+  });
+});

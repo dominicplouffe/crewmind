@@ -24,7 +24,7 @@ test("the conversation keeps a readable width beside the decisions and the draft
     const main = page.locator(".draft-main");
     const box = await main.boundingBox();
     expect(box?.width ?? 0, `conversation width at ${width}px`).toBeGreaterThanOrEqual(Math.min(480, width - 60));
-    const author = log.locator(".message.from-agent .author").first();
+    const author = log.getByTestId("line-founder").first().locator(".author");
     const line = await author.evaluate((element) => {
       const style = getComputedStyle(element);
       return element.getBoundingClientRect().height <= parseFloat(style.lineHeight) * 1.5;

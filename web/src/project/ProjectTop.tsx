@@ -76,84 +76,86 @@ export function ProjectTop({ projectId, name, header, tab, needs, onTab, onPanel
   const over = header ? header.budget_wall > 0 && header.budget_spent >= header.budget_wall : false;
   return (
     <header className="project-top">
-      <div className="project-titlebar">
-        <Link to="/projects" className="button ghost icon-only project-back" aria-label={shell.nav.projects}>
-          <ArrowLeft size={20} aria-hidden="true" />
-        </Link>
-        <h1 id="project-title">{name}</h1>
-        {header ? (
-          <span data-testid="project-state" data-state={header.state}>
-            <Pill tone={STATE_TONE[header.state] ?? "neutral"} live={header.state === "running" && working.length > 0}>
-              {projectLayout.states[header.state] ?? header.state}
-            </Pill>
-          </span>
-        ) : null}
-        <span className="title-actions row">
-          {action ? (
-            <button
-              type="button"
-              className={action === "start" ? "button primary small" : "button small"}
-              onClick={() => onAction(action)}
-            >
-              {action === "hold" ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-              {t.header.actions[action]}
-            </button>
+      <div className="project-headline">
+        <div className="project-titlebar">
+          <Link to="/projects" className="button ghost icon-only project-back" aria-label={shell.nav.projects}>
+            <ArrowLeft size={20} aria-hidden="true" />
+          </Link>
+          <h1 id="project-title">{name}</h1>
+          {header ? (
+            <span data-testid="project-state" data-state={header.state}>
+              <Pill tone={STATE_TONE[header.state] ?? "neutral"} live={header.state === "running" && working.length > 0}>
+                {projectLayout.states[header.state] ?? header.state}
+              </Pill>
+            </span>
           ) : null}
-        </span>
-      </div>
+          <span className="title-actions row">
+            {action ? (
+              <button
+                type="button"
+                className={action === "start" ? "button primary small" : "button small"}
+                onClick={() => onAction(action)}
+              >
+                {action === "hold" ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+                {t.header.actions[action]}
+              </button>
+            ) : null}
+          </span>
+        </div>
 
-      <section className="statusline" aria-label={t.header.label}>
-        <button
-          type="button"
-          className={needs > 0 ? "status-chip needs" : "status-chip"}
-          onClick={onNeeds}
-          data-testid="waiting-count"
-          data-count={needs}
-        >
-          <Inbox size={14} aria-hidden="true" />
-          {projectLayout.needsYou(needs)}
-        </button>
-        <span className="divider" aria-hidden="true" />
-        <button type="button" className="status-chip" onClick={() => onTab("crew")} data-testid="now">
-          {working.length > 0 ? (
+        <section className="statusline" aria-label={t.header.label}>
+          <button
+            type="button"
+            className={needs > 0 ? "status-chip needs" : "status-chip"}
+            onClick={onNeeds}
+            data-testid="waiting-count"
+            data-count={needs}
+          >
+            <Inbox size={14} aria-hidden="true" />
+            {projectLayout.needsYou(needs)}
+          </button>
+          <span className="divider" aria-hidden="true" />
+          <button type="button" className="status-chip" onClick={() => onTab("crew")} data-testid="now">
+            {working.length > 0 ? (
+              <>
+                <span className="avatar-stack" aria-hidden="true">
+                  {working.slice(0, 3).map((work) => (
+                    <Avatar key={work.seat} name={work.name || work.seat} hueKey={work.seat} size="xs" status="working" />
+                  ))}
+                </span>
+                <span>
+                  {working.length === 1 && working[0]
+                    ? t.header.working(working[0].name || working[0].seat, doingText(working[0].doing))
+                    : projectLayout.working(working.length)}
+                </span>
+              </>
+            ) : (
+              <span>{t.header.nowEmpty}</span>
+            )}
+          </button>
+          {header && header.next.length > 0 ? (
             <>
-              <span className="avatar-stack" aria-hidden="true">
-                {working.slice(0, 3).map((work) => (
-                  <Avatar key={work.seat} name={work.name || work.seat} hueKey={work.seat} size="xs" status="working" />
-                ))}
-              </span>
-              <span>
-                {working.length === 1 && working[0]
-                  ? t.header.working(working[0].name || working[0].seat, doingText(working[0].doing))
-                  : projectLayout.working(working.length)}
-              </span>
+              <span className="divider hide-phone" aria-hidden="true" />
+              <button type="button" className="status-chip hide-phone" onClick={() => onPanel("feed")}>
+                {t.header.next}: {header.next[0]}
+              </button>
             </>
-          ) : (
-            <span>{t.header.nowEmpty}</span>
-          )}
-        </button>
-        {header && header.next.length > 0 ? (
-          <>
-            <span className="divider hide-phone" aria-hidden="true" />
-            <button type="button" className="status-chip hide-phone" onClick={() => onPanel("feed")}>
-              {t.header.next}: {header.next[0]}
-            </button>
-          </>
-        ) : null}
-        {header ? (
-          <>
-            <span className="divider" aria-hidden="true" />
-            <button type="button" className="status-chip status-budget" onClick={() => onPanel("budget")}>
-              <Meter value={header.budget_spent} max={header.budget_wall} label={header.budget} tone={over ? "danger" : "accent"} />
-              <span className="visually-hidden">{t.header.budget}: </span>
-              <span className="tabular">
-                {compactNumber(header.budget_spent)} / {compactNumber(header.budget_wall)}
-                <span className="hide-phone"> tokens · {share(header.budget_spent, header.budget_wall)}</span>
-              </span>
-            </button>
-          </>
-        ) : null}
-      </section>
+          ) : null}
+          {header ? (
+            <>
+              <span className="divider" aria-hidden="true" />
+              <button type="button" className="status-chip status-budget" onClick={() => onPanel("budget")}>
+                <Meter value={header.budget_spent} max={header.budget_wall} label={header.budget} tone={over ? "danger" : "accent"} />
+                <span className="visually-hidden">{t.header.budget}: </span>
+                <span className="tabular">
+                  {compactNumber(header.budget_spent)} / {compactNumber(header.budget_wall)}
+                  <span className="hide-phone"> tokens · {share(header.budget_spent, header.budget_wall)}</span>
+                </span>
+              </button>
+            </>
+          ) : null}
+        </section>
+      </div>
 
       {header && header.holds.length > 0 ? (
         <div className="holdbar" role="status">
