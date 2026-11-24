@@ -31,6 +31,30 @@ describe("chat state", () => {
     expect(state.messages.map((m) => m.id)).toEqual([7]);
   });
 
+  it("never shows a sent message twice when its stored copy arrives before the send answers (CHAT-3)", () => {
+    let state = reduce(initialState, { type: "pending", pending: { key: "k", body: "hi", replyTo: null, error: null } });
+    state = reduce(state, { type: "messages", items: [message(7, { body: "hi" })] });
+    expect(state.pending[0]?.echoed).toBe(true);
+    // The send then answers: the copy goes and the message is marked delivered.
+    state = reduce(state, { type: "delivered", key: "k", message: message(7, { body: "hi" }) });
+    expect(state.pending).toEqual([]);
+    expect(state.messages.map((m) => m.id)).toEqual([7]);
+  });
+
+  it("shows a hidden copy again, with the error, if its send fails after all", () => {
+    let state = reduce(initialState, { type: "pending", pending: { key: "k", body: "hi", replyTo: null, error: null } });
+    state = reduce(state, { type: "messages", items: [message(7, { body: "hi" })] });
+    state = reduce(state, { type: "sendFailed", key: "k", message: "Refused.", hint: null });
+    expect(state.pending[0]?.error?.message).toBe("Refused.");
+  });
+
+  it("does not take an agent's words, or a message already shown, for the copy of one being sent", () => {
+    let state = reduce(initialState, { type: "messages", items: [message(3, { body: "hi" })], loaded: true });
+    state = reduce(state, { type: "pending", pending: { key: "k", body: "hi", replyTo: null, error: null } });
+    state = reduce(state, { type: "messages", items: [message(3, { body: "hi" }), message(4, { author_kind: "agent", body: "hi" })] });
+    expect(state.pending[0]?.echoed).toBeFalsy();
+  });
+
   it("keeps a failed message with the server's words so it can be retried", () => {
     let state = reduce(initialState, { type: "pending", pending: { key: "k", body: "hi", replyTo: null, error: null } });
     state = reduce(state, { type: "sendFailed", key: "k", message: "The project is stopped.", hint: "Start a new one." });
