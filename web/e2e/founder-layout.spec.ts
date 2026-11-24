@@ -39,7 +39,7 @@ test("a message to the Founder shows it working at once, until its answer arrive
   setFounderScript(
     [
       { text: "I'm setting up a daily post about new AI tools." },
-      { text: "I will use an image model for the hero images.", delay_ms: 4000 },
+      { text: "I will use an image model for the hero images, and a chart library for the charts.", delay_ms: 3000, word_delay_ms: 300 },
     ],
     [],
   );
@@ -58,8 +58,14 @@ test("a message to the Founder shows it working at once, until its answer arrive
   await expect(page.getByTestId("founder-thinking")).toBeInViewport();
   await expect(page.getByTestId("draft-composer")).toHaveAttribute("data-mode", "working");
   await expect(page.getByTestId("now")).toHaveAttribute("data-now", /writing-first|updating/);
-  // Then its answer replaces the bubble.
-  await expect(log.getByText("I will use an image model for the hero images.")).toBeVisible({ timeout: 30_000 });
+  // As its words arrive, the same bubble keeps moving: one bubble, dots and all, never a still one.
+  const writing = page.getByTestId("founder-reply");
+  await expect(writing).toContainText("I will use", { timeout: 30_000 });
+  await expect(writing.locator(".typing-dots")).toBeVisible();
+  await expect(page.locator("article.is-typing")).toHaveCount(1);
+  // Then its answer, stored, replaces the bubble.
+  await expect(log.getByTestId("line-founder").getByText(/a chart library for the charts\.$/)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("founder-thinking")).toHaveCount(0);
+  await expect(page.getByTestId("founder-reply")).toHaveCount(0);
   await page.context().close();
 });

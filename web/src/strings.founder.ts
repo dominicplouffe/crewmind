@@ -63,7 +63,7 @@ export const founder = {
     authors: { person: "You", founder: "The Founder", platform: "nightsquad" } as Record<string, string>,
     avatarName: "Founder",
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
-    writing: "The Founder is writing.",
+    writingNow: "writing",
     thinking: "thinking",
     thinkingLabel: "The Founder is working on your message",
     writingLabel: "The Founder is writing",
