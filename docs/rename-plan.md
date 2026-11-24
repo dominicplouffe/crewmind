@@ -1,6 +1,11 @@
 # Plan: rename crewmind to nightsquad, and "crew" to "squad"
 
-Status: draft for the owner's approval. Nothing in this plan has been done yet.
+Status: done on 24 Nov 2026, with the owner's choices: the `squad` command and a clean rename. Where the work differed from this plan:
+
+- The product name is written **nightsquad**, in lower case, as the brand guide (`docs/design/brand.md`) requires. The table below said "Nightsquad".
+- The commits are grouped by concern a little differently: spec, product name, token prefixes, squad concept, name casing, install bridges, guard test.
+- A second migration, 0018, gives the platform's own chat lines and artifact versions the new author name.
+- Doctor also names an old SQLite file (`crewmind.sqlite`) in the data directory.
 
 ## Scope, measured on the current tree
 

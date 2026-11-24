@@ -8,6 +8,7 @@ For whoever continues this build, person or coding agent. Everything needed is i
 - Phase 7 is the v2.0 release candidate, with one condition: the Founder has only ever been driven by a scripted model. See "Before anything else".
 - Docker support was finished after phase 7 (22 Nov 2026): the agent image, container sandboxes and checks proven on a real daemon, and a Compose install with a TLS front, driven by shell scripts in `deploy/` (deploy, update, backup, restore, kill).
 - Next is phase 8 (`docs/PLAN.md`). No phase 8 plan is written.
+- The product was renamed nightsquad on 24 Nov 2026 (ADR-0011), on branch `claude/lucid-franklin-gwvmmu`. The CLI command is `squad`, also installed as `nightsquad`, and the library's ready-made job is a squad. Migrations 0017 and 0018 carry existing data, and `squad doctor` names old variables and folders. Still the owner's to do: rename the GitHub repository, register the domains, reserve `nightsquad` on PyPI and npm, and confirm trademark clearance.
 
 ## Read in this order
 

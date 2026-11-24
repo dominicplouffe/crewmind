@@ -315,7 +315,7 @@ NFR-17,Latency targets:,11-nfr-NFR.md,all,yes,not started,,
 NFR-18,The app meets WCAG 2.2 AA:,11-nfr-NFR.md,all,yes,partial,"web/e2e/app.spec.ts: accessibility scans (axe, WCAG 2 A and AA) of sign-in, project list and project page in both themes; web/e2e/device.spec.ts; web/e2e axe scans of Home, projects, project tabs, panels, settings and drafting in both themes","No violations found by the scans. Not checked with a screen reader by a person. Reduced motion is CSS only. One strings catalog, English only"
 NFR-19,Test layers,11-nfr-NFR.md,all,yes,partial,,"Unit, contract, attack, chaos, scenario and acceptance layers exist. The suite runs in parallel with a 10 s per-test limit"
 NFR-20,Every rule records how often it refuses and how often a refused call l,11-nfr-NFR.md,all,yes,not started,,
-NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,partial,,"Checked by review, not by a test"
+NFR-21,"Code uses the domain names in section 4. No metaphor identifiers, and ",11-nfr-NFR.md,1,yes,partial,test_NFR_21_the_old_product_and_concept_names_do_not_come_back,"Checked by review, not by a test"
 NFR-22,OpenTelemetry export,11-nfr-NFR.md,8,later,not started,,
 NFR-23,Slim mode,11-nfr-NFR.md,1,yes,done,tests/acceptance/test_slim.py; tests/attack/test_install.py; tests/unit/test_install.py,
 NFR-24,Technology,11-nfr-NFR.md,1,yes,done,,
