@@ -162,7 +162,7 @@ async def test_IF_5_3_an_irreversible_write_needs_two_calls(app: App, clock: Fak
             return result.structured_content or {}
 
         assert (await stop(second, token))["code"] == "confirm_token_does_not_match"
-        assert (await stop(first, "cm_confirm_guess"))["code"] == "confirm_token_does_not_match"
+        assert (await stop(first, "ns_confirm_guess"))["code"] == "confirm_token_does_not_match"
         async with client_for(app, await mcp_caller(app, other["token"])) as stranger:
             stolen = await stranger.call_tool(
                 "projects_stop", {"project_id": first, "confirm": token}
@@ -298,7 +298,7 @@ async def test_IF_5_1_the_mcp_endpoint_takes_only_a_live_mcp_token(app: App) -> 
     server = create_app(app.runtime, run_scheduler=False)
     transport = httpx.ASGITransport(app=server)
     async with httpx.AsyncClient(transport=transport, base_url="http://127.0.0.1:8420") as http:
-        for credential in (None, personal, owner.token, revoked["token"], "cm_mcp_forged"):
+        for credential in (None, personal, owner.token, revoked["token"], "ns_mcp_forged"):
             headers = {"Authorization": f"Bearer {credential}"} if credential else {}
             response = await http.post("/mcp", json={}, headers=headers)
             assert response.status_code == 401, credential

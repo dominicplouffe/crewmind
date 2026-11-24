@@ -28,10 +28,10 @@ from nightsquad.domain.accounts.model import (
 )
 from nightsquad.storage.models import BrowserSession, Person, Token
 
-SESSION_PREFIX = "cm_ses_"
-PERSONAL_PREFIX = "cm_pat_"
-MCP_PREFIX = "cm_mcp_"
-LINK_PREFIX = "cm_lnk_"
+SESSION_PREFIX = "ns_ses_"
+PERSONAL_PREFIX = "ns_pat_"
+MCP_PREFIX = "ns_mcp_"
+LINK_PREFIX = "ns_lnk_"
 
 
 def mint_secret(prefix: str) -> tuple[str, str]:

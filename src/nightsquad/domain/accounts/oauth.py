@@ -46,7 +46,7 @@ ACCESS_LIFE = timedelta(hours=1)  # NFR-13
 CLIENTS_MOST = 200  # NFR-13
 LOOPBACK = ("localhost", "127.0.0.1", "[::1]")
 """NFR-13: redirect hosts allowed by default. Hosted clients are added by the admin."""
-REFRESH_PREFIX, CODE_PREFIX = "cm_refresh_", "cm_code_"
+REFRESH_PREFIX, CODE_PREFIX = "ns_refresh_", "ns_code_"
 ACTIVE, USED, REVOKED = "active", "used", "revoked"
 
 

@@ -58,7 +58,7 @@ async def test_NFR_2_setup_is_idempotent_and_never_overwrites_the_master_key(
     key_file = app.runtime.config.master_key_file
     key = key_file.read_text()
     link = first.setup_link
-    assert "/accept/cm_lnk_" in link
+    assert "/accept/ns_lnk_" in link
     assert any("Master key created" in step for step in first.steps)
 
     second = await app.host("install.setup", admin_email="other@example.com")

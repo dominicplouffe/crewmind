@@ -209,7 +209,7 @@ async def test_ACC_4_a_link_works_once_and_for_72_hours(app: App, clock: FakeClo
     late = await app.ok("people.invite", await app.admin(), email="two@example.com", name="Two")
     clock.advance(hours=72, minutes=1)
     answers: list[Any] = []
-    for link in (used["link"], late["link"], "http://127.0.0.1:8420/accept/cm_lnk_invented"):
+    for link in (used["link"], late["link"], "http://127.0.0.1:8420/accept/ns_lnk_invented"):
         response = await app.call("auth.use_link", link=link, password=PASSWORD)
         assert_refused(response, rule="ACC-4", code="link_invalid")
         answers.append(response.json())

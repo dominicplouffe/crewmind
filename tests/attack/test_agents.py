@@ -25,7 +25,7 @@ async def test_P3_a_run_token_works_only_for_its_own_live_run(app: App) -> None:
     assert me["project"] == "Atlas"
     assert (await agent_call(app, other.token, "agent.whoami")).json()["run_id"] == other.run_id
 
-    for credential in (None, "cm_run_forged", owner.token):
+    for credential in (None, "ns_run_forged", owner.token):
         assert (await agent_call(app, credential, "agent.whoami")).status_code == 401
     for name in ("auth.whoami", "projects.list"):
         assert (await app.call(name, run.token)).status_code == 401

@@ -30,7 +30,7 @@ UNSPENT, SPENT, EXPIRED = "unspent", "spent", "expired"
 CONFIRM_MACHINE = StateMachine(
     "MCP confirm token", "7.10", [(NEW, UNSPENT), (UNSPENT, SPENT), (UNSPENT, EXPIRED)]
 )
-PREFIX = "cm_confirm_"
+PREFIX = "ns_confirm_"
 
 
 def _hash(value: str) -> str:

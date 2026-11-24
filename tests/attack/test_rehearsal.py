@@ -143,7 +143,7 @@ async def test_RHS_1_the_drill_process_is_given_nothing(
 
     monkeypatch.setenv("NIGHTSQUAD_DATABASE_URL", "postgresql://real/database")
     monkeypatch.setenv("NIGHTSQUAD_MASTER_KEY_FILE", "/real/master.key")
-    monkeypatch.setenv("NIGHTSQUAD_TOKEN", "cm_pat_real")
+    monkeypatch.setenv("NIGHTSQUAD_TOKEN", "ns_pat_real")
     monkeypatch.setenv("HTTPS_PROXY", "http://proxy.example")
     started: dict[str, Any] = {}
     real = asyncio.create_subprocess_exec

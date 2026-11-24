@@ -93,7 +93,7 @@ async def test_IF_3_2_every_guarded_route_refuses_callers_without_a_valid_creden
     victim = await app.login(victim.email)
     credentials = {
         "none": None,
-        "forged": "cm_pat_" + "x" * 43,
+        "forged": "ns_pat_" + "x" * 43,
         "revoked": revoked["token"],
         "expired": expired["token"],
         "ended session": ended.token,

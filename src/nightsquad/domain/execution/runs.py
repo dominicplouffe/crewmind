@@ -39,7 +39,7 @@ from nightsquad.storage.events import append_event, event_type
 from nightsquad.storage.models import Project, Run, RunRefusal, Seat, Wake
 
 RUN_STATE_CHANGED = event_type("run.state_changed", "A run changed state (7.7).")
-RUN_PREFIX = "cm_run_"
+RUN_PREFIX = "ns_run_"
 
 RUNNER = platform_job("runner")
 REAPER = platform_job("scheduler: reap dead runs")

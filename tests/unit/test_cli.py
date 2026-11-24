@@ -96,10 +96,10 @@ async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
     assert signed_in.exit_code == 0, signed_in.output
     state = CliState.load()
     assert state.token is not None
-    assert state.token.startswith("cm_pat_")
+    assert state.token.startswith("ns_pat_")
     assert (CliState.path().stat().st_mode & 0o077) == 0
     assert state.token not in signed_in.output
-    assert "cm_ses_" not in signed_in.output
+    assert "ns_ses_" not in signed_in.output
     assert json.loads(signed_in.stdout)["signed_in_as"] == "alice"
 
     who = await run_cli(cli, ["whoami", "--json"])
