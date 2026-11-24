@@ -4,10 +4,10 @@
  */
 
 export const oauth = {
-  pageTitle: "Approve an AI client · crewmind",
+  pageTitle: "Approve an AI client · nightsquad",
   title: "An AI client asks to act for you",
   intro:
-    "A program outside crewmind wants to use your account. It will be able to do what you tick below, as you, until you revoke it.",
+    "A program outside nightsquad wants to use your account. It will be able to do what you tick below, as you, until you revoke it.",
   client: "Client",
   sendsBack: "After you answer, your browser goes to",
   scopesLegend: "What it may do",
@@ -17,7 +17,7 @@ export const oauth = {
     create: { name: "Create", allows: "Create projects." },
     configure: { name: "Configure", allows: "Change settings, hire teams and set models." },
   } as Record<string, { name: string; allows: string }>,
-  unknownScope: "crewmind does not know this permission.",
+  unknownScope: "nightsquad does not know this permission.",
   noneAsked: "The client asked for no permissions.",
   noneTicked: "Tick at least one permission to approve, or deny the request.",
   approve: "Approve",

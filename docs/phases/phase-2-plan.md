@@ -4,7 +4,7 @@ Goal (PLAN.md): talk to a CEO in the chat. It runs real work in a sandbox throug
 
 **Exit demo.**
 
-- In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness and on one real provider.
+- In the web app and in `squad chat`, the chairman talks to a CEO on the mock harness and on one real provider.
 - An upload becomes an artifact.
 - A run is metered by token kind, and only non-cached tokens count.
 - Hitting the wall pauses the project.
@@ -20,13 +20,13 @@ Phase 2 carries about 95 requirement ids: more than phases 0 and 1 together, plu
 | --- | --- | --- |
 | **2a Execution core** | Roles (minimal), roster, runs, wake triggers, dispatcher, leasing, heartbeats, reaping, retries, sandboxes, the agent API (context, messages, notes, team), the ledger, the budget wall, runaway guards. Mock harness and mock provider only | A scripted CEO wakes on a message, runs in a sandbox, is metered, and the project pauses at the wall. Killing the runner mid-run breaks no invariant |
 | **2b Models** | Model gateway on LiteLLM, model credentials, lineups, the quality dial, seat check, effort, circuit breaker, provider ceilings, health checks, web search, the vendor-neutral harness loop, the output standard (LLM-15) | The same run on one real provider, through the gateway, with no key in the sandbox |
-| **2c Conversation** | Channels, messages, threads, chat runs and warm sessions, never-silent statuses, slash commands, action cards and directives, artifacts, uploads, workspace snapshots, the live event stream, `crewmind chat` in the terminal | The chairman chats with the CEO in the terminal, streaming; an upload becomes an artifact |
+| **2c Conversation** | Channels, messages, threads, chat runs and warm sessions, never-silent statuses, slash commands, action cards and directives, artifacts, uploads, workspace snapshots, the live event stream, `squad chat` in the terminal | The chairman chats with the CEO in the terminal, streaming; an upload becomes an artifact |
 | **2d Web app** | `web/`: the chat, composer, header, activity feed, artifact previews, sign-in and setup-link pages. API client generated from the OpenAPI schema | The exit demo in a browser |
 
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/execution/     roles, teams, seats; runs and their lifecycle; wake triggers; dispatcher;
                         leasing; liveness; retries; context pack (EXE-1 to EXE-11, EXE-15, EXE-16)
   domain/budget/        ledger, token budget, thresholds, the wall, runaway guards (GOV-2, 3, 6, 7, 9)
@@ -39,7 +39,7 @@ src/crewmind/
                         harness loop (vendor-neutral), mock harness
   surfaces/agent_api/   the agent API over HTTP and as MCP tools inside the sandbox (IF-6.1 to 6.3)
   surfaces/api/stream.py  server-sent events (IF-3.6); resumable uploads (IF-3.9)
-  surfaces/cli/chat/    `crewmind chat` in Textual (IF-4.8)
+  surfaces/cli/chat/    `squad chat` in Textual (IF-4.8)
 web/                    the React app
 content/output-standard.md   the one copy of the output standard (LLM-15)
 ```
@@ -121,7 +121,7 @@ Phase 2 is built in its four parts. Of its 85 requirement ids, 61 are done, 20 a
 | Item | Result |
 | --- | --- |
 | Talk to a CEO in the web app, on the mock harness | Done. 20 browser tests drive the built app on the real server, with the agent as a separate process |
-| Talk to a CEO in `crewmind chat` | Done on the mock harness |
+| Talk to a CEO in `squad chat` | Done on the mock harness |
 | The same on one real provider | **Dropped by the owner (Q-006).** No real-provider test is kept; real providers are covered by recorded responses. No real model has been called by the build |
 | An upload becomes an artifact | Done, small and chunked uploads |
 | A run is metered by token kind; only non-cached tokens count | Done |
@@ -143,7 +143,7 @@ Phase 2 is built in its four parts. Of its 85 requirement ids, 61 are done, 20 a
 
 **Found and fixed on the way.**
 
-- `crewmind chat` did not open the terminal chat: the `chat` command group hid it.
+- `squad chat` did not open the terminal chat: the `chat` command group hid it.
 - A reply longer than a message was refused and its run repeated.
 - A reply stopped with Esc started again by itself.
 - Every upload triggered a full reply.

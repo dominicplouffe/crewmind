@@ -8,9 +8,9 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.founder import tree
-from crewmind.domain.rehearsal import operations as rehearsal
-from crewmind.domain.secrets.store import ensure_master_key
+from nightsquad.domain.founder import tree
+from nightsquad.domain.rehearsal import operations as rehearsal
+from nightsquad.domain.secrets.store import ensure_master_key
 from tests.support import Actor, App
 
 ACCEPTANCE = Path(__file__).parents[1] / "acceptance"

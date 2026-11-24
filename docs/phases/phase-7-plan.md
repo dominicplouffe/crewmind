@@ -26,8 +26,8 @@ Each part ends with the suite green on both databases.
 
 | Part | Builds | Demo |
 | --- | --- | --- |
-| **7a Library and spec** | Roles and crews as versioned records, loaded from and exported to files; the starter library; the one project spec format; import, export and clone (LIB-1 to LIB-5, PRJ-9). The phase 2 role stand-in becomes a pinned role version | A project is exported, the export holds no secret value, and importing it gives the same settings, roster and standing orders; clone copies no history |
-| **7b Rehearsal** | The fire drill: the real rules, dispatcher and scheduler on a fresh in-memory database with the scripted crew, clocks compressed, and the report (RHS-1 to RHS-4) | A spec with no reviewer hired but independent read on is reported as a staffing finding; the drill spends 0 tokens and refuses any other database |
+| **7a Library and spec** | Roles and squads as versioned records, loaded from and exported to files; the starter library; the one project spec format; import, export and clone (LIB-1 to LIB-5, PRJ-9). The phase 2 role stand-in becomes a pinned role version | A project is exported, the export holds no secret value, and importing it gives the same settings, roster and standing orders; clone copies no history |
+| **7b Rehearsal** | The fire drill: the real rules, dispatcher and scheduler on a fresh in-memory database with the scripted squad, clocks compressed, and the report (RHS-1 to RHS-4) | A spec with no reviewer hired but independent read on is reported as a staffing finding; the drill spends 0 tokens and refuses any other database |
 | **7c The Founder** | The drafting conversation, its eight tools, the decision tree and rounds, the ledger, the goal grammar grader, dates, roster and settings rules, the fire drill before "ready", the doctrine fingerprint (FND-1 to FND-11, FND-14) | A one-paragraph brief becomes a graded draft through questions that each carry a recommendation; who pays is never pre-selected |
 | **7d Grilling and quick mode** | Grilling a document before drafting; `/grill` in a running project; quick mode; what happens after creation (FND-12, FND-13, FND-15, FND-16) | The four planted problems each get a question, one at a time; quick mode creates and starts a project; `/grill` finds the conflict with a standing order |
 | **7e Surfaces and the acceptance suite** | Drafting in the terminal and the post-creation prompts (IF-4.6, IF-4.7); the Founder in the web app; the create scope over MCP; the reference specs; the full v2.0 acceptance suite as one run | Create, steer, inspect and configure a project three ways: only the app chat, only the CLI, only an MCP client |
@@ -46,16 +46,16 @@ Each part ends with the suite green on both databases.
 | **Agent Skills** (phase 8) | A role's pinned skills (LIB-1); the doctrine published as skills (LIB-6) | The field exists and stays empty. The doctrine and goal grammar are files served to the Founder and over MCP |
 | **Data sources, email, integrations** (phase 8) | "Integrations needed" and "controlled domains" in a spec (LIB-4); the setup checklist (FND-13) | The spec carries the fields. The checklist lists them as "not available in this version" |
 | **Browser and A2A permissions** (phase 8) | Role tool permissions (LIB-1) | The role carries the permissions; nothing grants a browser or A2A yet |
-| **Install history** | Rehearsal's estimate of runs and tokens (RHS-3) | From the crew's reference estimate until an install has finished projects of its own; the report says which it used |
+| **Install history** | Rehearsal's estimate of runs and tokens (RHS-3) | From the squad's reference estimate until an install has finished projects of its own; the report says which it used |
 
 ## Modules
 
 This was the plan. What was built differs in places, listed under "Differences from this plan" in the outcome.
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/library/
-    roles.py, crews.py     versioned templates; search
+    roles.py, squads.py     versioned templates; search
     files.py               load from and export to files
     spec.py                the project spec: one schema, validated
     transfer.py            import, export, clone
@@ -73,14 +73,14 @@ src/crewmind/
     drill.py               the run on a fresh in-memory database
     report.py
     operations.py
-content/                   roles/, crews/, doctrine/, goal-grammar/, examples/
+content/                   roles/, squads/, doctrine/, goal-grammar/, examples/
 acceptance/                reference specs, the reference goal, the raw brief, the seeded document
 web/src/founder/           the drafting view: question cards, the ledger, the grade
 ```
 
 ## Tables (migration 0014)
 
-`roles`, `role_versions`, `crews`, `founder_conversations`, `founder_decisions` (the ledger), `founder_gradings`, `grill_items`, `rehearsals`; `seats` gains its pinned role version; `projects` gains the doctrine fingerprint and the spec it was created from.
+`roles`, `role_versions`, `squads`, `founder_conversations`, `founder_decisions` (the ledger), `founder_gradings`, `grill_items`, `rehearsals`; `seats` gains its pinned role version; `projects` gains the doctrine fingerprint and the spec it was created from.
 
 The Founder conversation, quick mode and grilling lifecycles in section 7 are added to the drift test.
 
@@ -104,7 +104,7 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 ## Risks
 
 - **The Founder's quality cannot be proven here.** Tests use a scripted model (owner's decision Q-006: no real-provider test). They prove the rules, the tools and the flow. They do not prove that a real model asks good questions or grades goals accurately.
-- **The v1 content needs converting.** 38 roles, 17 crews and 12 example specs are in v1's format: roles name an effort level, and the specs are v1 bundles. Conversion problems go to `docs/spec-questions.md`.
+- **The v1 content needs converting.** 38 roles, 17 squads and 12 example specs are in v1's format: roles name an effort level, and the specs are v1 bundles. Conversion problems go to `docs/spec-questions.md`.
 - **Size.** The largest phase so far in new surface: two new domains, a new web view and the full acceptance run.
 - **The phase 2 role stand-in is used everywhere.** Replacing it with pinned role versions touches hiring, context packs and lineups.
 
@@ -112,8 +112,8 @@ The Founder conversation, quick mode and grilling lifecycles in section 7 are ad
 
 | Question | Answer |
 | --- | --- |
-| The v1 content | **The owner gives read access to the v1 repository,** and the build imports and converts its roles, crews, doctrine and goal grammar. It is `dominicplouffe/yaaf`; its content was copied into `content/` unchanged on 22 Nov 2026 and is converted in part 7a |
-| Proving the grader | **A command the owner runs:** `crewmind founder eval` grades the reference goals with the owner's own model key and prints agreement with the hand grades. Tests here prove the rules and the flow. FND-7's accuracy clause stays partial until it is run |
+| The v1 content | **The owner gives read access to the v1 repository,** and the build imports and converts its roles, squads, doctrine and goal grammar. It is `dominicplouffe/yaaf`; its content was copied into `content/` unchanged on 22 Nov 2026 and is converted in part 7a |
+| Proving the grader | **A command the owner runs:** `squad founder eval` grades the reference goals with the owner's own model key and prints agreement with the hand grades. Tests here prove the rules and the flow. FND-7's accuracy clause stays partial until it is run |
 | The reference documents | **The build writes them, the owner reviews:** the reference goal with its hand grades, the raw brief, the seeded document and the three reference specs, in `acceptance/` |
 | Review items R-31, R-32, R-51 | Accepted as recommended; applied in spec revision 2.18 |
 | Review stops | One, at the full exit demo |
@@ -124,7 +124,7 @@ No open questions remain.
 
 Phase 7 is built in its five parts. Of its 28 requirement ids, 16 are done and 12 are partial; `docs/traceability.csv` has the tests and a note for each.
 
-**The one thing to know first: the Founder has never spoken to a real model here.** Every test drives it with a scripted model. The tests prove the rules, the tools, the flow and every surface. They do not prove that a real model asks good questions, drafts a good goal or grades one accurately. Before calling this a release candidate, set `founder.credential`, draft one real project, and run `crewmind founder eval` (the README has the command).
+**The one thing to know first: the Founder has never spoken to a real model here.** Every test drives it with a scripted model. The tests prove the rules, the tools, the flow and every surface. They do not prove that a real model asks good questions, drafts a good goal or grades one accurately. Before calling this a release candidate, set `founder.credential`, draft one real project, and run `squad founder eval` (the README has the command).
 
 **Exit demo, item by item.**
 
@@ -159,8 +159,8 @@ Phase 7 is built in its five parts. Of its 28 requirement ids, 16 are done and 1
 **What is true now.**
 
 - A project is one portable file. Import, export, clone, check, rehearse and grade all read it. A spec that carries a credential value is refused, and a spec with any problem creates nothing.
-- The library has 41 roles and 17 crews, converted from v1. A role names no model. A team keeps the role version it was hired from until it is re-pinned, and only an admin changes a role that exists.
-- A rehearsal runs a spec through the real rules, dispatcher and scheduler in a process of its own that is given the spec and nothing else. Its crew is code, so it spends no tokens and gives the same report each time.
+- The library has 41 roles and 17 squads, converted from v1. A role names no model. A team keeps the role version it was hired from until it is re-pinned, and only an admin changes a role that exists.
+- A rehearsal runs a spec through the real rules, dispatcher and scheduler in a process of its own that is given the spec and nothing else. Its squad is code, so it spends no tokens and gives the same report each time.
 - The Founder acts only through eight tools, and each tool call meets the rules: one question at a time and in order, 2 to 4 options, a recommendation on every question except who pays when the chairman has more than one credential, no date in goal prose, a reason for every setting, a plan adversary on Deliver and Operate. A refused call is kept on the conversation.
 - A grade stands only on lines the goal holds. The verdict is computed, not taken from the model.
 - A project is created only from a ledger with nothing open, after the draft has been rehearsed. The ledger tells the chairman's words, their answers and assumptions apart, and goes to the CEO in its first run.
@@ -170,7 +170,7 @@ Phase 7 is built in its five parts. Of its 28 requirement ids, 16 are done and 1
 **Partial, and why.**
 
 - **A real model (your side).** FND-7's accuracy, and whether the Founder cuts a roster to the smallest team (FND-9), drafts a first usable version (FND-10) or acts well on a rehearsal (FND-11), are the model's judgement and are not checked.
-- **No crew has a reference estimate** (LIB-2, GOV-4, Q-013). With no history on the install, the Founder proposes the project type's default budget and says it is a default.
+- **No squad has a reference estimate** (LIB-2, GOV-4, Q-013). With no history on the install, the Founder proposes the project type's default budget and says it is a default.
 - **Phase 8.** Skills, browser and A2A permissions, integrations and role credentials are carried in roles and specs and grant nothing yet (LIB-1, LIB-4). A document reaches the Founder as text only: no PDF (FND-1).
 - **Rehearsal (RHS-3).** Tokens and duration are estimated to the first close, and only once the install has 10 finished runs. A rehearsal does not estimate the whole project.
 - **Grilling in a project (FND-16).** The platform checks that a conflict names something that exists; finding the conflicts is the CEO's work. A ruling that changes a standing order is prompted, not applied. The CEO suggesting `/grill` with a card is not built.
@@ -183,7 +183,7 @@ Phase 7 is built in its five parts. Of its 28 requirement ids, 16 are done and 1
 - **The drill runs one agent at a time,** so the same spec always gives the same report. It does not exercise parallel runs; it reports how much parallelism the roster allows.
 - **No `rehearsals`, `founder_gradings` or separate `roles`/`role_versions` tables.** A rehearsal is not stored except with the draft it ran on; roles stay one table with a version column.
 - **The drafting conversation and a project's grilling share tables** (`draftings` and its lines, questions, ledger and passages).
-- **`crewmind draft` is the terminal command,** not a subcommand of `founder`; `crewmind founder eval` is the grader check.
+- **`squad draft` is the terminal command,** not a subcommand of `founder`; `squad founder eval` is the grader check.
 - **Promote now opens a Founder drafting** with the findings report attached, instead of creating a draft project with the report as its goal.
 
 **Things to know.**

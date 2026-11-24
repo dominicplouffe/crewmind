@@ -8,12 +8,12 @@ import httpx
 from mcp import Client
 from typer.testing import CliRunner
 
-from crewmind.catalog.caller import HOST_OPERATOR
-from crewmind.catalog.execute import Executor
-from crewmind.runtime import Runtime
-from crewmind.surfaces.cli.invoke import HttpInvoker, LocalInvoker
-from crewmind.surfaces.cli.main import ExitCode, build_cli
-from crewmind.surfaces.mcp.server import build_mcp
+from nightsquad.catalog.caller import HOST_OPERATOR
+from nightsquad.catalog.execute import Executor
+from nightsquad.runtime import Runtime
+from nightsquad.surfaces.cli.invoke import HttpInvoker, LocalInvoker
+from nightsquad.surfaces.cli.main import ExitCode, build_cli
+from nightsquad.surfaces.mcp.server import build_mcp
 from tests.contract.test_IF_1_3_conformance import every_scope
 from tests.support import (
     Greeter,

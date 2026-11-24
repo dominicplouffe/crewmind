@@ -8,7 +8,7 @@ Three directions were sketched against one hero screen (Home: the inbox of decis
 - **Palette:** Radix *slate* neutrals; *iris* (#5B5BD6) as the single brand accent; green, amber and red only for status. Light and dark are equals.
 - **Type:** Inter Variable for everything, tabular figures for numbers; sizes from 12 to 36 px on a 4 px grid.
 - **Sample component:** the decision card. A coloured edge for urgency (with the deadline in words), the question in semibold, who is asking with their avatar, the recommendation, "If you do nothing: …", then one primary action and quiet secondary ones.
-- **Hero:** greeting and a one-line answer ("2 decisions wait on you"), the inbox as the main column, project cards with live crew avatars and budget meters on the right.
+- **Hero:** greeting and a one-line answer ("2 decisions wait on you"), the inbox as the main column, project cards with live squad avatars and budget meters on the right.
 
 ## B. Control room
 

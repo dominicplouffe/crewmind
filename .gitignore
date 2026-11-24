@@ -8,5 +8,5 @@ dist/
 *.egg-info/
 *.sqlite
 *.sqlite3
-src/crewmind/embedding_model/
+src/nightsquad/embedding_model/
 deploy/.env

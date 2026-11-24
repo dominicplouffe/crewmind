@@ -114,7 +114,7 @@ export const story = {
     meterLabel: (share: string): string => `Budget used: ${share}`,
   },
 
-  crew: { title: "The crew", open: "Open the crew" },
+  squad: { title: "The squad", open: "Open the squad" },
 
   timeline: {
     title: "Timeline",
@@ -194,7 +194,7 @@ export const story = {
   latest: {
     title: "Latest deliverables",
     open: "See all deliverables",
-    empty: "Nothing delivered yet. Files appear here as the crew writes them.",
+    empty: "Nothing delivered yet. Files appear here as the squad writes them.",
   },
 
   rail: {
@@ -226,7 +226,7 @@ export const burn = {
   reachesWall: (when: string): string => `reaches the wall ${when}`,
   pace: (rate: string): string => `About ${rate} tokens per active hour`,
   noPace: "No pace measured yet",
-  noData: "No tokens used yet. The chart fills in as the crew runs.",
+  noData: "No tokens used yet. The chart fills in as the squad runs.",
   tableCaption: "Tokens used over time",
   time: "Time",
   total: "Tokens used so far",

@@ -9,11 +9,11 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.decisions import items
+from nightsquad.domain.decisions import items
 from tests.attack.delivery_support import SOLO, spend
 from tests.attack.harness import assert_refused
 from tests.attack.test_planning import CHAIRMAN_HOLDS, TASK, plan, propose
-from tests.attack.work_support import Crew
+from tests.attack.work_support import Squad
 from tests.conftest import FakeClock
 from tests.support import App
 
@@ -28,22 +28,22 @@ QUESTION = {
 BASIS = {"kind": "command", "ref": "curl -s https://example.com/price prints 150.00"}
 
 
-async def open_items(crew: Crew, **more: Any) -> list[dict[str, Any]]:
-    listed = await crew.app.ok("items.list", crew.owner, project_id=crew.project, **more)
+async def open_items(squad: Squad, **more: Any) -> list[dict[str, Any]]:
+    listed = await squad.app.ok("items.list", squad.owner, project_id=squad.project, **more)
     return listed["items"]
 
 
-async def decide(crew: Crew, item: int, action: str, **more: Any) -> dict[str, Any]:
-    return await crew.app.ok(
-        "items.decide", crew.owner, project_id=crew.project, item_id=item, action=action, **more
+async def decide(squad: Squad, item: int, action: str, **more: Any) -> dict[str, Any]:
+    return await squad.app.ok(
+        "items.decide", squad.owner, project_id=squad.project, item_id=item, action=action, **more
     )
 
 
-async def later(crew: Crew, clock: FakeClock, **delta: float) -> None:
+async def later(squad: Squad, clock: FakeClock, **delta: float) -> None:
     clock.advance(**delta)
-    await crew.finish_all()
-    await crew.app.planning.tick()
-    crew.owner = await crew.app.login(crew.owner.email)
+    await squad.finish_all()
+    await squad.app.planning.tick()
+    squad.owner = await squad.app.login(squad.owner.email)
 
 
 @pytest.mark.attack("INV-17")
@@ -57,9 +57,9 @@ async def test_INV_17_an_unanswered_item_resolves_to_its_declared_default(
     agent decides it, an action it does not have is refused, and unanswered for 72 hours
     it is declined. A tool-permission item never resolves to allow, and a kind whose
     default would grant something cannot even be registered."""
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
-    wanted, ignored = await propose(crew), await propose(crew, text="A second pricing page.")
-    first, second = await open_items(crew)
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS)
+    wanted, ignored = await propose(squad), await propose(squad, text="A second pricing page.")
+    first, second = await open_items(squad)
     assert (first["kind"], first["title"]) == (
         "proposed scope",
         f"Proposed scope: requirement {wanted}, 4 runs",
@@ -68,35 +68,35 @@ async def test_INV_17_an_unanswered_item_resolves_to_its_declared_default(
     assert (first["default_outcome"], first["waits_on_you"]) == ("decline", True)
     assert first["deadline"].startswith("2026-11-24T09:00")
 
-    token = (await crew.call("CEO", "agent.whoami")).request.headers["Authorization"][7:]
+    token = (await squad.call("CEO", "agent.whoami")).request.headers["Authorization"][7:]
     by_agent = await app.call(
-        "items.decide", token, project_id=crew.project, item_id=first["id"], action="accept"
+        "items.decide", token, project_id=squad.project, item_id=first["id"], action="accept"
     )
     assert by_agent.status_code in (401, 403)
     wrong = await app.call(
-        "items.decide", crew.owner, project_id=crew.project, item_id=first["id"], action="grant"
+        "items.decide", squad.owner, project_id=squad.project, item_id=first["id"], action="grant"
     )
     assert_refused(wrong, rule="HUM-1", code="not_an_action")
-    decided = await decide(crew, first["id"], "accept", note="Go ahead.")
+    decided = await decide(squad, first["id"], "accept", note="Go ahead.")
     assert (decided["state"], decided["outcome"], decided["actions"]) == ("decided", "accept", [])
-    assert (await plan(crew))[wanted]["state"] == "accepted"
+    assert (await plan(squad))[wanted]["state"] == "accepted"
     again = await app.call(
-        "items.decide", crew.owner, project_id=crew.project, item_id=first["id"], action="decline"
+        "items.decide", squad.owner, project_id=squad.project, item_id=first["id"], action="decline"
     )
     assert_refused(again, rule="7.5")
 
-    tool = await crew.ok(
+    tool = await squad.ok(
         "build-1", "agent.request_approval", kind="tool permission", tool="send_invoice",
         recommendation="Allow me to send invoices.", if_declined="Invoices are sent by hand.",
     )  # fmt: skip
-    await later(crew, clock, hours=73)
-    shown = await app.ok("items.show", crew.owner, project_id=crew.project, item_id=second["id"])
+    await later(squad, clock, hours=73)
+    shown = await app.ok("items.show", squad.owner, project_id=squad.project, item_id=second["id"])
     assert (shown["state"], shown["outcome"]) == ("defaulted", "decline")
     assert [line["state"] for line in shown["history"]] == ["open", "defaulted"]
-    declined = (await plan(crew))[ignored]
+    declined = (await plan(squad))[ignored]
     assert (declined["state"], declined["reason"]) == ("declined", "Not accepted by its deadline.")
-    await later(crew, clock, days=5)
-    shown = await app.ok("items.show", crew.owner, project_id=crew.project, item_id=tool["id"])
+    await later(squad, clock, days=5)
+    shown = await app.ok("items.show", squad.owner, project_id=squad.project, item_id=tool["id"])
     assert (shown["state"], shown["outcome"]) == ("defaulted", "deny")
 
     with pytest.raises(ValueError, match="a default may not be"):
@@ -116,16 +116,16 @@ async def test_INV_17_an_unanswered_item_resolves_to_its_declared_default(
 async def test_HUM_3_only_an_open_approval_is_extended(app: App) -> None:
     """HUM-3: an approval's deadline is extended by 1 to 30 days with a reason. A question
     is not an approval, and a decided item cannot be extended."""
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
-    tool = await crew.ok(
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS)
+    tool = await squad.ok(
         "build-1", "agent.request_approval", kind="tool permission", tool="send_invoice",
         recommendation="Allow me to send invoices.", if_declined="Invoices are sent by hand.",
     )  # fmt: skip
-    asked = await crew.ok("CEO", "agent.ask_question", **QUESTION)
+    asked = await squad.ok("CEO", "agent.ask_question", **QUESTION)
 
     async def extend(item: int, days: int, reason: str) -> Any:
         return await app.call(
-            "items.extend", crew.owner, project_id=crew.project, item_id=item, days=days,
+            "items.extend", squad.owner, project_id=squad.project, item_id=item, days=days,
             reason=reason,
         )  # fmt: skip
 
@@ -134,7 +134,7 @@ async def test_HUM_3_only_an_open_approval_is_extended(app: App) -> None:
     assert_refused(await extend(asked["id"], 5, "I am away this week."), rule="HUM-3")
     longer = await extend(tool["id"], 5, "I am away this week.")
     assert longer.json()["deadline"].startswith("2026-12-03T09:00")
-    await decide(crew, tool["id"], "deny")
+    await decide(squad, tool["id"], "deny")
     assert_refused(await extend(tool["id"], 5, "I am away this week."), rule="HUM-3")
 
 
@@ -148,50 +148,50 @@ async def test_HUM_5_a_question_never_blocks_and_never_asks_what_the_ceo_holds(
     `question.max_open` are open. An answer that differs from the default is said so and
     the rework is recorded against the question. Unanswered, the default stands on the
     record and the platform does nothing else: no scope is accepted by silence."""
-    held = await Crew.start(app, team=False, settings=SOLO)
+    held = await Squad.start(app, team=False, settings=SOLO)
     own = await held.call("CEO", "agent.ask_question", **QUESTION)
     envelope = assert_refused(own, rule="HUM-4", code="you_hold_this_decision")
     assert envelope.message == "You hold this decision. Decide it and post a heads-up."
     told = await held.ok("CEO", "agent.post_heads_up", text="I accepted the pricing page scope.")
     assert (told["kind"], told["waits_on_you"], told["deadline"]) == ("heads-up", False, None)
 
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS, owner=held.owner)
-    assert (await crew.call("build-1", "agent.ask_question", **QUESTION)).status_code == 403
-    thin = await crew.call("CEO", "agent.ask_question", **QUESTION | {"why": "Because."})
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS, owner=held.owner)
+    assert (await squad.call("build-1", "agent.ask_question", **QUESTION)).status_code == 403
+    thin = await squad.call("CEO", "agent.ask_question", **QUESTION | {"why": "Because."})
     assert_refused(thin, rule="HUM-5", code="question_incomplete")
-    vague = await crew.call("CEO", "agent.ask_question", **QUESTION | {"concerns": "things"})
+    vague = await squad.call("CEO", "agent.ask_question", **QUESTION | {"concerns": "things"})
     assert_refused(vague, rule="HUM-4", code="concerns_unknown")
-    first = await crew.ok("CEO", "agent.ask_question", **QUESTION)
+    first = await squad.ok("CEO", "agent.ask_question", **QUESTION)
     assert (first["default_outcome"], first["deadline"][:16]) == (
         "the default stands",
         "2026-11-22T09:00",
     )
-    proposed = await propose(crew)
-    task = await crew.call("CEO", "agent.create_task", team="build", **TASK)
+    proposed = await propose(squad)
+    task = await squad.call("CEO", "agent.create_task", team="build", **TASK)
     assert task.status_code == 200, task.text
     for _ in range(2):
-        await crew.ok("CEO", "agent.ask_question", **QUESTION | {"concerns": "other"})
-    fourth = await crew.call("CEO", "agent.ask_question", **QUESTION)
+        await squad.ok("CEO", "agent.ask_question", **QUESTION | {"concerns": "other"})
+    fourth = await squad.call("CEO", "agent.ask_question", **QUESTION)
     assert_refused(fourth, rule="HUM-5", code="too_many_questions")
 
-    answered = await decide(crew, first["id"], "answer", option=2, note="Customers ask for it.")
+    answered = await decide(squad, first["id"], "answer", option=2, note="Customers ask for it.")
     assert answered["state"] == "decided"
-    pack = (await crew.ok("CEO", "agent.context"))["context_pack"]
+    pack = (await squad.ok("CEO", "agent.context"))["context_pack"]
     assert "Monthly and yearly Customers ask for it." in pack
     assert "This differs from the default you acted on." in pack
-    await crew.ok(
+    await squad.ok(
         "CEO", "agent.record_rework", item_id=first["id"], what="Rebuilt the price table."
     )
-    shown = await app.ok("items.show", crew.owner, project_id=crew.project, item_id=first["id"])
+    shown = await app.ok("items.show", squad.owner, project_id=squad.project, item_id=first["id"])
     assert shown["fields"]["concerns"] == "accept_scope"
 
-    await later(crew, clock, hours=13)
-    await later(crew, clock, hours=12)
+    await later(squad, clock, hours=13)
+    await later(squad, clock, hours=12)
     lapsed = [
-        item for item in await open_items(crew, open_only=False) if item["kind"] == "question"
+        item for item in await open_items(squad, open_only=False) if item["kind"] == "question"
     ]
     assert [item["state"] for item in lapsed] == ["decided", "defaulted", "defaulted"]
-    assert (await plan(crew))[proposed]["state"] == "proposed"
+    assert (await plan(squad))[proposed]["state"] == "proposed"
 
 
 @pytest.mark.attack("WRK-10")
@@ -203,65 +203,65 @@ async def test_GOV_8_real_world_spend_stays_under_its_cap_and_threshold(app: App
     is refused without the basis of its amount. No approval lets committed spend pass
     `spend.monthly_cap`. Only the declaring seat settles a purchase, and a cancelled one
     stops counting. Spend approvals stay with the chairman under autonomous authority."""
-    crew = await Crew.start(app)
-    off = await crew.call("CEO", "agent.declare_purchase", what="A domain name", amount=12)
+    squad = await Squad.start(app)
+    off = await squad.call("CEO", "agent.declare_purchase", what="A domain name", amount=12)
     assert_refused(off, rule="GOV-8", code="spend_is_off")
     await app.ok(
-        "settings.change_project", crew.owner, project_id=crew.project,
-        changes={"spend.enabled": True}, reason="The crew may buy small things.",
+        "settings.change_project", squad.owner, project_id=squad.project,
+        changes={"spend.enabled": True}, reason="The squad may buy small things.",
     )  # fmt: skip
-    small = await crew.ok("CEO", "agent.declare_purchase", what="A domain name", amount=50)
+    small = await squad.ok("CEO", "agent.declare_purchase", what="A domain name", amount=50)
     assert (small["state"], small["committed_this_month"], small["monthly_cap"]) == (
         "committed",
         50.0,
         500.0,
     )
     big = {"what": "A year of hosting", "amount": 150}
-    unapproved = await crew.call("CEO", "agent.declare_purchase", **big)
+    unapproved = await squad.call("CEO", "agent.declare_purchase", **big)
     assert_refused(unapproved, rule="GOV-8", code="needs_spend_approval")
 
     ask = {
         "kind": "spend", "amount": 150, "recommendation": "Approve a year of hosting.",
         "if_declined": "The site stays on the free plan.",
     }  # fmt: skip
-    assert (await crew.call("build-1", "agent.request_approval", **ask)).status_code == 403
-    bare = await crew.call("CEO", "agent.request_approval", **ask)
+    assert (await squad.call("build-1", "agent.request_approval", **ask)).status_code == 403
+    bare = await squad.call("CEO", "agent.request_approval", **ask)
     assert_refused(bare, rule="WRK-10", code="figure_needs_a_basis")
-    item = await crew.ok("CEO", "agent.request_approval", **ask, basis=BASIS)
+    item = await squad.ok("CEO", "agent.request_approval", **ask, basis=BASIS)
     assert (item["title"], item["default_outcome"]) == ("Spend 150.00 USD", "deny")
-    await decide(crew, item["id"], "approve")
-    bought = await crew.ok("CEO", "agent.declare_purchase", **big)
+    await decide(squad, item["id"], "approve")
+    bought = await squad.ok("CEO", "agent.declare_purchase", **big)
     assert bought["committed_this_month"] == 200.0
-    twice = await crew.call("CEO", "agent.declare_purchase", **big)
+    twice = await squad.call("CEO", "agent.declare_purchase", **big)
     assert_refused(twice, rule="GOV-8", code="needs_spend_approval")
 
-    huge = await crew.ok("CEO", "agent.request_approval", **ask | {"amount": 400}, basis=BASIS)
-    await decide(crew, huge["id"], "approve")
-    over = await crew.call("CEO", "agent.declare_purchase", what="A big server", amount=400)
+    huge = await squad.ok("CEO", "agent.request_approval", **ask | {"amount": 400}, basis=BASIS)
+    await decide(squad, huge["id"], "approve")
+    over = await squad.call("CEO", "agent.declare_purchase", what="A big server", amount=400)
     envelope = assert_refused(over, rule="INV-10", code="over_the_monthly_cap")
     assert "committed spend to 600.00 USD; `spend.monthly_cap` is 500.00 USD" in envelope.message
 
-    other = await crew.call(
+    other = await squad.call(
         "build-1", "agent.finish_purchase", purchase_id=bought["id"], bought=False
     )
     assert_refused(other, rule="GOV-8", code="not_your_open_purchase")
-    cancelled = await crew.ok(
+    cancelled = await squad.ok(
         "CEO", "agent.finish_purchase", purchase_id=bought["id"], bought=False
     )
     assert (cancelled["state"], cancelled["committed_this_month"]) == ("cancelled", 50.0)
-    fits = await crew.ok("CEO", "agent.declare_purchase", what="A big server", amount=400)
+    fits = await squad.ok("CEO", "agent.declare_purchase", what="A big server", amount=400)
     assert fits["committed_this_month"] == 450.0
-    shown = await app.ok("spend.show", crew.owner, project_id=crew.project)
+    shown = await app.ok("spend.show", squad.owner, project_id=squad.project)
     assert [p["state"] for p in shown["purchases"]] == ["committed", "cancelled", "committed"]
 
 
 async def test_HUM_7_an_assist_holds_one_task_and_nothing_else(app: App) -> None:
     """HUM-7, HUM-2: any agent may ask for a step only a human can do. The project goes on
     meanwhile. When the chairman cannot do it, the task that needed it is blocked."""
-    crew = await Crew.start(app)
-    task = await crew.task()
-    await crew.ok("build-1", "agent.claim_task", task_id=task["id"])
-    asked = await crew.ok(
+    squad = await Squad.start(app)
+    task = await squad.task()
+    await squad.ok("build-1", "agent.claim_task", task_id=task["id"])
+    asked = await squad.ok(
         "build-1", "agent.file_assist", what="two-factor code", task_id=task["id"],
         step="Sign in to the hosting account and read me the six-digit code.",
     )  # fmt: skip
@@ -269,11 +269,11 @@ async def test_HUM_7_an_assist_holds_one_task_and_nothing_else(app: App) -> None
         "A step only you can do: two-factor code",
         ["done", "cannot"],
     )
-    another = await crew.task(title="Write the about page")
+    another = await squad.task(title="Write the about page")
     assert another["state"] == "ready"
-    await decide(crew, asked["id"], "cannot", note="I do not have that account.")
-    assert (await crew.show(task["id"]))["state"] == "blocked"
-    assert (await crew.show(another["id"]))["state"] == "ready"
+    await decide(squad, asked["id"], "cannot", note="I do not have that account.")
+    assert (await squad.show(task["id"]))["state"] == "blocked"
+    assert (await squad.show(another["id"]))["state"] == "ready"
 
 
 async def test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item(
@@ -283,43 +283,43 @@ async def test_HUM_2_every_kind_that_waits_on_the_chairman_is_an_item(
     reopen request are items like any other, decided with their typed actions. A verdict
     the chairman does not give in 72 hours passes to a reviewer seat. Stopping the
     project voids what is still open."""
-    crew = await Crew.start(
+    squad = await Squad.start(
         app, team=False,
         settings=SOLO | {"budget.tokens": 1_000_000, "authority.verdict": "chairman"},
     )  # fmt: skip
-    task = await crew.ok("CEO", "agent.create_task", **TASK)
-    await crew.ok("CEO", "agent.claim_task", task_id=task["id"])
-    await crew.ok("CEO", "agent.complete_task", task_id=task["id"], evidence="The page is up.")
-    await later(crew, clock, minutes=1)
-    verdict = next(item for item in await open_items(crew) if item["kind"] == "verdict")
+    task = await squad.ok("CEO", "agent.create_task", **TASK)
+    await squad.ok("CEO", "agent.claim_task", task_id=task["id"])
+    await squad.ok("CEO", "agent.complete_task", task_id=task["id"], evidence="The page is up.")
+    await later(squad, clock, minutes=1)
+    verdict = next(item for item in await open_items(squad) if item["kind"] == "verdict")
     assert (verdict["kind"], verdict["default_outcome"]) == ("verdict", "to a reviewer")
-    await later(crew, clock, hours=73)
-    assert (await plan(crew))[crew.requirement]["state"] == "checking"
-    ruled = await crew.call(
-        "Reviewer", "agent.rule_requirement", requirement_id=crew.requirement, passed=True
+    await later(squad, clock, hours=73)
+    assert (await plan(squad))[squad.requirement]["state"] == "checking"
+    ruled = await squad.call(
+        "Reviewer", "agent.rule_requirement", requirement_id=squad.requirement, passed=True
     )
     assert ruled.status_code == 200, ruled.text
-    assert (await plan(crew))[crew.requirement]["state"] == "met"
+    assert (await plan(squad))[squad.requirement]["state"] == "met"
 
-    await crew.finish_all()
+    await squad.finish_all()
     app.script("CEO/work", {"text": "Working.", "usage": {"input": 10_000, "output": 0}})
-    await spend(app, crew.project, 895_000)
-    await app.ok("chat.command", crew.owner, project_id=crew.project, text="/do Carry on.")
+    await spend(app, squad.project, 895_000)
+    await app.ok("chat.command", squad.owner, project_id=squad.project, text="/do Carry on.")
     await app.work()
-    checkpoint = next(i for i in await open_items(crew) if i["kind"] == "budget checkpoint")
+    checkpoint = next(i for i in await open_items(squad) if i["kind"] == "budget checkpoint")
     assert checkpoint["actions"] == ["raise the budget", "land"]
     assert checkpoint["default_outcome"] == "land"
     small = await app.call(
-        "items.decide", crew.owner, project_id=crew.project, item_id=checkpoint["id"],
+        "items.decide", squad.owner, project_id=squad.project, item_id=checkpoint["id"],
         action="raise the budget", amount=500_000,
     )  # fmt: skip
     assert_refused(small, rule="GOV-3", code="not_a_raise")
-    await decide(crew, checkpoint["id"], "raise the budget", amount=2_000_000)
-    assert (await app.ok("budget.show", crew.owner, project_id=crew.project))["wall"] == 2_000_000
+    await decide(squad, checkpoint["id"], "raise the budget", amount=2_000_000)
+    assert (await app.ok("budget.show", squad.owner, project_id=squad.project))["wall"] == 2_000_000
 
-    await crew.ok("CEO", "agent.post_heads_up", text="I raised nothing; the chairman did.")
-    await app.ok("projects.stop", crew.owner, project_id=crew.project)
-    states = {item["kind"]: item["state"] for item in await open_items(crew, open_only=False)}
+    await squad.ok("CEO", "agent.post_heads_up", text="I raised nothing; the chairman did.")
+    await app.ok("projects.stop", squad.owner, project_id=squad.project)
+    states = {item["kind"]: item["state"] for item in await open_items(squad, open_only=False)}
     assert states["heads-up"] == "void"
     assert states["budget checkpoint"] == "decided"
 
@@ -328,7 +328,7 @@ async def test_HUM_1_a_new_kind_is_only_a_registration(app: App) -> None:
     """HUM-1, IF-1.3: registering a kind is all it takes. With no other code, an item of
     it is listed for people and for agents, shown as a card line in the chat, counted on
     the desk, decided with its typed action, and its title comes from its typed fields."""
-    crew = await Crew.start(app, team=False, settings=SOLO)
+    squad = await Squad.start(app, team=False, settings=SOLO)
     items.register(
         items.Kind(
             name="sample: colour",
@@ -339,9 +339,9 @@ async def test_HUM_1_a_new_kind_is_only_a_registration(app: App) -> None:
         )
     )
     async with app.runtime.sessions() as session, session.begin():
-        from crewmind.storage.models import Project
+        from nightsquad.storage.models import Project
 
-        project = await session.get(Project, crew.project)
+        project = await session.get(Project, squad.project)
         assert project is not None
         await items.file(
             session, app.runtime.services.settings, project, "sample: colour",
@@ -349,27 +349,27 @@ async def test_HUM_1_a_new_kind_is_only_a_registration(app: App) -> None:
             recommendation="Pick the colour you like.", if_declined="It stays grey.",
             now=app.runtime.clock(),
         )  # fmt: skip
-    (listed,) = await open_items(crew, kind="sample: colour")
+    (listed,) = await open_items(squad, kind="sample: colour")
     assert (listed["title"], listed["actions"]) == (
         "Choose a colour for page 3",
         ["choose", "skip"],
     )
-    seen = (await crew.ok("CEO", "agent.items"))["items"]
+    seen = (await squad.ok("CEO", "agent.items"))["items"]
     assert "sample: colour" in [item["kind"] for item in seen]
-    desk = (await app.ok("desk.show", crew.owner))["waiting"]
+    desk = (await app.ok("desk.show", squad.owner))["waiting"]
     assert [entry["title"] for entry in desk] == ["Choose a colour for page 3"]
-    lines = (await app.ok("chat.history", crew.owner, project_id=crew.project))["items"]
+    lines = (await app.ok("chat.history", squad.owner, project_id=squad.project))["items"]
     assert any("Choose a colour for page 3" in line["body"] for line in lines)
-    decided = await decide(crew, listed["id"], "choose")
+    decided = await decide(squad, listed["id"], "choose")
     assert (decided["state"], decided["outcome"]) == ("decided", "choose")
-    assert (await app.ok("desk.show", crew.owner))["waiting"] == []
+    assert (await app.ok("desk.show", squad.owner))["waiting"] == []
 
 
 def test_INV_17_no_registered_kind_defaults_to_a_grant() -> None:
     """INV-17, HUM-3, P6: over every registered kind, the default outcome grants nothing,
     except delivery sign-off and a green status review, which only close the books. A
     tool permission never defaults to allow."""
-    from crewmind.catalog import registry
+    from nightsquad.catalog import registry
 
     registry.load_domain_modules()
     positive_defaults = {
@@ -392,15 +392,15 @@ async def test_INV_17_no_sequence_of_extensions_and_snoozes_escapes_the_default(
     clock, an item past its deadline is never open, it holds its declared default unless
     the chairman decided it, and a tool permission is never allowed."""
     draw = random.Random(seed)
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
-    await propose(crew)
-    await crew.ok(
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS)
+    await propose(squad)
+    await squad.ok(
         "build-1", "agent.request_approval", kind="tool permission", tool="send_invoice",
         recommendation="Allow me to send invoices.", if_declined="Invoices are sent by hand.",
     )  # fmt: skip
     watched = [
         entry["id"]
-        for entry in await open_items(crew)
+        for entry in await open_items(squad)
         if entry["kind"] in ("proposed scope", "approval: tool permission")
     ]
     assert len(watched) == 2
@@ -409,20 +409,20 @@ async def test_INV_17_no_sequence_of_extensions_and_snoozes_escapes_the_default(
         step = draw.choice(("extend", "snooze", "wait", "wait"))
         if step == "extend":
             await app.call(
-                "items.extend", crew.owner, project_id=crew.project, item_id=item,
+                "items.extend", squad.owner, project_id=squad.project, item_id=item,
                 days=draw.randint(1, 30), reason="I am away for a while.",
             )  # fmt: skip
         elif step == "snooze":
             until = now + timedelta(hours=draw.randint(1, 24 * 40))
             await app.call(
-                "items.snooze", crew.owner, project_id=crew.project, item_id=item,
+                "items.snooze", squad.owner, project_id=squad.project, item_id=item,
                 until=until.isoformat(),
             )  # fmt: skip
         else:
-            await later(crew, clock, hours=draw.randint(1, 24 * 20))
+            await later(squad, clock, hours=draw.randint(1, 24 * 20))
         now = app.runtime.clock()
         for entry in watched:
-            shown = await app.ok("items.show", crew.owner, project_id=crew.project, item_id=entry)
+            shown = await app.ok("items.show", squad.owner, project_id=squad.project, item_id=entry)
             if datetime.fromisoformat(shown["deadline"]) <= now:
                 assert (shown["state"], shown["outcome"]) == (
                     "defaulted",

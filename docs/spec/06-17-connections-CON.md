@@ -12,7 +12,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - **Values are write-only.** Once saved, a value is never shown again to anyone, admins included, on any surface. It can be replaced.
   - A value shorter than `secret.min_length` \[8\] is refused, because it cannot be masked reliably (CON-8). A value larger than `secret.max_size` \[64 KB\] is refused.
   - A secret is used in one of two ways, chosen when it is added:
-    - **sent for you** (the default): crewmind adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
+    - **sent for you** (the default): nightsquad adds it to a run's HTTPS requests to the sites it names (CON-6), so it never enters a sandbox;
     - **given to the agent**: placed in the run's sandbox as an environment variable or a file (CON-7), for what cannot be sent for the agent.
   - A secret may carry an expiry date, a day in UTC. The chairman of every project that uses it is told `secret.expiry_warning` \[7 days\] before, and on the day. The day after, it expires.
   - Many secrets and variables can be added at once by pasting `KEY=value` lines, reviewed as a table before anything is saved. The review shows each line's name, whether it becomes a secret or a variable (guessed from the name, changeable) and any problem, never a value. Secrets added this way are given to the agent under their own name, as a `.env` file is read by programs.
@@ -34,17 +34,17 @@ A project reaches the outside world through its connections: secrets, variables 
   - A connection to a granted site is opened with a short-lived certificate (`proxy.certificate_life` \[24 h\]) from the install's own certificate authority, which every sandbox trusts. The proxy adds the secret as a header (bearer, basic with a user name, or a named header), replacing any the agent sent, verifies the real site's certificate, and passes the answer back.
   - The site is the host the request is for, checked against both the TLS server name and the request's `Host`; a mismatch is refused. A connection upgrade (such as a WebSocket) to such a site is refused.
   - The certificate authority is created on first use and valid for ten years; its key is a secret and never enters a sandbox. Certificate validity is measured on the wall clock.
-  - A connection silent for `proxy.idle_timeout` \[5 min\] is closed. The proxy listens on `CREWMIND_EGRESS_PORT`, by default a free port chosen at start and told to each run.
+  - A connection silent for `proxy.idle_timeout` \[5 min\] is closed. The proxy listens on `NIGHTSQUAD_EGRESS_PORT`, by default a free port chosen at start and told to each run.
   - Programs that ignore the proxy settings or pin certificates cannot use a secret sent for them; the platform says so when the secret is added, and SECURITY.md states it.
 - **CON-7 Secrets given to the agent.**
   - A text secret becomes an environment variable, a file secret a file on the run's private in-memory filesystem (EXE-13), each under the name set when it was attached. Variables reach runs the same way (CON-3).
-  - The values reach the run's harness over the run's own authenticated channel when the run starts, and only the commands it runs receive them. They are never put in a container's settings. File secrets are in the directory named by `CREWMIND_SECRETS_DIR`, removed when the run ends. The run's trace names each one, never its value.
-  - Names are letters, digits and underscores. Names that change how programs run are refused: `CREWMIND_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`.
+  - The values reach the run's harness over the run's own authenticated channel when the run starts, and only the commands it runs receive them. They are never put in a container's settings. File secrets are in the directory named by `NIGHTSQUAD_SECRETS_DIR`, removed when the run ends. The run's trace names each one, never its value.
+  - Names are letters, digits and underscores. Names that change how programs run are refused: `NIGHTSQUAD_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`.
   - The context pack names each one, its description and its variable, never its value.
 - **CON-8 Masking.**
   - For each live run the platform holds the values it gave to the agent, and the values sent for it (CON-6) with the headers they travel in, because a site may echo what it received. Every place agent text enters the platform (every agent API call and every model request, before anything reads them, and the workspace snapshot) replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]`: model requests at the gateway, run steps, traces, chat posts, memory, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts.
   - A workspace file that held a value is stored masked, and the chairman is told once, naming the file and the secret.
-  - Masking stops crewmind storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
+  - Masking stops nightsquad storing a value or sending it to a model provider. It does not stop an agent sending a given secret over the open network; SECURITY.md says so.
 - **CON-9 Remote MCP servers.**
   - Reached over Streamable HTTP, falling back to HTTP with server-sent events for servers that only speak it.
   - https only, except http to `localhost`.
@@ -78,7 +78,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - Results are untrusted input, cut to `mcp.result_max_bytes` \[64 KB\] with the cut marked. An error result is returned as one and is not a refusal.
   - Limits: `mcp.call_timeout` \[60 s\] a call, `mcp.max_calls_per_run` \[100\], `mcp.max_calls_per_day` \[1,000\] a project, counted in the ledger. A failing server opens a circuit breaker on the rules of LLM-11.
 - **CON-14 Everyone knows what a project has.**
-  - The Founder lists the connections the chairman can attach, by name and description, states the crew's needs in its first reply, and drafts the grants. The review screen shows each need as met or missing, with a way to add it.
+  - The Founder lists the connections the chairman can attach, by name and description, states the squad's needs in its first reply, and drafts the grants. The review screen shows each need as met or missing, with a way to add it.
   - Each run's context pack lists what it may use and what its role needs but lacks.
   - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny). An approved tool is allowed (by the person, IF-5.6); an approved connection is listed among the project's needs, not yet in place, with Add beside it, holding nobody.
   - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.

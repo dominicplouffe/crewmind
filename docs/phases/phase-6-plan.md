@@ -45,7 +45,7 @@ The web app gets a **Desk** (what waits on you, across projects), **decision car
 This was the plan. What was built differs in places, listed under "Differences from this plan" in the outcome.
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/decisions/
     model.py          item states (7.5), flag states, kinds as a registry
     kinds.py          one registration per kind: fields, actions, deadline, default, surfaces
@@ -180,7 +180,7 @@ Phase 6 is built in its five parts. Of its 29 requirement ids, 19 are done and 1
 - **Interpretations are in the spec,** revision 2.17: how a mistake's cost is computed, what a lever does, what is not on the desk, how the brief is delivered before mail exists, what happens to a chat run with no reply, that purchases are declared, and how OAuth steps map to operations.
 - **A supervised reserve request is now denied at its deadline** (it waited for ever in phase 5), and an unanswered proposal is declined after 72 hours.
 - **MCP answers are summaries by default** (6,000 characters; 40,000 on request, the fixed figures of IF-5.7) and say so when they are cut.
-- **A purchase is a declaration.** Nothing in crewmind spends money yet; the cap and the threshold are enforced on what an agent declares before it acts.
+- **A purchase is a declaration.** Nothing in nightsquad spends money yet; the cap and the threshold are enforced on what an agent declares before it acts.
 
 **Found and fixed on the way.**
 

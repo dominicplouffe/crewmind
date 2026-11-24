@@ -11,9 +11,9 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway.protocol import CompletionRequest
-from crewmind.storage.models import Connection, Run
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway.protocol import CompletionRequest
+from nightsquad.storage.models import Connection, Run
 from tests.attack.test_connections import BLOG_WRITER, blog_project
 from tests.attack.test_specs import SPEC as BASE_SPEC
 from tests.founder_support import BRIEF, SPEC, credential, propose, script, tool

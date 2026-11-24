@@ -11,26 +11,26 @@ import httpx
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
-from crewmind.catalog import Catalog, Principal, Refusal, Reversibility, Surface, catalog
-from crewmind.catalog.caller import HOST_OPERATOR, Authority
-from crewmind.catalog.define import operation as define
-from crewmind.catalog.execute import Context
-from crewmind.gateway.mock import ScriptedTurn
-from crewmind.jobs.dispatcher import Dispatcher
-from crewmind.jobs.founder import FounderWorker
-from crewmind.jobs.planning import PlanningJobs
-from crewmind.jobs.platform_work import PlatformWorker
-from crewmind.jobs.scheduler import Scheduler
-from crewmind.jobs.work import WorkJobs
-from crewmind.runner.sandbox import InProcessSandbox
-from crewmind.runner.supervisor import Runner
-from crewmind.runtime import Runtime
-from crewmind.surfaces.agent_api.app import add_agent_api
-from crewmind.surfaces.api.app import build_api, route_method, route_path
-from crewmind.surfaces.api.connection_routes import add_connection_routes
-from crewmind.surfaces.api.files import add_file_routes
-from crewmind.surfaces.cli.invoke import HttpInvoker
-from crewmind.surfaces.mcp.oauth_routes import add_oauth_routes
+from nightsquad.catalog import Catalog, Principal, Refusal, Reversibility, Surface, catalog
+from nightsquad.catalog.caller import HOST_OPERATOR, Authority
+from nightsquad.catalog.define import operation as define
+from nightsquad.catalog.execute import Context
+from nightsquad.gateway.mock import ScriptedTurn
+from nightsquad.jobs.dispatcher import Dispatcher
+from nightsquad.jobs.founder import FounderWorker
+from nightsquad.jobs.planning import PlanningJobs
+from nightsquad.jobs.platform_work import PlatformWorker
+from nightsquad.jobs.scheduler import Scheduler
+from nightsquad.jobs.work import WorkJobs
+from nightsquad.runner.sandbox import InProcessSandbox
+from nightsquad.runner.supervisor import Runner
+from nightsquad.runtime import Runtime
+from nightsquad.surfaces.agent_api.app import add_agent_api
+from nightsquad.surfaces.api.app import build_api, route_method, route_path
+from nightsquad.surfaces.api.connection_routes import add_connection_routes
+from nightsquad.surfaces.api.files import add_file_routes
+from nightsquad.surfaces.cli.invoke import HttpInvoker
+from nightsquad.surfaces.mcp.oauth_routes import add_oauth_routes
 
 PASSWORD = "correct horse battery staple"
 ADMIN_EMAIL = "admin@example.com"
@@ -362,8 +362,8 @@ async def wake(app: App, project_id: str, seat: str = "CEO", kind: str = "test n
     """Give an agent a reason to run: an urgent notice (EXE-2)."""
     from sqlalchemy import select
 
-    from crewmind.domain.execution import notices
-    from crewmind.storage.models import Seat
+    from nightsquad.domain.execution import notices
+    from nightsquad.storage.models import Seat
 
     async with app.runtime.sessions() as session, session.begin():
         row = await session.scalar(
@@ -385,7 +385,7 @@ async def live_run(
     app: App, project_id: str, seat: str = "CEO", runner_id: str = "test-runner"
 ) -> LiveRun:
     """Wake an agent, then lease and start its work run by hand, without a sandbox."""
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     stash: dict[tuple[str, str], list[LiveRun]] = app.__dict__.setdefault("_live_runs", {})
     handed: dict[tuple[str, str], LiveRun] = app.__dict__.setdefault("_handed_runs", {})
@@ -408,7 +408,7 @@ async def live_run(
                 await runs.started(session, lease.run_id, runner_id, now)
         from sqlalchemy import select as _select
 
-        from crewmind.storage.models import Seat as _Seat
+        from nightsquad.storage.models import Seat as _Seat
 
         async with app.runtime.sessions() as session:
             names = {
@@ -432,7 +432,7 @@ async def live_run(
 
 async def agent_call(app: App, token: str | None, name: str, /, **values: Any) -> httpx.Response:
     """Call the agent API as a sandbox would, with a run token."""
-    from crewmind.surfaces.agent_api.app import route_path as agent_path
+    from nightsquad.surfaces.agent_api.app import route_path as agent_path
 
     headers = {"Authorization": f"Bearer {token}"} if token else {}
     async with app.client() as client:
@@ -440,7 +440,7 @@ async def agent_call(app: App, token: str | None, name: str, /, **values: Any) -
 
 
 async def run_state(app: App, run_id: str) -> str:
-    from crewmind.storage.models import Run
+    from nightsquad.storage.models import Run
 
     async with app.runtime.sessions() as session:
         run = await session.get(Run, run_id)
@@ -468,7 +468,7 @@ async def quiet_start(app: App, project_id: str) -> None:
     from a project that does nothing until the test says so."""
     from sqlalchemy import delete
 
-    from crewmind.storage.models import Notice
+    from nightsquad.storage.models import Notice
 
     async with app.runtime.sessions() as session, session.begin():
         await session.execute(

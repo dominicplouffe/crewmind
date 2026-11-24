@@ -8,8 +8,8 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.storage.models import Event
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.storage.models import Event
 from tests.attack.harness import assert_refused
 from tests.founder_support import (
     BRIEF,
@@ -50,7 +50,7 @@ async def test_FND_3_the_founder_cannot_talk_its_way_past_a_drafting_rule(app: A
     no reason, leaves out the plan adversary, puts words in the chairman's mouth, or calls
     a tool it does not have, is refused each time and reaches no draft. Its tools are
     exactly eight."""
-    from crewmind.domain.founder.tools import TOOLS
+    from nightsquad.domain.founder.tools import TOOLS
 
     assert sorted(TOOLS) == sorted(
         ["search_library", "list_connections", "fetch_url", "read_upload", "grade_goal",
@@ -287,7 +287,7 @@ async def test_FND_15_a_document_is_grilled_one_question_at_a_time_before_any_dr
     await app.ok("founder.accept_rest", owner, **ref)
     script(app, tool("rehearse_spec"), {"text": "Ready."})
     async with app.runtime.sessions() as session, session.begin():
-        from crewmind.storage.models import Drafting
+        from nightsquad.storage.models import Drafting
 
         row = await session.get(Drafting, started["drafting_id"])
         assert row is not None
@@ -313,7 +313,7 @@ async def test_FND_7_a_grade_stands_only_on_lines_the_goal_holds(app: App) -> No
     said. The grade here is a scripted model's: it proves the rules, not a model's eye."""
     import json
 
-    from crewmind.domain.founder import grammar
+    from nightsquad.domain.founder import grammar
     from tests.founder_support import ACCEPTANCE, grades
 
     owner = await app.person("owner@example.com")
@@ -361,7 +361,7 @@ async def test_FND_12_quick_mode_creates_and_starts_or_leaves_nothing(app: App) 
     created ends failed with no project. Founder calls are metered to no project."""
     from sqlalchemy import select
 
-    from crewmind.storage.models import LedgerLine
+    from nightsquad.storage.models import LedgerLine
 
     owner = await app.person("owner@example.com")
     await credential(app, owner, "main")
@@ -409,11 +409,11 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
     or invent what a passage conflicts with; the planted conflict with a standing order
     is surfaced as a question in the chat, with no deadline. Nothing is confirmed while a
     question is open; after the chairman confirms, the CEO may propose scope again."""
-    from tests.attack.work_support import Crew
+    from tests.attack.work_support import Squad
     from tests.founder_support import DOCUMENT
 
-    crew = await Crew.start(app)
-    owner, project = crew.owner, crew.project
+    squad = await Squad.start(app)
+    owner, project = squad.owner, squad.project
     order = await app.ok(
         "orders.pin", owner, project_id=project, what="Every plate is a photograph."
     )
@@ -423,7 +423,7 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
         "success_test": "A reader finds the wren's page in the guide.",
         "estimate_runs": 1,
     }
-    await crew.ok("CEO", "agent.propose_requirement", **requirement)
+    await squad.ok("CEO", "agent.propose_requirement", **requirement)
 
     stranger = await app.person("stranger@example.com")
     assert (await app.call("grill.start", stranger, project_id=project)).status_code in (403, 404)
@@ -434,24 +434,24 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
         rule="FND-16",
         code="already_grilling",
     )
-    blocked = await crew.call(
+    blocked = await squad.call(
         "CEO", "agent.propose_requirement", **{**requirement, "text": "The guide has a robin page."}
     )
     assert_refused(blocked, rule="FND-16", code="grilling_in_progress")
     assert_refused(await app.call("grill.confirm", owner, project_id=project), rule="FND-16")
 
-    seen = await crew.ok("CEO", "agent.grill")
+    seen = await squad.ok("CEO", "agent.grill")
     assert seen["document"].startswith("Hollin Valley bird guide")
     drawing = {"kind": "constraint", "passage": "Every plate is a drawing.", "problem": "conflict"}
-    invented = await crew.call(
+    invented = await squad.call(
         "CEO", "agent.grill_extract", items=[{**drawing, "conflicts_with": "order:999"}]
     )
     assert_refused(invented, rule="FND-16", code="conflict_with_nothing")
-    misquoted = await crew.call(
+    misquoted = await squad.call(
         "CEO", "agent.grill_extract", items=[{"kind": "number", "passage": "Ninety birds."}]
     )
     assert_refused(misquoted, rule="FND-15", code="passage_not_in_document")
-    listed = await crew.ok(
+    listed = await squad.ok(
         "CEO",
         "agent.grill_extract",
         items=[
@@ -469,9 +469,9 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
         "changes": "Whether the plates are drawn or photographed.",
     }
     clear = next(item for item in listed["items"] if item["problem"] is None)
-    wrong = await crew.call("CEO", "agent.grill_ask", item_id=clear["id"], **card)
+    wrong = await squad.call("CEO", "agent.grill_ask", item_id=clear["id"], **card)
     assert_refused(wrong, rule="FND-15", code="not_the_next_decision")
-    asked = await crew.ok("CEO", "agent.grill_ask", item_id=conflict["id"], **card)
+    asked = await squad.ok("CEO", "agent.grill_ask", item_id=conflict["id"], **card)
     question = asked["questions"][0]
     history = (await app.ok("chat.history", owner, project_id=project, limit=200))["items"]
     shown = next(line for line in history if "grill question" in str(line["detail"]))
@@ -491,8 +491,8 @@ async def test_FND_16_a_grilled_document_becomes_no_work_until_the_ledger_is_con
     assert any("change that too" in line["body"] for line in history)
     confirmed = await app.ok("grill.confirm", owner, project_id=project)
     assert (confirmed["grilling"], confirmed["state"]) == (False, "created")
-    crew.owner = owner
-    await crew.ok(
+    squad.owner = owner
+    await squad.ok(
         "CEO", "agent.propose_requirement", **{**requirement, "text": "Every plate is a drawing."}
     )
     events = [e for e in await app.events(owner, project) if e["type"].startswith("drafting.")]
@@ -513,7 +513,7 @@ async def test_FND_14_a_doctrine_fix_is_a_finding_on_an_older_project_and_change
     """FND-14: a project records the doctrine it was drafted under. When the doctrine
     changes, the project's status carries a finding with its fix; the project itself is
     not rewritten and still starts. A project made by hand has no such finding."""
-    from crewmind.domain.founder import drafting
+    from nightsquad.domain.founder import drafting
 
     owner = await app.person("owner@example.com")
     await credential(app, owner, "main")
@@ -554,7 +554,7 @@ def test_FND_2_the_spec_tool_shows_every_field_of_a_spec() -> None:
     follow."""
     import json
 
-    from crewmind.domain.founder.tools import TOOL_SPECS
+    from nightsquad.domain.founder.tools import TOOL_SPECS
 
     schema = next(tool.input_schema for tool in TOOL_SPECS if tool.name == "propose_spec")
     spec = schema["properties"]["spec"]
@@ -571,7 +571,7 @@ async def test_FND_1_a_refused_draft_names_every_problem_at_once_and_the_turn_ne
     """FND-1, P17, LIB-4: a draft with several mistakes is refused once, with each mistake
     and its field, and the chairman can read why. While it works the Founder says what it
     is doing. A turn that runs out of steps says so and says what stopped it."""
-    from crewmind.domain.founder.turn import CALLS_MOST
+    from nightsquad.domain.founder.turn import CALLS_MOST
 
     owner = await app.person("owner@example.com")
     await credential(app, owner, "main")
@@ -632,7 +632,7 @@ async def test_FND_4_a_round_of_questions_is_asked_and_answered_as_a_whole(app: 
     async def founder_calls() -> int:
         from sqlalchemy import func, select
 
-        from crewmind.storage.models import LedgerLine
+        from nightsquad.storage.models import LedgerLine
 
         async with app.runtime.sessions() as session:
             counted = select(func.count()).select_from(LedgerLine)
@@ -659,7 +659,7 @@ async def test_FND_4_a_round_of_questions_is_asked_and_answered_as_a_whole(app: 
 def test_FND_2_misplaced_fields_are_put_right_not_refused() -> None:
     """FND-2: a spec's fields given beside `spec`, or what belongs beside the spec given
     inside it, is one input either way. Nothing is added and nothing is dropped."""
-    from crewmind.domain.founder.shape import arranged, changed
+    from nightsquad.domain.founder.shape import arranged, changed
 
     fields = {"name", "goal", "type", "teams"}
     flat = arranged({"name": "A", "goal": "G", "type": "deliver", "decisions": {}}, fields)

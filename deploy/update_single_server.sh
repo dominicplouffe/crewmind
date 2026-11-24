@@ -79,7 +79,7 @@ if [ "$BACKUP" = "no" ]; then
 elif ! server_is_running; then
   warn "the server is not running: nothing to back up through it"
 else
-  out="$(crewmind backup)" || die "the backup failed; nothing was updated (override with --no-backup)
+  out="$(squad backup)" || die "the backup failed; nothing was updated (override with --no-backup)
 $out"
   ok "$(printf '%s\n' "$out" | sed -n 's/^archive: //p')"
 fi
@@ -95,10 +95,10 @@ ok "restarted on the new code"
 say "Waiting for the server"
 wait_for_server 300
 ok "ready: the database answers and its schema is current"
-crewmind setup >/dev/null || warn "crewmind setup reported a problem; run it by hand to see"
+squad setup >/dev/null || warn "squad setup reported a problem; run it by hand to see"
 
 say "Done"
 cat <<EOF
-  crewmind is at $PUBLIC_URL on $(git rev-parse --short HEAD 2>/dev/null || echo 'the new code').
+  nightsquad is at $PUBLIC_URL on $(git rev-parse --short HEAD 2>/dev/null || echo 'the new code').
   To undo, restore the backup above: deploy/restore_single_server.sh <archive>
 EOF

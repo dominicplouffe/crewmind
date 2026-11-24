@@ -14,7 +14,7 @@ export function Shortcuts({ onClose }: { onClose(): void }): JSX.Element {
     [["G", "C"], shell.keys.chat],
     [["G", "O"], shell.keys.overview],
     [["G", "W"], shell.keys.work],
-    [["G", "R"], shell.keys.crew],
+    [["G", "R"], shell.keys.squad],
     [["G", "D"], shell.keys.deliverables],
     [["Enter"], shell.keys.send],
     [["Shift", "Enter"], shell.keys.newline],

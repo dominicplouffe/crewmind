@@ -22,9 +22,9 @@ def drill_here(monkeypatch: pytest.MonkeyPatch) -> None:
     the run and memory modules; that wiring is put back afterwards. The process the
     server really starts is covered by `test_RHS_1_the_drill_process_is_given_nothing`
     and, end to end, in `tests/acceptance/test_founder.py`."""
-    from crewmind.domain.execution import runs
-    from crewmind.domain.memory import recall
-    from crewmind.domain.rehearsal import drill, operations
+    from nightsquad.domain.execution import runs
+    from nightsquad.domain.memory import recall
+    from nightsquad.domain.rehearsal import drill, operations
 
     wired = (runs.seat_resolver, runs.provider_saturated, recall.purge_engine)
 
@@ -110,8 +110,8 @@ def test_RHS_1_the_drill_opens_no_socket_and_refuses_a_database_that_exists(
     to its end, and a drill pointed at a folder that already holds a database refuses."""
     import asyncio
 
-    from crewmind.domain.library.spec import ProjectSpec
-    from crewmind.domain.rehearsal import drill
+    from nightsquad.domain.library.spec import ProjectSpec
+    from nightsquad.domain.rehearsal import drill
 
     spec = ProjectSpec.model_validate(example("01-your-first-hour.json"))
     (tmp_path / drill.DATABASE_FILE).write_text("a real database")
@@ -133,17 +133,17 @@ async def test_RHS_1_the_drill_process_is_given_nothing(
     app: App, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """RHS-1: the process the server starts for a drill is given the spec on standard
-    input and an environment of two names: where Python finds crewmind, and the PATH. No
+    input and an environment of two names: where Python finds nightsquad, and the PATH. No
     database address, no key file, no token and no proxy setting reach it; it is started
     isolated from the user's Python settings; and one that outlives
     `rehearsal.max_seconds` is killed and reported."""
     import asyncio
 
-    from crewmind.domain.rehearsal import operations
+    from nightsquad.domain.rehearsal import operations
 
-    monkeypatch.setenv("CREWMIND_DATABASE_URL", "postgresql://real/database")
-    monkeypatch.setenv("CREWMIND_MASTER_KEY_FILE", "/real/master.key")
-    monkeypatch.setenv("CREWMIND_TOKEN", "cm_pat_real")
+    monkeypatch.setenv("NIGHTSQUAD_DATABASE_URL", "postgresql://real/database")
+    monkeypatch.setenv("NIGHTSQUAD_MASTER_KEY_FILE", "/real/master.key")
+    monkeypatch.setenv("NIGHTSQUAD_TOKEN", "ns_pat_real")
     monkeypatch.setenv("HTTPS_PROXY", "http://proxy.example")
     started: dict[str, Any] = {}
     real = asyncio.create_subprocess_exec
@@ -170,7 +170,7 @@ async def test_RHS_1_the_drill_process_is_given_nothing(
     refused = await app.call("specs.rehearse", owner, **example("01-your-first-hour.json"))
     assert refused.json()["code"] == "rehearsal_too_long"
     assert sorted(started["env"]) == ["PATH", "PYTHONPATH"]
-    assert started["command"][1:] == ("-I", "-m", "crewmind.domain.rehearsal.drill")
+    assert started["command"][1:] == ("-I", "-m", "nightsquad.domain.rehearsal.drill")
 
 
 @pytest.mark.usefixtures("drill_here")
@@ -186,10 +186,10 @@ async def test_section_13_each_reference_spec_reaches_its_first_verified_close(
     app: App, name: str, ends_with: str
 ) -> None:
     """Section 13 (golden path, each type), RHS-1, LIB-5: each reference spec in
-    `acceptance/`, run by the crew in code under the real rules, gets from creation to
+    `acceptance/`, run by the squad in code under the real rules, gets from creation to
     its first verified close with no human input beyond what its authority settings
     require, hits no rule on the way, and has a goal with no date in its prose."""
-    from crewmind.domain.founder import grammar
+    from nightsquad.domain.founder import grammar
 
     owner = await app.person("owner@example.com")
     spec = json.loads((EXAMPLES.parents[1] / "acceptance" / f"{name}.spec.json").read_text())

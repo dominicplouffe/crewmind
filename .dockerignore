@@ -5,6 +5,6 @@
 web/dist
 tests
 docs
-src/crewmind/embedding_model
-src/crewmind/web_dist
+src/nightsquad/embedding_model
+src/nightsquad/web_dist
 deploy/.env

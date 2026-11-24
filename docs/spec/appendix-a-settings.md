@@ -129,20 +129,20 @@ Environment variables, read at start (NFR-7). They are not governed settings: th
 
 | Variable | Default | Range | Used by |
 | --- | --- | --- | --- |
-| `CREWMIND_DATABASE_URL` | A SQLite file in the data directory (slim mode) | A Postgres or SQLite URL | NFR-8, NFR-23 |
-| `CREWMIND_DATA_DIR` | `~/.crewmind` | A writable directory | NFR-4, NFR-23 |
-| `CREWMIND_MASTER_KEY_FILE` | `<data dir>/master.key`, created once by install and never overwritten | A readable file | ACC-6, NFR-2 |
-| `CREWMIND_HOST` | 127.0.0.1 | An address | NFR-6 |
-| `CREWMIND_PORT` | 8420 (starting default) | 1–65535 | NFR-6 |
-| `CREWMIND_EGRESS_PORT` | 0 (a free port, chosen at start and told to each run) | 0–65535 | CON-6 |
-| `CREWMIND_PUBLIC_URL` | none | An https URL; required to bind beyond localhost | NFR-6 |
-| `CREWMIND_SANDBOX_MODE` | container | container, host-jail (once it ships), unisolated (development only) | EXE-12 |
-| `CREWMIND_SANDBOX_CPUS` | 2 | 1–32 | EXE-12 |
-| `CREWMIND_SANDBOX_MEMORY` | 2 GB | 512 MB–64 GB | EXE-12 |
-| `CREWMIND_BROWSER_SANDBOX_MEMORY` | 4 GB | 1–64 GB | EXE-17 |
-| `CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED` | off | on, off | WRK-7 |
-| `CREWMIND_AGENT_API_URL` | The server's own address | The URL at which sandboxes reach the agent API and the model gateway; set it when sandboxes are containers | IF-6.1, EXE-12 |
-| `CREWMIND_MOCK_SCRIPT_DIR` | none | A directory of scripts for the mock provider (tests and rehearsal only) | LLM-8 |
-| `CREWMIND_MEMORY_ENGINE` | mem0 | mem0, or in-process (kept in memory and lost at restart; tests and rehearsal only) | MEM-2 |
-| `CREWMIND_API` | `http://127.0.0.1:8420` | A URL (CLI only) | IF-4.1 |
-| `CREWMIND_TOKEN` | none | A personal token (CLI only) | IF-4.1 |
+| `NIGHTSQUAD_DATABASE_URL` | A SQLite file in the data directory (slim mode) | A Postgres or SQLite URL | NFR-8, NFR-23 |
+| `NIGHTSQUAD_DATA_DIR` | `~/.nightsquad` | A writable directory | NFR-4, NFR-23 |
+| `NIGHTSQUAD_MASTER_KEY_FILE` | `<data dir>/master.key`, created once by install and never overwritten | A readable file | ACC-6, NFR-2 |
+| `NIGHTSQUAD_HOST` | 127.0.0.1 | An address | NFR-6 |
+| `NIGHTSQUAD_PORT` | 8420 (starting default) | 1–65535 | NFR-6 |
+| `NIGHTSQUAD_EGRESS_PORT` | 0 (a free port, chosen at start and told to each run) | 0–65535 | CON-6 |
+| `NIGHTSQUAD_PUBLIC_URL` | none | An https URL; required to bind beyond localhost | NFR-6 |
+| `NIGHTSQUAD_SANDBOX_MODE` | container | container, host-jail (once it ships), unisolated (development only) | EXE-12 |
+| `NIGHTSQUAD_SANDBOX_CPUS` | 2 | 1–32 | EXE-12 |
+| `NIGHTSQUAD_SANDBOX_MEMORY` | 2 GB | 512 MB–64 GB | EXE-12 |
+| `NIGHTSQUAD_BROWSER_SANDBOX_MEMORY` | 4 GB | 1–64 GB | EXE-17 |
+| `NIGHTSQUAD_ALLOW_AGENT_CHECKS_UNISOLATED` | off | on, off | WRK-7 |
+| `NIGHTSQUAD_AGENT_API_URL` | The server's own address | The URL at which sandboxes reach the agent API and the model gateway; set it when sandboxes are containers | IF-6.1, EXE-12 |
+| `NIGHTSQUAD_MOCK_SCRIPT_DIR` | none | A directory of scripts for the mock provider (tests and rehearsal only) | LLM-8 |
+| `NIGHTSQUAD_MEMORY_ENGINE` | mem0 | mem0, or in-process (kept in memory and lost at restart; tests and rehearsal only) | MEM-2 |
+| `NIGHTSQUAD_API` | `http://127.0.0.1:8420` | A URL (CLI only) | IF-4.1 |
+| `NIGHTSQUAD_TOKEN` | none | A personal token (CLI only) | IF-4.1 |

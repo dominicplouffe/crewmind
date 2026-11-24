@@ -1,6 +1,6 @@
 /**
  * Invites a person (ACC-2): name, email and role. The server answers with a one-time link, shown
- * with a Copy button, because crewmind sends no email itself.
+ * with a Copy button, because nightsquad sends no email itself.
  */
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { post, type Schemas } from "../api/client";

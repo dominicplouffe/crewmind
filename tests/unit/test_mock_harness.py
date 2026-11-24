@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 
-from crewmind.runner.harness.base import (
+from nightsquad.runner.harness.base import (
     Effort,
     Finished,
     Harness,
@@ -14,7 +14,7 @@ from crewmind.runner.harness.base import (
     TextProduced,
     ToolCalled,
 )
-from crewmind.runner.harness.mock import MockHarness
+from nightsquad.runner.harness.mock import MockHarness
 
 START = HarnessStart(
     system_prompt="You are a test agent.",

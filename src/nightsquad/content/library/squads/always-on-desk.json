@@ -1,0 +1,49 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "always-on-desk",
+  "name": "An always-on advertising desk",
+  "outcome": "A standup each morning and a Monday memo the owner could forward to a client without editing it.",
+  "ceo_role": "ceo",
+  "domains": [
+    "data"
+  ],
+  "teams": [
+    {
+      "name": "Analytics",
+      "role": "ppc-analyst",
+      "members": [
+        "Rae",
+        "Tomas"
+      ]
+    },
+    {
+      "name": "Strategy",
+      "role": "ppc-strategist",
+      "members": [
+        "Idris"
+      ]
+    },
+    {
+      "name": "Attribution",
+      "role": "attribution-reviewer",
+      "members": [
+        "Wren"
+      ]
+    },
+    {
+      "name": "Executability",
+      "role": "executability-checker",
+      "members": [
+        "Nadia"
+      ]
+    },
+    {
+      "name": "Editorial",
+      "role": "exec-communicator",
+      "members": [
+        "Ada"
+      ]
+    }
+  ],
+  "estimate": null
+}

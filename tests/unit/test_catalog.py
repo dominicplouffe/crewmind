@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from crewmind.catalog import Catalog, CatalogError, Principal, Surface, surfaces_for
-from crewmind.catalog.caller import Authority
+from nightsquad.catalog import Catalog, CatalogError, Principal, Surface, surfaces_for
+from nightsquad.catalog.caller import Authority
 from tests.support import Greeter, operation
 
 

@@ -1179,7 +1179,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Show what a project has, what its crew needs, and what could be attached.
+         * Show what a project has, what its squad needs, and what could be attached.
          * @description Requires: project_observer.
          */
         get: operations["connections.for_project"];
@@ -1605,66 +1605,6 @@ export interface paths {
          * @description Requires: person.
          */
         post: operations["credentials.smoke"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List the ready-made crews: each is a job with a team already on it.
-         * @description Requires: person.
-         */
-        get: operations["crews.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add a crew from a file, or replace one that exists.
-         * @description Requires: person.
-         */
-        post: operations["crews.save"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/show": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Show one crew in full, as the file it can be saved to.
-         * @description Requires: person.
-         */
-        get: operations["crews.show"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2441,7 +2381,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Load the roles and crews shipped with this version of crewmind again.
+         * Load the roles and squads shipped with this version of nightsquad again.
          * @description Requires: admin.
          */
         post: operations["library.reload"];
@@ -2459,7 +2399,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Find roles and crews that fit a piece of work.
+         * Find roles and squads that fit a piece of work.
          * @description Requires: person.
          */
         get: operations["library.search"];
@@ -2859,7 +2799,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List the providers crewmind can use, with any concurrency ceiling.
+         * List the providers nightsquad can use, with any concurrency ceiling.
          * @description Requires: person.
          */
         get: operations["models.providers"];
@@ -3559,7 +3499,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Show what the crew would wait for if the project started now, and who.
+         * Show what the squad would wait for if the project started now, and who.
          * @description Requires: project_observer.
          */
         get: operations["projects.readiness"];
@@ -4531,6 +4471,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/squads/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the ready-made squads: each is a job with a team already on it.
+         * @description Requires: person.
+         */
+        get: operations["squads.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/squads/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a squad from a file, or replace one that exists.
+         * @description Requires: person.
+         */
+        post: operations["squads.save"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/squads/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one squad in full, as the file it can be saved to.
+         * @description Requires: person.
+         */
+        get: operations["squads.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tasks/list": {
         parameters: {
             query?: never;
@@ -4763,7 +4763,7 @@ export interface components {
             /**
              * Key
              * Format: password
-             * @description The API key. It is encrypted and never shown again.
+             * @description The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.
              */
             key: string;
             /**
@@ -4927,7 +4927,7 @@ export interface components {
              */
             basic_user?: string | null;
             /**
-             * @description sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
+             * @description sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
              * @default sent_for_you
              */
             delivery?: components["schemas"]["Delivery"];
@@ -5976,7 +5976,7 @@ export interface components {
             type: string;
             /**
              * Waiting
-             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).
+             * @description Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).
              */
             waiting?: string[];
         };
@@ -6005,7 +6005,7 @@ export interface components {
             state: string;
             /**
              * Waiting
-             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).
+             * @description Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).
              */
             waiting: string[];
         };
@@ -6058,67 +6058,6 @@ export interface components {
              * @description The credential's name.
              */
             name: string;
-        };
-        /**
-         * CrewDoc
-         * @description One crew, as a file (LIB-2).
-         */
-        CrewDoc: {
-            /** Ceo Role */
-            ceo_role: string;
-            /**
-             * Crewmind Crew
-             * @default 1
-             * @constant
-             */
-            crewmind_crew?: 1;
-            /** Domains */
-            domains?: string[];
-            /** @description Reference runs and tokens for the job, when known (GOV-4). */
-            estimate?: components["schemas"]["Estimate"] | null;
-            /** Name */
-            name: string;
-            /**
-             * Outcome
-             * @description What the crew delivers.
-             */
-            outcome: string;
-            /** Slug */
-            slug: string;
-            /** Teams */
-            teams: components["schemas"]["CrewTeam"][];
-        };
-        /** CrewItem */
-        CrewItem: {
-            /** Domains */
-            domains: string[];
-            /** Estimate Tokens */
-            estimate_tokens: number | null;
-            /** Name */
-            name: string;
-            /** Outcome */
-            outcome: string;
-            /**
-             * Seats
-             * @description Seats in its teams, not counting the CEO.
-             */
-            seats: number;
-            /** Slug */
-            slug: string;
-        };
-        /** CrewList */
-        CrewList: {
-            /** Items */
-            items: components["schemas"]["CrewItem"][];
-        };
-        /** CrewTeam */
-        CrewTeam: {
-            /** Members */
-            members: string[];
-            /** Name */
-            name: string;
-            /** Role */
-            role: string;
         };
         /** CycleView */
         CycleView: {
@@ -6455,7 +6394,7 @@ export interface components {
             lines: components["schemas"]["Line"][];
             /**
              * Needs
-             * @description What the drafted crew needs from outside, and whether you have it (FND-9).
+             * @description What the drafted squad needs from outside, and whether you have it (FND-9).
              */
             needs?: components["schemas"]["DraftNeed"][];
             /** Not Ready Because */
@@ -8205,12 +8144,6 @@ export interface components {
             controlled_domains?: string[];
             /** Credentials */
             credentials?: components["schemas"]["CredentialGrant"][];
-            /**
-             * Crewmind Spec
-             * @default 1
-             * @constant
-             */
-            crewmind_spec?: 1;
             deadline?: components["schemas"]["Deadline"] | null;
             /** Goal */
             goal: string;
@@ -8218,6 +8151,12 @@ export interface components {
             integrations?: string[];
             /** Name */
             name: string;
+            /**
+             * Nightsquad Spec
+             * @default 1
+             * @constant
+             */
+            nightsquad_spec?: 1;
             /**
              * Paying Credential
              * @description The credential that pays, by name.
@@ -8305,10 +8244,20 @@ export interface components {
         ProviderItem: {
             /** Ceiling */
             ceiling: number | null;
+            /**
+             * Credential
+             * @description key, or login for a command-line agent (LLM-2).
+             */
+            credential: string;
             /** Images */
             images: boolean;
             /** Label */
             label: string;
+            /**
+             * Login Hint
+             * @description What to paste as a login, in plain words.
+             */
+            login_hint: string;
             /** Name */
             name: string;
             /** Needs Base Url */
@@ -8720,12 +8669,6 @@ export interface components {
              * @description The credentials it receives, by name only.
              */
             credential_names?: string[];
-            /**
-             * Crewmind Role
-             * @default 1
-             * @constant
-             */
-            crewmind_role?: 1;
             /** Description */
             description: string;
             /** Domains */
@@ -8745,6 +8688,12 @@ export interface components {
              * @default false
              */
             needs_vision?: boolean;
+            /**
+             * Nightsquad Role
+             * @default 1
+             * @constant
+             */
+            nightsquad_role?: 1;
             /**
              * Skills
              * @description Skills it may use, each pinned by version.
@@ -8958,7 +8907,7 @@ export interface components {
         SearchHit: {
             /**
              * Kind
-             * @description role or crew.
+             * @description role or squad.
              */
             kind: string;
             /** Name */
@@ -9321,6 +9270,67 @@ export interface components {
             monthly_cap: number;
             /** Purchases */
             purchases: components["schemas"]["PurchaseLine"][];
+        };
+        /**
+         * SquadDoc
+         * @description One squad, as a file (LIB-2).
+         */
+        SquadDoc: {
+            /** Ceo Role */
+            ceo_role: string;
+            /** Domains */
+            domains?: string[];
+            /** @description Reference runs and tokens for the job, when known (GOV-4). */
+            estimate?: components["schemas"]["Estimate"] | null;
+            /** Name */
+            name: string;
+            /**
+             * Nightsquad Squad
+             * @default 1
+             * @constant
+             */
+            nightsquad_squad?: 1;
+            /**
+             * Outcome
+             * @description What the squad delivers.
+             */
+            outcome: string;
+            /** Slug */
+            slug: string;
+            /** Teams */
+            teams: components["schemas"]["SquadTeam"][];
+        };
+        /** SquadItem */
+        SquadItem: {
+            /** Domains */
+            domains: string[];
+            /** Estimate Tokens */
+            estimate_tokens: number | null;
+            /** Name */
+            name: string;
+            /** Outcome */
+            outcome: string;
+            /**
+             * Seats
+             * @description Seats in its teams, not counting the CEO.
+             */
+            seats: number;
+            /** Slug */
+            slug: string;
+        };
+        /** SquadList */
+        SquadList: {
+            /** Items */
+            items: components["schemas"]["SquadItem"][];
+        };
+        /** SquadTeam */
+        SquadTeam: {
+            /** Members */
+            members: string[];
+            /** Name */
+            name: string;
+            /** Role */
+            role: string;
         };
         /** Step */
         Step: {
@@ -9850,7 +9860,7 @@ export interface components {
             seat: string;
         };
         /** HistoryLine */
-        crewmind__domain__connections__item_operations__HistoryLine: {
+        nightsquad__domain__connections__item_operations__HistoryLine: {
             /**
              * At
              * Format: date-time
@@ -9864,14 +9874,14 @@ export interface components {
             what: string;
         };
         /** ItemDetail */
-        crewmind__domain__connections__item_operations__ItemDetail: {
+        nightsquad__domain__connections__item_operations__ItemDetail: {
             /**
              * Hidden Uses
              * @description Projects using it that you cannot see.
              */
             hidden_uses: number;
             /** History */
-            history: components["schemas"]["crewmind__domain__connections__item_operations__HistoryLine"][];
+            history: components["schemas"]["nightsquad__domain__connections__item_operations__HistoryLine"][];
             item: components["schemas"]["ConnectionView"];
             /**
              * Used In
@@ -9880,12 +9890,12 @@ export interface components {
             used_in: components["schemas"]["Usage"][];
         };
         /** ItemList */
-        crewmind__domain__connections__item_operations__ItemList: {
+        nightsquad__domain__connections__item_operations__ItemList: {
             /** Items */
             items: components["schemas"]["ConnectionView"][];
         };
         /** DecideInput */
-        crewmind__domain__conversation__decisions__DecideInput: {
+        nightsquad__domain__conversation__decisions__DecideInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -9898,7 +9908,7 @@ export interface components {
             text: string;
         };
         /** RuleInput */
-        crewmind__domain__conversation__decisions__RuleInput: {
+        nightsquad__domain__conversation__decisions__RuleInput: {
             /**
              * Decision Id
              * @description The decision's id, from `decisions list`.
@@ -9916,7 +9926,7 @@ export interface components {
             ruling: string;
         };
         /** AcceptInput */
-        crewmind__domain__conversation__directives__AcceptInput: {
+        nightsquad__domain__conversation__directives__AcceptInput: {
             /**
              * Card Id
              * @description The card's id.
@@ -9934,7 +9944,7 @@ export interface components {
             project_id: string;
         };
         /** History */
-        crewmind__domain__conversation__operations__History: {
+        nightsquad__domain__conversation__operations__History: {
             /**
              * Earlier
              * @description Pass as `before` to read older messages. Absent at the start.
@@ -9946,7 +9956,7 @@ export interface components {
             next?: string | null;
         };
         /** DecideInput */
-        crewmind__domain__decisions__operations__DecideInput: {
+        nightsquad__domain__decisions__operations__DecideInput: {
             /**
              * Action
              * @description One of the item's actions.
@@ -9984,7 +9994,7 @@ export interface components {
             project_id: string;
         };
         /** ExtendInput */
-        crewmind__domain__decisions__operations__ExtendInput: {
+        nightsquad__domain__decisions__operations__ExtendInput: {
             /**
              * Days
              * @description How many days more: 1 to 30.
@@ -10007,7 +10017,7 @@ export interface components {
             reason: string;
         };
         /** HistoryLine */
-        crewmind__domain__decisions__operations__HistoryLine: {
+        nightsquad__domain__decisions__operations__HistoryLine: {
             /** Actor Kind */
             actor_kind: string;
             /**
@@ -10021,7 +10031,7 @@ export interface components {
             what: string;
         };
         /** ItemDetail */
-        crewmind__domain__decisions__operations__ItemDetail: {
+        nightsquad__domain__decisions__operations__ItemDetail: {
             /**
              * Actions
              * @description What you can do with it now.
@@ -10052,7 +10062,7 @@ export interface components {
              */
             filed_by: string;
             /** History */
-            history: components["schemas"]["crewmind__domain__decisions__operations__HistoryLine"][];
+            history: components["schemas"]["nightsquad__domain__decisions__operations__HistoryLine"][];
             /** Id */
             id: number;
             /** If Declined */
@@ -10081,12 +10091,12 @@ export interface components {
             waits_on_you: boolean;
         };
         /** ItemList */
-        crewmind__domain__decisions__operations__ItemList: {
+        nightsquad__domain__decisions__operations__ItemList: {
             /** Items */
             items: components["schemas"]["ItemView"][];
         };
         /** StartInput */
-        crewmind__domain__founder__operations__StartInput: {
+        nightsquad__domain__founder__operations__StartInput: {
             /**
              * Brief
              * @description What you want, in your own words.
@@ -10099,7 +10109,7 @@ export interface components {
             document?: string | null;
         };
         /** ReasonInput */
-        crewmind__domain__planning__delivery_operations__ReasonInput: {
+        nightsquad__domain__planning__delivery_operations__ReasonInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10112,7 +10122,7 @@ export interface components {
             reason: string;
         };
         /** ExtendInput */
-        crewmind__domain__planning__explore_operations__ExtendInput: {
+        nightsquad__domain__planning__explore_operations__ExtendInput: {
             /**
              * Bet Id
              * @description The bet's id, from `plan show`.
@@ -10136,7 +10146,7 @@ export interface components {
             until: string;
         };
         /** AcceptInput */
-        crewmind__domain__planning__operations__AcceptInput: {
+        nightsquad__domain__planning__operations__AcceptInput: {
             /**
              * Anyway
              * @description Accept it even though the plan does not fit the budget.
@@ -10155,7 +10165,7 @@ export interface components {
             requirement_id: number;
         };
         /** ReasonInput */
-        crewmind__domain__planning__operations__ReasonInput: {
+        nightsquad__domain__planning__operations__ReasonInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10173,7 +10183,7 @@ export interface components {
             requirement_id: number;
         };
         /** RuleInput */
-        crewmind__domain__planning__operations__RuleInput: {
+        nightsquad__domain__planning__operations__RuleInput: {
             /**
              * Note
              * @description What you found.
@@ -10196,7 +10206,7 @@ export interface components {
             requirement_id: number;
         };
         /** StartInput */
-        crewmind__domain__projects__operations__StartInput: {
+        nightsquad__domain__projects__operations__StartInput: {
             /**
              * Project Id
              * @description The project's id, from `projects list`.
@@ -10204,13 +10214,13 @@ export interface components {
             project_id: string;
             /**
              * Without Missing
-             * @description Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).
+             * @description Start even though some of the squad cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).
              * @default false
              */
             without_missing?: boolean;
         };
         /** History */
-        crewmind__domain__settings__operations__History: {
+        nightsquad__domain__settings__operations__History: {
             /** Items */
             items: components["schemas"]["HistoryItem"][];
             /** Next */
@@ -10959,7 +10969,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__explore_operations__ExtendInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__explore_operations__ExtendInput"];
             };
         };
         responses: {
@@ -11077,7 +11087,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__directives__AcceptInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__directives__AcceptInput"];
             };
         };
         responses: {
@@ -11348,7 +11358,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__conversation__operations__History"];
+                    "application/json": components["schemas"]["nightsquad__domain__conversation__operations__History"];
                 };
             };
             /** @description Validation Error */
@@ -11605,7 +11615,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__delivery_operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__delivery_operations__ReasonInput"];
             };
         };
         responses: {
@@ -12176,7 +12186,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemList"];
+                    "application/json": components["schemas"]["nightsquad__domain__connections__item_operations__ItemList"];
                 };
             };
             /** @description Validation Error */
@@ -12329,7 +12339,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__connections__item_operations__ItemDetail"];
+                    "application/json": components["schemas"]["nightsquad__domain__connections__item_operations__ItemDetail"];
                 };
             };
             /** @description Validation Error */
@@ -12791,91 +12801,6 @@ export interface operations {
             };
         };
     };
-    "crews.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewList"];
-                };
-            };
-        };
-    };
-    "crews.save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CrewDoc"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewItem"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "crews.show": {
-        parameters: {
-            query: {
-                /** @description The crew's slug, from `crews list`. */
-                crew: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewDoc"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "cycles.set_due": {
         parameters: {
             query?: never;
@@ -12951,7 +12876,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__decisions__DecideInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__decisions__DecideInput"];
             };
         };
         responses: {
@@ -13081,7 +13006,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__conversation__decisions__RuleInput"];
+                "application/json": components["schemas"]["nightsquad__domain__conversation__decisions__RuleInput"];
             };
         };
         responses: {
@@ -13547,7 +13472,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__founder__operations__StartInput"];
+                "application/json": components["schemas"]["nightsquad__domain__founder__operations__StartInput"];
             };
         };
         responses: {
@@ -13809,7 +13734,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__decisions__operations__DecideInput"];
+                "application/json": components["schemas"]["nightsquad__domain__decisions__operations__DecideInput"];
             };
         };
         responses: {
@@ -13842,7 +13767,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__decisions__operations__ExtendInput"];
+                "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ExtendInput"];
             };
         };
         responses: {
@@ -13888,7 +13813,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemList"];
+                    "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ItemList"];
                 };
             };
             /** @description Validation Error */
@@ -13955,7 +13880,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__decisions__operations__ItemDetail"];
+                    "application/json": components["schemas"]["nightsquad__domain__decisions__operations__ItemDetail"];
                 };
             };
             /** @description Validation Error */
@@ -14119,7 +14044,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CrewList"];
+                    "application/json": components["schemas"]["SquadList"];
                 };
             };
             /** @description Validation Error */
@@ -16126,7 +16051,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__projects__operations__StartInput"];
+                "application/json": components["schemas"]["nightsquad__domain__projects__operations__StartInput"];
             };
         };
         responses: {
@@ -16461,7 +16386,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__AcceptInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__AcceptInput"];
             };
         };
         responses: {
@@ -16560,7 +16485,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__ReasonInput"];
             };
         };
         responses: {
@@ -16593,7 +16518,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__ReasonInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__ReasonInput"];
             };
         };
         responses: {
@@ -16659,7 +16584,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["crewmind__domain__planning__operations__RuleInput"];
+                "application/json": components["schemas"]["nightsquad__domain__planning__operations__RuleInput"];
             };
         };
         responses: {
@@ -17296,7 +17221,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["crewmind__domain__settings__operations__History"];
+                    "application/json": components["schemas"]["nightsquad__domain__settings__operations__History"];
                 };
             };
             /** @description Validation Error */
@@ -17487,6 +17412,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SpendView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "squads.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadList"];
+                };
+            };
+        };
+    };
+    "squads.save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SquadDoc"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "squads.show": {
+        parameters: {
+            query: {
+                /** @description The squad's slug, from `squads list`. */
+                squad: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadDoc"];
                 };
             };
             /** @description Validation Error */

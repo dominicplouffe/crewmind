@@ -1,6 +1,6 @@
 /**
- * A project (CHAT-1, CHAT-18): the conversation with the crew, and beside it the project's places.
- * Tabs: Chat (default), Overview, Work (plan and board), Crew, Deliverables. Every other tool
+ * A project (CHAT-1, CHAT-18): the conversation with the squad, and beside it the project's places.
+ * Tabs: Chat (default), Overview, Work (plan and board), Squad, Deliverables. Every other tool
  * (activity, budget, runs, memory, models, settings, search) opens as a wide docked panel from
  * "More" or the ⌘K palette. The header line answers "what needs me, who is working, what does it
  * cost" from the same data as everywhere else.
@@ -20,9 +20,9 @@ import { useProjectChat } from "../chat/useProjectChat";
 import { useUploads } from "../chat/useUploads";
 import type { PaletteItem } from "../components/CommandPalette";
 import { ErrorNote } from "../components/common";
-import { CrewAssembled, markAssembled, shouldShowAssembled } from "../crew/CrewAssembled";
-import { CrewView } from "../crew/CrewView";
-import { AgentNamesProvider, mentionOf, roleLabel } from "../crew/names";
+import { SquadAssembled, markAssembled, shouldShowAssembled } from "../squad/SquadAssembled";
+import { SquadView } from "../squad/SquadView";
+import { AgentNamesProvider, mentionOf, roleLabel } from "../squad/names";
 import { Deliverables } from "../deliverables/Deliverables";
 import { AwayNote } from "../desk/AwayNote";
 import { ItemsContext, type ItemsScope } from "../desk/context";
@@ -75,20 +75,20 @@ export function Project(): JSX.Element {
 
   const projectName = status.data?.name ?? t.project.fallbackName;
 
-  // The crew assembles once: right after the Founder starts the project, or the first time the
-  // person opens the Crew tab once a team exists. Never in the middle of other work.
-  const justHired = search.get("crew") === "hired";
+  // The squad assembles once: right after the Founder starts the project, or the first time the
+  // person opens the Squad tab once a team exists. Never in the middle of other work.
+  const justHired = search.get("squad") === "hired";
   const seats = roster.data?.seats ?? [];
   const teams = roster.data?.teams.length ?? 0;
   useEffect(() => {
     if (!roster.data || assembling || seats.length === 0) return;
-    if (justHired || (tab === "crew" && teams > 0 && shouldShowAssembled(projectId))) setAssembling(true);
+    if (justHired || (tab === "squad" && teams > 0 && shouldShowAssembled(projectId))) setAssembling(true);
   }, [roster.data, justHired, tab, teams, projectId, assembling, seats.length]);
   const doneAssembling = useCallback(() => {
     markAssembled(projectId);
     setAssembling(false);
-    if (search.has("crew")) {
-      search.delete("crew");
+    if (search.has("squad")) {
+      search.delete("squad");
       setSearch(search, { replace: true });
     }
   }, [projectId, search, setSearch]);
@@ -109,7 +109,7 @@ export function Project(): JSX.Element {
     c: () => goTab("chat"),
     o: () => goTab("overview"),
     w: () => goTab("work"),
-    r: () => goTab("crew"),
+    r: () => goTab("squad"),
     d: () => goTab("deliverables"),
   });
 
@@ -136,7 +136,7 @@ export function Project(): JSX.Element {
     }
   }, [panel]);
 
-  // Text queued for the message box while another tab was shown ("Message CEO" from the Crew).
+  // Text queued for the message box while another tab was shown ("Message CEO" from the Squad).
   useEffect(() => {
     if (tab === "chat" && pendingInsert !== null) {
       composer.current?.insert(pendingInsert);
@@ -215,7 +215,7 @@ export function Project(): JSX.Element {
         label: projectLayout.tabs[id],
         detail: projectName,
         group: shell.palette.project,
-        keywords: id === "work" ? "plan board tasks requirements" : id === "deliverables" ? "files outputs" : id === "crew" ? "agents team org" : "",
+        keywords: id === "work" ? "plan board tasks requirements" : id === "deliverables" ? "files outputs" : id === "squad" ? "agents team org" : "",
         run: () => goTab(id),
       })),
       ...PANEL_ORDER.map((id) => ({
@@ -280,9 +280,9 @@ export function Project(): JSX.Element {
     case "work":
       view = <WorkView projectId={projectId} changes={state.changes} onChanged={items.onChanged} />;
       break;
-    case "crew":
+    case "squad":
       view = (
-        <CrewView
+        <SquadView
           projectId={projectId}
           changes={state.changes}
           header={state.header}
@@ -430,12 +430,12 @@ export function Project(): JSX.Element {
         </div>
         <ListeningDialogs listening={listening} />
         {assembling ? (
-          <CrewAssembled
+          <SquadAssembled
             projectId={projectId}
             seats={seats.map((seat) => ({ name: seat.name, displayName: seat.display_name, role: roleLabel(seat), kind: seat.kind }))}
             onDone={() => {
               doneAssembling();
-              goTab("crew");
+              goTab("squad");
             }}
             onSkip={doneAssembling}
           />

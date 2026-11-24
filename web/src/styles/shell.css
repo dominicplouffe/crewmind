@@ -357,7 +357,7 @@
   .project-body > .panel .panel-body { padding: var(--space-4); padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom)); }
 }
 
-/* The chat's side rail: needs you, the crew, progress and budget, beside the conversation. */
+/* The chat's side rail: needs you, the squad, progress and budget, beside the conversation. */
 .chat-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; position: relative; }
 .chat-rail {
   width: 21rem;
@@ -399,7 +399,7 @@
 
 /* Tab views share one page frame. */
 .project-view > .overview,
-.project-view > .crew,
+.project-view > .squad,
 .project-view > .deliv {
   max-width: var(--content-max);
   margin: 0 auto;
@@ -407,7 +407,7 @@
 }
 @media (max-width: 899px) {
   .project-view > .overview,
-  .project-view > .crew,
+  .project-view > .squad,
   .project-view > .deliv { padding: var(--space-4) var(--space-4) var(--space-8); }
 }
 .status-chip { white-space: nowrap; flex: none; }

@@ -11,7 +11,7 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.work import fetch
+from nightsquad.domain.work import fetch
 
 PAGE = b"<html><body>Order 4411 was <b>delivered</b> on 3 May.</body></html>"
 

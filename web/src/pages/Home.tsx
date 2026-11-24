@@ -23,7 +23,7 @@ import { useAlerts } from "../shell/useAlerts";
 import { home } from "../strings.shell";
 import { Skeleton } from "../ui/Skeleton";
 
-const ALERTS_DISMISSED = "crewmind.alerts-prompt-dismissed";
+const ALERTS_DISMISSED = "nightsquad.alerts-prompt-dismissed";
 const DAY_FORMAT = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "long" });
 
 function readDismissed(): boolean {

@@ -7,7 +7,7 @@ import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { Tag, stateName, useAct, type TabProps } from "./parts";
-import { useAgentName } from "../../crew/names";
+import { useAgentName } from "../../squad/names";
 
 export function CorrectionsTab({ projectId, changes, onChanged }: TabProps): JSX.Element {
   const corrections = useLoad(() => get("/v1/corrections/list", { project_id: projectId }), [projectId, changes]);

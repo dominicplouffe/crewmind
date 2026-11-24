@@ -1,4 +1,4 @@
-"""Attacks on the role and crew libraries (LIB-1, LIB-2, LIB-3)."""
+"""Attacks on the role and squad libraries (LIB-1, LIB-2, LIB-3)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.library import service
+from nightsquad.domain.library import service
 from tests.attack.harness import assert_refused
 from tests.support import App
 
@@ -83,7 +83,7 @@ async def test_LIB_1_a_team_keeps_its_role_version_until_it_is_repinned(app: App
 async def test_LIB_3_the_starter_library_covers_what_the_spec_names(app: App) -> None:
     """LIB-3, LIB-2: the shipped library has roles for research, writing, engineering,
     data, design, review and adversary, and the plan adversary and gap reviewer. Every
-    crew names roles that exist, and the library can be searched."""
+    squad names roles that exist, and the library can be searched."""
     owner = await app.person("owner@example.com")
     roles = {role["slug"]: role for role in (await app.ok("roles.list", owner))["items"]}
     wanted = (
@@ -92,23 +92,23 @@ async def test_LIB_3_the_starter_library_covers_what_the_spec_names(app: App) ->
     )  # fmt: skip
     assert not [slug for slug in wanted if slug not in roles]
     assert roles["ceo"]["kind"] == "ceo"
-    crews = (await app.ok("crews.list", owner))["items"]
-    assert len(crews) == len(service.starter_crews())
-    for crew in crews:
-        shown = await app.ok("crews.show", owner, crew=crew["slug"])
+    squads = (await app.ok("squads.list", owner))["items"]
+    assert len(squads) == len(service.starter_squads())
+    for squad in squads:
+        shown = await app.ok("squads.show", owner, squad=squad["slug"])
         assert {shown["ceo_role"], *(team["role"] for team in shown["teams"])} <= set(roles)
     found = (await app.ok("library.search", owner, query="red team adversary"))["items"]
     assert found[0]["slug"] == "adversary"
-    assert {hit["kind"] for hit in found} <= {"role", "crew"}
+    assert {hit["kind"] for hit in found} <= {"role", "squad"}
     assert (await app.ok("library.search", owner, query="zzzz"))["items"] == []
 
 
 def test_LIB_1_no_shipped_role_names_a_model_or_a_tool_that_does_not_exist() -> None:
-    """LIB-1, LIB-3: every shipped role and crew file is in the one format, and no charter
+    """LIB-1, LIB-3: every shipped role and squad file is in the one format, and no charter
     tells an agent to call a tool the agent API does not have."""
     import re
 
-    from crewmind.catalog import catalog, registry
+    from nightsquad.catalog import catalog, registry
 
     registry.load_domain_modules()
     tools = {

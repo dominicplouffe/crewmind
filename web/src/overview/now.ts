@@ -5,7 +5,7 @@
  * the server; nothing here decides anything.
  */
 import type { Header, Task } from "../api/client";
-import { doingSentence } from "../crew/logic";
+import { doingSentence } from "../squad/logic";
 import { story, type Part } from "../strings.overview";
 
 export type NowStatus = "working" | "blocked" | "review" | "checking" | "claimed";

@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import pytest
 
-from crewmind.domain.work import fetch
+from nightsquad.domain.work import fetch
 from tests.attack.harness import assert_refused
-from tests.attack.work_support import OBSERVABLE, Crew
+from tests.attack.work_support import OBSERVABLE, Squad
 from tests.conftest import FakeClock
 from tests.site_support import PAGE, Site
 from tests.support import App, agent_call, live_run
@@ -63,31 +63,31 @@ async def test_WRK_12_evidence_counts_only_once_the_platform_verifies_it(
     fetches the page and verifies the quoted words are on it, then snapshots it. Words that
     are not there, an inside address and a missing task fail it; an agent cannot mark its
     own evidence verified. A failing fetch is retried 5 times, then fails closed."""
-    crew = await Crew.start(app)
-    task = await crew.task()
-    orphan = await crew.call(
+    squad = await Squad.start(app)
+    task = await squad.task()
+    orphan = await squad.call(
         "build-1", "agent.file_evidence", url=site.url(), quote="Order 4411 was delivered"
     )
     assert_refused(orphan, rule="WRK-12", code="evidence_needs_a_task")
-    filed = await crew.ok(
+    filed = await squad.ok(
         "build-1", "agent.file_evidence", url=site.url(), task_id=task["id"],
         quote="order 4411 was   DELIVERED",
     )  # fmt: skip
     assert filed["state"] == "pending"
-    wrong = await crew.ok(
+    wrong = await squad.ok(
         "build-1", "agent.file_evidence", url=site.url(), task_id=task["id"],
         quote="Order 9999 was refunded",
     )  # fmt: skip
-    inside = await crew.ok(
+    inside = await squad.ok(
         "build-1", "agent.file_evidence", url="http://10.0.0.5/secret", task_id=task["id"],
         quote="anything at all",
     )  # fmt: skip
     for name in ("evidence.verify", "agent.verify_evidence"):
-        forged = await crew.call("build-1", name, evidence_id=filed["id"])
+        forged = await squad.call("build-1", name, evidence_id=filed["id"])
         assert forged.status_code in (403, 404), name
 
     assert await app.work_jobs.verify_evidence() == 3
-    listed = (await app.ok("evidence.list", crew.owner, project_id=crew.project))["items"]
+    listed = (await app.ok("evidence.list", squad.owner, project_id=squad.project))["items"]
     by_id = {item["id"]: item for item in listed}
     assert by_id[filed["id"]]["state"] == "verified"
     assert (by_id[wrong["id"]]["state"], by_id[wrong["id"]]["failure"]) == (
@@ -98,14 +98,14 @@ async def test_WRK_12_evidence_counts_only_once_the_platform_verifies_it(
     assert "not a public address" in by_id[inside["id"]]["failure"]
 
     site.status = 503
-    flaky = await crew.ok(
+    flaky = await squad.ok(
         "build-1", "agent.file_evidence", url=site.url(), task_id=task["id"],
         quote="Order 4411 was delivered",
     )  # fmt: skip
     for _ in range(4):
         assert await app.work_jobs.verify_evidence() == 0
     assert await app.work_jobs.verify_evidence() == 1
-    final = (await app.ok("evidence.list", crew.owner, project_id=crew.project))["items"][-1]
+    final = (await app.ok("evidence.list", squad.owner, project_id=squad.project))["items"][-1]
     assert (final["id"], final["state"]) == (flaky["id"], "failed")
 
 
@@ -116,20 +116,20 @@ async def test_INV_14_a_side_effect_fires_once_across_retries(app: App, clock: F
     """INV-14, WRK-16, section 7.16: a side effect is declared before it fires. When the run
     fails and is retried, the retry is shown what was declared, and declaring the same key
     again says do not fire. Only the declaring run or its retry finishes it, once."""
-    crew = await Crew.start(app)
+    squad = await Squad.start(app)
     declare = {"key": "email-supplier-quote", "what": "Email the supplier for a quote."}
-    first = await crew.ok("build-1", "agent.declare_effect", **declare)
+    first = await squad.ok("build-1", "agent.declare_effect", **declare)
     assert (first["fire"], first["state"]) == (True, "declared")
-    other = await crew.call(
+    other = await squad.call(
         "build-2", "agent.finish_effect", key=declare["key"], fired=True, outcome="I sent it."
     )
     assert_refused(other, rule="WRK-16", code="not_your_side_effect")
 
-    retry = await live_run(app, crew.project, seat="build-2")
+    retry = await live_run(app, squad.project, seat="build-2")
     for _ in range(2):
-        await crew.fail("build-1")
+        await squad.fail("build-1")
         clock.advance(seconds=100)
-        retry = await live_run(app, crew.project, seat="build-1")
+        retry = await live_run(app, squad.project, seat="build-1")
         pack = (await agent_call(app, retry.token, "agent.context")).json()["context_pack"]
         assert "[key email-supplier-quote] Email the supplier for a quote.: it was never" in pack
         again = await agent_call(app, retry.token, "agent.declare_effect", **declare)
@@ -144,7 +144,7 @@ async def test_INV_14_a_side_effect_fires_once_across_retries(app: App, clock: F
         app, retry.token, "agent.finish_effect", key=declare["key"], fired=True, outcome="Again."
     )
     assert_refused(twice, rule="7.16-effect")
-    effects = (await app.ok("launches.list", crew.owner, project_id=crew.project))["items"]
+    effects = (await app.ok("launches.list", squad.owner, project_id=squad.project))["items"]
     assert len(effects) == 1
 
 
@@ -156,73 +156,73 @@ async def test_WRK_17_a_launch_must_be_watched(app: App, clock: FakeClock) -> No
     the watch fails the chat says so, the chairman is alarmed and the launching seat is
     woken; when it recovers it passes again. Only the launching seat, the CEO or the
     chairman retires it, which ends the watch."""
-    crew = await Crew.start(app)
+    squad = await Squad.start(app)
     launch = {"key": "landing-page-v1", "what": "Publish the landing page.", "launch": True}
-    bare = await crew.call("build-1", "agent.declare_effect", **launch)
+    bare = await squad.call("build-1", "agent.declare_effect", **launch)
     assert_refused(bare, rule="WRK-17", code="launch_needs_a_watch")
-    often = await crew.call(
+    often = await squad.call(
         "build-1", "agent.declare_effect", **launch,
         watch={"kind": "command", "check": "test -f site-up.txt", "interval_minutes": 5},
     )  # fmt: skip
     assert_refused(often, rule="WRK-17", code="watch_too_often")
-    blind = await crew.call(
+    blind = await squad.call(
         "build-1", "agent.declare_effect", **launch,
         watch={"kind": "url", "check": "https://example.org/", "interval_minutes": 30},
     )  # fmt: skip
     assert_refused(blind, rule="WRK-17", code="watch_needs_a_condition")
 
     watch = {"kind": "command", "check": "test -f site-up.txt", "interval_minutes": 15}
-    run = await live_run(app, crew.project, seat="build-1")
+    run = await live_run(app, squad.project, seat="build-1")
     declared = (
         await agent_call(app, run.token, "agent.declare_effect", **launch, watch=watch)
     ).json()
     assert (declared["fire"], declared["watch"]) == (True, None)
-    crew.write("site-up.txt", "up")
+    squad.write("site-up.txt", "up")
     live = await agent_call(
         app, run.token, "agent.finish_effect", key=launch["key"], fired=True,
         outcome="It is live.",
     )  # fmt: skip
     assert live.json()["watch"] == "passing"
-    spent = (await app.ok("budget.show", crew.owner, project_id=crew.project))["spent"]
+    spent = (await app.ok("budget.show", squad.owner, project_id=squad.project))["spent"]
 
     assert await app.work_jobs.run_watches() == 1
     assert await app.work_jobs.run_watches() == 0
-    (crew.workspace / "site-up.txt").unlink()
+    (squad.workspace / "site-up.txt").unlink()
     clock.advance(minutes=16)
     await app.work_jobs.run_watches()
-    listed = (await app.ok("launches.list", crew.owner, project_id=crew.project))["items"][0]
+    listed = (await app.ok("launches.list", squad.owner, project_id=squad.project))["items"][0]
     assert listed["watch"] == "failing"
-    history = (await app.ok("chat.history", crew.owner, project_id=crew.project))["items"]
+    history = (await app.ok("chat.history", squad.owner, project_id=squad.project))["items"]
     flags = [m for m in history if m["detail"] == {"kind": "watch failing", "alarm": True}]
     assert len(flags) == 1
     clock.advance(minutes=16)
     await app.work_jobs.run_watches()
     assert len([m for m in history if m["detail"] == {"kind": "watch failing", "alarm": True}]) == 1
 
-    crew.write("site-up.txt", "up again")
+    squad.write("site-up.txt", "up again")
     clock.advance(minutes=16)
     await app.work_jobs.run_watches()
-    listed = (await app.ok("launches.list", crew.owner, project_id=crew.project))["items"][0]
+    listed = (await app.ok("launches.list", squad.owner, project_id=squad.project))["items"][0]
     assert listed["watch"] == "passing"
-    assert (await app.ok("budget.show", crew.owner, project_id=crew.project))["spent"] == spent
+    assert (await app.ok("budget.show", squad.owner, project_id=squad.project))["spent"] == spent
 
-    stranger = await crew.call("build-2", "agent.retire_launch", effect_id=declared["id"])
+    stranger = await squad.call("build-2", "agent.retire_launch", effect_id=declared["id"])
     assert_refused(stranger, rule="WRK-17", code="not_your_launch")
     retired = await app.ok(
-        "launches.retire", crew.owner, project_id=crew.project, effect_id=declared["id"]
+        "launches.retire", squad.owner, project_id=squad.project, effect_id=declared["id"]
     )
     assert (retired["state"], retired["watch"]) == ("retired", "ended")
-    owner = await app.login(crew.owner.email)
+    owner = await app.login(squad.owner.email)
     changes = [
         e["after"]["state"]
-        for e in await app.events(owner, crew.project)
+        for e in await app.events(owner, squad.project)
         if e["type"] == "side_effect.state_changed"
     ]
     assert changes == ["declared", "finished", "retired"]
     clock.advance(minutes=16)
     assert await app.work_jobs.run_watches() == 0
     again = await app.call(
-        "launches.retire", crew.owner, project_id=crew.project, effect_id=declared["id"]
+        "launches.retire", squad.owner, project_id=squad.project, effect_id=declared["id"]
     )
     assert_refused(again, rule="7.16-effect")
 
@@ -233,19 +233,19 @@ async def test_WRK_3_an_explore_project_in_an_evidence_drought_makes_only_eviden
     """WRK-3, WRK-12: a young Explore project is never in drought. After
     `evidence.drought_after` with nothing verified, only evidence-producing tasks may be
     created, until evidence is verified."""
-    crew = await Crew.start(app, type="explore")
-    await crew.task()
+    squad = await Squad.start(app, type="explore")
+    await squad.task()
     clock.advance(hours=25)
-    dry = await crew.call("CEO", "agent.create_task", **OBSERVABLE, team="build")
+    dry = await squad.call("CEO", "agent.create_task", **OBSERVABLE, team="build")
     assert_refused(dry, rule="WRK-3", code="evidence_drought")
-    probe = await crew.task(title="Ask five customers", outside_evidence=True)
-    await crew.ok(
+    probe = await squad.task(title="Ask five customers", outside_evidence=True)
+    await squad.ok(
         "build-1", "agent.file_evidence", url=site.url(), task_id=probe["id"],
         quote="Order 4411 was delivered",
     )  # fmt: skip
     await app.work_jobs.verify_evidence()
-    await crew.task(title="Write up what we learned", outside_evidence=True)
-    await crew.task(title="Plan the next step")
+    await squad.task(title="Write up what we learned", outside_evidence=True)
+    await squad.task(title="Plan the next step")
 
 
 async def test_WRK_16_a_side_effect_is_never_stranded(app: App) -> None:
@@ -253,37 +253,37 @@ async def test_WRK_16_a_side_effect_is_never_stranded(app: App) -> None:
     later run when the declaring run is gone. If the agent never does, the chairman closes
     it as outcome unknown; a launch is then watched and can be retired. Another agent
     still cannot finish it, and an agent cannot close one as unknown."""
-    crew = await Crew.start(app)
-    await crew.ok("build-1", "agent.declare_effect", key="send-quote", what="Email the quote.")
-    later = await crew.ok(
+    squad = await Squad.start(app)
+    await squad.ok("build-1", "agent.declare_effect", key="send-quote", what="Email the quote.")
+    later = await squad.ok(
         "build-1", "agent.finish_effect", key="send-quote", fired=True, outcome="Sent it."
     )
     assert (later["state"], later["fired"]) == ("finished", True)
 
     watch = {"kind": "command", "check": "test -f up.txt", "interval_minutes": 15}
-    launch = await crew.ok(
+    launch = await squad.ok(
         "build-1", "agent.declare_effect", key="site-live", what="Publish the landing page.",
         launch=True, watch=watch,
     )  # fmt: skip
-    ref = {"project_id": crew.project, "effect_id": launch["id"]}
-    stuck = await app.call("launches.retire", crew.owner, **ref)
+    ref = {"project_id": squad.project, "effect_id": launch["id"]}
+    stuck = await app.call("launches.retire", squad.owner, **ref)
     assert_refused(stuck, rule="7.16-effect")
-    other = await crew.call(
+    other = await squad.call(
         "build-2", "agent.finish_effect", key="site-live", fired=True, outcome="I say it is up."
     )
     assert_refused(other, rule="WRK-16", code="not_your_side_effect")
-    by_agent = await crew.call("build-1", "launches.close_unknown", **ref)
+    by_agent = await squad.call("build-1", "launches.close_unknown", **ref)
     assert by_agent.status_code in (401, 403, 404)
 
-    closed = await app.ok("launches.close_unknown", crew.owner, **ref)
+    closed = await app.ok("launches.close_unknown", squad.owner, **ref)
     assert (closed["state"], closed["fired"], closed["watch"]) == ("finished", None, "passing")
     assert "unknown" in closed["outcome"]
-    assert_refused(await app.call("launches.close_unknown", crew.owner, **ref), rule="7.16-effect")
-    retired = await app.ok("launches.retire", crew.owner, **ref)
+    assert_refused(await app.call("launches.close_unknown", squad.owner, **ref), rule="7.16-effect")
+    retired = await app.ok("launches.retire", squad.owner, **ref)
     assert (retired["state"], retired["watch"]) == ("retired", "ended")
     changes = [
         e["after"]["state"]
-        for e in await app.events(crew.owner, crew.project)
+        for e in await app.events(squad.owner, squad.project)
         if e["type"] == "side_effect.state_changed" and e["subject_id"] == str(launch["id"])
     ]
     assert changes == ["declared", "finished", "retired"]

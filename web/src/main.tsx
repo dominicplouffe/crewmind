@@ -15,7 +15,7 @@ import "./styles/founder.css";
 import "./styles/shell.css";
 import "./styles/home.css";
 import "./styles/overview.css";
-import "./styles/crew.css";
+import "./styles/squad.css";
 import "./styles/deliverables.css";
 import "./styles/settings.css";
 import "./styles/connections.css";

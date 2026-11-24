@@ -1,6 +1,6 @@
 """The phase 2 chat loop as real processes (EXE-12, MSG-11, CHAT-2, LLM-8, IF-6.1).
 
-`crewmind up --slim` with sandboxes as separate processes and the mock provider: a person
+`squad up --slim` with sandboxes as separate processes and the mock provider: a person
 sends a chat message with the real command, and the CEO's reply comes back from an agent
 process that reached the server only through the agent API and the model gateway.
 """
@@ -39,7 +39,7 @@ def wait_for(read: Callable[[], Items], wanted: Callable[[Items], Any], what: st
 def warm_processes(server_pid: int) -> list[str]:
     """The warm agent processes the server has started."""
     found = subprocess.run(
-        ["pgrep", "-P", str(server_pid), "-f", "crewmind.runner.agent --warm"],
+        ["pgrep", "-P", str(server_pid), "-f", "nightsquad.runner.agent --warm"],
         capture_output=True,
         text=True,
         check=False,
@@ -65,8 +65,8 @@ def test_EXE_12_a_chat_message_is_answered_by_an_agent_in_its_own_process(
     scripts.mkdir()
     (scripts / "CEO.chat.json").write_text(json.dumps([{"text": REPLY}]))
     install = Install(tmp_path / "data")
-    install.env["CREWMIND_SANDBOX_MODE"] = "unisolated"
-    install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
+    install.env["NIGHTSQUAD_SANDBOX_MODE"] = "unisolated"
+    install.env["NIGHTSQUAD_MOCK_SCRIPT_DIR"] = str(scripts)
     try:
         setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
         install.start("--slim")

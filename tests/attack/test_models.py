@@ -10,11 +10,11 @@ import pytest
 from litellm.exceptions import AuthenticationError, RateLimitError
 from sqlalchemy import select
 
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway import outbound
-from crewmind.gateway.protocol import CompletionResponse, TokenUsage
-from crewmind.runner.sandbox import SandboxSpec, sandbox_environment
-from crewmind.storage.models import Base, ModelCredential
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway import outbound
+from nightsquad.gateway.protocol import CompletionResponse, TokenUsage
+from nightsquad.runner.sandbox import SandboxSpec, sandbox_environment
+from nightsquad.storage.models import Base, ModelCredential
 from tests.attack.harness import assert_refused
 from tests.attack.test_budget import complete, ledger
 from tests.conftest import FakeClock
@@ -133,7 +133,13 @@ async def test_P3_no_sandbox_holds_a_provider_key(app: App, provider: FakeProvid
         run.run_id, project, run.token, "http://127.0.0.1:8420", app.runtime.config.data_dir
     )
     environment = sandbox_environment(spec)
-    assert set(environment) == {"CREWMIND_RUN_TOKEN", "CREWMIND_AGENT_API", "PATH", "HOME", "LANG"}
+    assert set(environment) == {
+        "NIGHTSQUAD_RUN_TOKEN",
+        "NIGHTSQUAD_AGENT_API",
+        "PATH",
+        "HOME",
+        "LANG",
+    }
     assert KEY not in json.dumps(environment)
     seen: list[str] = []
     for name in ("agent.whoami", "agent.context", "agent.list_roles", "agent.read_messages"):
@@ -155,8 +161,8 @@ async def test_LLM_6_a_seat_with_no_way_to_run_is_refused_before_any_token(
     not run. Started without it, those seats are held with the reason and nothing is spent;
     once a credential pays, they work. A hidden credential makes the seat note say so. One
     resolver serves chat and work."""
-    from crewmind.domain.execution import runs
-    from crewmind.domain.models.service import SeatResolver
+    from nightsquad.domain.execution import runs
+    from nightsquad.domain.models.service import SeatResolver
 
     monkeypatch.setattr(
         runs,
@@ -201,7 +207,7 @@ async def test_LLM_3_the_quality_dial_sets_class_and_effort_by_seat_kind(
     owner = await app.person("owner@example.com")
     project = await paid_project(app, owner)
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=2
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=2
     )
 
     async def view(quality: str) -> dict[str, tuple[str, str, str | None]]:
@@ -215,13 +221,13 @@ async def test_LLM_3_the_quality_dial_sets_class_and_effort_by_seat_kind(
     assert await view("fast") == {
         "CEO": ("balanced", "medium", "claude-sonnet-5-5"),
         "Reviewer": ("balanced", "medium", "claude-sonnet-5-5"),
-        "crew-1": ("balanced", "medium", "claude-sonnet-5-5"),
-        "crew-2": ("fast", "low", "claude-haiku-5-5"),
+        "squad-1": ("balanced", "medium", "claude-sonnet-5-5"),
+        "squad-2": ("fast", "low", "claude-haiku-5-5"),
     }
-    assert (await view("balanced"))["crew-2"] == ("balanced", "medium", "claude-sonnet-5-5")
+    assert (await view("balanced"))["squad-2"] == ("balanced", "medium", "claude-sonnet-5-5")
     best = await view("best")
     assert best["CEO"] == ("frontier", "max", "claude-opus-5-5")
-    assert best["crew-2"] == ("frontier", "high", "claude-opus-5-5")
+    assert best["squad-2"] == ("frontier", "high", "claude-opus-5-5")
 
     provider.models = ["claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5", "embed-9"]
     refreshed = await app.ok("credentials.refresh_lineup", owner, name="anthropic-main")
@@ -243,26 +249,27 @@ async def test_LLM_3_the_quality_dial_sets_class_and_effort_by_seat_kind(
         "models.set_seat",
         owner,
         project_id=project,
-        seat="crew-2",
+        seat="squad-2",
         credential="small",
         effort="low",
     )
     shown = await app.ok("models.show", owner, project_id=project)
-    crew = next(s for s in shown["seats"] if s["seat"] == "crew-2")
-    assert (crew["paid_by"], crew["model"], crew["effort"]) == (
+    squad = next(s for s in shown["seats"] if s["seat"] == "squad-2")
+    assert (squad["paid_by"], squad["model"], squad["effort"]) == (
         "small",
         "deepseek-reasoner",
         "low",
     )
-    await app.ok("models.set_seat", owner, project_id=project, seat="crew-2", model_class="fast")
-    crew = next(
+    await app.ok("models.set_seat", owner, project_id=project, seat="squad-2", model_class="fast")
+    squad = next(
         s
         for s in (await app.ok("models.show", owner, project_id=project))["seats"]
-        if s["seat"] == "crew-2"
+        if s["seat"] == "squad-2"
     )
-    assert crew["model"] == "deepseek-chat"
+    assert squad["model"] == "deepseek-chat"
     assert (
-        crew["note"] == "Fast class asked for, running on a balanced model: no fast model on small."
+        squad["note"]
+        == "Fast class asked for, running on a balanced model: no fast model on small."
     )
 
 
@@ -276,9 +283,9 @@ async def test_LLM_11_the_circuit_breaker_opens_cools_off_and_uses_the_fallback(
     owner = await app.person("owner@example.com")
     project = await paid_project(app, owner)
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=3
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=3
     )
-    runs_ = [await live_run(app, project, seat=seat) for seat in ("CEO", "crew-1", "crew-2")]
+    runs_ = [await live_run(app, project, seat=seat) for seat in ("CEO", "squad-1", "squad-2")]
     provider.error = RateLimitError("slow down", "anthropic", "claude")
     for run in runs_:
         assert (await complete(app, run.token))[0] == 502
@@ -299,7 +306,7 @@ async def test_LLM_11_the_circuit_breaker_opens_cools_off_and_uses_the_fallback(
     assert "keeps failing. It is rested for 5 minutes" in history[-1]["body"]
     waiting = await app.ok("models.show", owner, project_id=project)
     assert waiting["seats"][0]["note"] == "Waiting: the credential anthropic-main is cooling off."
-    await wake(app, project, seat="crew-3")
+    await wake(app, project, seat="squad-3")
     await app.dispatcher.tick()
     assert await app.runner().step() == 0
 
@@ -355,17 +362,17 @@ async def test_LLM_12_leasing_looks_past_a_provider_at_its_ceiling(
     owner = await app.person("owner@example.com")
     project = await paid_project(app, owner, "anthropic-main", **{"run.concurrency": 8})
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=3
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=3
     )
     await app.ok("credentials.add", owner, name="other", provider="deepseek", key=KEY)
-    await app.ok("models.set_seat", owner, project_id=project, seat="crew-3", credential="other")
+    await app.ok("models.set_seat", owner, project_id=project, seat="squad-3", credential="other")
     member = await app.call("models.set_ceiling", owner, provider="anthropic", max_concurrent=1)
     assert member.status_code == 403
     await app.ok("models.set_ceiling", await app.admin(), provider="anthropic", max_concurrent=2)
-    for seat in ("CEO", "crew-1", "crew-2", "crew-3"):
+    for seat in ("CEO", "squad-1", "squad-2", "squad-3"):
         await wake(app, project, seat=seat)
     await app.dispatcher.tick()
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         leases = await runs.lease(session, app.runtime.settings, "r", 10, app.runtime.clock())
@@ -385,7 +392,7 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
     """INT-8, P4, INV-6: a role without the web cannot search; with no service the search
     is refused; searches are counted in the ledger up to `search.max_per_day`; the search
     key is used only by the server; results are labelled as untrusted data."""
-    from crewmind.storage.models import Role
+    from nightsquad.storage.models import Role
 
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"search.max_per_day": 2})
@@ -436,7 +443,7 @@ async def test_INT_8_web_search_needs_a_grant_a_service_and_stays_within_the_lim
 async def test_EXE_6_a_run_keeps_what_it_was_leased_with(app: App, provider: FakeProvider) -> None:
     """EXE-6: at lease a run pins its model, effort, provider, credential, harness and token
     cap. Changing the seat afterwards changes later runs, not this one."""
-    from crewmind.storage.models import Run
+    from nightsquad.storage.models import Run
 
     owner = await app.person("owner@example.com")
     project = await paid_project(app, owner)

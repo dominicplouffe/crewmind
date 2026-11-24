@@ -1,5 +1,5 @@
 """The phase 7.B exit demo, end to end through the public operations (docs/phases/
-phase-7b-plan.md): the Founder names what the crew needs; start says what is missing; the
+phase-7b-plan.md): the Founder names what the squad needs; start says what is missing; the
 chairman adds a secret sent for the agent, a variable and one MCP server of each kind; the
 writer posts with plain curl and never holds the password; tools are used and asked for;
 no value is anywhere; a replaced password is used at once; a revoked sign-in raises one
@@ -19,14 +19,14 @@ import httpx
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.connections.agent_operations import EGRESS
-from crewmind.domain.connections.mcp_sign_in import CALLBACK_PATH
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway.protocol import CompletionRequest
-from crewmind.runner.egress.proxy import EgressProxy
-from crewmind.runner.egress.service import build_proxy
-from crewmind.storage.models import Alarm
-from crewmind.surfaces.api.app import SESSION_COOKIE
+from nightsquad.domain.connections.agent_operations import EGRESS
+from nightsquad.domain.connections.mcp_sign_in import CALLBACK_PATH
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway.protocol import CompletionRequest
+from nightsquad.runner.egress.proxy import EgressProxy
+from nightsquad.runner.egress.service import build_proxy
+from nightsquad.storage.models import Alarm
+from nightsquad.surfaces.api.app import SESSION_COOKIE
 from tests.attack import mcp_support
 from tests.attack.egress_support import Site, trusting
 from tests.attack.harness import assert_refused
@@ -72,7 +72,7 @@ async def proxy(app: App, site: Site) -> AsyncIterator[int]:
 
 
 async def come_back(app: App, actor: Actor, address: str, authority: Authority) -> None:
-    """The person agrees at the provider and the browser returns to crewmind."""
+    """The person agrees at the provider and the browser returns to nightsquad."""
     query = {key: values[0] for key, values in parse_qs(urlsplit(address).query).items()}
     code = authority.code_for(query)
     async with httpx.AsyncClient(
@@ -110,7 +110,7 @@ async def test_phase_7b_exit_demo(
 ) -> None:
     """CON-1 to CON-16, FND-9, FND-13, PRJ-1, EXE-13, EXE-14, INT-4, INV-6, INV-21: the
     exit demo, steps 1 to 6."""
-    caplog.set_level(logging.DEBUG, logger="crewmind")
+    caplog.set_level(logging.DEBUG, logger="nightsquad")
     sent: list[CompletionRequest] = []
     complete = app.runtime.mock.complete
 
@@ -123,7 +123,7 @@ async def test_phase_7b_exit_demo(
     await credential(app, owner, "main")
     mcp_support.created.clear()
 
-    # 1. The Founder drafts the crew and names what it needs; nothing is had yet.
+    # 1. The Founder drafts the squad and names what it needs; nothing is had yet.
     teams = [*SPEC["teams"], {"name": "Desk", "role": WRITER_ROLE, "members": ["Wren"]}]
     grants = [
         {"name": "wordpress", "roles": [WRITER_ROLE]},
@@ -200,7 +200,7 @@ async def test_phase_7b_exit_demo(
     shown = await app.ok("connections.show", owner, connection="docs-oauth")
     assert shown["item"]["mcp"]["state"] == "active"
 
-    # 4. The project starts; the writer posts through crewmind without holding the password.
+    # 4. The project starts; the writer posts through nightsquad without holding the password.
     await app.ok("projects.start", owner, project_id=project)
     await quiet_start(app, project)
     writer = next(name for name in await seats(app, project) if name == "Wren")
@@ -239,7 +239,7 @@ async def test_phase_7b_exit_demo(
         alarms = list(await session.scalars(select(Alarm.body)))
     assert len([body for body in alarms if "sign in again" in body]) == 1
 
-    # 5. No value is anywhere crewmind keeps or says anything.
+    # 5. No value is anywhere nightsquad keeps or says anything.
     values = {
         "password": PASSWORD, "replaced": REPLACED, "basic": f"dom:{PASSWORD}",
         "basic-replaced": f"dom:{REPLACED}", "bearer": BEARER, "header": HEADER, "notes": NOTES,

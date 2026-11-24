@@ -21,7 +21,7 @@ QUICK_SECONDS_MOST = 120  # FND-12, section 1.3: quick mode in under 2 minutes
 
 def draft(install: Install, *arguments: str, typed: str = "") -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, "-m", "crewmind", "draft", *arguments],
+        [sys.executable, "-m", "nightsquad", "draft", *arguments],
         env=install.env,
         input=typed,
         capture_output=True,
@@ -34,7 +34,7 @@ def draft(install: Install, *arguments: str, typed: str = "") -> subprocess.Comp
 def test_IF_4_6_a_project_is_drafted_in_the_terminal_and_quick_mode_takes_under_two_minutes(
     tmp_path: Path,
 ) -> None:
-    """Section 13 (Founder), IF-4.6, IF-4.7, FND-1, FND-12, FND-13: `crewmind draft` asks
+    """Section 13 (Founder), IF-4.6, IF-4.7, FND-1, FND-12, FND-13: `squad draft` asks
     each question with its recommended answer, Enter accepts it, the rest are accepted on
     request, the draft is rehearsed for real, and the chairman creates and starts the
     project from the terminal. Quick mode then creates and starts a second project in
@@ -54,9 +54,9 @@ def test_IF_4_6_a_project_is_drafted_in_the_terminal_and_quick_mode_takes_under_
         json.dumps([{"text": json.dumps(grades("reference-goal"))}])
     )
     install = Install(tmp_path / "data")
-    install.env["CREWMIND_SANDBOX_MODE"] = "unisolated"
-    install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
-    install.env["CREWMIND_MEMORY_ENGINE"] = "in-process"
+    install.env["NIGHTSQUAD_SANDBOX_MODE"] = "unisolated"
+    install.env["NIGHTSQUAD_MOCK_SCRIPT_DIR"] = str(scripts)
+    install.env["NIGHTSQUAD_MEMORY_ENGINE"] = "in-process"
     try:
         setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
         install.start("--slim")

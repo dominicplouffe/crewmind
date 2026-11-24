@@ -10,9 +10,9 @@ export function kindWord(kind: string): string {
 export const connectionWords = {
   sectionTitle: "Connections",
   listTitle: { person: "Your connections", install: "The install's connections" },
-  sectionHelp: "Secrets and variables your crews use to reach the outside world.",
+  sectionHelp: "Secrets and variables your squads use to reach the outside world.",
   intro:
-    "Your crew reaches the outside world through connections: a secret crewmind sends for you, a secret given to the agent, a plain variable, or an MCP server's tools.",
+    "Your squad reaches the outside world through connections: a secret nightsquad sends for you, a secret given to the agent, a plain variable, or an MCP server's tools.",
   scopes: { person: "Yours", install: "Whole install", project: "This project" },
   scopeHelp: {
     person: "Only you can see these. Attach them to any project you chair.",
@@ -23,7 +23,7 @@ export const connectionWords = {
   presets: {
     label: "Start from a known server",
     none: "None: fill it in myself",
-    help: "Choosing one fills in the address or command and how crewmind signs in. You test it before saving.",
+    help: "Choosing one fills in the address or command and how nightsquad signs in. You test it before saving.",
     secret: (what: string): string => `You need: ${what}`,
     variable: (env: string, what: string): string => `${env}: ${what}`,
     docs: (title: string): string => `${title}'s own instructions`,
@@ -31,7 +31,7 @@ export const connectionWords = {
   },
   command: {
     warning:
-      "A command server runs code from its publisher. crewmind runs it in its own container, with only the variables you give it, never with your workspace or other secrets.",
+      "A command server runs code from its publisher. nightsquad runs it in its own container, with only the variables you give it, never with your workspace or other secrets.",
     command: "Command",
     commandHelp: "The command that starts the server, as its instructions give it.",
     environment: "Environment variables",
@@ -44,7 +44,7 @@ export const connectionWords = {
     noSources: "You have no secrets or variables yet. Add one first, then come back.",
     imageLegend: "Container image",
     image: "Image",
-    imageHelp: "By default, crewmind's tool image, with Node, Python and uv.",
+    imageHelp: "By default, nightsquad's tool image, with Node, Python and uv.",
     testAndSave: "Test and save",
     testingAndSaving: "Starting it and reading its tools…",
   },
@@ -53,11 +53,11 @@ export const connectionWords = {
     whereLegend: "Where it runs",
     where: {
       remote: { title: "Remote", help: "A server at an https address." },
-      command: { title: "Command", help: "A server crewmind starts, such as npx or uvx." },
+      command: { title: "Command", help: "A server nightsquad starts, such as npx or uvx." },
     } as Record<string, { title: string; help: string }>,
     url: "Address",
     urlHelp: "The server's https address, such as https://mcp.example.com/mcp.",
-    authLegend: "How crewmind signs in",
+    authLegend: "How nightsquad signs in",
     auth: {
       none: { title: "No sign-in", help: "A public server." },
       bearer: { title: "Bearer token", help: "A token the provider gave you." },
@@ -66,7 +66,7 @@ export const connectionWords = {
     } as Record<string, { title: string; help: string }>,
     token: "Token",
     headerValue: "Header value",
-    oauthNote: "Signing in lets crewmind act as your account at this provider when agents use this server.",
+    oauthNote: "Signing in lets nightsquad act as your account at this provider when agents use this server.",
     clientLegend: "If the provider asks for a client id",
     clientId: "Client id",
     clientSecret: "Client secret (optional)",
@@ -98,7 +98,7 @@ export const connectionWords = {
   },
   empty: {
     title: "No connections yet",
-    secret: { title: "A secret sent for you", help: "A key or password crewmind adds to requests to the sites you name. Agents never see it." },
+    secret: { title: "A secret sent for you", help: "A key or password nightsquad adds to requests to the sites you name. Agents never see it." },
     given: { title: "A secret given to the agent", help: "For keys a program reads itself. Hidden in everything the agent writes." },
     variable: { title: "A variable", help: "A plain setting, such as a region or a site address, that agents can read." },
     mcp: { title: "An MCP server", help: "Tools from another service, such as GitHub or a database, offered to agents you choose." },
@@ -130,13 +130,13 @@ export const connectionWords = {
     nameHelp: "A short name, such as wordpress. Letters, digits, - _ and .",
     description: "What is it for?",
     descriptionHelp: "One line. Agents read it to know when to use it.",
-    useLegend: "How should crewmind use it?",
+    useLegend: "How should nightsquad use it?",
     sendTitle: "Send it for me",
     sendHelp: "Recommended. Added to requests to the sites you choose; agents never see it.",
     giveTitle: "Give it to the agent",
     giveHelp: "For keys a program reads itself. Hidden in what the agent writes.",
     giveCaveat:
-      "The agent holds the value while it works. crewmind hides it in everything stored or sent to a model, but cannot stop the agent sending it somewhere itself.",
+      "The agent holds the value while it works. nightsquad hides it in everything stored or sent to a model, but cannot stop the agent sending it somewhere itself.",
     sites: "Sites",
     sitesHelp: "The exact host names, separated by commas, such as example.com, api.example.com.",
     authLegend: "How the site expects it",
@@ -197,7 +197,7 @@ export const connectionWords = {
   importProblems: (count: number): string => `${plural(count, "line needs", "lines need")} fixing or skipping.`,
   project: {
     missingTitle: "Missing",
-    missingHelp: "The crew needs these. The agents named wait until they are added.",
+    missingHelp: "The squad needs these. The agents named wait until they are added.",
     waits: (names: string[]): string => `Waits: ${names.join(", ")}`,
     waived: "Started without it",
     addIt: (kind: string): string => `Add ${kind}`,

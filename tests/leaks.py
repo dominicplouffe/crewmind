@@ -1,4 +1,4 @@
-"""Looking for secret values everywhere crewmind keeps or says anything (INV-6, CON-8,
+"""Looking for secret values everywhere nightsquad keeps or says anything (INV-6, CON-8,
 CON-16): every row of every table, every file of the data directory, and any other text a
 test collected (log lines, model requests, operation answers). A value is looked for raw,
 in base64 (standard and URL-safe, with and without padding) and URL-encoded."""
@@ -13,7 +13,7 @@ from urllib.parse import quote
 
 from sqlalchemy import select
 
-from crewmind.storage.models import Base
+from nightsquad.storage.models import Base
 from tests.support import App
 
 

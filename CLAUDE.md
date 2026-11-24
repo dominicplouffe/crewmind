@@ -1,6 +1,6 @@
-# crewmind: instructions for Claude Code
+# nightsquad: instructions for Claude Code
 
-crewmind runs a team of AI agents like a company (chairman, CEO, teams) under rules the agents cannot talk their way out of. This repository is a rebuild from an empty start. The specification in `docs/spec/` is the source of truth.
+nightsquad runs a team of AI agents like a company (chairman, CEO, teams) under rules the agents cannot talk their way out of. This repository is a rebuild from an empty start. The specification in `docs/spec/` is the source of truth.
 
 ## Before any work
 
@@ -21,7 +21,7 @@ crewmind runs a team of AI agents like a company (chairman, CEO, teams) under ru
 
 ## Stack (NFR-24)
 
-- Python 3.12+, managed with `uv`. FastAPI + Pydantic v2, SQLAlchemy 2 + Alembic, Typer (CLI), Textual (`crewmind chat`), the official MCP Python SDK, LiteLLM (inside the model gateway), Mem0 (recall memory), Docker SDK, Playwright, OpenTelemetry SDK.
+- Python 3.12+, managed with `uv`. FastAPI + Pydantic v2, SQLAlchemy 2 + Alembic, Typer (CLI), Textual (`squad chat`), the official MCP Python SDK, LiteLLM (inside the model gateway), Mem0 (recall memory), Docker SDK, Playwright, OpenTelemetry SDK.
 - Background work: asyncio workers that lease from the database. No Redis and no broker.
 - Databases: Postgres (with pgvector) and SQLite. **Both from the first commit.** Domain logic never depends on one database's features except behind the storage adapter.
 - Web app: TypeScript + React in `web/`, with its API client generated from the OpenAPI schema. The only other non-Python code is the bash scripts in `deploy/` that run the Docker install (ADR-0009). They hold no product rules: they call the server's own operations.
@@ -30,7 +30,7 @@ crewmind runs a team of AI agents like a company (chairman, CEO, teams) under ru
 ## Layout
 
 ```
-src/crewmind/
+src/nightsquad/
   catalog/            operation registry, schemas, authority, reversibility, the one call path
   domain/<module>/    one module per domain: rules, state machines, commands, read models
                       (projects, settings, budget, planning, work, artifacts, conversation,
@@ -48,7 +48,7 @@ web/                  TypeScript/React app
 deploy/               Dockerfiles, Compose file and shell scripts for a full server
 tests/
   unit/  contract/  attack/  chaos/  scenarios/  acceptance/
-content/              imported v1 roles, crews, doctrine, goal grammar
+content/              imported v1 roles, squads, doctrine, goal grammar
 acceptance/           reference specs used by the acceptance suite
 ```
 
@@ -57,7 +57,7 @@ Keep files small and focused. A file growing past about 600 lines is a sign it h
 ## Tests
 
 - `uv run pytest`: default suite. It never calls a paid model or the network; use the mock harness.
-- Tests that use the real memory engine need the embedding model on disk: `uv run python -m crewmind.domain.memory.fetch_model` once. Without it they skip and say so. Every other test uses the in-process memory engine.
+- Tests that use the real memory engine need the embedding model on disk: `uv run python -m nightsquad.domain.memory.fetch_model` once. Without it they skip and say so. Every other test uses the in-process memory engine.
 - `uv run pytest --db=sqlite` and `uv run pytest --db=postgres`: both must pass. CI runs both.
 - **Every enforced rule gets an attack test** in `tests/attack/` that tries to break it through the public API the way an agent would (P10).
 - **State machines get table-driven tests plus Hypothesis property tests.**

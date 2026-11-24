@@ -1,6 +1,6 @@
 ## 9. Interfaces: chat, API, CLI, MCP, Slack and agent API
 
-crewmind must be fully operable from any of its surfaces. The HTTP API is the product's real interface. The app (chat and panels), the CLI, the MCP server and the Slack bridge are all clients of one shared set of operations. Anything a person can do in the app they MUST be able to do from the API and the CLI, and from MCP within the client's scope (exceptions in IF-5.6).
+nightsquad must be fully operable from any of its surfaces. The HTTP API is the product's real interface. The app (chat and panels), the CLI, the MCP server and the Slack bridge are all clients of one shared set of operations. Anything a person can do in the app they MUST be able to do from the API and the CLI, and from MCP within the client's scope (exceptions in IF-5.6).
 
 ### 9.1 One operation catalog, many surfaces
 
@@ -40,9 +40,9 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
 - **IF-3.8** Every read view the app shows MUST be a documented API read, so a third-party client could rebuild the app. That covers chat, overview, plan, board, org, runs and traces, evidence, deliverables and artifacts, memory, ledger, brief, agenda and record.
 - **IF-3.9** Uploads use resumable multipart transfer up to `upload.max_size`.
 
-### 9.4 CLI (`crewmind`)
+### 9.4 CLI (`squad`)
 
-- **IF-4.1** One command, `crewmind`, talking to the server over the HTTP API. It is configured by `CREWMIND_API` (the server address) and either `crewmind login` (stores a personal token) or `CREWMIND_TOKEN`.
+- **IF-4.1** One command, `squad` (also installed as `nightsquad`), talking to the server over the HTTP API. It is configured by `NIGHTSQUAD_API` (the server address) and either `squad login` (stores a personal token) or `NIGHTSQUAD_TOKEN`.
 - **IF-4.2** A small, explicitly marked set of host-local commands may touch storage directly, because they must work when the server is down:
   - install (NFR-2);
   - `up`, which starts the services and migrates on start (NFR-2, NFR-23);
@@ -62,7 +62,7 @@ crewmind must be fully operable from any of its surfaces. The HTTP API is the pr
   - who pays is never pre-selected;
   - the conversation lives on the server, so it can be resumed elsewhere.
 - **IF-4.7** After creating a project, the CLI asks for any missing model credential and each open need of the roster: secrets by hidden input, variables, and MCP servers by address (skippable; CON-5). It then prints the remaining setup checklist with links, and offers to start the project only when nothing blocks it.
-- **IF-4.8** `crewmind chat [project]` opens a full-screen terminal chat with the same capabilities as the app chat:
+- **IF-4.8** `squad chat [project]` opens a full-screen terminal chat with the same capabilities as the app chat:
   - streaming replies;
   - slash commands and `@` mentions;
   - file attachment by path or drag-and-drop where the terminal allows;
@@ -75,7 +75,7 @@ Required command groups (names are suggestions; coverage is required):
 | --- | --- |
 | Install and run | Guided setup, start all services, health check with fixes (`doctor`), update, backup, restore, rotate master key, open the app |
 | Sign in | Login, logout, whoami |
-| Chat | `crewmind chat`; send a message or a slash command non-interactively; upload a file |
+| Chat | `squad chat`; send a message or a slash command non-interactively; upload a file |
 | Projects | Create by conversation, `--quick`, `--from-file`; rehearse a spec; list; status; start, hold, resume, stop, reopen, complete, delete; set budget and quality; amend a setting; export and clone |
 | What needs you | An interactive one-item-at-a-time desk; the daily brief across projects; decide items; acknowledge flags; extend a bet; unfreeze a thread; audit samples |
 | Look inside | Overview, agenda, plan, board, org, activity, runs and a run's trace, channels and tail, deliverables and artifacts, memory, evidence, full project snapshot as JSON |
@@ -84,12 +84,12 @@ Required command groups (names are suggestions; coverage is required):
 | People | Invite a user (prints a one-time setup link), list, promote or demote, deactivate or reactivate; project members add, change role, remove; hand on the chair; link a Slack identity |
 | MCP clients | Mint a token with scopes, list, revoke |
 | Integrations | Connect Slack (install) and pick a project's channel; connect mail servers and outbound mail (install); give a project a managed or manual mailbox; manage agent addresses and the email allowlist; store project secrets; webhooks; data sources; A2A endpoints; OpenTelemetry export |
-| Libraries | Load and export roles and crews; add, review and approve skills |
+| Libraries | Load and export roles and squads; add, review and approve skills |
 | Ambient | A one-line status-bar signal (machine formats available) |
 
 ### 9.5 MCP server
 
-crewmind is itself an MCP server, so a person can run it from any MCP client.
+nightsquad is itself an MCP server, so a person can run it from any MCP client.
 
 - **IF-5.1 Transport and auth.**
   - Streamable HTTP at one endpoint.
@@ -103,7 +103,7 @@ crewmind is itself an MCP server, so a person can run it from any MCP client.
 | --- | --- |
 | read | Whoami; list projects; the desk; overview; plan; budget and receipts; board; deliverables and artifacts; evidence; org; channels and chat history; memory; the record |
 | steer | Chat with any agent; slash commands (pin, decide, fix, example, grill, do, hold, resume); upload files; decide items; acknowledge flags; lifecycle (start, hold, resume, stop, reopen, complete); edit memory |
-| create | Search roles and crews; read a source URL; grade a goal; rehearse a spec; create a project from a spec; quick project and its status; clone a project |
+| create | Search roles and squads; read a source URL; grade a goal; rehearse a spec; create a project from a spec; quick project and its status; clone a project |
 | configure | Roster and hiring; skills; budget and quality; settings; data sources (minus human-only verbs); credential names and grants |
 
 - **IF-5.3 Two-phase confirmation.** An irreversible write cannot happen in one call. The first call returns a preview and a confirm token bound to a hash of the tool and its exact arguments; the second call spends it. The token is single-use with a 5-minute life.

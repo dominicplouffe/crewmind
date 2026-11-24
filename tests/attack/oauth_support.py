@@ -16,7 +16,7 @@ from urllib.parse import parse_qs
 import httpx2
 from mcp.server.transport_security import TransportSecuritySettings
 
-from crewmind.domain.connections import mcp_client
+from nightsquad.domain.connections import mcp_client
 from tests.attack.mcp_support import URL, Receive, Scope, Send, build_server
 
 ISSUER = "https://auth.test"

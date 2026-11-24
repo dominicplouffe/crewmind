@@ -6,7 +6,7 @@ from typing import Any
 
 from tests.attack.test_mcp import client_for, mcp_caller
 from tests.attack.test_planning import CHAIRMAN_HOLDS, plan, propose
-from tests.attack.work_support import Crew
+from tests.attack.work_support import Squad
 from tests.support import App
 
 
@@ -15,9 +15,9 @@ async def test_IF_5_2_a_client_with_steer_and_create_runs_a_project(app: App) ->
     scopes creates a project, starts it, asks the CEO a question and gets the answer,
     decides a waiting item, and stops a project only on the second call. Each write is
     recorded as the person acting through the client."""
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
-    wanted = await propose(crew)
-    owner = crew.owner
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS)
+    wanted = await propose(squad)
+    owner = squad.owner
     minted = await app.ok(
         "mcp_clients.mint", owner, client_name="Desk client", scopes=["steer", "create"]
     )
@@ -29,13 +29,13 @@ async def test_IF_5_2_a_client_with_steer_and_create_runs_a_project(app: App) ->
             assert "code" not in result.structured_content, result.structured_content
             return result.structured_content
 
-        waiting = (await call("items_list", project_id=crew.project))["items"]
+        waiting = (await call("items_list", project_id=squad.project))["items"]
         item = next(entry for entry in waiting if entry["kind"] == "proposed scope")
         decided = await call(
-            "items_decide", project_id=crew.project, item_id=item["id"], action="accept"
+            "items_decide", project_id=squad.project, item_id=item["id"], action="accept"
         )
         assert (decided["state"], decided["outcome"]) == ("decided", "accept")
-        assert (await plan(crew))[wanted]["state"] == "accepted"
+        assert (await plan(squad))[wanted]["state"] == "accepted"
 
         created = await call(
             "projects_create", name="Second site", type="deliver", goal="Publish a second site."
@@ -62,7 +62,7 @@ async def test_IF_5_2_a_client_with_steer_and_create_runs_a_project(app: App) ->
     assert {"project.created", "project.state_changed", "message.posted"} <= by_client
     decision = [
         event
-        for event in await app.events(owner, crew.project)
+        for event in await app.events(owner, squad.project)
         if event["type"] == "item.state_changed" and event["after"]["state"] == "decided"
     ]
     assert [(e["actor"], e["via"]) for e in decision] == [(owner.person_id, "mcp:Desk client")]

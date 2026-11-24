@@ -1,0 +1,21 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "an-overnight-squad",
+  "name": "An overnight squad",
+  "outcome": "Work done while you sleep, waiting for you in the morning.",
+  "ceo_role": "ceo",
+  "domains": [
+    "general"
+  ],
+  "teams": [
+    {
+      "name": "Squad",
+      "role": "engineer",
+      "members": [
+        "Mika",
+        "Dev"
+      ]
+    }
+  ],
+  "estimate": null
+}

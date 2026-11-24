@@ -1,5 +1,5 @@
 """The speed acceptance criterion (section 13, SPD-1, SPD-2, SPD-3), measured in real time
-on a real server with a scripted crew in real processes."""
+on a real server with a scripted squad in real processes."""
 
 from __future__ import annotations
 
@@ -36,15 +36,15 @@ def test_SPD_1_the_deliver_reference_project_finishes_at_the_speed_of_its_longes
     project is all the chairman does."""
     scripts = tmp_path / "scripts"
     scripts.mkdir()
-    crew: dict[str, Any] = json.loads((SCRIPTS / "deliver-reference.json").read_text())
-    chain_runs = int(crew.pop("chain_runs"))
-    crew.pop("about")
-    for key, turns in crew.items():
+    squad: dict[str, Any] = json.loads((SCRIPTS / "deliver-reference.json").read_text())
+    chain_runs = int(squad.pop("chain_runs"))
+    squad.pop("about")
+    for key, turns in squad.items():
         (scripts / f"{key.replace('/', '.')}.json").write_text(json.dumps(turns))
     install = Install(tmp_path / "data")
-    install.env["CREWMIND_SANDBOX_MODE"] = "unisolated"
-    install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
-    install.env["CREWMIND_MEMORY_ENGINE"] = "in-process"
+    install.env["NIGHTSQUAD_SANDBOX_MODE"] = "unisolated"
+    install.env["NIGHTSQUAD_MOCK_SCRIPT_DIR"] = str(scripts)
+    install.env["NIGHTSQUAD_MEMORY_ENGINE"] = "in-process"
     try:
         setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
         install.start("--slim")

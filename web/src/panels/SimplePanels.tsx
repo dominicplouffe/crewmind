@@ -16,7 +16,7 @@ import { RelativeTime } from "../chat/RelativeTime";
 import { groupByDay } from "../desk/logic";
 import { Empty, Loading } from "./kit";
 import { listeningLine } from "./memory/PinnedTab";
-import { roleLabel } from "../crew/names";
+import { roleLabel } from "../squad/names";
 
 interface Props {
   projectId: string;
@@ -45,7 +45,7 @@ function percentOf(part: number, whole: number): string {
 }
 const dayFormat = new Intl.DateTimeFormat(undefined, { weekday: "long", day: "numeric", month: "long" });
 
-/** Who did it: you, someone else in the project (a person or an agent, by id), or crewmind itself (a job). */
+/** Who did it: you, someone else in the project (a person or an agent, by id), or nightsquad itself (a job). */
 function Actor({ actor, me }: { actor: string; me: { id: string; name: string } | null }): JSX.Element {
   if (me && actor === me.id) return <Avatar name={me.name} kind="person" size="xs" label={t.feed.you} />;
   if (PERSON_ID.test(actor)) {
@@ -56,7 +56,7 @@ function Actor({ actor, me }: { actor: string; me: { id: string; name: string } 
     );
   }
   return (
-    <span className="feed-system" role="img" aria-label={t.feed.crewmind}>
+    <span className="feed-system" role="img" aria-label={t.feed.nightsquad}>
       <Sparkles size={11} aria-hidden="true" />
     </span>
   );

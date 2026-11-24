@@ -1,6 +1,6 @@
 ### 6.11 Memory (MEM)
 
-crewmind does not invent a memory system. It combines two well-established patterns:
+nightsquad does not invent a memory system. It combines two well-established patterns:
 
 - **Pinned memory:** a small, exact layer that is always in context. This is the "core memory" idea from MemGPT, now Letta.
 - **Recall memory:** a searched layer of extracted facts, built on an established open-source library.
@@ -19,7 +19,7 @@ Governance facts live in the pinned layer, because they must never be fuzzy or m
 - **MEM-2 Recall memory on an established library.**
   - The default engine is Mem0 (open source, Apache-2.0), used as a library inside the server, not as a separately exposed service. On Postgres it stores into the same database with pgvector; on SQLite (slim mode, NFR-23) it uses Qdrant in embedded mode, which runs in the server process and stores to a folder in the data directory. Neither needs an extra service. Mem0 also keeps its change history in a SQLite file of its own in the data directory, on every install; the file is backed up with the install and purged on forget and on project delete. Mem0's telemetry is switched off (NFR-1). The library is loaded on first use, not at start (NFR-23). The model is read from disk and never fetched at run time: without it, memory operations are refused with the command that installs it, and runs go on with pinned memory alone. On Postgres the `vector` extension must be enabled by a database superuser; a backup leaves extensions out, and a restore keeps the ones the database has. Mem0 handles fact extraction, de-duplication and updating.
   - Retrieval is hybrid: keyword (BM25) plus vector similarity.
-  - Embeddings default to an open-source ONNX model running locally, so memory works without a key and without PyTorch. The model is shipped inside the crewmind package and the Docker image, so memory works offline from the first start. It is added when the package is built and is not kept in the source repository.
+  - Embeddings default to an open-source ONNX model running locally, so memory works without a key and without PyTorch. The model is shipped inside the nightsquad package and the Docker image, so memory works offline from the first start. It is added when the package is built and is not kept in the source repository.
   - The engine sits behind a narrow interface (add, search, update, forget, history). Graphiti (a temporal knowledge graph; needs Neo4j or FalkorDB) or Letta can be swapped in as plug-ins without touching the rest of the product.
   - Home-grown memory algorithms are out of scope; only glue code is written.
 - **MEM-3 Scopes.**
@@ -41,7 +41,7 @@ Governance facts live in the pinned layer, because they must never be fuzzy or m
   - Chat runs save working notes every `memory.chat_extract_every` turns.
   - The CEO's plan is stored state, never conversation state.
 - **MEM-8 Measured, not assumed.**
-  - Published memory benchmark scores vary widely between vendor and third-party runs, so crewmind measures its own. A memory eval suite runs in CI.
+  - Published memory benchmark scores vary widely between vendor and third-party runs, so nightsquad measures its own. A memory eval suite runs in CI.
   - Pinned recall must be 100%: every standing order, decision and correction must be present in every relevant context pack. This is checked mechanically.
   - Recall-layer accuracy is scored on project-history questions with scripted scenarios, and a regression fails the build.
 

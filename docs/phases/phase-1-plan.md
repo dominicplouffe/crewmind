@@ -2,7 +2,7 @@
 
 Goal (PLAN.md): projects exist, are governed by versioned settings, and are reachable from the API, the CLI and MCP (read).
 
-**Exit demo.** In slim mode (`crewmind up --slim`) and on a Postgres server: create a user and a project, change a setting with a reason, then start, hold and resume the project. See every change in the event log from the CLI, the API and an MCP client.
+**Exit demo.** In slim mode (`squad up --slim`) and on a Postgres server: create a user and a project, change a setting with a reason, then start, hold and resume the project. See every change in the event log from the CLI, the API and an MCP client.
 
 Status: **agreed with the owner on 21 Nov 2026.** The answers are at the end.
 
@@ -21,7 +21,7 @@ Authorities an operation can declare: `anyone` (login only), `person`, `admin`, 
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   catalog/
     execute.py        The five steps above; the only way a handler is called
     caller.py         Caller, authorities, the via field
@@ -39,7 +39,7 @@ src/crewmind/
     cli/              Login state, hidden input for secrets (IF-4.5)
   jobs/               Scheduler loop and the phase 1 jobs (BG-1, BG-3, BG-4)
   storage/models/     One file per domain
-  server.py           The app `crewmind up` runs: API, MCP and scheduler; full or slim (NFR-23)
+  server.py           The app `squad up` runs: API, MCP and scheduler; full or slim (NFR-23)
 ```
 
 `domain/record` and `jobs/` are additions to the layout in CLAUDE.md, which will be updated.
@@ -110,7 +110,7 @@ Each rule is registered with its id, and each has an attack test through the pub
 - **Same transaction** (NFR-10): a handler that fails after changing state leaves neither the change nor the event.
 - **Background jobs** (BG-1, BG-3, BG-4): each job run twice changes nothing the second time; a project whose job raises does not stop the others; each automatic change names its job as actor.
 - **Chaos** (NFR-9): drop every pooled connection, then the API and the scheduler recover without a restart.
-- **Slim and move up** (NFR-23): the exit demo runs in one process on SQLite; `crewmind migrate --to postgres` then shows the same projects, settings and events on Postgres. Start time and idle memory are measured against 5 seconds and 400 MB.
+- **Slim and move up** (NFR-23): the exit demo runs in one process on SQLite; `squad migrate --to postgres` then shows the same projects, settings and events on Postgres. Start time and idle memory are measured against 5 seconds and 400 MB.
 - **Backup and restore** (NFR-4), **key rotation** (ACC-6: a failure part-way changes nothing), **bind rules** (NFR-6: a non-local bind without TLS and a public URL is refused).
 - **Exit demo as a scenario test**, on both databases, through the CLI, the API and an MCP client.
 
@@ -141,12 +141,12 @@ Four increments, each ending with the full suite green on both databases:
 
 | Question | Answer |
 | --- | --- |
-| Setup links with no web app | The CLI accepts them in phase 1: `crewmind accept <link>` asks for a password with hidden input (operation `auth.use_link`). The same link opens a web page from phase 2. No web code in phase 1 |
+| Setup links with no web app | The CLI accepts them in phase 1: `squad accept <link>` asks for a password with hidden input (operation `auth.use_link`). The same link opens a web page from phase 2. No web code in phase 1 |
 | Password resets with no outbound mail | An admin issues a reset link (`people.reset_link`), or the host operator does on the server. Self-service reset by email arrives with outbound mail in phase 6 |
 | Deactivating a person who chairs a project | Refused, naming the projects they chair. The admin hands each chair on first (break-glass, recorded). Added to ACC-5 and 7.8 (spec revision 2.4) |
 | INV-4 and BG-2 | Both move to phase 2, where runs and the dispatcher exist |
-| Full-server packaging | A Docker Compose bundle (Postgres with pgvector, plus the server) that `crewmind setup` can start, and support for a Postgres the owner already runs. Slim mode needs neither |
-| Update | Source checkouts only, as NFR-3 specifies. A tool install is told to run `uv tool upgrade`; `crewmind up` then migrates on start. Revisit when a package is published |
+| Full-server packaging | A Docker Compose bundle (Postgres with pgvector, plus the server) that `squad setup` can start, and support for a Postgres the owner already runs. Slim mode needs neither |
+| Update | Source checkouts only, as NFR-3 specifies. A tool install is told to run `uv tool upgrade`; `squad up` then migrates on start. Revisit when a package is published |
 | Review points | One stop, at the exit demo. The four increments are still built in order, each with the suite green on both databases |
 
 No open questions remain.
@@ -157,7 +157,7 @@ Built as planned, in the four increments. 53 operations, 12 tables, 24 registere
 
 Differences from this plan:
 
-- **Setup links:** the command is `crewmind accept --link <link>`, with the link as an option, not a bare argument.
+- **Setup links:** the command is `squad accept --link <link>`, with the link as an option, not a bare argument.
 - **Compose bundle:** `deploy/deploy_single_server.sh` builds and starts it (22 Nov 2026): Postgres, the server, a TLS front, and the agent image. It was run end to end once by hand on Docker 29, with a browser sign-in on a non-localhost address and a scripted agent answering from a container. No automated test starts the bundle.
 - **Update:** the refusals (dirty checkout, package install) and the dry run are tested. The pull, sync and restart path has not been run for real.
 - **First admin:** created as invited with a setup link, not directly active. Section 7.8 was corrected (spec revision 2.5).

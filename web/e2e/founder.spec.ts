@@ -1,5 +1,5 @@
 /**
- * End-to-end test of drafting a project with the Founder against a real crewmind server with the
+ * End-to-end test of drafting a project with the Founder against a real nightsquad server with the
  * mock model (FND-1, FND-3, FND-5, FND-11, FND-13, RHS-4): the chairman says what they want, sees
  * the draft, its grade and the ledger, answers the first question with the recommended answer, has
  * the Founder use its recommendations for the rest, creates the project once the draft is rehearsed
@@ -203,13 +203,13 @@ test("creating the project shows what is still missing and offers to start it; s
   await expectNoViolations(page, "a created project, before starting");
 
   await created.getByRole("button", { name: "Start the project" }).click();
-  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\?crew=hired$/);
-  // The crew assembles once, then the person meets it on the Crew tab.
-  const assembled = page.getByRole("dialog", { name: "Your crew is ready" });
+  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\?squad=hired$/);
+  // The squad assembles once, then the person meets it on the Squad tab.
+  const assembled = page.getByRole("dialog", { name: "Your squad is ready" });
   await expect(assembled).toBeVisible();
-  await expectNoViolations(page, "the crew assembled");
-  await assembled.getByRole("button", { name: "Meet the crew" }).click();
-  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\/crew$/);
+  await expectNoViolations(page, "the squad assembled");
+  await assembled.getByRole("button", { name: "Meet the squad" }).click();
+  await expect(page).toHaveURL(/\/projects\/[0-9a-f]+\/squad$/);
   await page.goBack();
   await expect(page.getByRole("heading", { level: 1, name: NAME })).toBeVisible();
   await expect(page.getByTestId("project-state")).toHaveAttribute("data-state", "running");
@@ -219,7 +219,7 @@ test("creating the project shows what is still missing and offers to start it; s
   await expect(mine).toContainText(BRIEF);
   await expect(mine).not.toContainText(`You: ${BRIEF}`);
   await expect(log.locator('[data-testid="message-drafting"][data-author="founder"]').first()).toBeVisible();
-  if (process.env.CREWMIND_E2E_SHOTS) await page.screenshot({ path: `${process.env.CREWMIND_E2E_SHOTS}/project-chat.png` });
+  if (process.env.NIGHTSQUAD_E2E_SHOTS) await page.screenshot({ path: `${process.env.NIGHTSQUAD_E2E_SHOTS}/project-chat.png` });
 
   await page.goto("/");
   await expect(page.locator("#content").getByRole("link", { name: new RegExp(NAME) })).toBeVisible();

@@ -42,7 +42,7 @@ Phase 4's requirements lean on three domains that come later. The plan uses the 
 ## Modules
 
 ```
-src/crewmind/
+src/nightsquad/
   domain/work/
     model.py           task states (7.3), evidence (7.15), side effect and watch (7.16)
     tasks.py           create, ceilings and floors, claim, expiry, complete, block, kill
@@ -63,7 +63,7 @@ src/crewmind/
     work.py            claim expiry, checks due, evidence to verify, watches due,
                        audit expiry, the stall watchdog, the spinning guard
 web/src/panels/board/  the Board panel
-acceptance/scripts/    the rule-breaker and competent-crew scripts for the mock harness
+acceptance/scripts/    the rule-breaker and competent-squad scripts for the mock harness
 ```
 
 The context pack gains "the board": the agent's claimed task with its attempt history, what it may claim, and for the CEO the open tasks and suggestions.
@@ -98,7 +98,7 @@ Every lifecycle is already in section 7 (7.3, 7.15, 7.16) and is added to the dr
 
 ## Settings used
 
-`tasks.max_open`, `tasks.max_subtasks`, `evidence.min_share`, `evidence.drought_after`, `review.independent`, `audit.sample_rate`, `audit.window`, `watch.min_interval`, `run.timeout`, `stall.after`, `spin.window`, `CREWMIND_ALLOW_AGENT_CHECKS_UNISOLATED`. All exist in the registry. The fixed numbers the spec states (3 failures, 5 attempts kept, 6 hours ahead, 15 and 10 characters, 300 seconds, 1 CPU and 1 GB, 5 fetch retries, 20 seconds, 2 MB) are constants citing their requirement.
+`tasks.max_open`, `tasks.max_subtasks`, `evidence.min_share`, `evidence.drought_after`, `review.independent`, `audit.sample_rate`, `audit.window`, `watch.min_interval`, `run.timeout`, `stall.after`, `spin.window`, `NIGHTSQUAD_ALLOW_AGENT_CHECKS_UNISOLATED`. All exist in the registry. The fixed numbers the spec states (3 failures, 5 attempts kept, 6 hours ahead, 15 and 10 characters, 300 seconds, 1 CPU and 1 GB, 5 fetch retries, 20 seconds, 2 MB) are constants citing their requirement.
 
 ## Tests to write first
 
@@ -138,8 +138,8 @@ None. The new rules guard verification, authority and side effects, and INV-2, I
 
 ## Risks
 
-- **Refusal loops.** Tasks bring many new refusals (ceilings, red-first, one item at a time). Each refusal says what to do instead, the refusal cap ends a run that keeps hitting them, and the scenario suite includes a competent crew that must finish a small job without tripping them.
-- **Scripted crews are harder to write than scripted chats.** The mock harness may need a small helper so a script can refer to "the task I just created".
+- **Refusal loops.** Tasks bring many new refusals (ceilings, red-first, one item at a time). Each refusal says what to do instead, the refusal cap ends a run that keeps hitting them, and the scenario suite includes a competent squad that must finish a small job without tripping them.
+- **Scripted squads are harder to write than scripted chats.** The mock harness may need a small helper so a script can refer to "the task I just created".
 - **The spinning guard needs a definition of "changed work state".** I will use: a task changed state, or an artifact version was published.
 
 ## Owner answers (22 Nov 2026)
@@ -164,7 +164,7 @@ Phase 4 is built in its four parts. Of its 23 requirement ids, 16 are done, 6 ar
 | The rule-breaker scenario | Passes. A scripted agent tries to complete a task it does not hold, review it, kill it, overwrite a locked file, re-argue a closed decision, create its own task and write a standing order. Each call is refused, the fifth refusal ends the run and revokes its token, and nothing it wanted is reached. With a run token it also cannot do anything only the chairman may |
 | A test that passes before any work is refused | Passes, with the can't-fail list and missing test files |
 | A launch without a watch is refused | Passes |
-| (Added) A competent crew finishes a verified job | Passes in-process with no refusals, and as real processes: separate agent processes do the work and the server's own check closes it as verified |
+| (Added) A competent squad finishes a verified job | Passes in-process with no refusals, and as real processes: separate agent processes do the work and the server's own check closes it as verified |
 
 **What "done" means now.**
 

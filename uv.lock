@@ -562,77 +562,6 @@ wheels = [
 ]
 
 [[package]]
-name = "crewmind"
-version = "0.0.1"
-source = { editable = "." }
-dependencies = [
-    { name = "aiosqlite" },
-    { name = "alembic" },
-    { name = "argon2-cffi" },
-    { name = "cryptography" },
-    { name = "docker" },
-    { name = "fastapi" },
-    { name = "fastembed" },
-    { name = "h11" },
-    { name = "httpx" },
-    { name = "litellm" },
-    { name = "mcp" },
-    { name = "mem0ai" },
-    { name = "psycopg", extra = ["binary", "pool"] },
-    { name = "pydantic" },
-    { name = "pywebpush" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-    { name = "textual" },
-    { name = "typer" },
-    { name = "tzdata" },
-    { name = "uvicorn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "hypothesis" },
-    { name = "pyright" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-xdist" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiosqlite", specifier = ">=0.20" },
-    { name = "alembic", specifier = ">=1.13" },
-    { name = "argon2-cffi", specifier = ">=23.1" },
-    { name = "cryptography", specifier = ">=43" },
-    { name = "docker", specifier = ">=7" },
-    { name = "fastapi", specifier = ">=0.115" },
-    { name = "fastembed", specifier = ">=0.9.1" },
-    { name = "h11", specifier = ">=0.16" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "litellm", specifier = ">=1.50" },
-    { name = "mcp", specifier = ">=1.2" },
-    { name = "mem0ai", specifier = "==2.2.1" },
-    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2" },
-    { name = "pydantic", specifier = ">=2.9" },
-    { name = "pywebpush", specifier = ">=2.5.0" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
-    { name = "textual", specifier = ">=0.80" },
-    { name = "typer", specifier = ">=0.12" },
-    { name = "tzdata", specifier = ">=2024.1" },
-    { name = "uvicorn", specifier = ">=0.30" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "hypothesis", specifier = ">=6.100" },
-    { name = "pyright", specifier = ">=1.1.380" },
-    { name = "pytest", specifier = ">=8.3" },
-    { name = "pytest-asyncio", specifier = ">=0.24" },
-    { name = "pytest-xdist", specifier = ">=3.8.0" },
-    { name = "ruff", specifier = ">=0.7" },
-]
-
-[[package]]
 name = "cryptography"
 version = "50.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2009,6 +1938,77 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/00/2f/45eb8700ee15716cc22f5b42592b4d5bc1ca65c880179c2c10e42fd6f0b4/multidict-7.2.1-cp315-cp315t-win_amd64.whl", hash = "sha256:25ebc4208d9098f77caeb16df895a0e56eb6c3b22870ac4e3ec43e0a9d6a33b6", size = 101193, upload-time = "2026-10-24T20:41:34.124Z" },
     { url = "https://files.pythonhosted.org/packages/7b/80/37d26f26d20b937344cfd68d9a1f57d8bc4f64adae416fc6828a7f8c8a10/multidict-7.2.1-cp315-cp315t-win_arm64.whl", hash = "sha256:4d61be3725016ef5db3543c95f1f062d7d150ba776582d959a982af88e75fa55", size = 98863, upload-time = "2026-10-24T20:40:59.146Z" },
     { url = "https://files.pythonhosted.org/packages/9d/96/1aaad0e5df33f1f5af21775c411349c0234a6edd581ea403bc81919a6eab/multidict-7.2.1-py3-none-any.whl", hash = "sha256:08ea94663d9e7c25d14d78222f7aee906c472d4837766bec62477c38f6e419dc", size = 28145, upload-time = "2026-10-24T20:40:59.159Z" },
+]
+
+[[package]]
+name = "nightsquad"
+version = "0.0.1"
+source = { editable = "." }
+dependencies = [
+    { name = "aiosqlite" },
+    { name = "alembic" },
+    { name = "argon2-cffi" },
+    { name = "cryptography" },
+    { name = "docker" },
+    { name = "fastapi" },
+    { name = "fastembed" },
+    { name = "h11" },
+    { name = "httpx" },
+    { name = "litellm" },
+    { name = "mcp" },
+    { name = "mem0ai" },
+    { name = "psycopg", extra = ["binary", "pool"] },
+    { name = "pydantic" },
+    { name = "pywebpush" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+    { name = "textual" },
+    { name = "typer" },
+    { name = "tzdata" },
+    { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "hypothesis" },
+    { name = "pyright" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-xdist" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiosqlite", specifier = ">=0.20" },
+    { name = "alembic", specifier = ">=1.13" },
+    { name = "argon2-cffi", specifier = ">=23.1" },
+    { name = "cryptography", specifier = ">=43" },
+    { name = "docker", specifier = ">=7" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "fastembed", specifier = ">=0.9.1" },
+    { name = "h11", specifier = ">=0.16" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "litellm", specifier = ">=1.50" },
+    { name = "mcp", specifier = ">=1.2" },
+    { name = "mem0ai", specifier = "==2.2.1" },
+    { name = "psycopg", extras = ["binary", "pool"], specifier = ">=3.2" },
+    { name = "pydantic", specifier = ">=2.9" },
+    { name = "pywebpush", specifier = ">=2.5.0" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.36" },
+    { name = "textual", specifier = ">=0.80" },
+    { name = "typer", specifier = ">=0.12" },
+    { name = "tzdata", specifier = ">=2024.1" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "hypothesis", specifier = ">=6.100" },
+    { name = "pyright", specifier = ">=1.1.380" },
+    { name = "pytest", specifier = ">=8.3" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "pytest-xdist", specifier = ">=3.8.0" },
+    { name = "ruff", specifier = ">=0.7" },
 ]
 
 [[package]]

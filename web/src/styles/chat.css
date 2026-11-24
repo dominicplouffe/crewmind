@@ -1,5 +1,5 @@
 /*
- * The chat: messages, crewmind's own lines, cards in the conversation, and the composer.
+ * The chat: messages, squadmind's own lines, cards in the conversation, and the composer.
  * The composer sits in the flow under the list (never on top of it), so no message is ever hidden
  * behind it; the page uses dynamic viewport units, so it stays above a phone's on-screen keyboard.
  */
@@ -159,7 +159,7 @@
 }
 .typing-stop { margin-left: auto; align-self: center; }
 
-/* crewmind's own line that carries a card. */
+/* squadmind's own line that carries a card. */
 .system-avatar {
   display: grid;
   place-items: center;
@@ -172,7 +172,7 @@
 }
 .message.is-system .author { color: var(--color-text-muted); }
 
-/* crewmind's plain line: a quiet notice on the same left edge as the messages, its icon in the
+/* squadmind's plain line: a quiet notice on the same left edge as the messages, its icon in the
    avatar column, the time at the right. Readable size; never centred. */
 .message.is-row {
   display: flex;

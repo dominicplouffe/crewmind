@@ -14,11 +14,11 @@ import httpx
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.connections.agent_operations import EGRESS
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.runner.egress.proxy import EgressProxy, Refused, guarded_connect
-from crewmind.runner.egress.service import build_proxy, load_authority
-from crewmind.storage.models import RunStep
+from nightsquad.domain.connections.agent_operations import EGRESS
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.runner.egress.proxy import EgressProxy, Refused, guarded_connect
+from nightsquad.runner.egress.service import build_proxy, load_authority
+from nightsquad.storage.models import RunStep
 from tests.attack.egress_support import Site, trusting
 from tests.attack.test_connections import blog_project, seats
 from tests.support import App, agent_call, live_run, quiet_start, wake

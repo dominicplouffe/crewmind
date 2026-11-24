@@ -10,13 +10,13 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.state_machine import NEW
-from crewmind.domain.execution.roster import check_stand_down
-from crewmind.domain.planning import commitments, cycles, projection
-from crewmind.domain.planning.estimates import adjusted_runs, bias_multiplier
-from crewmind.domain.planning.graph import longest_chain, loop_if_added
-from crewmind.domain.planning.model import REQUIREMENT_MACHINE, RequirementState
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.state_machine import NEW
+from nightsquad.domain.execution.roster import check_stand_down
+from nightsquad.domain.planning import commitments, cycles, projection
+from nightsquad.domain.planning.estimates import adjusted_runs, bias_multiplier
+from nightsquad.domain.planning.graph import longest_chain, loop_if_added
+from nightsquad.domain.planning.model import REQUIREMENT_MACHINE, RequirementState
 
 
 @pytest.mark.parametrize(

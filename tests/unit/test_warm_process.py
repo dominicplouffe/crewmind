@@ -6,8 +6,8 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
-from crewmind.runner import sandbox
-from crewmind.runner.sandbox import SandboxSpec, UnisolatedSandbox
+from nightsquad.runner import sandbox
+from nightsquad.runner.sandbox import SandboxSpec, UnisolatedSandbox
 
 
 class Pipe:

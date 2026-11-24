@@ -15,7 +15,7 @@ from typing import Any, cast
 
 import pytest
 
-from crewmind.domain.memory.engine import (
+from nightsquad.domain.memory.engine import (
     InProcessEngine,
     Mem0Engine,
     MemoryEngine,
@@ -24,7 +24,7 @@ from crewmind.domain.memory.engine import (
 )
 
 PROJECT, OTHER = "project:alpha", "project:beta"
-FETCH = "run `uv run python -m crewmind.domain.memory.fetch_model` first"
+FETCH = "run `uv run python -m nightsquad.domain.memory.fetch_model` first"
 
 
 @pytest.fixture(params=["in-process", "mem0"])

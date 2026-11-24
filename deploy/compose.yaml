@@ -1,4 +1,4 @@
-# A full crewmind server (NFR-1, NFR-2): Postgres with pgvector, the server, and a TLS
+# A full nightsquad server (NFR-1, NFR-2): Postgres with pgvector, the server, and a TLS
 # front. Agent runs and platform checks are sibling containers from the agent image
 # (EXE-12, WRK-7).
 #
@@ -9,11 +9,11 @@
 # updates it and deploy/kill_single_server.sh stops it.
 #
 # What is published (NFR-6):
-#   - the TLS front, on CREWMIND_BIND (127.0.0.1 unless you choose another address);
-#   - the server's plain port, on 127.0.0.1 only, for the `crewmind` command on this host.
-# People sign in at CREWMIND_PUBLIC_URL and nowhere else.
+#   - the TLS front, on NIGHTSQUAD_BIND (127.0.0.1 unless you choose another address);
+#   - the server's plain port, on 127.0.0.1 only, for the `squad` command on this host.
+# People sign in at NIGHTSQUAD_PUBLIC_URL and nowhere else.
 
-name: crewmind
+name: nightsquad
 
 services:
   database:
@@ -22,13 +22,13 @@ services:
     image: pgvector/pgvector:pg17
     restart: unless-stopped
     environment:
-      POSTGRES_USER: crewmind
-      POSTGRES_PASSWORD: ${CREWMIND_DB_PASSWORD:?run deploy/deploy_single_server.sh, or set CREWMIND_DB_PASSWORD in deploy/.env}
-      POSTGRES_DB: crewmind
+      POSTGRES_USER: nightsquad
+      POSTGRES_PASSWORD: ${NIGHTSQUAD_DB_PASSWORD:?run deploy/deploy_single_server.sh, or set NIGHTSQUAD_DB_PASSWORD in deploy/.env}
+      POSTGRES_DB: nightsquad
     volumes:
       - database:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "crewmind"]
+      test: ["CMD", "pg_isready", "-U", "nightsquad"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -37,27 +37,27 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: crewmind-server
+    image: nightsquad-server
     restart: unless-stopped
     depends_on:
       database:
         condition: service_healthy
     environment:
-      CREWMIND_DATABASE_URL: postgresql://crewmind:${CREWMIND_DB_PASSWORD}@database:5432/crewmind
-      CREWMIND_DATA_DIR: ${CREWMIND_STATE_ROOT:-/var/lib/crewmind}
-      CREWMIND_HOST: 0.0.0.0
-      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://localhost}
+      NIGHTSQUAD_DATABASE_URL: postgresql://nightsquad:${NIGHTSQUAD_DB_PASSWORD}@database:5432/nightsquad
+      NIGHTSQUAD_DATA_DIR: ${NIGHTSQUAD_STATE_ROOT:-/var/lib/nightsquad}
+      NIGHTSQUAD_HOST: 0.0.0.0
+      NIGHTSQUAD_PUBLIC_URL: ${NIGHTSQUAD_PUBLIC_URL:-https://localhost}
       # Where sandboxes reach the server. The server joins each project's network under
       # this name (EXE-12).
-      CREWMIND_AGENT_API_URL: http://server:8420
+      NIGHTSQUAD_AGENT_API_URL: http://server:8420
       # Limits of each agent's container. On a host with fewer CPUs than this, a
       # container is given all the host has.
-      CREWMIND_SANDBOX_CPUS: ${CREWMIND_SANDBOX_CPUS:-2}
-      CREWMIND_SANDBOX_MEMORY: ${CREWMIND_SANDBOX_MEMORY:-2147483648}
+      NIGHTSQUAD_SANDBOX_CPUS: ${NIGHTSQUAD_SANDBOX_CPUS:-2}
+      NIGHTSQUAD_SANDBOX_MEMORY: ${NIGHTSQUAD_SANDBOX_MEMORY:-2147483648}
     volumes:
       # Sandboxes are started by the host's container runtime, so a workspace must have
       # the same path on the host and in the server.
-      - ${CREWMIND_STATE_ROOT:-/var/lib/crewmind}:${CREWMIND_STATE_ROOT:-/var/lib/crewmind}
+      - ${NIGHTSQUAD_STATE_ROOT:-/var/lib/nightsquad}:${NIGHTSQUAD_STATE_ROOT:-/var/lib/nightsquad}
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "127.0.0.1:8420:8420"
@@ -68,21 +68,21 @@ services:
     depends_on:
       - server
     environment:
-      CREWMIND_PUBLIC_URL: ${CREWMIND_PUBLIC_URL:-https://localhost}
-      CREWMIND_PUBLIC_HOST: ${CREWMIND_PUBLIC_HOST:-localhost}
-      CREWMIND_TLS: ${CREWMIND_TLS:-internal}
+      NIGHTSQUAD_PUBLIC_URL: ${NIGHTSQUAD_PUBLIC_URL:-https://localhost}
+      NIGHTSQUAD_PUBLIC_HOST: ${NIGHTSQUAD_PUBLIC_HOST:-localhost}
+      NIGHTSQUAD_TLS: ${NIGHTSQUAD_TLS:-internal}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - proxy:/data
     ports:
-      - "${CREWMIND_BIND:-127.0.0.1}:${CREWMIND_TLS_PORT:-443}:${CREWMIND_TLS_PORT:-443}"
+      - "${NIGHTSQUAD_BIND:-127.0.0.1}:${NIGHTSQUAD_TLS_PORT:-443}:${NIGHTSQUAD_TLS_PORT:-443}"
 
   # Not a running service: it exists so that one build makes the agent image too.
   agent:
     build:
       context: ..
       dockerfile: deploy/agent.Dockerfile
-    image: crewmind-agent
+    image: nightsquad-agent
     restart: "no"
     network_mode: none
     command: ["true"]

@@ -1,7 +1,7 @@
-# The crewmind agent image: what every agent run and every platform check executes in,
+# The nightsquad agent image: what every agent run and every platform check executes in,
 # in container mode (EXE-12, WRK-7).
 #
-#   docker build -f deploy/agent.Dockerfile -t crewmind-agent .
+#   docker build -f deploy/agent.Dockerfile -t nightsquad-agent .
 #
 # It holds the harness loop and common tools, and nothing of the server: no database
 # driver, no key, no server code. The harness needs only an HTTP client (P3, LLM-8).
@@ -23,9 +23,9 @@ RUN pip install --no-cache-dir --disable-pip-version-check "httpx>=0.27"
 
 # The harness goes into site-packages because it is started with `python -I`, which
 # ignores PYTHONPATH.
-COPY src/crewmind/__init__.py /usr/local/lib/python3.13/site-packages/crewmind/__init__.py
-COPY src/crewmind/runner/__init__.py src/crewmind/runner/agent.py \
-    /usr/local/lib/python3.13/site-packages/crewmind/runner/
+COPY src/nightsquad/__init__.py /usr/local/lib/python3.13/site-packages/nightsquad/__init__.py
+COPY src/nightsquad/runner/__init__.py src/nightsquad/runner/agent.py \
+    /usr/local/lib/python3.13/site-packages/nightsquad/runner/
 
 # The server names the user at start (EXE-12); this one is the default.
 RUN useradd --create-home --uid 10001 agent

@@ -7,9 +7,9 @@ from typing import Any
 
 import pytest
 
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.gateway import outbound
-from crewmind.jobs.alarms import AlarmSender
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.gateway import outbound
+from nightsquad.jobs.alarms import AlarmSender
 from tests.support import App
 
 BROWSER = {

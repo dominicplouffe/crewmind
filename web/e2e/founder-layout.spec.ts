@@ -1,5 +1,5 @@
 /**
- * End-to-end test of the drafting page's layout against a real crewmind server: at common window
+ * End-to-end test of the drafting page's layout against a real nightsquad server: at common window
  * widths, with the app's sidebar beside it, the conversation keeps a readable width and the
  * Founder's name stays on one line (FND-1, NFR-18).
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
@@ -7,7 +7,7 @@
 import { expect, test } from "@playwright/test";
 import { STATE_FILE, setFounderScript } from "./helpers";
 
-const SHOTS = process.env.CREWMIND_E2E_SHOTS;
+const SHOTS = process.env.NIGHTSQUAD_E2E_SHOTS;
 const BRIEF = "Every day, research new AI tools and write a long blog post about them, with charts and a hero image.";
 
 test("the conversation keeps a readable width beside the decisions and the draft (FND-1, NFR-18)", async ({ browser }) => {

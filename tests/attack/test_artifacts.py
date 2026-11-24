@@ -109,7 +109,7 @@ async def test_ART_5_agents_cannot_change_a_locked_artifact(app: App) -> None:
     workspace = app.runtime.config.data_dir / "workspaces" / project
     (workspace / "plan.md").chmod(0o644)
     (workspace / "plan.md").write_text("changed through the shell")
-    from crewmind.domain.execution import runs
+    from nightsquad.domain.execution import runs
 
     async with app.runtime.sessions() as session, session.begin():
         await runs.finish(session, ceo.run_id, ceo.runner_id, app.runtime.clock(), failed=False)
@@ -162,7 +162,7 @@ async def test_ART_6_files_and_project_storage_stay_within_their_limits(app: App
 
     from sqlalchemy import update
 
-    from crewmind.storage.models import ArtifactVersion
+    from nightsquad.storage.models import ArtifactVersion
 
     async with app.runtime.sessions() as session, session.begin():
         await session.execute(update(ArtifactVersion).values(size=20 * 1024**3 - 500))

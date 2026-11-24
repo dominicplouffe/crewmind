@@ -1,5 +1,5 @@
 /**
- * End-to-end test of the Plan panel against a real crewmind server with the mock model: the chairman
+ * End-to-end test of the Plan panel against a real nightsquad server with the mock model: the chairman
  * adds requirements, sees what is not ready and the longest chain, sets a target date and cuts scope.
  * It runs after the other specs (one worker, files in name order) and reuses the signed-in session.
  * The project stays a draft, so no agent runs and nothing here waits on one.

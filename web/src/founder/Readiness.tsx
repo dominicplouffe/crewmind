@@ -47,7 +47,7 @@ function Created({ view, created, busy, onStart }: Pick<Props, "view" | "created
           {created.waiting.length > 0 ? (
             <>
               <h3 className="group-title">{words.waitingTitle}</h3>
-              <ul className="checklist" data-testid="crew-waiting">
+              <ul className="checklist" data-testid="squad-waiting">
                 {created.waiting.map((line) => (
                   <li key={line}>{line}</li>
                 ))}

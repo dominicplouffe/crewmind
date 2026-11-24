@@ -2,6 +2,10 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.32 (24 Nov 2026): the CLI command
+
+- **IF-4.1:** the CLI command is `squad`, also installed as `nightsquad` (ADR-0008).
+
 ## Revision 2.31 (23 Nov 2026): connections, part 7B.8
 
 - **CON-8:** values sent for a run are masked too, with the headers they travel in: a site that echoes the header it received cannot carry the value to the model.
@@ -27,17 +31,17 @@ Newest first. One line per change, citing the ids touched.
 
 - **CON-15, IF-5.6:** adding any MCP server and allowing any tool are human-only, not only command servers and changing tools: a model client could otherwise give agents new reach. Testing a server with a value and choosing where a secret is sent are human-only too.
 - **7.18:** the MCP server table lists the states that may be deleted, so it can be checked.
-- **IF-5.1:** crewmind's own MCP tools carry the read-only and destructive annotations from the catalog's reversibility, so any client, crewmind's own connections included, can tell readers from writers.
+- **IF-5.1:** nightsquad's own MCP tools carry the read-only and destructive annotations from the catalog's reversibility, so any client, nightsquad's own connections included, can tell readers from writers.
 - **CON-10:** a sign-in expires after ten minutes; tokens are refreshed a minute before expiry; a server waiting for sign-in meets no need, so its seats are held.
 
 ## Revision 2.26 (23 Nov 2026): connections, part 7B.3
 
 - **CON-6, EXE-14:** only a run with a secret sent for it goes through the egress proxy, so the proxy never stands in the way of ordinary traffic; the proxy connects only to public addresses (WRK-12) and says why it refuses; a secret is never added to plain HTTP; upgrades to a site with a secret are refused; the authority is valid for ten years and certificate validity follows the wall clock; idle connections close after `proxy.idle_timeout`.
-- **Appendix A:** `proxy.idle_timeout` (5 min, 10 s–1 h, install) and `CREWMIND_EGRESS_PORT` (a free port by default).
+- **Appendix A:** `proxy.idle_timeout` (5 min, 10 s–1 h, install) and `NIGHTSQUAD_EGRESS_PORT` (a free port by default).
 
 ## Revision 2.25 (23 Nov 2026): connections, part 7B.2
 
-- **CON-7, CON-3:** given secrets and variables reach the harness over the run's own channel when the run starts and only the commands it runs receive them, never a container's settings; file secrets are in `CREWMIND_SECRETS_DIR`, removed when the run ends.
+- **CON-7, CON-3:** given secrets and variables reach the harness over the run's own channel when the run starts and only the commands it runs receive them, never a container's settings; file secrets are in `NIGHTSQUAD_SECRETS_DIR`, removed when the run ends.
 - **CON-4:** replacing or changing a granted connection also ends the seat's warm chat process.
 - **CON-8:** the ingress points are named: every agent API call and model request, before anything reads them, and the workspace snapshot.
 
@@ -51,7 +55,7 @@ Newest first. One line per change, citing the ids touched.
 
 ## Revision 2.23 (23 Nov 2026): connections, phase 7.B
 
-- **CON-1 to CON-16 (new section 6.17):** secrets, variables and MCP servers: three scopes (install, person, project), attachment and role grants, write-only values, secrets sent for the agent by the egress proxy as the default, secrets given to the agent with masking, remote and command MCP servers with no auth, bearer, custom header and OAuth, needs and starting without them, the Founder and the crew knowing what a project has, the screens, records and errors. Role secrets were specified only as "injected" (EXE-13) and never built (phase 7.B plan, owner, 23 Nov 2026).
+- **CON-1 to CON-16 (new section 6.17):** secrets, variables and MCP servers: three scopes (install, person, project), attachment and role grants, write-only values, secrets sent for the agent by the egress proxy as the default, secrets given to the agent with masking, remote and command MCP servers with no auth, bearer, custom header and OAuth, needs and starting without them, the Founder and the squad knowing what a project has, the screens, records and errors. Role secrets were specified only as "injected" (EXE-13) and never built (phase 7.B plan, owner, 23 Nov 2026).
 - **INT-4:** renamed "MCP servers (data sources)"; how servers are added and reached moves to CON-9 to CON-13; the permission rules stay.
 - **EXE-13, EXE-14:** point to CON; the egress proxy blocks and reads nothing except connections to sites with a secret sent for the run.
 - **PRJ-1, FND-13, IF-4.7:** open needs are prompted for, and block the start unless the chairman starts without them, holding the dependent seats.
@@ -86,7 +90,7 @@ Newest first. One line per change, citing the ids touched.
 
 - **FND-4, Appendix A:** `grill.pace` defaults to batch. A first real drafting on a slow reasoning model took 45 minutes at one decision per turn. The thirteen decisions now take three rounds. A round is answered as a whole before the Founder's next turn, and an unchanged goal keeps its grade (owner, 23 Nov 2026).
 - **FND-2, FND-11:** `propose_spec` takes `changes` once a draft exists, so the Founder sends only what differs, and every draft is rehearsed as it is kept. The Founder is shown its own draft and the role list at the start of each turn. Measured on a real model with the same brief: the full interview went from over 45 minutes to about 3.5.
-- **WRK-5, WRK-8:** when a check fails and the work is in a pinned test file, the output says so and the CEO is told at once. A real crew lost two tasks to this: the CEO had pinned the file the worker was to write.
+- **WRK-5, WRK-8:** when a check fails and the work is in a pinned test file, the output says so and the CEO is told at once. A real squad lost two tasks to this: the CEO had pinned the file the worker was to write.
 
 ## Revision 2.19 (22 Nov 2026): container mode proven on a real Docker host
 
@@ -101,13 +105,13 @@ Newest first. One line per change, citing the ids touched.
 - **FND-12:** one quick-mode target, under 2 minutes (R-32).
 - **RHS-1:** rehearsal always runs on a fresh in-memory SQLite database; the code refuses any other (R-51).
 - **LIB-1:** a role states its seat kind (ceo, worker or reviewer); "can be the CEO" is the kind ceo. A role has a slug, and no two roles share a name. Web is a permission; a role that cannot run without web search says so separately.
-- **LIB-3:** anyone adds a role or a crew; only an admin changes one that exists, because every later project picks the change up. A shipped role whose text changes becomes its next version.
-- **LIB-2:** a crew's estimate may be empty; a team's first named member leads it.
+- **LIB-3:** anyone adds a role or a squad; only an admin changes one that exists, because every later project picks the change up. A shipped role whose text changes becomes its next version.
+- **LIB-2:** a squad's estimate may be empty; a team's first named member leads it.
 - **LIB-4:** the spec's fields are named; a spec with a problem creates nothing; a spec that carries a value where a credential name belongs is refused; what a spec asks for that the install lacks is listed as missing, not refused. A spec embeds only custom roles.
 - **PRJ-9:** a clone is an export imported under a new name by the same chairman.
 - **WRK-12:** domains a spec declares as controlled count as the project's own.
 - **IF-3.1:** a read that takes a whole document is sent as a POST body.
-- **RHS-1:** the drill's database is a fresh file in a folder of its own, not in memory: SQLite in memory cannot serve the dispatcher, the runner and the jobs at once. The drill is its own process, with a time limit (`rehearsal.max_seconds`), a crew in code, and one agent at a time.
+- **RHS-1:** the drill's database is a fresh file in a folder of its own, not in memory: SQLite in memory cannot serve the dispatcher, the runner and the jobs at once. The drill is its own process, with a time limit (`rehearsal.max_seconds`), a squad in code, and one agent at a time.
 - **RHS-2, RHS-3:** where the walk ends for each project type; estimates are to the first close.
 - **EXE-5:** runs queued at the same instant are leased in the order their seats were created.
 - **Appendix A:** `rehearsal.max_seconds`.
@@ -124,7 +128,7 @@ Newest first. One line per change, citing the ids touched.
 - **PRJ-7:** promote opens a Founder drafting with the findings report as its document; the Deliver project exists once that draft is confirmed.
 - **IF-5.8:** the design doctrine and the goal grammar are served as documents; the design prompt goes through the Founder.
 - **FND-14:** the finding is shown in the project's status, with its fix.
-- **IF-4.6, IF-4.7:** `crewmind draft` is the terminal's drafting command; `crewmind founder eval` compares the grader with hand grades.
+- **IF-4.6, IF-4.7:** `squad draft` is the terminal's drafting command; `squad founder eval` compares the grader with hand grades.
 
 ## Revision 2.17 (22 Nov 2026): phase 6 plan answers
 
@@ -222,7 +226,7 @@ Newest first. One line per change, citing the ids touched.
 - **MEM-4:** where extraction runs, where facts go, and when they are untrusted.
 - **MEM-6:** what pinning an entry does.
 - **MSG-11:** what counts as an involuntary restart; a sandbox may keep a warm process.
-- **Appendix A (operational):** adds `CREWMIND_MEMORY_ENGINE` (MEM-2).
+- **Appendix A (operational):** adds `NIGHTSQUAD_MEMORY_ENGINE` (MEM-2).
 - **MSG-12:** names the three parts the lint measures.
 - **MSG-7:** defines a figure and says the flag is feedback.
 - **MSG-8:** slots are evenly spaced from the chairman's `brief.time` in the project's time zone (R-66).
@@ -243,7 +247,7 @@ Newest first. One line per change, citing the ids touched.
 - **CHAT-9:** an upload's chat line starts no reply and costs no tokens.
 - **MSG-1:** a chat reply over the length limit is posted cut, with a note.
 - **IF-3.5:** chat history with no cursor returns the newest messages and pages back.
-- **Appendix A (operational):** adds `CREWMIND_AGENT_API_URL` (IF-6.1, EXE-12) and `CREWMIND_MOCK_SCRIPT_DIR` (LLM-8).
+- **Appendix A (operational):** adds `NIGHTSQUAD_AGENT_API_URL` (IF-6.1, EXE-12) and `NIGHTSQUAD_MOCK_SCRIPT_DIR` (LLM-8).
 
 ## Revision 2.6 (21 Nov 2026): phase 2 plan answers
 
@@ -316,7 +320,7 @@ Owner answers to the blocking items in `docs/spec-review.md`.
 
 ## Revision 2 (21 Nov 2026)
 
-- **Renamed** the project from yaaf to crewmind: product, package, CLI, environment variables, Slack and mail prefixes (ADR-0008).
+- **Renamed** the project from yaaf to nightsquad: product, package, CLI, environment variables, Slack and mail prefixes (ADR-0008).
 - **Full rewrite from revision 1:** chat-first front door (CHAT); token-only budgets with the budget as the wall and a CEO reserve (GOV-2, GOV-3, GOV-10); speed requirements (SPD); one quality dial (LLM-3); mailbox per project, managed (Stalwart) or manual, with per-agent accounts (INT-6, INT-10); Mem0 recall memory with an exact pinned layer (MEM); every file an artifact (ART); grilling (FND-15, FND-16); Agent Skills (LIB-6); agent browser (EXE-17); A2A (INT-11); OpenTelemetry export (NFR-22); slim mode on SQLite (NFR-23); Python stack (NFR-24); state machines (section 7); settings registry (Appendix A).
 - **Owner decisions recorded:** Python; Postgres and SQLite; budgets count non-cached tokens only; Mem0; separate mailbox accounts per agent; subscription logins are the user's choice. See `docs/decisions/`.
 - **Removed:** tempo and bar presets, stakes, dollar model budgets, run-count allowances and inbox lanes, the global plan gate, measurement windows, the change stamp, directives inferred from chat, the budget overage multiple.

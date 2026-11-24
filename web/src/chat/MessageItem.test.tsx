@@ -68,8 +68,8 @@ describe("message actions (CHAT-8)", () => {
     expect(screen.getByTestId("marker-example")).toBeTruthy();
   });
 
-  it("has no menu on a status line from crewmind", () => {
-    show(message({ author_kind: "platform", author: "crewmind", kind: "status" }));
+  it("has no menu on a status line from nightsquad", () => {
+    show(message({ author_kind: "platform", author: "nightsquad", kind: "status" }));
     expect(screen.queryByRole("button", { name: /More/ })).toBeNull();
   });
 });
@@ -116,7 +116,7 @@ describe("lines said while drafting (FND-1)", () => {
     show(
       message({
         author_kind: "platform",
-        author: "crewmind",
+        author: "nightsquad",
         kind: "status",
         body: "The Founder: Here is a first draft.",
         detail: { kind: "drafting", author: "founder" },

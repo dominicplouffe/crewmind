@@ -5,11 +5,11 @@
 
 ## Context
 
-The owner wants crewmind to run slim when needed. v1 shipped both databases, but SQLite could not run half the migrations, so tests passed for a database nobody deployed.
+The owner wants nightsquad to run slim when needed. v1 shipped both databases, but SQLite could not run half the migrations, so tests passed for a database nobody deployed.
 
 ## Decision
 
-Both databases are first-class from the first commit. Every test and migration runs on both in CI. Domain logic never relies on one database's features except behind the storage adapter. Slim mode is one process on SQLite; `crewmind migrate --to postgres` moves up.
+Both databases are first-class from the first commit. Every test and migration runs on both in CI. Domain logic never relies on one database's features except behind the storage adapter. Slim mode is one process on SQLite; `squad migrate --to postgres` moves up.
 
 ## Consequences
 

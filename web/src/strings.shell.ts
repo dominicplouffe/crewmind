@@ -39,7 +39,7 @@ export const shell = {
     chat: "Project: Chat",
     overview: "Project: Overview",
     work: "Project: Work",
-    crew: "Project: Crew",
+    squad: "Project: Squad",
     deliverables: "Project: Deliverables",
     send: "Send a message",
     newline: "New line in a message",
@@ -94,21 +94,21 @@ export const home = {
   inbox: "Needs you",
   inboxLabel: "Decisions waiting on you, soonest first",
   inboxEmptyTitle: "You're all caught up",
-  inboxEmptyNext: "When the crew needs a decision, approval or answer from you, it appears here first.",
+  inboxEmptyNext: "When the squad needs a decision, approval or answer from you, it appears here first.",
   inboxStale: "Showing the last list we had. It refreshes when the connection is back.",
   projectsTitle: "Projects",
   allProjects: "All projects",
   projectsEmptyTitle: "No projects yet",
-  projectsEmptyNext: "Describe what you want done. The Founder turns it into a project and hires a crew.",
+  projectsEmptyNext: "Describe what you want done. The Founder turns it into a project and hires a squad.",
   start: "Start a project",
   byForm: "Fill in a form instead",
   briefTitle: "While you were away",
   setupTitle: "Finish setting up",
-  setupNext: "Add a model key so the Founder and the crew can work. It takes a minute.",
+  setupNext: "Add a model key so the Founder and the squad can work. It takes a minute.",
   setupMember: "An admin needs to add a model key before the Founder can start projects.",
   setupAction: "Set up now",
   alertsTitle: "Get a ping when you're needed",
-  alertsNext: "Turn on browser alerts and crewmind tells you when a decision waits on you, and nothing else.",
+  alertsNext: "Turn on browser alerts and nightsquad tells you when a decision waits on you, and nothing else.",
   alertsAction: "Turn on alerts",
   alertsDismiss: "Not now",
   openProject: "Open",
@@ -122,7 +122,7 @@ export const home = {
 
 export const projectsPage = {
   title: "Projects",
-  intro: "Every project is a crew working toward one goal.",
+  intro: "Every project is a squad working toward one goal.",
   live: "Active",
   other: "Not running",
   needs: (count: number): string => `${count} need${count === 1 ? "s" : ""} you`,
@@ -130,7 +130,7 @@ export const projectsPage = {
 };
 
 export const projectLayout = {
-  tabs: { chat: "Chat", overview: "Overview", work: "Work", crew: "Crew", deliverables: "Deliverables" },
+  tabs: { chat: "Chat", overview: "Overview", work: "Work", squad: "Squad", deliverables: "Deliverables" },
   more: "More",
   moreLabel: "More project tools",
   needsYou: (count: number): string => (count === 0 ? "Nothing needs you" : `${plural(count, "decision", "decisions")} for you`),
@@ -154,10 +154,10 @@ export const projectLayout = {
 };
 
 export const startDialog = {
-  title: "Some of the crew can't work yet",
+  title: "Some of the squad can't work yet",
   lead: (count: number): string =>
     count === 0
-      ? "Something the crew needs is missing."
+      ? "Something the squad needs is missing."
       : `${plural(count, "agent needs", "agents need")} something the project doesn't have yet.`,
   who: (names: string[]): string => `Waits: ${names.join(", ")}`,
   after:

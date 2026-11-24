@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 export type ThemePreference = Theme | "system";
-const STORAGE_KEY = "crewmind.theme";
+const STORAGE_KEY = "nightsquad.theme";
 
 function systemTheme(): Theme {
   return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";

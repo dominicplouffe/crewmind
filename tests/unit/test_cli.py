@@ -1,4 +1,4 @@
-"""The `crewmind` command: help, secrets, options and stored login (IF-4.1, IF-4.3, IF-4.5)."""
+"""The `squad` command: help, secrets, options and stored login (IF-4.1, IF-4.3, IF-4.5)."""
 
 from __future__ import annotations
 
@@ -11,18 +11,18 @@ import pytest
 from typer.main import get_command
 from typer.testing import CliRunner
 
-from crewmind.catalog import Surface, catalog
-from crewmind.catalog.registry import load_domain_modules
-from crewmind.catalog.surfaces import exposed_on
-from crewmind.surfaces.cli.config import CliState
-from crewmind.surfaces.cli.main import ALIASES, ExitCode, build_cli
+from nightsquad.catalog import Surface, catalog
+from nightsquad.catalog.registry import load_domain_modules
+from nightsquad.catalog.surfaces import exposed_on
+from nightsquad.surfaces.cli.config import CliState
+from nightsquad.surfaces.cli.main import ALIASES, ExitCode, build_cli
 from tests.support import PASSWORD, App, OnLoop, invoker_for, run_cli
 
 
-def test_IF_4_3_crewmind_help_runs() -> None:
-    """IF-4.3: `crewmind --help` exits 0 and lists the command groups."""
+def test_IF_4_3_nightsquad_help_runs() -> None:
+    """IF-4.3: `squad --help` exits 0 and lists the command groups."""
     result = subprocess.run(
-        [sys.executable, "-m", "crewmind", "--help"], capture_output=True, text=True, check=False
+        [sys.executable, "-m", "nightsquad", "--help"], capture_output=True, text=True, check=False
     )
     assert result.returncode == 0
     for group in ("projects", "settings", "record", "login", "up", "doctor", "backup"):
@@ -75,16 +75,16 @@ def test_IF_4_5_a_secret_is_never_a_command_line_argument() -> None:
 async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
     app: App, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """IF-4.1, IF-4.5, ACC-3: `crewmind login` reads the password from a file, keeps a
+    """IF-4.1, IF-4.5, ACC-3: `squad login` reads the password from a file, keeps a
     personal token in a private file, never prints a credential, and ends its session.
-    `crewmind logout` revokes the token on the server."""
-    monkeypatch.setenv("CREWMIND_DATA_DIR", str(tmp_path / "cli"))
-    monkeypatch.delenv("CREWMIND_TOKEN", raising=False)
+    `squad logout` revokes the token on the server."""
+    monkeypatch.setenv("NIGHTSQUAD_DATA_DIR", str(tmp_path / "cli"))
+    monkeypatch.delenv("NIGHTSQUAD_TOKEN", raising=False)
     alice = await app.person("alice@example.com")
     password_file = tmp_path / "password"
     password_file.write_text(PASSWORD + "\n")
-    from crewmind.surfaces.cli.config import current_token
-    from crewmind.surfaces.cli.invoke import HttpInvoker
+    from nightsquad.surfaces.cli.config import current_token
+    from nightsquad.surfaces.cli.invoke import HttpInvoker
     from tests.support import api_client_factory
 
     invoker = OnLoop(HttpInvoker(api_client_factory(app.api), current_token))
@@ -96,10 +96,10 @@ async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
     assert signed_in.exit_code == 0, signed_in.output
     state = CliState.load()
     assert state.token is not None
-    assert state.token.startswith("cm_pat_")
+    assert state.token.startswith("ns_pat_")
     assert (CliState.path().stat().st_mode & 0o077) == 0
     assert state.token not in signed_in.output
-    assert "cm_ses_" not in signed_in.output
+    assert "ns_ses_" not in signed_in.output
     assert json.loads(signed_in.stdout)["signed_in_as"] == "alice"
 
     who = await run_cli(cli, ["whoami", "--json"])
@@ -127,13 +127,13 @@ async def test_IF_4_1_login_stores_a_personal_token_and_logout_revokes_it(
     assert (await app.call("auth.whoami", state.token)).status_code == 401
 
 
-def test_IF_4_8_crewmind_chat_opens_the_terminal_chat_and_keeps_its_subcommands(
+def test_IF_4_8_nightsquad_chat_opens_the_terminal_chat_and_keeps_its_subcommands(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """IF-4.8, CHAT-1: `crewmind chat` with no subcommand opens the project chat in the
-    terminal; `crewmind chat send` and the other chat commands still exist beside it."""
-    from crewmind.surfaces.cli.chat.app import ChatApp
-    from crewmind.surfaces.cli.chat.client import ChatClient
+    """IF-4.8, CHAT-1: `squad chat` with no subcommand opens the project chat in the
+    terminal; `squad chat send` and the other chat commands still exist beside it."""
+    from nightsquad.surfaces.cli.chat.app import ChatApp
+    from nightsquad.surfaces.cli.chat.client import ChatClient
 
     opened: list[str] = []
 

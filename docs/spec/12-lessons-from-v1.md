@@ -34,4 +34,4 @@ v1's ideas are mostly right; its structure is what failed. It grew to about 87,0
 - the Founder's goal grammar and doctrine;
 - attack tests for every rule.
 
-The role library, crews, examples, doctrine and goal grammar are imported as content.
+The role library, squads, examples, doctrine and goal grammar are imported as content.

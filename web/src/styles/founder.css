@@ -216,9 +216,9 @@
 .rail-card.fold > summary { color: var(--color-text-muted); }
 .fold[open] > summary { margin-bottom: var(--space-2); }
 .draft-goal { font-size: var(--text-md); }
-.crew-list, .redone-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
-.crew-team { font-weight: var(--weight-medium); }
-.crew-members, .redone-list li { color: var(--color-text-muted); font-size: var(--text-sm); }
+.squad-list, .redone-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.squad-team { font-weight: var(--weight-medium); }
+.squad-members, .redone-list li { color: var(--color-text-muted); font-size: var(--text-sm); }
 
 /* ---------- Decisions ---------- */
 .decision-list { list-style: none; margin: 0; padding: 0; }
@@ -247,7 +247,7 @@
 
 /* ---------- The draft, read as a brief ---------- */
 .brief .pairs { margin: 0; }
-.brief-goal, .brief-crew { margin-top: var(--space-3); }
+.brief-goal, .brief-squad { margin-top: var(--space-3); }
 .goal-text.clamped {
   max-height: 11rem;
   overflow: hidden;
@@ -255,7 +255,7 @@
   mask-image: linear-gradient(#000 65%, transparent);
 }
 .brief-goal > .button { margin-top: var(--space-1); margin-left: calc(-1 * var(--space-2)); }
-.crew-team .crew-role { margin-left: var(--space-1); font-weight: var(--weight-regular); }
+.squad-team .squad-role { margin-left: var(--space-1); font-weight: var(--weight-regular); }
 
 /* ---------- The conversation ---------- */
 .draft-lines { display: flex; flex-direction: column; gap: var(--space-1); }

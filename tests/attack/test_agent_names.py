@@ -8,10 +8,10 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.catalog import catalog
-from crewmind.catalog.operation import Principal
-from crewmind.domain.execution import names
-from crewmind.storage.models import Message, Seat
+from nightsquad.catalog import catalog
+from nightsquad.catalog.operation import Principal
+from nightsquad.domain.execution import names
+from nightsquad.storage.models import Message, Seat
 from tests.attack.harness import assert_refused
 from tests.support import App, agent_call, live_run, running_project
 
@@ -20,18 +20,18 @@ def _by_seat(roster: dict[str, Any]) -> dict[str, str]:
     return {seat["name"]: seat["display_name"] for seat in roster["seats"]}
 
 
-def test_EXE_18_the_pool_is_distinct_first_names_that_crews_do_not_use() -> None:
+def test_EXE_18_the_pool_is_distinct_first_names_that_squads_do_not_use() -> None:
     """EXE-18: the pool holds about sixty different first names, none a name the shipped
-    crews or the demo give their members; a project always draws the same name, and a
+    squads or the demo give their members; a project always draws the same name, and a
     used-up pool goes round again with a number."""
     import json
     from importlib import resources
 
     assert len(names.POOL) >= 50
     assert len({name.casefold() for name in names.POOL}) == len(names.POOL)
-    crews = resources.files("crewmind.content").joinpath("library", "crews")
+    squads = resources.files("nightsquad.content").joinpath("library", "squads")
     given = {"Maya", "Theo", "Priya", "Fay", "Noor"}
-    for entry in crews.iterdir():
+    for entry in squads.iterdir():
         if entry.name.endswith(".json"):
             for team in json.loads(entry.read_text("utf-8"))["teams"]:
                 given.update(team["members"])
@@ -132,7 +132,7 @@ async def test_EXE_18_a_mention_by_name_reaches_the_agent_and_the_agent_knows_it
     app: App,
 ) -> None:
     """EXE-18, CHAT-2, EXE-15: `@Name` addresses the agent shown by that name, without case,
-    as `@CEO` still does; the agent's prompt and context pack name it and list the crew by
+    as `@CEO` still does; the agent's prompt and context pack name it and list the squad by
     name and role."""
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)

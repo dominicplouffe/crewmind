@@ -125,7 +125,7 @@
       "title": "Base Url"
      },
      "key": {
-      "description": "The API key. It is encrypted and never shown again.",
+      "description": "The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.",
       "format": "password",
       "title": "Key",
       "type": "string",
@@ -417,7 +417,7 @@
      "delivery": {
       "$ref": "#/components/schemas/Delivery",
       "default": "sent_for_you",
-      "description": "sent_for_you (crewmind adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
+      "description": "sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
      },
      "description": {
       "description": "What it is for, in one line. Agents read it.",
@@ -2683,7 +2683,7 @@
       "type": "string"
      },
      "waiting": {
-      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).",
+      "description": "Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).",
       "items": {
        "type": "string"
       },
@@ -2737,7 +2737,7 @@
       "type": "string"
      },
      "waiting": {
-      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).",
+      "description": "Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).",
       "items": {
        "type": "string"
       },
@@ -2867,172 +2867,6 @@
      "name"
     ],
     "title": "CredentialRef",
-    "type": "object"
-   },
-   "CrewDoc": {
-    "additionalProperties": false,
-    "description": "One crew, as a file (LIB-2).",
-    "properties": {
-     "ceo_role": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Ceo Role",
-      "type": "string"
-     },
-     "crewmind_crew": {
-      "const": 1,
-      "default": 1,
-      "title": "Crewmind Crew",
-      "type": "integer"
-     },
-     "domains": {
-      "items": {
-       "type": "string"
-      },
-      "title": "Domains",
-      "type": "array"
-     },
-     "estimate": {
-      "anyOf": [
-       {
-        "$ref": "#/components/schemas/Estimate"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "Reference runs and tokens for the job, when known (GOV-4)."
-     },
-     "name": {
-      "maxLength": 200,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "outcome": {
-      "description": "What the crew delivers.",
-      "maxLength": 2000,
-      "minLength": 1,
-      "title": "Outcome",
-      "type": "string"
-     },
-     "slug": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Slug",
-      "type": "string"
-     },
-     "teams": {
-      "items": {
-       "$ref": "#/components/schemas/CrewTeam"
-      },
-      "title": "Teams",
-      "type": "array"
-     }
-    },
-    "required": [
-     "slug",
-     "name",
-     "outcome",
-     "ceo_role",
-     "teams"
-    ],
-    "title": "CrewDoc",
-    "type": "object"
-   },
-   "CrewItem": {
-    "properties": {
-     "domains": {
-      "items": {
-       "type": "string"
-      },
-      "title": "Domains",
-      "type": "array"
-     },
-     "estimate_tokens": {
-      "anyOf": [
-       {
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Estimate Tokens"
-     },
-     "name": {
-      "title": "Name",
-      "type": "string"
-     },
-     "outcome": {
-      "title": "Outcome",
-      "type": "string"
-     },
-     "seats": {
-      "description": "Seats in its teams, not counting the CEO.",
-      "title": "Seats",
-      "type": "integer"
-     },
-     "slug": {
-      "title": "Slug",
-      "type": "string"
-     }
-    },
-    "required": [
-     "slug",
-     "name",
-     "outcome",
-     "domains",
-     "seats",
-     "estimate_tokens"
-    ],
-    "title": "CrewItem",
-    "type": "object"
-   },
-   "CrewList": {
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/CrewItem"
-      },
-      "title": "Items",
-      "type": "array"
-     }
-    },
-    "required": [
-     "items"
-    ],
-    "title": "CrewList",
-    "type": "object"
-   },
-   "CrewTeam": {
-    "additionalProperties": false,
-    "properties": {
-     "members": {
-      "items": {
-       "type": "string"
-      },
-      "maxItems": 12,
-      "minItems": 1,
-      "title": "Members",
-      "type": "array"
-     },
-     "name": {
-      "maxLength": 60,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "role": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Role",
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "role",
-     "members"
-    ],
-    "title": "CrewTeam",
     "type": "object"
    },
    "CycleView": {
@@ -3743,7 +3577,7 @@
       "type": "array"
      },
      "needs": {
-      "description": "What the drafted crew needs from outside, and whether you have it (FND-9).",
+      "description": "What the drafted squad needs from outside, and whether you have it (FND-9).",
       "items": {
        "$ref": "#/components/schemas/DraftNeed"
       },
@@ -7613,12 +7447,6 @@
       "title": "Credentials",
       "type": "array"
      },
-     "crewmind_spec": {
-      "const": 1,
-      "default": 1,
-      "title": "Crewmind Spec",
-      "type": "integer"
-     },
      "deadline": {
       "anyOf": [
        {
@@ -7647,6 +7475,12 @@
       "minLength": 1,
       "title": "Name",
       "type": "string"
+     },
+     "nightsquad_spec": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Spec",
+      "type": "integer"
      },
      "paying_credential": {
       "anyOf": [
@@ -7865,12 +7699,22 @@
       ],
       "title": "Ceiling"
      },
+     "credential": {
+      "description": "key, or login for a command-line agent (LLM-2).",
+      "title": "Credential",
+      "type": "string"
+     },
      "images": {
       "title": "Images",
       "type": "boolean"
      },
      "label": {
       "title": "Label",
+      "type": "string"
+     },
+     "login_hint": {
+      "description": "What to paste as a login, in plain words.",
+      "title": "Login Hint",
       "type": "string"
      },
      "name": {
@@ -7887,7 +7731,9 @@
      "label",
      "needs_base_url",
      "images",
-     "ceiling"
+     "ceiling",
+     "credential",
+     "login_hint"
     ],
     "title": "ProviderItem",
     "type": "object"
@@ -8828,12 +8674,6 @@
       "title": "Credential Names",
       "type": "array"
      },
-     "crewmind_role": {
-      "const": 1,
-      "default": 1,
-      "title": "Crewmind Role",
-      "type": "integer"
-     },
      "description": {
       "maxLength": 2000,
       "minLength": 1,
@@ -8878,6 +8718,12 @@
       "default": false,
       "title": "Needs Vision",
       "type": "boolean"
+     },
+     "nightsquad_role": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Role",
+      "type": "integer"
      },
      "skills": {
       "description": "Skills it may use, each pinned by version.",
@@ -9502,7 +9348,7 @@
    "SearchHit": {
     "properties": {
      "kind": {
-      "description": "role or crew.",
+      "description": "role or squad.",
       "title": "Kind",
       "type": "string"
      },
@@ -10343,6 +10189,172 @@
      "purchases"
     ],
     "title": "SpendView",
+    "type": "object"
+   },
+   "SquadDoc": {
+    "additionalProperties": false,
+    "description": "One squad, as a file (LIB-2).",
+    "properties": {
+     "ceo_role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Ceo Role",
+      "type": "string"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Estimate"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Reference runs and tokens for the job, when known (GOV-4)."
+     },
+     "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "nightsquad_squad": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Squad",
+      "type": "integer"
+     },
+     "outcome": {
+      "description": "What the squad delivers.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Outcome",
+      "type": "string"
+     },
+     "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "teams": {
+      "items": {
+       "$ref": "#/components/schemas/SquadTeam"
+      },
+      "title": "Teams",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "ceo_role",
+     "teams"
+    ],
+    "title": "SquadDoc",
+    "type": "object"
+   },
+   "SquadItem": {
+    "properties": {
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate_tokens": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Estimate Tokens"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "outcome": {
+      "title": "Outcome",
+      "type": "string"
+     },
+     "seats": {
+      "description": "Seats in its teams, not counting the CEO.",
+      "title": "Seats",
+      "type": "integer"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "domains",
+     "seats",
+     "estimate_tokens"
+    ],
+    "title": "SquadItem",
+    "type": "object"
+   },
+   "SquadList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/SquadItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "SquadList",
+    "type": "object"
+   },
+   "SquadTeam": {
+    "additionalProperties": false,
+    "properties": {
+     "members": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Members",
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Role",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "role",
+     "members"
+    ],
+    "title": "SquadTeam",
     "type": "object"
    },
    "Step": {
@@ -11605,7 +11617,7 @@
     "title": "Working",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__HistoryLine": {
+   "nightsquad__domain__connections__item_operations__HistoryLine": {
     "properties": {
      "at": {
       "format": "date-time",
@@ -11641,7 +11653,7 @@
     "title": "HistoryLine",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__ItemDetail": {
+   "nightsquad__domain__connections__item_operations__ItemDetail": {
     "properties": {
      "hidden_uses": {
       "description": "Projects using it that you cannot see.",
@@ -11650,7 +11662,7 @@
      },
      "history": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__HistoryLine"
+       "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__HistoryLine"
       },
       "title": "History",
       "type": "array"
@@ -11676,7 +11688,7 @@
     "title": "ItemDetail",
     "type": "object"
    },
-   "crewmind__domain__connections__item_operations__ItemList": {
+   "nightsquad__domain__connections__item_operations__ItemList": {
     "properties": {
      "items": {
       "items": {
@@ -11692,7 +11704,7 @@
     "title": "ItemList",
     "type": "object"
    },
-   "crewmind__domain__conversation__decisions__DecideInput": {
+   "nightsquad__domain__conversation__decisions__DecideInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -11714,7 +11726,7 @@
     "title": "DecideInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__decisions__RuleInput": {
+   "nightsquad__domain__conversation__decisions__RuleInput": {
     "properties": {
      "decision_id": {
       "description": "The decision's id, from `decisions list`.",
@@ -11742,7 +11754,7 @@
     "title": "RuleInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__directives__AcceptInput": {
+   "nightsquad__domain__conversation__directives__AcceptInput": {
     "properties": {
      "card_id": {
       "description": "The card's id.",
@@ -11774,7 +11786,7 @@
     "title": "AcceptInput",
     "type": "object"
    },
-   "crewmind__domain__conversation__operations__History": {
+   "nightsquad__domain__conversation__operations__History": {
     "properties": {
      "earlier": {
       "anyOf": [
@@ -11813,7 +11825,7 @@
     "title": "History",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__DecideInput": {
+   "nightsquad__domain__decisions__operations__DecideInput": {
     "properties": {
      "action": {
       "description": "One of the item's actions.",
@@ -11891,7 +11903,7 @@
     "title": "DecideInput",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ExtendInput": {
+   "nightsquad__domain__decisions__operations__ExtendInput": {
     "properties": {
      "days": {
       "description": "How many days more: 1 to 30.",
@@ -11924,7 +11936,7 @@
     "title": "ExtendInput",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__HistoryLine": {
+   "nightsquad__domain__decisions__operations__HistoryLine": {
     "properties": {
      "actor_kind": {
       "title": "Actor Kind",
@@ -11960,7 +11972,7 @@
     "title": "HistoryLine",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ItemDetail": {
+   "nightsquad__domain__decisions__operations__ItemDetail": {
     "properties": {
      "actions": {
       "description": "What you can do with it now.",
@@ -12041,7 +12053,7 @@
      },
      "history": {
       "items": {
-       "$ref": "#/components/schemas/crewmind__domain__decisions__operations__HistoryLine"
+       "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__HistoryLine"
       },
       "title": "History",
       "type": "array"
@@ -12120,7 +12132,7 @@
     "title": "ItemDetail",
     "type": "object"
    },
-   "crewmind__domain__decisions__operations__ItemList": {
+   "nightsquad__domain__decisions__operations__ItemList": {
     "properties": {
      "items": {
       "items": {
@@ -12136,7 +12148,7 @@
     "title": "ItemList",
     "type": "object"
    },
-   "crewmind__domain__founder__operations__StartInput": {
+   "nightsquad__domain__founder__operations__StartInput": {
     "properties": {
      "brief": {
       "description": "What you want, in your own words.",
@@ -12165,7 +12177,7 @@
     "title": "StartInput",
     "type": "object"
    },
-   "crewmind__domain__planning__delivery_operations__ReasonInput": {
+   "nightsquad__domain__planning__delivery_operations__ReasonInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12186,7 +12198,7 @@
     "title": "ReasonInput",
     "type": "object"
    },
-   "crewmind__domain__planning__explore_operations__ExtendInput": {
+   "nightsquad__domain__planning__explore_operations__ExtendInput": {
     "properties": {
      "bet_id": {
       "description": "The bet's id, from `plan show`.",
@@ -12220,7 +12232,7 @@
     "title": "ExtendInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__AcceptInput": {
+   "nightsquad__domain__planning__operations__AcceptInput": {
     "properties": {
      "anyway": {
       "default": false,
@@ -12246,7 +12258,7 @@
     "title": "AcceptInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__ReasonInput": {
+   "nightsquad__domain__planning__operations__ReasonInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12273,7 +12285,7 @@
     "title": "ReasonInput",
     "type": "object"
    },
-   "crewmind__domain__planning__operations__RuleInput": {
+   "nightsquad__domain__planning__operations__RuleInput": {
     "properties": {
      "note": {
       "anyOf": [
@@ -12312,7 +12324,7 @@
     "title": "RuleInput",
     "type": "object"
    },
-   "crewmind__domain__projects__operations__StartInput": {
+   "nightsquad__domain__projects__operations__StartInput": {
     "properties": {
      "project_id": {
       "description": "The project's id, from `projects list`.",
@@ -12321,7 +12333,7 @@
      },
      "without_missing": {
       "default": false,
-      "description": "Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).",
+      "description": "Start even though some of the squad cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).",
       "title": "Without Missing",
       "type": "boolean"
      }
@@ -12332,7 +12344,7 @@
     "title": "StartInput",
     "type": "object"
    },
-   "crewmind__domain__settings__operations__History": {
+   "nightsquad__domain__settings__operations__History": {
     "properties": {
      "items": {
       "items": {
@@ -12362,7 +12374,7 @@
   }
  },
  "info": {
-  "title": "crewmind",
+  "title": "nightsquad",
   "version": "1"
  },
  "openapi": "3.1.0",
@@ -13394,7 +13406,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__explore_operations__ExtendInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__explore_operations__ExtendInput"
        }
       }
      },
@@ -13545,7 +13557,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__directives__AcceptInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__directives__AcceptInput"
        }
       }
      },
@@ -14002,7 +14014,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__conversation__operations__History"
+         "$ref": "#/components/schemas/nightsquad__domain__conversation__operations__History"
         }
        }
       },
@@ -14357,7 +14369,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__delivery_operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__delivery_operations__ReasonInput"
        }
       }
      },
@@ -15018,7 +15030,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Show what a project has, what its crew needs, and what could be attached.",
+    "summary": "Show what a project has, what its squad needs, and what could be attached.",
     "tags": [
      "connections"
     ]
@@ -15113,7 +15125,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemList"
+         "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__ItemList"
         }
        }
       },
@@ -15324,7 +15336,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__connections__item_operations__ItemDetail"
+         "$ref": "#/components/schemas/nightsquad__domain__connections__item_operations__ItemDetail"
         }
        }
       },
@@ -15918,115 +15930,6 @@
     ]
    }
   },
-  "/v1/crews/list": {
-   "get": {
-    "description": "Requires: person.",
-    "operationId": "crews.list",
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewList"
-        }
-       }
-      },
-      "description": "Successful Response"
-     }
-    },
-    "summary": "List the ready-made crews: each is a job with a team already on it.",
-    "tags": [
-     "crews"
-    ]
-   }
-  },
-  "/v1/crews/save": {
-   "post": {
-    "description": "Requires: person.",
-    "operationId": "crews.save",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/CrewDoc"
-       }
-      }
-     },
-     "required": true
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewItem"
-        }
-       }
-      },
-      "description": "Successful Response"
-     },
-     "422": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/HTTPValidationError"
-        }
-       }
-      },
-      "description": "Validation Error"
-     }
-    },
-    "summary": "Add a crew from a file, or replace one that exists.",
-    "tags": [
-     "crews"
-    ]
-   }
-  },
-  "/v1/crews/show": {
-   "get": {
-    "description": "Requires: person.",
-    "operationId": "crews.show",
-    "parameters": [
-     {
-      "description": "The crew's slug, from `crews list`.",
-      "in": "query",
-      "name": "crew",
-      "required": true,
-      "schema": {
-       "description": "The crew's slug, from `crews list`.",
-       "title": "Crew",
-       "type": "string"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewDoc"
-        }
-       }
-      },
-      "description": "Successful Response"
-     },
-     "422": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/HTTPValidationError"
-        }
-       }
-      },
-      "description": "Validation Error"
-     }
-    },
-    "summary": "Show one crew in full, as the file it can be saved to.",
-    "tags": [
-     "crews"
-    ]
-   }
-  },
   "/v1/cycles/set_due": {
    "post": {
     "description": "Requires: project_chair.",
@@ -16119,7 +16022,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__DecideInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__decisions__DecideInput"
        }
       }
      },
@@ -16293,7 +16196,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__conversation__decisions__RuleInput"
+        "$ref": "#/components/schemas/nightsquad__domain__conversation__decisions__RuleInput"
        }
       }
      },
@@ -16892,7 +16795,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__founder__operations__StartInput"
+        "$ref": "#/components/schemas/nightsquad__domain__founder__operations__StartInput"
        }
       }
      },
@@ -17236,7 +17139,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__DecideInput"
+        "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__DecideInput"
        }
       }
      },
@@ -17278,7 +17181,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ExtendInput"
+        "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ExtendInput"
        }
       }
      },
@@ -17364,7 +17267,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemList"
+         "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ItemList"
         }
        }
       },
@@ -17462,7 +17365,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__decisions__operations__ItemDetail"
+         "$ref": "#/components/schemas/nightsquad__domain__decisions__operations__ItemDetail"
         }
        }
       },
@@ -17675,7 +17578,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CrewList"
+         "$ref": "#/components/schemas/SquadList"
         }
        }
       },
@@ -17692,7 +17595,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Load the roles and crews shipped with this version of crewmind again.",
+    "summary": "Load the roles and squads shipped with this version of nightsquad again.",
     "tags": [
      "library"
     ]
@@ -17751,7 +17654,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Find roles and crews that fit a piece of work.",
+    "summary": "Find roles and squads that fit a piece of work.",
     "tags": [
      "library"
     ]
@@ -18674,7 +18577,7 @@
       "description": "Successful Response"
      }
     },
-    "summary": "List the providers crewmind can use, with any concurrency ceiling.",
+    "summary": "List the providers nightsquad can use, with any concurrency ceiling.",
     "tags": [
      "models"
     ]
@@ -20263,7 +20166,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Show what the crew would wait for if the project started now, and who.",
+    "summary": "Show what the squad would wait for if the project started now, and who.",
     "tags": [
      "projects"
     ]
@@ -20493,7 +20396,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__projects__operations__StartInput"
+        "$ref": "#/components/schemas/nightsquad__domain__projects__operations__StartInput"
        }
       }
      },
@@ -21102,7 +21005,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__AcceptInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__AcceptInput"
        }
       }
      },
@@ -21228,7 +21131,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__ReasonInput"
        }
       }
      },
@@ -21270,7 +21173,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__ReasonInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__ReasonInput"
        }
       }
      },
@@ -21354,7 +21257,7 @@
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/crewmind__domain__planning__operations__RuleInput"
+        "$ref": "#/components/schemas/nightsquad__domain__planning__operations__RuleInput"
        }
       }
      },
@@ -22309,7 +22212,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/crewmind__domain__settings__operations__History"
+         "$ref": "#/components/schemas/nightsquad__domain__settings__operations__History"
         }
        }
       },
@@ -22569,6 +22472,115 @@
     "summary": "Show real-world spend: the cap, what is committed this month, and each purchase.",
     "tags": [
      "spend"
+    ]
+   }
+  },
+  "/v1/squads/list": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "squads.list",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List the ready-made squads: each is a job with a team already on it.",
+    "tags": [
+     "squads"
+    ]
+   }
+  },
+  "/v1/squads/save": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "squads.save",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SquadDoc"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a squad from a file, or replace one that exists.",
+    "tags": [
+     "squads"
+    ]
+   }
+  },
+  "/v1/squads/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "squads.show",
+    "parameters": [
+     {
+      "description": "The squad's slug, from `squads list`.",
+      "in": "query",
+      "name": "squad",
+      "required": true,
+      "schema": {
+       "description": "The squad's slug, from `squads list`.",
+       "title": "Squad",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadDoc"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one squad in full, as the file it can be saved to.",
+    "tags": [
+     "squads"
     ]
    }
   },

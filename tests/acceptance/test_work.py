@@ -1,5 +1,5 @@
-"""Phase 4 as real processes (WRK-5, WRK-7, INV-2, EXE-12): the reference competent crew
-runs in `crewmind up --slim` with agents as separate processes, and the server's own job
+"""Phase 4 as real processes (WRK-5, WRK-7, INV-2, EXE-12): the reference competent squad
+runs in `squad up --slim` with agents as separate processes, and the server's own job
 runs the pinned check in a process with no token and no key."""
 
 from __future__ import annotations
@@ -14,28 +14,28 @@ from tests.support import PASSWORD
 SCRIPTS = Path(__file__).parents[2] / "acceptance" / "scripts"
 
 
-def test_INV_2_a_real_crew_finishes_a_job_the_platform_verifies(tmp_path: Path) -> None:
+def test_INV_2_a_real_squad_finishes_a_job_the_platform_verifies(tmp_path: Path) -> None:
     """INV-2, WRK-5, WRK-7, P5: the CEO's process creates a task whose test fails first; the
     lead's process claims it, writes the file and completes it; the server runs the pinned
     check and only then is the task done, labelled verified."""
-    finish_a_verified_job(tmp_path, {"CREWMIND_SANDBOX_MODE": "unisolated"})
+    finish_a_verified_job(tmp_path, {"NIGHTSQUAD_SANDBOX_MODE": "unisolated"})
 
 
 def finish_a_verified_job(tmp_path: Path, environment: dict[str, str]) -> None:
-    """The reference competent crew takes one task from planned to verified, in the
+    """The reference competent squad takes one task from planned to verified, in the
     sandbox mode the environment names."""
     scripts = tmp_path / "scripts"
     scripts.mkdir()
-    crew = json.loads((SCRIPTS / "competent-crew.json").read_text())
-    for key, turns in crew.items():
+    squad = json.loads((SCRIPTS / "competent-squad.json").read_text())
+    for key, turns in squad.items():
         if key != "about":
             (scripts / f"{key.replace('/', '.')}.json").write_text(json.dumps(turns))
     install = Install(tmp_path / "data")
     install.env.update(environment)
     for name, value in environment.items():
         install.env[name] = value.replace("{port}", str(install.port))
-    install.env["CREWMIND_MOCK_SCRIPT_DIR"] = str(scripts)
-    install.env["CREWMIND_MEMORY_ENGINE"] = "in-process"
+    install.env["NIGHTSQUAD_MOCK_SCRIPT_DIR"] = str(scripts)
+    install.env["NIGHTSQUAD_MEMORY_ENGINE"] = "in-process"
     try:
         setup = install.run("setup", "--slim", "--admin-email", "dom@example.com")
         install.start("--slim")

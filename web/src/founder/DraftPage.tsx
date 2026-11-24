@@ -61,7 +61,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
   const mode: ComposerMode = stage === "founder" ? "working" : asking ? "questions" : "open";
   const start = (): void => {
     void actions.start().then((projectId) => {
-      if (projectId) navigate(`/projects/${projectId}?crew=hired`);
+      if (projectId) navigate(`/projects/${projectId}?squad=hired`);
     });
   };
 

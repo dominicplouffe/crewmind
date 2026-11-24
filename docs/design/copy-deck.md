@@ -27,7 +27,7 @@ share); say what happens next, in words, never by colour alone; keep raw values 
 | 14 | Budget | 1,920 of 20,000,000 tokens used (0%) | 1.9K of 20M tokens used (<0.1%) | Compact numbers give scale; "0%" was false for a non-zero spend. |
 | 15 | Budget | (bare progress bar) | Meter with marks at the warning and wrap-up levels, and "18M tokens left" | Shows where the limits sit, and what is left, at a glance. |
 | 16 | Budget | Warning at 16,000,000 tokens | At 16M tokens (80%) the CEO is warned and a line goes in the chat. | Says what happens at the level, not only where it is. |
-| 17 | Budget | Wrap-up at 18,000,000 tokens | At 18M tokens (90%) the crew wraps up: no new scope, only work already under way, and you are asked whether to raise the budget or let the project land. | "Wrap-up" was jargon; this is GOV-3 in words. |
+| 17 | Budget | Wrap-up at 18,000,000 tokens | At 18M tokens (90%) the squad wraps up: no new scope, only work already under way, and you are asked whether to raise the budget or let the project land. | "Wrap-up" was jargon; this is GOV-3 in words. |
 | 18 | Budget | Limit 20,000,000 tokens | At 20M tokens all work stops until you raise the limit. | The wall's consequence, said once. |
 | 19 | Budget | Tokens by kind | Where the tokens went | Asks the question the table answers. |
 | 20 | Budget | Input | Reading (what the agents were given) | "Input tokens" is model-API language. |
@@ -48,7 +48,7 @@ share); say what happens next, in words, never by colour alone; keep raw values 
 | 35 | Decision card | delivery sign-off / reserve draw / proposed commitment | Sign-off / Reserve request / Finish date proposal | Same. |
 | 36 | Decision card | Answer by Nov 25, 2026, 10:14 PM. If you do nothing: it is declined. | Decide by Wed 10:14 PM · in 3 days, then (after the recommendation) If you do nothing: it is declined. | Short date plus distance; the default outcome gets its own line. |
 | 37 | Decision card | (no urgency) | Overdue / Due today / Due soon badge, plus "Overdue · was due …" | Urgency in words, not colour alone (WCAG 1.4.1). |
-| 38 | Decision card | (who asks not shown) | The CEO asks / An agent asks / crewmind asks, with the asker's avatar | The chairman should know who wants the decision. |
+| 38 | Decision card | (who asks not shown) | The CEO asks / An agent asks / nightsquad asks, with the asker's avatar | The chairman should know who wants the decision. |
 | 39 | Decision card | Recommendation: Accept requirement 1 into scope. | RECOMMENDATION callout | The recommendation is the most useful line; it is set apart. |
 | 40 | Decision card | defaulted / void (state tags) | Decided by default / No longer needed | State names become outcomes. |
 | 41 | Decision card, Desk | (none) | Discuss in chat | A way to talk it over before deciding. |
@@ -58,13 +58,13 @@ share); say what happens next, in words, never by colour alone; keep raw values 
 | 45 | Board | ready (3) | Ready (3), task state as a pill | Sentence case; state scannable. Check labels stay the server's words (rule in strings.board.ts). |
 | 46 | Memory | Project: 34 of 6,000 tokens (bare progress bar) | Project: 34 of 6,000 tokens · 1%, with a meter | Adds the share; the sentence is kept. |
 | 47 | Activity | 22 Nov 2026, 22:14 (per line) | 22 minutes ago, grouped under "Sunday, November 22" | Relative time and day headings are how people scan a feed. |
-| 48 | Activity | (actor id hidden or shown raw) | Your avatar, "Someone in the project", or the crewmind mark | Who did it, without showing ids. |
-| 49 | Activity (server, done) | project: created (project 375c76…). / item: state changed (item 3). | The project was created. / Item 3 is now open. / CEO joined the crew. | Event names are not sentences. Changed in the server's feed wording, with a test that no line reads like an event name. |
-| 50 | Chat | crewmind · crewmind · 10:14 PM (dashed box) | Centred quiet line with an icon: "Directive 1 to CEO: Plan the landing page. · 30 minutes ago" | Platform lines are context, not conversation. |
+| 48 | Activity | (actor id hidden or shown raw) | Your avatar, "Someone in the project", or the nightsquad mark | Who did it, without showing ids. |
+| 49 | Activity (server, done) | project: created (project 375c76…). / item: state changed (item 3). | The project was created. / Item 3 is now open. / CEO joined the squad. | Event names are not sentences. Changed in the server's feed wording, with a test that no line reads like an event name. |
+| 50 | Chat | nightsquad · nightsquad · 10:14 PM (dashed box) | Centred quiet line with an icon: "Directive 1 to CEO: Plan the landing page. · 30 minutes ago" | Platform lines are context, not conversation. |
 | 51 | Chat | CEO · agent · 10:14 PM | CEO · CEO / Project Manager · 5 minutes ago, with an avatar | The role says who this agent is; "agent" said nothing. |
 | 52 | Chat | Admin (on your own messages) | You | Your own messages are yours; the account name is noise. |
 | 53 | Chat | Delivered (text) | ✓✓ Delivered | Same word, quieter, with a mark. |
-| 54 | Chat, composer | Message. / for commands, @ for agents | Message the crew… / for commands, @ to mention | Says who you are writing to. |
+| 54 | Chat, composer | Message. / for commands, @ for agents | Message the squad… / for commands, @ to mention | Says who you are writing to. |
 | 55 | Chat, composer | Enter sends. Shift+Enter starts a new line. Up arrow brings back your last message. Esc stops a reply. | Enter to send · Shift+Enter for a new line · ↑ for your last message · Esc stops a reply | Shorter, scannable, and quieter under the box. |
 | 56 | Chat, composer | Attach files / Edit and resend last / Send (text buttons) | Paperclip, history and arrow icon buttons with the same accessible names | Less chrome around the box; names unchanged for assistive tech. |
 | 57 | Chat | Reply · Open thread · How this was made · More (underlined links on every message) | A small toolbar on hover or focus (always shown on touch screens) | Actions stop competing with the words. |

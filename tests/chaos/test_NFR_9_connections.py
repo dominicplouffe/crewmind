@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import text
 
-from crewmind.jobs.scheduler import Scheduler
-from crewmind.storage.engine import Database
+from nightsquad.jobs.scheduler import Scheduler
+from nightsquad.storage.engine import Database
 from tests.conftest import FakeClock
 from tests.support import App
 

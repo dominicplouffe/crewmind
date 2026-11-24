@@ -13,7 +13,7 @@ import { requirementProgress } from "../board/logic";
 import { AgentText } from "../board/parts";
 import { isSettled } from "./logic";
 import { StateTag, type Requirement } from "./parts";
-import { AgentAvatar, useAgentName } from "../../crew/names";
+import { AgentAvatar, useAgentName } from "../../squad/names";
 
 /** Cut and declined requirements are folded away; met ones stay, as progress. */
 function isDropped(state: string): boolean {

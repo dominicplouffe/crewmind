@@ -8,7 +8,7 @@
 #
 # Usage:
 #   deploy/backup_single_server.sh                       # into <state root>/backups/
-#   deploy/backup_single_server.sh --out /mnt/nas/crewmind.tar.gz
+#   deploy/backup_single_server.sh --out /mnt/nas/nightsquad.tar.gz
 #
 set -euo pipefail
 
@@ -32,7 +32,7 @@ load_env
 server_is_running || die "the server is not running. Start it: deploy/deploy_single_server.sh"
 
 say "Backup"
-out="$(crewmind backup)" || die "the backup failed:
+out="$(squad backup)" || die "the backup failed:
 $out"
 archive="$(printf '%s\n' "$out" | sed -n 's/^archive: //p')"
 [ -n "$archive" ] || die "the server did not say where it wrote the archive:

@@ -15,7 +15,7 @@ import { ItemsContext } from "./context";
 import { headlineOf } from "./headline";
 import type { Item } from "./logic";
 import { askerOf } from "./when";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 const ICONS: Record<string, LucideIcon> = { "heads-up": Megaphone, flag: AlertTriangle, "mistake report": FileWarning };
 

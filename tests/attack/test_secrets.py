@@ -9,11 +9,11 @@ import pytest
 from pydantic import BaseModel, SecretStr
 from sqlalchemy import select, text
 
-from crewmind.catalog import Principal, catalog
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.secret import one_time_secret_fields
-from crewmind.domain.secrets.store import MasterKey, SecretStore, ensure_master_key
-from crewmind.storage.models import Base, StoredSecret
+from nightsquad.catalog import Principal, catalog
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.secret import one_time_secret_fields
+from nightsquad.domain.secrets.store import MasterKey, SecretStore, ensure_master_key
+from nightsquad.storage.models import Base, StoredSecret
 from tests.support import PASSWORD, App
 
 SHOWN_ONCE = {

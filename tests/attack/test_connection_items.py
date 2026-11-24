@@ -11,13 +11,13 @@ from hypothesis import given
 from hypothesis import strategies as st
 from sqlalchemy import select
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.registry import catalog
-from crewmind.domain.connections import expiry
-from crewmind.domain.connections.model import CONNECTION_MACHINE
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.storage.models import Alarm, Event, Seat, StoredSecret
-from crewmind.surfaces.mcp.server import tool_name
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.registry import catalog
+from nightsquad.domain.connections import expiry
+from nightsquad.domain.connections.model import CONNECTION_MACHINE
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.storage.models import Alarm, Event, Seat, StoredSecret
+from nightsquad.surfaces.mcp.server import tool_name
 from tests.attack.harness import assert_refused
 from tests.attack.test_connections import blog_project, seats
 from tests.attack.test_mcp import client_for, mcp_caller
@@ -255,7 +255,7 @@ RESERVED = (
     "HTTPS_PROXY",
     "no_proxy",
     "LD_PRELOAD",
-    "CREWMIND_TOKEN",
+    "NIGHTSQUAD_TOKEN",
     "PYTHONPATH",
     "NODE_OPTIONS",
     "SSL_CERT_FILE",

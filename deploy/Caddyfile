@@ -1,17 +1,17 @@
-# The TLS front of a full server (NFR-6). It serves CREWMIND_PUBLIC_URL and passes
+# The TLS front of a full server (NFR-6). It serves NIGHTSQUAD_PUBLIC_URL and passes
 # everything to the server.
 #
-# CREWMIND_TLS is `internal` by default: Caddy signs the certificate itself, which suits
+# NIGHTSQUAD_TLS is `internal` by default: Caddy signs the certificate itself, which suits
 # an address on your own network, and a browser asks you to accept it once. For a public
-# host name, set CREWMIND_TLS to your email address and Caddy gets a certificate from
+# host name, set NIGHTSQUAD_TLS to your email address and Caddy gets a certificate from
 # Let's Encrypt.
 {
 	# A browser that connects to a bare address sends no server name; this is the
 	# certificate it gets.
-	default_sni {$CREWMIND_PUBLIC_HOST}
+	default_sni {$NIGHTSQUAD_PUBLIC_HOST}
 }
 
-{$CREWMIND_PUBLIC_URL} {
-	tls {$CREWMIND_TLS}
+{$NIGHTSQUAD_PUBLIC_URL} {
+	tls {$NIGHTSQUAD_TLS}
 	reverse_proxy server:8420
 }

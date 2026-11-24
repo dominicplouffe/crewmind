@@ -68,7 +68,7 @@ export function ProjectCard({ project }: { project: Project }): JSX.Element {
         <span>{t.projects.types[project.type as keyof typeof t.projects.types] ?? project.type}</span>
         {count > 0 ? <strong className="needs-text">{projectsPage.needs(count)}</strong> : null}
       </p>
-      <div className="project-card-crew">
+      <div className="project-card-squad">
         {first ? (
           <>
             <span className="avatar-stack" aria-hidden="true">

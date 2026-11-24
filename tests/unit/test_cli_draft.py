@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from crewmind.surfaces.cli.draft import Session, prompt_for, question_text
+from nightsquad.surfaces.cli.draft import Session, prompt_for, question_text
 
 QUESTION: dict[str, Any] = {
     "id": 7,
@@ -92,7 +92,7 @@ def test_IF_4_6_enter_a_letter_and_free_text_are_sent_as_typed_and_the_talk_resu
         ),
         ("founder.accept_rest", {"drafting_id": "d1"}),
     ]
-    assert printed[-1] == "\nKept. Resume with: crewmind draft --resume d1"
+    assert printed[-1] == "\nKept. Resume with: squad draft --resume d1"
 
 
 WORDPRESS = "The secret wordpress, for blog-writer is missing."
@@ -101,7 +101,7 @@ WORDPRESS = "The secret wordpress, for blog-writer is missing."
 def test_IF_4_7_after_creation_missing_credentials_are_asked_for_and_start_is_offered() -> None:
     """IF-4.7, FND-13, IF-4.5: once the ledger is confirmed and the project created, each
     missing credential is asked for with hidden input and may be skipped; what is still
-    missing is listed; who in the crew would wait is listed, and starting then means starting
+    missing is listed; who in the squad would wait is listed, and starting then means starting
     without it (CON-5)."""
     ledger = [{"settles": "finish_line", "value": "The signed proof", "source": "answer"}]
     created = {
@@ -138,7 +138,7 @@ def test_IF_4_7_after_creation_missing_credentials_are_asked_for_and_start_is_of
     made.after_creation(waiting)
     assert server.calls == []
     assert any(WORDPRESS in line for line in printed)
-    assert printed[-1] == "\nStart it with `crewmind projects start` when you are ready."
+    assert printed[-1] == "\nStart it with `squad projects start` when you are ready."
     made, printed = session(server, "y")
     made.after_creation(waiting)
     assert server.calls == [("projects.start", {"project_id": "p1", "without_missing": True})]

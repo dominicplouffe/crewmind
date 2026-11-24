@@ -96,20 +96,20 @@
   - Optional paid judges grade planning quality, plain language and sycophancy comparatively. Golden scenarios assert behaviour, never exact prompt wording.
 - **NFR-20** Every rule records how often it refuses and how often a refused call later succeeds, so false refusals are visible. Each phase plan lists which of its rules start in warn-only mode; a rule an invariant cites always enforces. New rules ship in warn-only mode first, unless they guard authority, budget, secrets or side effects.
 - **NFR-21** Code uses the domain names in section 4. No metaphor identifiers, and no comments that narrate incidents.
-- **NFR-22 OpenTelemetry export.** crewmind emits OpenTelemetry traces and metrics, following the GenAI semantic conventions, so runs can be watched in tools people already use (Grafana, Langfuse, Datadog and others).
+- **NFR-22 OpenTelemetry export.** nightsquad emits OpenTelemetry traces and metrics, following the GenAI semantic conventions, so runs can be watched in tools people already use (Grafana, Langfuse, Datadog and others).
   - **Spans:** every run, model call, tool call, agent API call, browser action, check, watch, scheduled job and A2A exchange. W3C trace context is carried from dispatcher to runner, harness, gateway and agent API, and onward on outbound A2A calls.
   - **Metrics:** tokens by kind, seat and model; run outcomes; refusals by rule; queue wait; chat latency; budget used against the wall.
   - **Off by default, and never to the vendor.** Export goes over OTLP only to a collector the admin configures (`otel.endpoint`). NFR-1's "no telemetry" still holds: nothing is sent anywhere else.
   - **Content stays home unless chosen.** Prompts and outputs are left out of spans unless `otel.capture_content` \[off\] is on for a project. Secret values are never exported (INV-6).
-  - crewmind's own trace store stays the source of truth; the export is a copy.
-- **NFR-23 Slim mode.** crewmind can run small, for one person on a laptop or a small virtual machine.
+  - nightsquad's own trace store stays the source of truth; the export is a copy.
+- **NFR-23 Slim mode.** nightsquad can run small, for one person on a laptop or a small virtual machine.
   - **One process** runs the server, scheduler, gateway and one runner, on SQLite, with the bundled local embedding model and Mem0's embedded vector store.
   - **Nothing extra required:** no Postgres, no message broker, and no Slack, email, A2A or OpenTelemetry unless configured.
   - **Sandboxes:** containers when Docker is present; host-jail mode once it ships (phase 8).
-  - **Install:** one command (for example `uv tool install crewmind`, then `crewmind up --slim`).
+  - **Install:** one command (for example `uv tool install nightsquad`, then `squad up --slim`).
   - **Targets:** start in under 5 seconds; idle memory under 400 MB before recall memory is first used, and about 450 MB once it is in use, because the memory library and its embedding model stay loaded.
   - **Same rules everywhere.** Slim mode runs the same rules, operations and tests as a full server; only storage and process layout differ.
-  - **Moving up:** `crewmind migrate --to postgres` moves a slim install to a full server with no data loss.
+  - **Moving up:** `squad migrate --to postgres` moves a slim install to a full server with no data loss.
 - **NFR-24 Technology.** The rebuild is written in Python.
   - **MUST:** Python 3.12 or later for the server, runners, scheduler, model gateway, memory, harness loop, CLI and MCP server.
   - **SHOULD**, each deviation recorded with a reason:
@@ -117,7 +117,7 @@
     - SQLAlchemy 2 with Alembic for both databases;
     - asyncio workers that lease from the database for background jobs, with no Redis or broker;
     - LiteLLM as a library inside the model gateway (LLM-1), and Mem0 as a library for recall memory (MEM-2);
-    - the official MCP Python SDK; Typer for the CLI; Textual for `crewmind chat`;
+    - the official MCP Python SDK; Typer for the CLI; Textual for `squad chat`;
     - the Docker SDK for Python for sandboxes; Playwright for Python for the agent browser (EXE-17);
     - the OpenTelemetry Python SDK (NFR-22);
     - uv, ruff, strict type checking, and pytest with Hypothesis for the state machines.

@@ -10,7 +10,7 @@ import { AgentText } from "../panels/board/parts";
 import { story, type Part } from "../strings.overview";
 import { Skeleton } from "../ui/Skeleton";
 import type { NowEntry, NowStatus } from "./now";
-import { AgentAvatar } from "../crew/names";
+import { AgentAvatar } from "../squad/names";
 
 /** Names in bold; titles written by agents or people as plain text (P4). */
 export function Sentence({ parts }: { parts: readonly Part[] }): JSX.Element {

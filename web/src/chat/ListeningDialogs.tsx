@@ -5,7 +5,7 @@ import { Modal } from "../components/Modal";
 import { t } from "../strings";
 import { snippet } from "./MessageItem";
 import type { Listening } from "./useListening";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 interface FormProps {
   label: string;

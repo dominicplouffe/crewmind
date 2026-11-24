@@ -38,11 +38,11 @@ describe("placements: day dividers, groups and reply quotes (CHAT-10, CHAT-11)",
     expect(shown.map((entry) => entry.continued)).toEqual([false, true, false, true, false]);
   });
 
-  it("never groups crewmind's own lines or action cards, nor what follows them", () => {
+  it("never groups nightsquad's own lines or action cards, nor what follows them", () => {
     const shown = placements(
       [
         message({ author_kind: "agent", author: "CEO" }),
-        message({ author_kind: "platform", author: "crewmind", kind: "status" }),
+        message({ author_kind: "platform", author: "nightsquad", kind: "status" }),
         message({ author_kind: "agent", author: "CEO" }),
         message({ author_kind: "agent", author: "CEO", detail: { kind: "action card", card: 3 } }),
       ],
@@ -54,7 +54,7 @@ describe("placements: day dividers, groups and reply quotes (CHAT-10, CHAT-11)",
 
   it("groups lines said while drafting by who said them", () => {
     const drafted = (author: string): Message =>
-      message({ author_kind: "platform", author: "crewmind", kind: "status", detail: { kind: "drafting", author } });
+      message({ author_kind: "platform", author: "nightsquad", kind: "status", detail: { kind: "drafting", author } });
     const shown = placements([drafted("founder"), drafted("founder"), drafted("person")], NOW, WORDS);
     expect(shown.map((entry) => entry.continued)).toEqual([false, true, false]);
   });

@@ -1,5 +1,5 @@
 {
-  "crewmind_role": 1,
+  "nightsquad_role": 1,
   "slug": "adversary",
   "name": "Red Team / Adversarial Reviewer",
   "kind": "reviewer",

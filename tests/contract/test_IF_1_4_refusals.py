@@ -7,9 +7,9 @@ import json
 from mcp import Client
 from typer.testing import CliRunner
 
-from crewmind.runtime import Runtime
-from crewmind.surfaces.cli.main import ExitCode, build_cli
-from crewmind.surfaces.mcp.server import build_mcp
+from nightsquad.runtime import Runtime
+from nightsquad.surfaces.cli.main import ExitCode, build_cli
+from nightsquad.surfaces.mcp.server import build_mcp
 from tests.contract.test_IF_1_3_conformance import every_scope
 from tests.support import (
     REFUSED_NAME,

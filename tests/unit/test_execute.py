@@ -8,13 +8,13 @@ import pytest
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
-from crewmind.catalog import Catalog, Reversibility
-from crewmind.catalog.caller import ANONYMOUS, Authority
-from crewmind.catalog.define import operation
-from crewmind.catalog.execute import Context
-from crewmind.runtime import Runtime
-from crewmind.storage.events import append_event, event_type
-from crewmind.storage.models import Event, Person
+from nightsquad.catalog import Catalog, Reversibility
+from nightsquad.catalog.caller import ANONYMOUS, Authority
+from nightsquad.catalog.define import operation
+from nightsquad.catalog.execute import Context
+from nightsquad.runtime import Runtime
+from nightsquad.storage.events import append_event, event_type
+from nightsquad.storage.models import Event, Person
 from tests.conftest import FakeClock
 from tests.support import App
 

@@ -8,7 +8,7 @@ import { snippet } from "../chat/MessageItem";
 import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
 import { Avatar } from "../ui/Avatar";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { AgentAvatar, useAgentName } from "../squad/names";
 
 interface Props {
   projectId: string;

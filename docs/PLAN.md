@@ -1,4 +1,4 @@
-# crewmind v2 build plan
+# nightsquad v2 build plan
 
 Owner: Dominic. Written 21 Nov 2026 against spec revision 2. Phases follow spec section 13; phase 0 is added before them.
 
@@ -30,12 +30,12 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
   - the attack-test harness;
   - a mock harness stub;
   - the settings registry loaded from Appendix A as data.
-- **Exit:** CI green on both databases with the skeleton. The spec review is answered, the conformance test fails when an operation is registered without an adapter, and `crewmind --help` runs.
+- **Exit:** CI green on both databases with the skeleton. The spec review is answered, the conformance test fails when an operation is registered without an adapter, and `squad --help` runs.
 
 ## Phase 1: Core
 
 - **Goal:** projects exist, are governed by versioned settings, and are reachable from API, CLI and MCP (read).
-- **Exit demo:** in slim mode (`crewmind up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
+- **Exit demo:** in slim mode (`squad up --slim`) and on a Postgres server, create a user and a project, change a setting with a reason, start, hold and resume it. See every change in the event log from the CLI, the API and an MCP client.
 - **Ids:** PRJ-1, PRJ-2, PRJ-3, PRJ-10; ACC-1, ACC-2, ACC-3, ACC-4, ACC-5, ACC-6; INV-5, INV-6, INV-7, INV-21; IF-1.1, IF-1.2, IF-1.3, IF-1.4, IF-3.1, IF-3.2, IF-3.3, IF-3.4, IF-3.5, IF-3.7, IF-3.8, IF-4.1, IF-4.2, IF-4.3, IF-4.4, IF-4.5; IF-5.1 and IF-5.2 in part (see below); BG-1, BG-3, BG-4; NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7, NFR-8, NFR-9, NFR-10, NFR-11, NFR-12, NFR-14, NFR-15, NFR-16, NFR-21, NFR-23, NFR-24
 - **Partial ids** (spec review R-11):
   - **MCP:** IF-5.1 is delivered here only as minted bearer tokens, and IF-5.2 only as the `read` scope, so the exit demo can use an MCP client. OAuth and the other scopes stay in phase 6.
@@ -45,7 +45,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 
 - **Goal:** talk to a CEO in the chat. It runs real work in a sandbox through the model gateway, metered in tokens, and stops at the wall.
 - **Exit demo:**
-  - In the web app and in `crewmind chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
+  - In the web app and in `squad chat`, the chairman talks to a CEO on the mock harness. A run on a real provider is not part of the test suite (owner decision, Q-006); real providers are covered by recorded responses.
   - An upload becomes an artifact.
   - A run is metered by token kind, and only non-cached tokens count.
   - Hitting the wall pauses the project.
@@ -87,14 +87,14 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 ## Phase 7: Founder and rehearsal (v2.0 release candidate)
 
 - **Goal:** start a project by talking. A pasted document is grilled before anything is drafted.
-- **Includes:** importing v1 content from `content/` (roles, crews, doctrine, goal grammar).
+- **Includes:** importing v1 content from `content/` (roles, squads, doctrine, goal grammar).
 - **Exit demo:** the Founder acceptance scenario passes, grilling included. The full v2.0 acceptance suite passes; the Standards item and the Slack column of surface parity are deferred.
 - **Ids:** PRJ-9; IF-4.6, IF-4.7; FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
 
 ## Phase 7.B: Secrets, variables and MCP servers (inserted 23 Nov 2026)
 
 - **Why:** the first real project could not do its job. Nothing accepts a role's secret, nothing connects an MCP server, and nothing stopped it starting. Most real projects need one or the other.
-- **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the crew know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
+- **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the squad know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
 - **Plan:** `docs/phases/phase-7b-plan.md`, with the code review that found how this was missed and the owner's answers (23 Nov 2026).
 - **Ids:** CON-1 to CON-16 (new section 6.17); EXE-13 (the half never built); INT-4 (moved from phase 8); EXE-14 (the egress proxy); PRJ-1 (the start checks); FND-13; IF-4.7; INV-6 (sandboxes and masking).
 

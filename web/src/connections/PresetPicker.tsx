@@ -1,6 +1,6 @@
 /**
  * Start from a well-known MCP server (CON-15): choosing one fills in the address or command, how
- * crewmind signs in, and says which secret to create at the provider. Nothing is saved by choosing.
+ * nightsquad signs in, and says which secret to create at the provider. Nothing is saved by choosing.
  */
 import { useEffect, useId, useState } from "react";
 import { get, type Schemas } from "../api/client";

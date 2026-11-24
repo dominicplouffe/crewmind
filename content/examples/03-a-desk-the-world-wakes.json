@@ -1,5 +1,5 @@
 {
-  "crewmind_spec": 1,
+  "nightsquad_spec": 1,
   "name": "A Desk The World Wakes Up",
   "goal": "Run a standing triage desk for MY SIDE PROJECT — replace that with what you are actually watching before planning. Events arrive at this project's signed webhook endpoint: an error my app caught, a signup, a customer email, a failed job, anything I decide to POST. When one arrives, the named agent is woken and works it the same hour rather than waiting for a heartbeat. For each event: reproduce or corroborate it before theorising, decide whether it is new or the same underlying thing as something already logged, and write it into a single living register at deliverables/register.md — one row per DISTINCT problem, with how many times it has now been seen, when it was first and last seen, and what is known. Never a second row for a repeat; the register's value is that it collapses noise. Anything you can genuinely settle, settle, and say what you did. Anything you cannot, say plainly what you would need. Once a week, give me a summary of what the world actually sent, what changed, and the single thing most worth fixing — and if a quiet week is a quiet week, say that in one line rather than padding it.",
   "type": "operate",

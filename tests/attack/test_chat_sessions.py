@@ -7,9 +7,9 @@ from typing import Any
 import pytest
 from sqlalchemy import select
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.domain.conversation.sessions import CHAT_SESSION_MACHINE, SessionState
-from crewmind.storage.models import ChatSession
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.domain.conversation.sessions import CHAT_SESSION_MACHINE, SessionState
+from nightsquad.storage.models import ChatSession
 from tests.conftest import FakeClock
 from tests.support import Actor, App, running_project
 

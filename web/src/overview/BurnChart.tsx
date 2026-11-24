@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { get } from "../api/client";
-import { loadRuns } from "../crew/data";
+import { loadRuns } from "../squad/data";
 import { compactNumber, fromNow, tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { burn, story } from "../strings.overview";

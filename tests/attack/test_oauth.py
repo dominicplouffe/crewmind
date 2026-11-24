@@ -11,7 +11,7 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import OAuthClient
+from nightsquad.storage.models import OAuthClient
 from tests.attack.harness import assert_refused
 from tests.attack.test_mcp import client_for
 from tests.conftest import FakeClock
@@ -188,7 +188,7 @@ async def test_NFR_13_registration_is_capped_and_redirects_stay_on_this_machine(
             "/oauth/token",
             data={
                 "grant_type": "authorization_code", "client_id": made.json()["client_id"],
-                "code": "cm_code_guess", "redirect_uri": REDIRECT, "code_verifier": VERIFIER,
+                "code": "ns_code_guess", "redirect_uri": REDIRECT, "code_verifier": VERIFIER,
             },
         )  # fmt: skip
         assert (wrong.status_code, wrong.json()["error"]) == (400, "invalid_code")

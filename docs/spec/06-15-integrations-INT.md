@@ -11,7 +11,7 @@
   - A denied call never leaves the server and counts toward the run's refusal cap.
 - **INT-5 Slack: one channel per project** (SHOULD).
   - The admin connects one Slack app to the install, once, from a guided setup with a provided app manifest.
-  - Each project then has exactly one Slack channel: created automatically as `#crewmind-<project>`, or an existing channel the chairman picks.
+  - Each project then has exactly one Slack channel: created automatically as `#nightsquad-<project>`, or an existing channel the chairman picks.
   - That channel mirrors the project chat both ways:
     - messages and threads;
     - `@agent` mentions;
@@ -25,7 +25,7 @@
   - A project's mailbox is set by `email.mode` \[off\], one of:
     - **Managed:** created on a mail server the admin connected (below). The chairman, or the Founder, picks the address. The platform creates the account, generates a strong password, stores it as the project's mailbox credential, and wires IMAP and SMTP. Nobody types or sees the password.
     - **Manual:** the chairman enters a username, password, IMAP host, port and TLS mode, and SMTP host, port and TLS mode (with separate SMTP login details if the provider needs them), for any provider. The password is a credential: hidden input, human-only (IF-5.6).
-    - **Install alias:** an alias of the install mailbox, such as `crewmind+<project>@domain`, for installs with no mail server connected.
+    - **Install alias:** an alias of the install mailbox, such as `nightsquad+<project>@domain`, for installs with no mail server connected.
   - **Mail servers.**
     - The admin connects one or more mail servers to the install. Each connection records the server kind, its management endpoint, an admin API key, the domains projects may use, and the IMAP and SMTP hosts its mailboxes use.
     - The admin key is a credential: encrypted, never in a sandbox, and used only by the mail provisioner.
@@ -52,7 +52,7 @@
     - `email.max_new_threads_per_day` \[20\] new threads a day;
     - threads freeze at `email.thread_freeze_after` \[40\] messages;
     - attachments are at most 10 MB each and 25 MB per email.
-  - **Setup checks.** A project with email on cannot start until a test send and receive pass. For managed domains, `crewmind doctor` also checks the domain's MX, SPF, DKIM and DMARC records and names any fix.
+  - **Setup checks.** A project with email on cannot start until a test send and receive pass. For managed domains, `squad doctor` also checks the domain's MX, SPF, DKIM and DMARC records and names any fix.
 - **INT-7 Alerts.**
   - One per-person setting, `alerts.level` \[decisions and alarms\], with three levels: everything, decisions and alarms, or alarms only. It applies across app push, the project's Slack channel and email.
   - An item answered in the app or Slack within `alerts.grace` \[60 min\] is never emailed.
@@ -79,4 +79,4 @@
   - **Outbound.** An agent whose role grants A2A may send tasks to outside agents on the allowlist, through the platform gateway, as data sources work (INT-4). Endpoint credentials never enter a sandbox. Each outbound task is a side effect (WRK-16) with an idempotency key, and replies are untrusted input.
   - **One allowlist.** The chairman-owned allowlist from INT-10 holds A2A endpoints as well as email addresses and domains. Agents may request entries; only the chairman adds them.
   - **Same guards as email.** The loop guard of INT-10 applies to A2A conversations. Every exchange appears in the project's External panel and the activity feed, and is recorded in the event log.
-  - **Status and streaming.** Long-running A2A tasks stream status into the chat. A crewmind project that delegates to another crewmind install sees the other side's status the same way.
+  - **Status and streaming.** Long-running A2A tasks stream status into the chat. A nightsquad project that delegates to another nightsquad install sees the other side's status the same way.

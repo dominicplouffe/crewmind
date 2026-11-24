@@ -11,13 +11,13 @@ from hypothesis import given
 from hypothesis import strategies as st
 from sqlalchemy import select
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.catalog.registry import catalog
-from crewmind.domain.connections.mcp import SERVER_MACHINE, TOOL_MACHINE
-from crewmind.domain.connections.mcp_client import Unreachable, address_allowed, check_host
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.storage.models import Event, StoredSecret
-from crewmind.surfaces.mcp.server import tool_name
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.catalog.registry import catalog
+from nightsquad.domain.connections.mcp import SERVER_MACHINE, TOOL_MACHINE
+from nightsquad.domain.connections.mcp_client import Unreachable, address_allowed, check_host
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.storage.models import Event, StoredSecret
+from nightsquad.surfaces.mcp.server import tool_name
 from tests.attack.harness import assert_refused
 from tests.attack.mcp_support import HEADER, HEADER_VALUE, TOKEN, URL, build_server, serving
 from tests.attack.test_mcp import client_for, mcp_caller
@@ -256,11 +256,11 @@ async def test_CON_12_tools_are_read_again_every_refresh_period(app: App, clock:
     assert refreshed["item"]["mcp"]["server_version"] == "3.0"
 
 
-async def test_IF_5_1_crewmind_marks_its_own_reading_tools_so_clients_can_tell_them_apart(
+async def test_IF_5_1_nightsquad_marks_its_own_reading_tools_so_clients_can_tell_them_apart(
     app: App,
 ) -> None:
-    """IF-5.1, CON-12: crewmind's own MCP tools say whether they only read and whether they
-    can be undone, so a client (crewmind included) allows its readers and asks about writers."""
+    """IF-5.1, CON-12: nightsquad's own MCP tools say whether they only read and whether they
+    can be undone, so a client (nightsquad included) allows its readers and asks about writers."""
     owner = await app.person("owner@example.com")
     minted = await app.ok("mcp_clients.mint", owner, client_name="Reader", scopes=["steer"])
     caller = await mcp_caller(app, minted["token"])

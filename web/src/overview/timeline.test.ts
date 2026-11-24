@@ -78,7 +78,7 @@ describe("storyOf", () => {
     ["directive.state_changed", "Directive 3 is now issued."],
     ["setting.changed", "budget.tokens changed from 1 to 2."],
     ["member.added", "Person 123: added."],
-    ["seat.created", "Maya joined the crew."],
+    ["seat.created", "Maya joined the squad."],
     ["task.state_changed", "Task 2 is now claimed."],
     ["task.state_changed", "Task 99 is now done."],
     ["requirement.state_changed", "Requirement 1 is now in progress."],

@@ -1,6 +1,6 @@
 /**
  * The project told as a story (CHAT-18, CHAT-19, PLN-5, GOV-1, EXE-4): one sentence on where it
- * stands, who is doing what now, progress by requirement, the budget and its pace, the crew, what
+ * stands, who is doing what now, progress by requirement, the budget and its pace, the squad, what
  * happened, and the latest deliverables. Each part loads on its own, so one slow or failed part
  * never blanks the page. Display only: the server decides every state and number.
  */
@@ -8,7 +8,7 @@ import { useMemo, type ReactNode } from "react";
 import { ArrowRight, CircleCheck, CircleDot, OctagonAlert, PackageOpen, Pause, Play, Square } from "lucide-react";
 import { get, type Header } from "../api/client";
 import { useAuth } from "../auth";
-import { CrewStrip } from "../crew/CrewStrip";
+import { SquadStrip } from "../squad/SquadStrip";
 import { DeliverableCard } from "../deliverables/DeliverableCard";
 import { arrange, authorKind, defaultScope } from "../deliverables/logic";
 import { useLoad } from "../lib/useLoad";
@@ -22,7 +22,7 @@ import { nowEntries } from "./now";
 import { Load, More, NowList } from "./parts";
 import { Timeline } from "./Timeline";
 import { storyOf } from "./timeline";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 const TIMELINE_ENTRIES = 12;
 const LATEST_FILES = 3;
@@ -30,7 +30,7 @@ const FEED_PAGE = 200;
 /** Feed pages to read at most; the story needs only the newest lines. */
 const FEED_PAGES = 20;
 
-type Tab = "chat" | "work" | "crew" | "deliverables";
+type Tab = "chat" | "work" | "squad" | "deliverables";
 type Panel = "feed" | "budget" | "runs";
 
 interface Props {
@@ -280,9 +280,9 @@ export function ProjectOverview({ projectId, changes, header, onTab, onPanel, on
     </Section>
   );
 
-  const crewSection = (
-    <Section id="ov-crew" title={story.crew.title} className="ov-crew">
-      <CrewStrip projectId={projectId} changes={changes} header={header} onOpen={() => onTab("crew")} />
+  const squadSection = (
+    <Section id="ov-squad" title={story.squad.title} className="ov-squad">
+      <SquadStrip projectId={projectId} changes={changes} header={header} onOpen={() => onTab("squad")} />
     </Section>
   );
 
@@ -350,7 +350,7 @@ export function ProjectOverview({ projectId, changes, header, onTab, onPanel, on
         </div>
         <div className="ov-side">
           {budgetSection}
-          {crewSection}
+          {squadSection}
           {timeline}
         </div>
       </div>

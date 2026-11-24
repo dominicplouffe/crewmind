@@ -17,7 +17,7 @@ export interface Placement {
 }
 
 /**
- * Who speaks in a message, for grouping, or null when the message stands alone: crewmind's own
+ * Who speaks in a message, for grouping, or null when the message stands alone: nightsquad's own
  * lines and cards never join a group, and neither does anything after them.
  */
 export function speakerOf(message: Message): string | null {

@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from crewmind.catalog.registry import catalog
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.surfaces.mcp.server import tool_name
+from nightsquad.catalog.registry import catalog
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.surfaces.mcp.server import tool_name
 from tests.attack.harness import assert_refused
 from tests.attack.test_mcp import client_for, mcp_caller
 from tests.attack.test_mcp_calls import mcp_call
@@ -32,8 +32,8 @@ async def test_CON_11_a_command_server_runs_with_only_its_own_variables_and_serv
 ) -> None:
     """CON-11, CON-12, CON-13: the command is tested before it is saved; it sees the secret
     it was given and nothing of the host's environment; its reading tools are offered to
-    agents, who use them through crewmind; it stops when the install closes."""
-    monkeypatch.setenv("CREWMIND_HOST_ONLY", "host-value")
+    agents, who use them through nightsquad; it stops when the install closes."""
+    monkeypatch.setenv("NIGHTSQUAD_HOST_ONLY", "host-value")
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)
     await app.ok(
@@ -60,7 +60,7 @@ async def test_CON_11_a_command_server_runs_with_only_its_own_variables_and_serv
     assert length.json()["content"] == str(len(TOKEN))
     names = (await mcp_call(app, run.token, added["id"], "environment_names")).json()["content"]
     assert "BLOG_TOKEN" in names
-    assert "CREWMIND_HOST_ONLY" not in names
+    assert "NIGHTSQUAD_HOST_ONLY" not in names
     assert app.runtime.commands.running() == [added["id"]]
     await app.runtime.commands.close()
     assert app.runtime.commands.running() == []

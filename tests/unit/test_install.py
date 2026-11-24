@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.domain.install.config import ConfigError, load_config
-from crewmind.domain.install.operations import Finding
-from crewmind.domain.install.process import pid_file, running_server, write_pid
-from crewmind.runner import containers
-from crewmind.storage.engine import Database
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.domain.install.config import ConfigError, load_config
+from nightsquad.domain.install.operations import Finding
+from nightsquad.domain.install.process import pid_file, running_server, write_pid
+from nightsquad.runner import containers
+from nightsquad.storage.engine import Database
 from tests.attack.test_install import environment
 from tests.support import App
 
@@ -23,25 +23,29 @@ def test_NFR_7_configuration_comes_from_the_environment_with_registry_defaults(
 ) -> None:
     """NFR-7, Appendix A: unset variables take the registry's defaults; set ones are parsed
     and checked against their range."""
-    config = load_config({"CREWMIND_DATA_DIR": str(tmp_path)})
+    config = load_config({"NIGHTSQUAD_DATA_DIR": str(tmp_path)})
     assert (config.host, config.port, config.public_url) == ("127.0.0.1", 8420, None)
     assert config.database is Database.SQLITE
-    assert config.database_url == f"sqlite:///{tmp_path / 'crewmind.sqlite'}"
+    assert config.database_url == f"sqlite:///{tmp_path / 'nightsquad.sqlite'}"
     assert config.master_key_file == tmp_path / "master.key"
     assert config.base_url == "http://127.0.0.1:8420"
-    custom = load_config({"CREWMIND_DATA_DIR": str(tmp_path), "CREWMIND_PORT": "9000"})
+    custom = load_config({"NIGHTSQUAD_DATA_DIR": str(tmp_path), "NIGHTSQUAD_PORT": "9000"})
     assert custom.port == 9000
-    for bad in ({"CREWMIND_PORT": "0"}, {"CREWMIND_PORT": "eighty"}, {"CREWMIND_PORT": "70000"}):
+    for bad in (
+        {"NIGHTSQUAD_PORT": "0"},
+        {"NIGHTSQUAD_PORT": "eighty"},
+        {"NIGHTSQUAD_PORT": "70000"},
+    ):
         with pytest.raises(ConfigError):
-            load_config({"CREWMIND_DATA_DIR": str(tmp_path), **bad})
+            load_config({"NIGHTSQUAD_DATA_DIR": str(tmp_path), **bad})
 
 
 def test_NFR_23_slim_mode_is_sqlite(tmp_path: Path) -> None:
     """NFR-23: slim mode runs on SQLite in the data directory, and refuses a Postgres URL."""
-    base = {"CREWMIND_DATA_DIR": str(tmp_path)}
+    base = {"NIGHTSQUAD_DATA_DIR": str(tmp_path)}
     assert load_config(base, slim=True).database is Database.SQLITE
     with pytest.raises(ConfigError, match="Slim mode runs on SQLite"):
-        load_config({**base, "CREWMIND_DATABASE_URL": "postgresql://u:p@db/crew"}, slim=True)
+        load_config({**base, "NIGHTSQUAD_DATABASE_URL": "postgresql://u:p@db/squad"}, slim=True)
 
 
 async def test_NFR_2_setup_is_idempotent_and_never_overwrites_the_master_key(
@@ -54,7 +58,7 @@ async def test_NFR_2_setup_is_idempotent_and_never_overwrites_the_master_key(
     key_file = app.runtime.config.master_key_file
     key = key_file.read_text()
     link = first.setup_link
-    assert "/accept/cm_lnk_" in link
+    assert "/accept/ns_lnk_" in link
     assert any("Master key created" in step for step in first.steps)
 
     second = await app.host("install.setup", admin_email="other@example.com")
@@ -148,7 +152,7 @@ async def test_NFR_5_doctor_says_what_container_sandboxes_still_need(
     plain = await sandbox()
     assert (plain.ok, "no isolation" in plain.detail) == (True, True)
 
-    monkeypatch.setenv("CREWMIND_SANDBOX_MODE", "container")
+    monkeypatch.setenv("NIGHTSQUAD_SANDBOX_MODE", "container")
 
     def no_runtime() -> None:
         raise ConnectionError("no socket")
@@ -161,11 +165,11 @@ async def test_NFR_5_doctor_says_what_container_sandboxes_still_need(
     unbuilt = await sandbox()
     assert (unbuilt.ok, "deploy/agent.Dockerfile" in (unbuilt.fix or "")) == (False, True)
 
-    monkeypatch.setattr(containers, "docker_client", lambda: _Runtime(["crewmind-agent"]))
+    monkeypatch.setattr(containers, "docker_client", lambda: _Runtime(["nightsquad-agent"]))
     unreachable = await sandbox()
-    assert (unreachable.ok, "CREWMIND_AGENT_API_URL" in (unreachable.fix or "")) == (False, True)
+    assert (unreachable.ok, "NIGHTSQUAD_AGENT_API_URL" in (unreachable.fix or "")) == (False, True)
 
-    monkeypatch.setenv("CREWMIND_AGENT_API_URL", "http://host.docker.internal:8420")
+    monkeypatch.setenv("NIGHTSQUAD_AGENT_API_URL", "http://host.docker.internal:8420")
     assert (await sandbox()).ok
 
 

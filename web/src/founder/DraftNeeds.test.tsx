@@ -22,7 +22,7 @@ describe("DraftNeeds (FND-9, CON-14)", () => {
     expect(link.getAttribute("href")).toBe("/settings/connections");
   });
 
-  it("says nothing when the crew needs nothing from outside", () => {
+  it("says nothing when the squad needs nothing from outside", () => {
     const { container } = render(<DraftNeeds needs={[]} />);
     expect(container.textContent).toBe("");
   });

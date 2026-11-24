@@ -5,9 +5,9 @@ from __future__ import annotations
 import importlib
 from typing import Any
 
-from crewmind.gateway.litellm_provider import normalise_usage, to_messages, to_tools
-from crewmind.gateway.protocol import CompletionRequest, ToolCall, ToolSpec, Turn
-from crewmind.gateway.registry import ModelClass, nearest_class, pick_lineup, providers
+from nightsquad.gateway.litellm_provider import normalise_usage, to_messages, to_tools
+from nightsquad.gateway.protocol import CompletionRequest, ToolCall, ToolSpec, Turn
+from nightsquad.gateway.registry import ModelClass, nearest_class, pick_lineup, providers
 
 AnthropicConfig: Any = importlib.import_module(
     "litellm.llms.anthropic.chat.transformation"

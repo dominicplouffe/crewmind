@@ -5,8 +5,8 @@
 import { Lock } from "lucide-react";
 import type { Artifact } from "../api/client";
 import { fromNow } from "../lib/humanize";
-import { deliverables as words } from "../strings.crew";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { deliverables as words } from "../strings.squad";
+import { AgentAvatar, useAgentName } from "../squad/names";
 import { Avatar } from "../ui/Avatar";
 import { Pill, type Tone } from "../ui/Status";
 import type { AuthorKind } from "./logic";

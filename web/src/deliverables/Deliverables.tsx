@@ -1,5 +1,5 @@
 /**
- * Deliverables as the hero (ART-3, CHAT-16): a gallery of what the crew made, each with a real
+ * Deliverables as the hero (ART-3, CHAT-16): a gallery of what the squad made, each with a real
  * preview. A card opens the full file view (versions, downloads, compare) in a wide sheet.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -9,7 +9,7 @@ import { useAuth } from "../auth";
 import { ErrorNote } from "../components/common";
 import { useLoad } from "../lib/useLoad";
 import { FileView } from "../panels/FileView";
-import { deliverables as words } from "../strings.crew";
+import { deliverables as words } from "../strings.squad";
 import { Sheet } from "../ui/Sheet";
 import { DeliverableCard, madeBy, statusWord } from "./DeliverableCard";
 import { FILTERS, SORTS, arrange, authorKind, countByFilter, defaultScope, type Filter, type Scope, type Sort } from "./logic";

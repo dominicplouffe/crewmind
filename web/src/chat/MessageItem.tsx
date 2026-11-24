@@ -1,7 +1,7 @@
 /**
  * One stored chat message (CHAT-3, CHAT-7, CHAT-8): who wrote it, a reply quote, the body, an action
  * or decision card or upload link, and its actions. Agents and people get an avatar and a name;
- * crewmind's own lines are quiet rows; the less common actions sit in a toolbar shown on hover or focus.
+ * nightsquad's own lines are quiet rows; the less common actions sit in a toolbar shown on hover or focus.
  */
 import {
   AlertTriangle,
@@ -28,7 +28,7 @@ import { ChatItemCard } from "../desk/ItemCard";
 import { ChatItemNote } from "../desk/ItemNote";
 import { formatDateTime, formatTime } from "../lib/format";
 import { t } from "../strings";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { AgentAvatar, useAgentName } from "../squad/names";
 import { ActionCard } from "./ActionCard";
 import { Markers, StatusActions, detailOf, draftingLine, isReopenLine, type MessageDetail } from "./MessageExtras";
 import { Avatar } from "../ui/Avatar";
@@ -100,7 +100,7 @@ function menuActions(message: Message, isExample: boolean, handlers: MessageHand
   ];
 }
 
-/** The small icon in front of one of crewmind's own lines, by what the line is about. */
+/** The small icon in front of one of nightsquad's own lines, by what the line is about. */
 function systemIcon(detail: MessageDetail): LucideIcon {
   switch (detail.kind) {
     case "directive":
@@ -171,7 +171,7 @@ function MessageItemInner({
   const hasItemCard = isItemLine && !hasItemNote;
   const hasStatusActions = isStatus && (detail.kind === "standing order proposed" || isReopenLine(detail));
   const kind = message.author_kind as "person" | "agent" | "platform";
-  // A plain line from crewmind (or a person's status line) is a quiet row; one that carries a card is a card.
+  // A plain line from nightsquad (or a person's status line) is a quiet row; one that carries a card is a card.
   const layout =
     isStatus && !hasActionCard && !hasItemCard && !hasStatusActions ? "row" : kind === "platform" ? "system" : "bubble";
   const menu = compact ? [] : menuActions(message, isExample, handlers);
@@ -344,7 +344,7 @@ function MessageItemInner({
           </span>
         </div>
         <div className="message-main">
-          {/* A decision card says who asks and by when itself; crewmind's name and the time stay in the line's label. */}
+          {/* A decision card says who asks and by when itself; nightsquad's name and the time stay in the line's label. */}
           {hasItemCard ? null : (
             <header className="message-head">
               <span className="author">{author}</span>

@@ -9,9 +9,9 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import text
 
-from crewmind.storage.engine import Database, create_engine, database_of, sync_url
-from crewmind.storage.migrate import alembic_config, migrate
-from crewmind.storage.models import Base
+from nightsquad.storage.engine import Database, create_engine, database_of, sync_url
+from nightsquad.storage.migrate import alembic_config, migrate
+from nightsquad.storage.models import Base
 
 HEAD = "0016"
 
@@ -45,7 +45,7 @@ async def test_NFR_8_the_engine_runs_on_the_selected_database(
 def test_NFR_8_other_databases_are_refused() -> None:
     """NFR-8: only SQLite and Postgres are supported."""
     with pytest.raises(ValueError, match="use SQLite or Postgres"):
-        database_of("mysql://localhost/crewmind")
+        database_of("mysql://localhost/nightsquad")
 
 
 def test_NFR_10_the_migrations_build_exactly_the_tables_the_code_uses(database_url: str) -> None:
@@ -91,7 +91,7 @@ def test_EXE_18_the_migration_names_the_seats_that_exist(database_url: str) -> N
     ones a new project with that id would draw."""
     from alembic import command
 
-    from crewmind.domain.execution import names
+    from nightsquad.domain.execution import names
 
     command.upgrade(alembic_config(database_url), "0014")
     engine = sqlalchemy.create_engine(sync_url(database_url))

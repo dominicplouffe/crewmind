@@ -1,0 +1,20 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "your-first-hour",
+  "name": "Your first hour",
+  "outcome": "One written thing, so you can see how the project works.",
+  "ceo_role": "ceo",
+  "domains": [
+    "general"
+  ],
+  "teams": [
+    {
+      "name": "Desk",
+      "role": "writer",
+      "members": [
+        "Ada"
+      ]
+    }
+  ],
+  "estimate": null
+}

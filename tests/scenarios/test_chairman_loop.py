@@ -11,10 +11,10 @@ from typing import Any
 import pytest
 from sqlalchemy import func, select
 
-from crewmind.storage.models import BriefRun
+from nightsquad.storage.models import BriefRun
 from tests.attack.delivery_support import SOLO, command_requirement, meet, set_states, spend
 from tests.attack.test_planning import CHAIRMAN_HOLDS, propose
-from tests.attack.work_support import Crew
+from tests.attack.work_support import Squad
 from tests.conftest import FakeClock
 from tests.push_support import BROWSER, FakePushService, sender
 from tests.support import App, running_project, shown_as, wake
@@ -125,29 +125,29 @@ async def test_HUM_11_the_brief_and_the_away_summary_agree_with_the_event_log(
     requirements settled apart from tasks closed, and what it says moved, what the CEO
     handled and what decided itself are the events of the stretch, counted again here
     from the event log. Opening the chat after `brief.away_after` gives the same."""
-    crew = await Crew.start(app, team=False, settings=SOLO)
-    await set_states(app, {crew.requirement: "cut"})
-    opened = await app.ok("chat.opened", crew.owner, project_id=crew.project)
+    squad = await Squad.start(app, team=False, settings=SOLO)
+    await set_states(app, {squad.requirement: "cut"})
+    opened = await app.ok("chat.opened", squad.owner, project_id=squad.project)
     assert opened == {"away": False, "summary": None}
     clock.advance(minutes=1)
-    spent = (await app.ok("budget.show", crew.owner, project_id=crew.project))["spent"]
+    spent = (await app.ok("budget.show", squad.owner, project_id=squad.project))["spent"]
 
-    first = await command_requirement(crew, "pricing")
-    second = await command_requirement(crew, "signup")
-    await meet(crew, clock, first, "pricing")
-    await meet(crew, clock, second, "signup")
-    mine = await crew.ok(
+    first = await command_requirement(squad, "pricing")
+    second = await command_requirement(squad, "signup")
+    await meet(squad, clock, first, "pricing")
+    await meet(squad, clock, second, "signup")
+    mine = await squad.ok(
         "CEO", "agent.propose_requirement", text="An about page is published.",
         test_kind="observable", success_test="A visitor can open the about page.",
         estimate_runs=2,
     )  # fmt: skip
-    await crew.ok("CEO", "agent.accept_requirement", requirement_id=mine["requirements"][-1]["id"])
-    await crew.ok("CEO", "agent.post_heads_up", text="I added an about page to the scope.")
+    await squad.ok("CEO", "agent.accept_requirement", requirement_id=mine["requirements"][-1]["id"])
+    await squad.ok("CEO", "agent.post_heads_up", text="I added an about page to the scope.")
     clock.advance(hours=5)
-    await crew.finish_all()
-    crew.owner = await app.login(crew.owner.email)
+    await squad.finish_all()
+    squad.owner = await app.login(squad.owner.email)
 
-    events = await app.events(crew.owner, crew.project)
+    events = await app.events(squad.owner, squad.project)
     met = [
         e for e in events
         if e["type"] == "requirement.state_changed" and e["after"]["state"] == "met"
@@ -156,7 +156,7 @@ async def test_HUM_11_the_brief_and_the_away_summary_agree_with_the_event_log(
         e for e in events if e["type"] == "task.state_changed" and e["after"]["state"] == "done"
     ]
     assert (len(met), len(done)) == (2, 2)
-    brief = await app.ok("brief.show", crew.owner)
+    brief = await app.ok("brief.show", squad.owner)
     (entry,) = brief["projects"]
     sections = entry["sections"]
     assert sections["what moved"][:2] == [
@@ -170,12 +170,12 @@ async def test_HUM_11_the_brief_and_the_away_summary_agree_with_the_event_log(
     assert sections["what decided itself"] == []
     assert any("heartbeat" in line for line in sections["what happens next"])
 
-    away = await app.ok("chat.opened", crew.owner, project_id=crew.project)
+    away = await app.ok("chat.opened", squad.owner, project_id=squad.project)
     assert away["away"] is True
     assert away["summary"]["what moved"][:2] == sections["what moved"][:2]
-    again = await app.ok("chat.opened", crew.owner, project_id=crew.project)
+    again = await app.ok("chat.opened", squad.owner, project_id=squad.project)
     assert again["away"] is False
-    assert (await app.ok("budget.show", crew.owner, project_id=crew.project))["spent"] == spent
+    assert (await app.ok("budget.show", squad.owner, project_id=squad.project))["spent"] == spent
 
 
 async def test_HUM_11_the_daily_brief_is_built_once_per_local_day(
@@ -185,9 +185,9 @@ async def test_HUM_11_the_daily_brief_is_built_once_per_local_day(
 ) -> None:
     """HUM-11, INT-7: at `brief.time` in the person's timezone the platform builds their
     brief, once per local day, and tells them. A person who turned it off gets none."""
-    crew = await Crew.start(app, team=False, settings=SOLO)
-    await app.ok("push.public_key", crew.owner)
-    await app.ok("push.subscribe", crew.owner, **BROWSER)
+    squad = await Squad.start(app, team=False, settings=SOLO)
+    await app.ok("push.public_key", squad.owner)
+    await app.ok("push.subscribe", squad.owner, **BROWSER)
     quiet = await app.person("quiet@example.com")
     await app.ok("settings.change_mine", quiet, changes={"brief.time": "off"})
     await running_project(app, quiet)
@@ -254,15 +254,15 @@ async def test_INT_7_the_alert_level_decides_what_is_pushed(
     """INT-7: with "alarms only" a decision is not pushed; with "decisions and alarms" an
     item that waits on the chairman is, and a heads-up is not; with "everything" both
     are. An alarm is never held back."""
-    crew = await Crew.start(app, settings=CHAIRMAN_HOLDS)
-    await app.ok("push.public_key", crew.owner)
-    await app.ok("push.subscribe", crew.owner, **BROWSER)
+    squad = await Squad.start(app, settings=CHAIRMAN_HOLDS)
+    await app.ok("push.public_key", squad.owner)
+    await app.ok("push.subscribe", squad.owner, **BROWSER)
 
     async def pushed(level: str) -> list[str]:
         service.sent.clear()
-        await app.ok("settings.change_mine", crew.owner, changes={"alerts.level": level})
-        await propose(crew)
-        await crew.ok("CEO", "agent.post_heads_up", text="I hired the build team.")
+        await app.ok("settings.change_mine", squad.owner, changes={"alerts.level": level})
+        await propose(squad)
+        await squad.ok("CEO", "agent.post_heads_up", text="I hired the build team.")
         await sender(app).tick()
         return [push["body"].split(":")[0] for push in service.sent]
 

@@ -1,6 +1,6 @@
 /**
  * The draft as it stands, beside the conversation, read like a project brief (FND-3): its name and
- * facts, the goal, the crew, settings it changes and steps the Founder had to redo. How it grades
+ * facts, the goal, the squad, settings it changes and steps the Founder had to redo. How it grades
  * and whether it is rehearsed are on the checklist, not here. The long parts open on request.
  */
 import { useState } from "react";
@@ -61,17 +61,17 @@ export function ProjectFacts({ draft }: { draft: DraftSummary }): JSX.Element {
   );
 }
 
-export function CrewList({ draft }: { draft: DraftSummary }): JSX.Element {
+export function SquadList({ draft }: { draft: DraftSummary }): JSX.Element {
   const words = t.founder.side;
   if (draft.teams.length === 0) return <p className="quiet">{words.noTeams}</p>;
   return (
-    <ul className="crew-list">
+    <ul className="squad-list">
       {draft.teams.map((team) => (
         <li key={team.name} data-testid="draft-team">
-          <p className="crew-team">
-            {team.name} <span className="badge crew-role">{team.role}</span>
+          <p className="squad-team">
+            {team.name} <span className="badge squad-role">{team.role}</span>
           </p>
-          <p className="crew-members">{team.members.join(", ")}</p>
+          <p className="squad-members">{team.members.join(", ")}</p>
         </li>
       ))}
     </ul>
@@ -125,11 +125,11 @@ export function DraftRail({ draft, rulesHit }: Props): JSX.Element {
         <>
           <ProjectFacts draft={draft} />
           {draft.goal ? <Goal goal={draft.goal} /> : null}
-          <div className="brief-crew">
+          <div className="brief-squad">
             <h3 className="rail-subtitle">
-              {brief.crew} <span className="rail-count">{rail.seats(seats)}</span>
+              {brief.squad} <span className="rail-count">{rail.seats(seats)}</span>
             </h3>
-            <CrewList draft={draft} />
+            <SquadList draft={draft} />
           </div>
           {draft.settings.length > 0 ? (
             <details className="fold">

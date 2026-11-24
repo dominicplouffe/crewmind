@@ -1,5 +1,5 @@
 /**
- * End-to-end tests against a real crewmind server with the mock model.
+ * End-to-end tests against a real nightsquad server with the mock model.
  * Covers CHAT-1 to CHAT-4, CHAT-7, CHAT-9, CHAT-10, CHAT-14, CHAT-16, CHAT-18 to CHAT-20, ART-3, ART-4, NFR-18.
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -34,7 +34,7 @@ const agentMessages = (): ReturnType<Page["locator"]> => page.getByTestId("messa
 
 test("signed-out visitors are sent to sign in, and the page is accessible (NFR-18)", async () => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Sign in to crewmind" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to nightsquad" })).toBeVisible();
   await expectAccessible(page, "sign-in page");
 });
 
@@ -144,8 +144,8 @@ test("agents go by person-like names, and the chairman renames one from its shee
   expect(ceo).not.toBe("CEO");
   expect(reviewer).not.toBe(ceo);
   const home = page.url();
-  await page.goto(`${home.replace(/\/$/, "")}/crew`);
-  const card = page.getByTestId("crew-card").filter({ hasText: reviewer });
+  await page.goto(`${home.replace(/\/$/, "")}/squad`);
+  const card = page.getByTestId("squad-card").filter({ hasText: reviewer });
   await expect(card).toContainText("Reviewer");
   await card.click();
   const sheet = page.getByTestId("agent-sheet");
@@ -159,7 +159,7 @@ test("agents go by person-like names, and the chairman renames one from its shee
   await sheet.getByRole("button", { name: "Save" }).click();
   await expect(sheet.getByTestId("agent-rename")).toHaveCount(0);
   await expect(sheet.getByRole("heading", { name: "Quill" })).toBeVisible();
-  await expect(page.getByTestId("crew-card").filter({ hasText: "Quill" })).toBeVisible();
+  await expect(page.getByTestId("squad-card").filter({ hasText: "Quill" })).toBeVisible();
   await page.keyboard.press("Escape");
   await page.goto(home);
   await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();

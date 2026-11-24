@@ -1,6 +1,6 @@
-# crewmind: Requirements & Specification (revision 2, 21 Nov 2026)
+# nightsquad: Requirements & Specification (revision 2, 21 Nov 2026)
 
-Revision 2 rebuilds crewmind chat-first, budgeted in tokens and built for speed. You talk to a project like a coding assistant, it stays inside the token budget you set, and Deliver ships a first usable version early.
+Revision 2 rebuilds nightsquad chat-first, budgeted in tokens and built for speed. You talk to a project like a coding assistant, it stays inside the token budget you set, and Deliver ships a first usable version early.
 
 Owner: Dominic. Requirement ids are stable; cite them in code, tests and commits.
 
@@ -34,7 +34,7 @@ Then, as the current phase needs:
 | [06-11-memory-MEM.md](06-11-memory-MEM.md) | Pinned and recall memory | MEM |
 | [06-12-founder-FND.md](06-12-founder-FND.md) | Drafting and grilling | FND |
 | [06-13-rehearsal-RHS.md](06-13-rehearsal-RHS.md) | The zero-token fire drill | RHS |
-| [06-14-library-LIB.md](06-14-library-LIB.md) | Roles, crews, specs, Agent Skills | LIB |
+| [06-14-library-LIB.md](06-14-library-LIB.md) | Roles, squads, specs, Agent Skills | LIB |
 | [06-15-integrations-INT.md](06-15-integrations-INT.md) | Webhooks, data sources, Slack, email, A2A | INT |
 | [06-16-accounts-ACC.md](06-16-accounts-ACC.md) | Accounts and access | ACC |
 | [06-17-connections-CON.md](06-17-connections-CON.md) | Secrets, variables and MCP servers | CON |

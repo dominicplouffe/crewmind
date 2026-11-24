@@ -2,11 +2,11 @@
 
 Status: **planned on 23 Nov 2026; the owner's answers are recorded (end of this file).** Building starts with 7B.0.
 
-Goal: a project can be given the secrets, variables and MCP servers its work needs; the Founder and the crew know what they have; nothing runs that cannot work for lack of one; and no secret value ever reaches a model, a trace, a chat, an artifact, an export or a log. Most secrets never enter a sandbox at all.
+Goal: a project can be given the secrets, variables and MCP servers its work needs; the Founder and the squad know what they have; nothing runs that cannot work for lack of one; and no secret value ever reaches a model, a trace, a chat, an artifact, an export or a log. Most secrets never enter a sandbox at all.
 
 ## Why this phase exists
 
-The first real project on the server was a daily WordPress blog. It started, its crew ran, and it could never publish: nothing anywhere accepts a WordPress password, and nothing stopped the start. The tokens spent were wasted. Phase 7.B is inserted before phase 8 because without it most real projects cannot do their job.
+The first real project on the server was a daily WordPress blog. It started, its squad ran, and it could never publish: nothing anywhere accepts a WordPress password, and nothing stopped the start. The tokens spent were wasted. Phase 7.B is inserted before phase 8 because without it most real projects cannot do their job.
 
 ## How this was missed
 
@@ -17,13 +17,13 @@ A review of the code and the records, 23 Nov 2026.
 | 1 | EXE-13 has two halves: what must never enter a sandbox, and the role credentials that must. Phase 2 built and tested only the first. `traceability.csv` marks EXE-13 **done** on the strength of `test_P3_no_sandbox_holds_a_provider_key`, which proves only that nothing gets in. | `docs/traceability.csv` EXE-13 |
 | 2 | The deferral was written in footnotes, not in the plan. The phase 7 outcome and LIB-4's note say role credentials "grant nothing until phase 8", but phase 8's list in `PLAN.md` does not contain EXE-13. It was in no phase's to-do list. | `phase-7-plan.md`, `PLAN.md` |
 | 3 | The spec never says how a role credential is created, owned, granted, changed or removed. EXE-13 only says what happens once one exists. An honest phase 2 would have had to stop and ask. | `06-10-execution-EXE.md` |
-| 4 | Creating a project from the Founder filters the missing role credentials **out** of what blocks the start, by matching the words "not available in this version". So `can_start` is true for a project that cannot work. | `src/crewmind/domain/founder/operations.py:579` |
-| 5 | The project start-check registry (PRJ-1) is empty. Phase 1 built it for later phases; none added a check. Nothing is checked when any project starts. | `src/crewmind/domain/projects/lifecycle.py:46`, `operations.py:282` |
-| 6 | The credential grants a spec carries are stored in `project.extras["credentials"]` and read only by export. No code uses them. | `src/crewmind/domain/library/transfer.py:136-140` |
+| 4 | Creating a project from the Founder filters the missing role credentials **out** of what blocks the start, by matching the words "not available in this version". So `can_start` is true for a project that cannot work. | `src/nightsquad/domain/founder/operations.py:579` |
+| 5 | The project start-check registry (PRJ-1) is empty. Phase 1 built it for later phases; none added a check. Nothing is checked when any project starts. | `src/nightsquad/domain/projects/lifecycle.py:46`, `operations.py:282` |
+| 6 | The credential grants a spec carries are stored in `project.extras["credentials"]` and read only by export. No code uses them. | `src/nightsquad/domain/library/transfer.py:136-140` |
 | 7 | Four shipped roles declare credentials: `github` (engineer, game-developer, market-data-engineer), `market-data` (five finance roles), `wordpress` (blog-writer), `news-api` (market-news-analyst). The Founder staffs them freely; nothing tells the chairman. | `content/roles/*.json` |
-| 8 | The role tool grant `data` (for data sources) exists in the role format and grants nothing. | `src/crewmind/domain/library/documents.py:25` |
+| 8 | The role tool grant `data` (for data sources) exists in the role format and grants nothing. | `src/nightsquad/domain/library/documents.py:25` |
 | 9 | Data sources (INT-4) are planned for phase 8 and not started. Their spec allows no auth, bearer and OAuth, but not a custom header, and says nothing about servers on a private network. | `06-15-integrations-INT.md` |
-| 10 | The secret store seals each value with AES-256-GCM but binds it to nothing. Someone who can write to the database could move one secret's ciphertext onto another row (for example a project secret onto a model credential) and it would decrypt. | `src/crewmind/domain/secrets/store.py:65` |
+| 10 | The secret store seals each value with AES-256-GCM but binds it to nothing. Someone who can write to the database could move one secret's ciphertext onto another row (for example a project secret onto a model credential) and it would decrypt. | `src/nightsquad/domain/secrets/store.py:65` |
 | 11 | The tests that keep secrets out of outputs check field **names** (`SECRET_WORDS`), not values. A value that reaches an agent through a field called `text` or `body` would pass. Nothing scans agent-visible text for a known secret. | `tests/attack/test_secrets.py:58` |
 | 12 | IF-4.7 is marked done, but it prompts only for model credentials, because that is the only kind there is. FND-13 is partial for the same reason. | `docs/traceability.csv` |
 
@@ -42,17 +42,17 @@ The owner asked that each decision answer three questions: what would a world-cl
 - **MCP server:** an outside server that speaks the Model Context Protocol and offers tools. The spec's "data source" (INT-4) becomes "MCP server" everywhere a person sees it.
 - **Scope:** where a secret, variable or MCP server lives: the **install** (an admin's, usable by everyone), a **person** (theirs, usable in any of their projects), or a **project** (that project only).
 - **Grant:** which roles of a project may use something. A project uses only what is granted.
-- **Sent for you:** a secret crewmind adds to an agent's HTTPS requests to one site, so the agent never sees it. The default for API keys and passwords.
+- **Sent for you:** a secret nightsquad adds to an agent's HTTPS requests to one site, so the agent never sees it. The default for API keys and passwords.
 - **Given to the agent:** a secret placed in the agent's sandbox, for what cannot be sent for it (an SSH key, a database password, a tool that reads its own config file). Masked in everything stored; the risk is stated.
 
 ## Exit demo
 
 On a real install, with the reference WordPress brief:
 
-1. The Founder drafts the project and says, in its first reply, that the crew needs a WordPress application password for `dplouffe.ca` and the site address. The review screen shows both as missing, each with **Add**.
+1. The Founder drafts the project and says, in its first reply, that the squad needs a WordPress application password for `dplouffe.ca` and the site address. The review screen shows both as missing, each with **Add**.
 2. Create works. **Start** shows what is missing and offers two buttons: **Add them now**, and **Start without them**, which says which agents will wait and why.
 3. The chairman adds the password as a secret *sent for you* to `dplouffe.ca` (Basic auth with the WordPress user name), the site address as a variable, and one MCP server of each kind: a remote server with no auth, one with a bearer token, one with a custom header, one with OAuth sign-in, and one started from a command (`npx …`) that runs in its own container. Each is tested on save; its tools are listed, read tools allowed and write tools denied.
-4. The project starts. The blog-writer publishes a draft post with plain `curl` to the WordPress REST API, **without the password ever entering its sandbox**: crewmind adds it on the way out. An agent calls a read tool; a call to a denied write tool is refused on the server, and the agent's request for it becomes an approval on the desk.
+4. The project starts. The blog-writer publishes a draft post with plain `curl` to the WordPress REST API, **without the password ever entering its sandbox**: nightsquad adds it on the way out. An agent calls a read tool; a call to a denied write tool is refused on the server, and the agent's request for it becomes an approval on the desk.
 5. No secret value appears in any model request, run step, trace, chat message, memory, artifact, export, clone, spec, backup in clear, event, OpenTelemetry span or log line. A test checks every one.
 6. The chairman replaces the password; the next request uses the new one. A revoked OAuth sign-in raises one alarm with **Sign in again**.
 
@@ -120,7 +120,7 @@ One catalog operation each (P11), with web, CLI, HTTP and MCP adapters. Values a
 ## Secrets sent for you: the egress proxy
 
 - Every run's outbound HTTP and HTTPS goes through the platform's egress proxy, named in the run's environment (`HTTPS_PROXY`, `HTTP_PROXY`) with the run's own token as the proxy credential, so the proxy knows which run, and so which grants, each connection belongs to.
-- **Nothing is blocked or changed except what has a secret.** A connection to a site with no secret *sent for you* granted to this run is passed through as an opaque tunnel: crewmind does not read it. This keeps EXE-14's open egress and v1's lesson that blocked requests fail invisibly.
+- **Nothing is blocked or changed except what has a secret.** A connection to a site with no secret *sent for you* granted to this run is passed through as an opaque tunnel: nightsquad does not read it. This keeps EXE-14's open egress and v1's lesson that blocked requests fail invisibly.
 - A connection to a granted site is opened with a certificate for that site issued by the **install's own certificate authority**, which is trusted inside every sandbox (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `NODE_EXTRA_CA_CERTS`, and the system store of the agent image). The proxy adds the header (`Authorization: Bearer …`, `Authorization: Basic …` from the user name and the secret, or a named header), replacing any the agent sent, verifies the real site's certificate on the way out, and streams the answer back. HTTP/1.1 is offered to the agent; the proxy speaks what the site supports.
 - Each injection is a run step: site, secret name, method, path without the query, status, time. Never the value.
 - **Built in-house, small, on the libraries already in the stack** (`h11`, `cryptography`, asyncio). mitmproxy was considered and rejected: it would bring 26 packages into the process that holds the master key, among them a web framework, a console UI and an LDAP client. Recorded in ADR-0010.
@@ -130,16 +130,16 @@ One catalog operation each (P11), with web, CLI, HTTP and MCP adapters. Values a
 ## Secrets given to the agent
 
 - At lease, the runner reads the *given* secrets granted to the seat's role in this project and nothing else (EXE-13).
-- Text secrets become environment variables under the name set on the attachment; file secrets are written to the run's private in-memory filesystem (`/run/crewmind`, mode 0700, no exec), with a variable holding the path. Names are checked: letters, digits and underscores; reserved names refused (`CREWMIND_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE` and others that change how programs run).
+- Text secrets become environment variables under the name set on the attachment; file secrets are written to the run's private in-memory filesystem (`/run/nightsquad`, mode 0700, no exec), with a variable holding the path. Names are checked: letters, digits and underscores; reserved names refused (`NIGHTSQUAD_*`, `PATH`, `HOME`, `LD_*`, `PYTHON*`, `NODE_OPTIONS`, `*_PROXY`, `SSL_CERT_FILE` and others that change how programs run).
 - The context pack lists each by name, description and variable name, never the value.
 - **The scrubber.** For each live run the server holds the values it gave. One function replaces any of them, and their base64 and URL-encoded forms, with `[secret: NAME]` at every point agent text enters the platform: model requests at the gateway (so the provider never receives a value the agent printed), run steps, traces, chat posts, memory notes, evidence, task completions, side-effect records, MCP call arguments, and the workspace snapshot that makes artifacts. A file that held a value is stored scrubbed and the chairman is told once, naming the file and the secret. Values shorter than `secret.min_length` \[8\] are refused when saved.
-- SECURITY.md says plainly: a *given* secret can be sent anywhere by the agent over the open network; the scrubber stops crewmind storing it or sending it to the model provider, not exfiltration. That is why *sent for you* is the default.
+- SECURITY.md says plainly: a *given* secret can be sent anywhere by the agent over the open network; the scrubber stops nightsquad storing it or sending it to the model provider, not exfiltration. That is why *sent for you* is the default.
 
 ## MCP servers
 
 - **Never reached by an agent directly.** Addresses, tokens, header values, OAuth tokens and a command server's secrets stay on the platform (INT-4). The agent calls the agent API; the MCP gateway makes the call.
 - **Remote servers:** Streamable HTTP, falling back to HTTP+SSE for servers that only speak it. https only, except http to `localhost`. Public addresses through the existing fetch guard (resolve, refuse private, connect to the checked address, no redirects to other hosts).
-- **Private networks** (`localhost`, a LAN, a Docker network): allowed per server when an admin turns it on, with a warning that it lets crewmind reach inside its own network. Link-local and cloud metadata addresses (`169.254.0.0/16`, `fd00:ec2::254`) are refused always.
+- **Private networks** (`localhost`, a LAN, a Docker network): allowed per server when an admin turns it on, with a warning that it lets nightsquad reach inside its own network. Link-local and cloud metadata addresses (`169.254.0.0/16`, `fd00:ec2::254`) are refused always.
 - **Auth kinds:** none; bearer; custom header (a name and a value; `Host`, `Content-Length`, `Transfer-Encoding`, `Connection`, `Cookie` and `Mcp-Session-Id` refused); OAuth, following the MCP authorization specification: protected-resource metadata, then the authorization server's metadata; dynamic client registration where offered, otherwise a pasted client id (and secret if required); authorization code with PKCE S256, single-use `state` bound to the person's session, the resource indicator for audience binding; the callback at `<public URL>/oauth/mcp/callback`, so OAuth needs the install's public https address (the form says so if it is missing). Tokens are secrets; refresh happens before expiry and on a 401; a rotated refresh token replaces the old one. A refused refresh marks the server **needs sign-in**, raises one alarm with **Sign in again**, and calls meanwhile return a plain message. The form says the tokens act as the chairman's account at that provider.
 - **Command servers:** a command and arguments (`npx -y @modelcontextprotocol/server-github`), the secrets it needs as environment variables, and an image (the tool image by default, with Node, Python, `uv` and `npx`). Each runs in its own container, on its own network with egress, with no workspace, no master key and nothing of any agent's; the platform talks to it over standard input and output. Started on first use, stopped after `mcp.command_idle` \[15 min\] unused, restarted after a crash with the breaker's back-off. Without Docker (unisolated mode), command servers are offered only for development, as a plain process, with the warning shown.
 - **Discovery and classification:** a tool whose annotations say read-only and not destructive starts **allowed**; anything else, or none, starts **denied** (INT-4). Annotations are the server's claim, so the chairman sees and can change every classification. A tool that appears later starts as its classification says and the chairman is told once; a tool that disappears is kept, marked gone.
@@ -151,19 +151,19 @@ One catalog operation each (P11), with web, CLI, HTTP and MCP adapters. Values a
 ## The Founder and the project know
 
 - The Founder's `list_credentials` becomes `list_connections`: model credentials, secrets, variables and MCP servers the chairman can attach, by name and description.
-- Roles declare what they need by name (`credential_names` today; extended to kinds: a secret for a site, a variable, an MCP server). The Founder's first reply names what the crew will need; the draft lists each need as **have it** or **missing**, and proposes grants.
+- Roles declare what they need by name (`credential_names` today; extended to kinds: a secret for a site, a variable, an MCP server). The Founder's first reply names what the squad will need; the draft lists each need as **have it** or **missing**, and proposes grants.
 - **Start:** if anything is missing, start shows the list with **Add them now** and **Start without them**. Starting without holds exactly the seats whose roles need what is missing, each hold naming the missing item (EXE-4), and puts one item on the desk. Adding the missing item lifts the hold by itself. No seat ever runs and fails for lack of a credential.
 - A running project whose item is deleted, expires or needs sign-in shows a banner naming what broke and the fix; dependent seats are held, not left to fail.
 - The CEO's context pack lists what the project has and what its roles need but lack, so it plans around a gap and asks for it.
 
 ## Experience
 
-The bar: someone who has never seen crewmind adds a WordPress password the safe way, connects an OAuth MCP server and starts the project in under three minutes, without reading documentation, and never wonders whether a secret is safe. Every screen follows the design system (`docs/design/design-system.md`); keyboard first; WCAG 2.2 AA.
+The bar: someone who has never seen nightsquad adds a WordPress password the safe way, connects an OAuth MCP server and starts the project in under three minutes, without reading documentation, and never wonders whether a secret is safe. Every screen follows the design system (`docs/design/design-system.md`); keyboard first; WCAG 2.2 AA.
 
-- **Where things are.** Settings gains **Connections** (install and personal items, in tabs). Each project gains a **Connections** tab: what this project uses, what its crew needs and lacks, and agents' access requests. One component set serves both.
-- **The empty state teaches.** "Your crew uses connections to reach the outside world: a secret crewmind sends for you, a variable, or an MCP server's tools." Three cards, each with one sentence and **Add**.
+- **Where things are.** Settings gains **Connections** (install and personal items, in tabs). Each project gains a **Connections** tab: what this project uses, what its squad needs and lacks, and agents' access requests. One component set serves both.
+- **The empty state teaches.** "Your squad uses connections to reach the outside world: a secret nightsquad sends for you, a variable, or an MCP server's tools." Three cards, each with one sentence and **Add**.
 - **One "Add" flow, three kinds,** in a side sheet:
-  - *Secret.* Name; "What is it for?" (one line, agents read it); **How should crewmind use it?** as two cards: **Send it for me** (recommended; "to sites you choose; your agents never see it") with site, and auth style chosen from Bearer / Basic (with user name) / Header (with name); or **Give it to the agent** ("for keys a program reads itself; masked everywhere, but the agent could send it elsewhere"). The value field is a masked input with a paste button and a strength-free length check, and the line "You won't be able to see this again. You can replace it." **Who can use it** shows the roles that need it already chosen.
+  - *Secret.* Name; "What is it for?" (one line, agents read it); **How should nightsquad use it?** as two cards: **Send it for me** (recommended; "to sites you choose; your agents never see it") with site, and auth style chosen from Bearer / Basic (with user name) / Header (with name); or **Give it to the agent** ("for keys a program reads itself; masked everywhere, but the agent could send it elsewhere"). The value field is a masked input with a paste button and a strength-free length check, and the line "You won't be able to see this again. You can replace it." **Who can use it** shows the roles that need it already chosen.
   - *Variable.* Name, value, what it is for.
   - *MCP server.* A preset picker with search ("GitHub", "Sentry", "Linear"…) or **Custom**. For custom: **Remote** (a URL) or **Command** (a command line). Auth as four cards, each revealing only its fields: **No auth**, **Bearer token**, **Custom header**, **OAuth sign-in**. **Test connection** shows the server's name, version and tools before anything is saved. Then **Tools**: a table with each tool's name, what it does, **Reads** or **Changes things**, and an allow switch; allowing a tool that changes things asks once, in words: "Agents will be able to … on <server>. Allow?"
   - **Paste a .env** on the secrets tab: a text area that turns `KEY=value` lines into a reviewable table (secret or variable, guessed from the name, changeable) before anything is saved.
@@ -199,7 +199,7 @@ The bar: someone who has never seen crewmind adds a WordPress password the safe 
 - **Server logs:** one line per MCP connection or OAuth failure and per proxy upstream failure, with the server or site and the reason; never a value, header, token or query string.
 - **The agent is told** a plain reason it can act on ("the WordPress password has not been added yet; ask the chairman with request_access"), never a stack trace, a value or an internal address.
 - **The chairman is told** once per broken thing, with the fix as a button; repeats are counted, not repeated.
-- **Health:** testing lists tools; the daily upkeep re-tests attached servers, refreshes tools and warns of expiry; `crewmind doctor` reports servers needing sign-in, failing proxies and open needs.
+- **Health:** testing lists tools; the daily upkeep re-tests attached servers, refreshes tools and warns of expiry; `squad doctor` reports servers needing sign-in, failing proxies and open needs.
 
 ## Settings to add to Appendix A
 
@@ -279,7 +279,7 @@ Phase 7.B is built in its nine parts (7B.0 to 7B.8). CON-1 to CON-16 are done, w
 
 | Step | Result |
 | --- | --- |
-| 1. The Founder names what the crew needs; the review lists each as missing | Passes, scripted. The prompt carries each role's needs and the chairman's connections; the draft's view lists each need as had or missing, and granted or not |
+| 1. The Founder names what the squad needs; the review lists each as missing | Passes, scripted. The prompt carries each role's needs and the chairman's connections; the draft's view lists each need as had or missing, and granted or not |
 | 2. Create works; start says what is missing, and offers to start without it | Passes. Start is refused naming the missing connections; creation lists the agents who would wait |
 | 3. A secret sent for the agent, a variable, and one MCP server of each kind, each tested on save | Passes. Read tools start allowed and write tools denied |
 | 4. The writer posts with plain curl and never holds the password; a read tool works; a denied write tool is refused before the server; the request becomes an approval | Passes |

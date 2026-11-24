@@ -6,19 +6,19 @@ from pathlib import Path
 
 import pytest
 
-from crewmind.catalog.refusal import Refusal
-from crewmind.domain.install import maintenance
-from crewmind.domain.install.config import ConfigError, load_config
-from crewmind.runtime import Runtime
+from nightsquad.catalog.refusal import Refusal
+from nightsquad.domain.install import maintenance
+from nightsquad.domain.install.config import ConfigError, load_config
+from nightsquad.runtime import Runtime
 from tests.support import App
 
 
 def environment(runtime: Runtime, monkeypatch: pytest.MonkeyPatch) -> None:
     """Point the host commands at the test install, as the environment would."""
     config = runtime.config
-    monkeypatch.setenv("CREWMIND_DATA_DIR", str(config.data_dir))
-    monkeypatch.setenv("CREWMIND_DATABASE_URL", config.database_url)
-    monkeypatch.setenv("CREWMIND_SANDBOX_MODE", config.sandbox_mode)
+    monkeypatch.setenv("NIGHTSQUAD_DATA_DIR", str(config.data_dir))
+    monkeypatch.setenv("NIGHTSQUAD_DATABASE_URL", config.database_url)
+    monkeypatch.setenv("NIGHTSQUAD_SANDBOX_MODE", config.sandbox_mode)
     config.data_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -26,15 +26,15 @@ def environment(runtime: Runtime, monkeypatch: pytest.MonkeyPatch) -> None:
 def test_NFR_6_binding_beyond_localhost_needs_tls_and_a_public_url(tmp_path: Path) -> None:
     """NFR-6: the default bind is 127.0.0.1. Any other host is refused without an https
     public URL."""
-    base = {"CREWMIND_DATA_DIR": str(tmp_path)}
+    base = {"NIGHTSQUAD_DATA_DIR": str(tmp_path)}
     assert load_config(base).host == "127.0.0.1"
-    for extra in ({}, {"CREWMIND_PUBLIC_URL": "http://crew.example"}):
+    for extra in ({}, {"NIGHTSQUAD_PUBLIC_URL": "http://squad.example"}):
         with pytest.raises(ConfigError, match="TLS"):
-            load_config({**base, "CREWMIND_HOST": "0.0.0.0", **extra})
+            load_config({**base, "NIGHTSQUAD_HOST": "0.0.0.0", **extra})
     published = load_config(
-        {**base, "CREWMIND_HOST": "0.0.0.0", "CREWMIND_PUBLIC_URL": "https://crew.example"}
+        {**base, "NIGHTSQUAD_HOST": "0.0.0.0", "NIGHTSQUAD_PUBLIC_URL": "https://squad.example"}
     )
-    assert published.base_url == "https://crew.example"
+    assert published.base_url == "https://squad.example"
 
 
 @pytest.mark.attack("NFR-4")

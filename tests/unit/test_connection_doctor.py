@@ -1,4 +1,4 @@
-"""What `crewmind doctor` says about connections: a server that needs sign-in or fails, a
+"""What `squad doctor` says about connections: a server that needs sign-in or fails, a
 started project waiting for a connection, and an egress proxy that does not run while a
 secret is sent for agents, each with its fix (CON-16, CON-6, CON-10, CON-5, NFR-5)."""
 
@@ -10,9 +10,9 @@ import json
 import pytest
 from sqlalchemy import select
 
-from crewmind.domain.connections.doctor import PROXY_FILE, record_proxy
-from crewmind.domain.secrets.store import ensure_master_key
-from crewmind.storage.models import McpServer
+from nightsquad.domain.connections.doctor import PROXY_FILE, record_proxy
+from nightsquad.domain.secrets.store import ensure_master_key
+from nightsquad.storage.models import McpServer
 from tests.attack import mcp_support
 from tests.attack.mcp_support import URL, serving
 from tests.attack.test_connections import blog_project
@@ -74,7 +74,7 @@ async def test_CON_16_doctor_names_servers_waiting_needs_and_a_proxy_that_does_n
     assert not ok
     assert "OSError" in detail
     assert fix
-    assert "crewmind up" in fix
+    assert "squad up" in fix
 
     listening = await asyncio.start_server(lambda r, w: w.close(), "127.0.0.1", 0)
     port = listening.sockets[0].getsockname()[1]

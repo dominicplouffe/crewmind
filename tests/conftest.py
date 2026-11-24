@@ -16,13 +16,13 @@ import sqlalchemy
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ProgrammingError
 
-from crewmind.domain.install.config import Config
-from crewmind.runtime import Runtime, build_runtime
-from crewmind.storage.engine import sync_url
-from crewmind.storage.migrate import migrate
+from nightsquad.domain.install.config import Config
+from nightsquad.runtime import Runtime, build_runtime
+from nightsquad.storage.engine import sync_url
+from nightsquad.storage.migrate import migrate
 from tests.support import App
 
-DEFAULT_POSTGRES_URL = "postgresql://crewmind:crewmind@localhost:5432/crewmind_test"
+DEFAULT_POSTGRES_URL = "postgresql://nightsquad:nightsquad@localhost:5432/nightsquad_test"
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -30,7 +30,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "--db",
         choices=("sqlite", "postgres"),
         default="sqlite",
-        help="The database to run on. Postgres reads CREWMIND_TEST_POSTGRES_URL.",
+        help="The database to run on. Postgres reads NIGHTSQUAD_TEST_POSTGRES_URL.",
     )
 
 
@@ -39,7 +39,7 @@ DROP_PAUSE_SECONDS = 0.5
 
 
 def _postgres_admin() -> tuple[sqlalchemy.URL, sqlalchemy.Engine]:
-    base = make_url(os.environ.get("CREWMIND_TEST_POSTGRES_URL", DEFAULT_POSTGRES_URL))
+    base = make_url(os.environ.get("NIGHTSQUAD_TEST_POSTGRES_URL", DEFAULT_POSTGRES_URL))
     return base, sqlalchemy.create_engine(sync_url(base), isolation_level="AUTOCOMMIT")
 
 
@@ -47,7 +47,7 @@ def _postgres_admin() -> tuple[sqlalchemy.URL, sqlalchemy.Engine]:
 def _postgres_database(template: str | None = None) -> Generator[str]:
     """A new Postgres database, dropped afterwards. With `template`, a copy of that one."""
     base, admin = _postgres_admin()
-    name = f"crewmind_test_{uuid.uuid4().hex}"
+    name = f"nightsquad_test_{uuid.uuid4().hex}"
     copy = f' TEMPLATE "{template}"' if template else ""
     with admin.connect() as connection:
         connection.execute(sqlalchemy.text(f'CREATE DATABASE "{name}"{copy}'))
@@ -100,7 +100,7 @@ def database_url(request: pytest.FixtureRequest, tmp_path: Path) -> Iterator[str
     """The URL of a fresh, empty database of the selected kind, removed afterwards. Only
     tests of the migrations themselves need this; the rest use `migrated_url`."""
     if request.config.getoption("--db") == "sqlite":
-        yield f"sqlite:///{tmp_path / 'crewmind.sqlite'}"
+        yield f"sqlite:///{tmp_path / 'nightsquad.sqlite'}"
         return
     with _postgres_database() as url:
         yield url
@@ -113,7 +113,7 @@ def migrated_template(
     """One migrated database per test process. Each test copies it, which is far cheaper
     than running every migration again, so the suite stays fast as it grows."""
     if request.config.getoption("--db") == "sqlite":
-        path = tmp_path_factory.mktemp("template") / "crewmind.sqlite"
+        path = tmp_path_factory.mktemp("template") / "nightsquad.sqlite"
         migrate(f"sqlite:///{path}")
         yield str(path)
         return
@@ -128,7 +128,7 @@ def migrated_url(
 ) -> Iterator[str]:
     """The URL of a fresh, fully migrated database for one test."""
     if request.config.getoption("--db") == "sqlite":
-        target = tmp_path / "crewmind.sqlite"
+        target = tmp_path / "nightsquad.sqlite"
         with (
             contextlib.closing(sqlite3.connect(migrated_template)) as source,
             contextlib.closing(sqlite3.connect(target)) as copy,
@@ -157,7 +157,7 @@ class FakeClock:
 def no_container_runtime_on_this_host(monkeypatch: pytest.MonkeyPatch) -> None:
     """The suite gives the same answers on a machine with Docker and on one without. A
     test of the WRK-7 refusal names the socket it means."""
-    from crewmind.domain.work import checks
+    from nightsquad.domain.work import checks
 
     monkeypatch.setattr(checks, "CONTAINER_SOCKETS", ())
 
@@ -167,7 +167,7 @@ def fast_password_hashing(monkeypatch: pytest.MonkeyPatch) -> None:
     """Argon2 at its cheapest, so the suite stays fast. The algorithm is unchanged."""
     from argon2 import PasswordHasher
 
-    from crewmind.domain.accounts import passwords
+    from nightsquad.domain.accounts import passwords
 
     hasher = PasswordHasher(time_cost=1, memory_cost=8, parallelism=1)
     monkeypatch.setattr(passwords, "_hasher", hasher)

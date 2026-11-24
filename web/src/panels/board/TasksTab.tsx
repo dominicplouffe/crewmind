@@ -9,7 +9,7 @@ import { t } from "../../strings";
 import { groupTasks, type TaskGroup } from "./logic";
 import { Bar, CheckLabel, StateTag, type BoardTabProps } from "./parts";
 import { TaskDetail } from "./TaskDetail";
-import { useAgentName } from "../../crew/names";
+import { useAgentName } from "../../squad/names";
 
 /** Indentation stops growing here, so deep subtasks still fit a phone. */
 const MAX_INDENT = 3;

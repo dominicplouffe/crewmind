@@ -1,4 +1,4 @@
-"""Helpers for the work tests: a small crew and its workspace."""
+"""Helpers for the work tests: a small squad and its workspace."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ OBSERVABLE = {
 }
 
 
-class Crew:
+class Squad:
     """A running project with a CEO, a reviewer and one team: a lead and a member."""
 
     def __init__(self, app: App, owner: Actor, project: str) -> None:
@@ -37,7 +37,7 @@ class Crew:
         type: str = "deliver",
         settings: dict[str, Any] | None = None,
         owner: Actor | None = None,
-    ) -> Crew:
+    ) -> Squad:
         owner = owner or await app.person("owner@example.com")
         # These tests wake the same agent many times in one clock hour.
         settings = {"agent.max_wakes_per_hour": 60, **(settings or {})}
@@ -52,22 +52,22 @@ class Crew:
                 )  # fmt: skip
             await app.ok("projects.start", owner, project_id=project)
             await quiet_start(app, project)
-        crew = cls(app, owner, project)
-        crew.workspace.mkdir(parents=True, exist_ok=True)
+        squad = cls(app, owner, project)
+        squad.workspace.mkdir(parents=True, exist_ok=True)
         if type != "explore":
-            crew.requirement = await crew.add_requirement()
+            squad.requirement = await squad.add_requirement()
         else:
-            crew.bet = await crew.open_bet()
+            squad.bet = await squad.open_bet()
         if team:
-            hired = await crew.call(
+            hired = await squad.call(
                 "CEO", "agent.hire_team", team="build", role="Generalist", members=2
             )
             assert hired.status_code == 200, hired.text
-        return crew
+        return squad
 
     async def call(self, seat: str, name: str, /, **values: Any) -> httpx.Response:
         """Call an agent operation as `seat`, in a work run of its own. A new top-level
-        task serves the crew's requirement unless the test names another."""
+        task serves the squad's requirement unless the test names another."""
         if name == "agent.create_task":
             values = {**self.scope(), **values}
         run = await live_run(self.app, self.project, seat=seat)
@@ -81,7 +81,7 @@ class Crew:
 
         from sqlalchemy import select
 
-        from crewmind.storage.models import Run
+        from nightsquad.storage.models import Run
 
         async with self.app.runtime.sessions() as session, session.begin():
             rows = await session.scalars(
@@ -141,7 +141,7 @@ class Crew:
 
     async def finish(self, seat: str) -> None:
         """End the run this agent was last given, as its sandbox would."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         run = handed.pop((self.project, seat), None)
@@ -153,7 +153,7 @@ class Crew:
 
     async def finish_all(self) -> None:
         """End every run this project's agents were given or are waiting to be given."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         stash: dict[tuple[str, str], list[Any]] = self.app.__dict__.get("_live_runs", {})
@@ -169,7 +169,7 @@ class Crew:
 
     async def fail(self, seat: str) -> None:
         """End the run this agent was last given as failed, so it is retried (EXE-8)."""
-        from crewmind.domain.execution import runs
+        from nightsquad.domain.execution import runs
 
         handed: dict[tuple[str, str], Any] = self.app.__dict__.get("_handed_runs", {})
         run = handed.pop((self.project, seat))
