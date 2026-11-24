@@ -246,3 +246,75 @@ export function specFileName(projectName: string): string {
     .replace(/^-+|-+$/g, "");
   return `${safe || "project"}.spec.json`;
 }
+
+export type CheckKey = "draft" | "passages" | "questions" | "decisions" | "goal" | "rehearsal" | "other";
+/** Done, the next thing to do, or not possible until something before it is done. */
+export type CheckStatus = "done" | "todo" | "later";
+
+export interface Check {
+  key: CheckKey;
+  status: CheckStatus;
+  /** The server's own reason when this check is not met, shown as given. */
+  reason: string | null;
+}
+
+/** Which check a reason of the server's `not_ready_because` belongs to (FND-5). */
+function checkOfReason(reason: string): CheckKey {
+  if (reason === "There is no draft yet.") return "draft";
+  if (reason.startsWith("Passages of the document")) return "passages";
+  if (/question\(s\) are waiting/.test(reason)) return "questions";
+  if (reason.startsWith("Not yet decided")) return "decisions";
+  if (/rehears/i.test(reason)) return "rehearsal";
+  return "goal";
+}
+
+/**
+ * What stands between this draft and a project, as a checklist in the order the work happens
+ * (FND-5): a draft, the questions answered, every decision made, the goal graded ready, the draft
+ * rehearsed. Display only: each check is open exactly when the server gives a reason for it, and the
+ * server's `ready` stays the only verdict. Passages of a document show only while some are open.
+ */
+export function readinessChecks(view: Drafting): Check[] {
+  const reasons = new Map<CheckKey, string>();
+  for (const reason of view.not_ready_because) {
+    const key = checkOfReason(reason);
+    reasons.set(key, reasons.has(key) ? `${reasons.get(key) ?? ""} ${reason}` : reason);
+  }
+  const hasDraft = view.draft !== null && !reasons.has("draft");
+  const check = (key: CheckKey, status: CheckStatus): Check => ({ key, status, reason: reasons.get(key) ?? null });
+  // Decisions, the goal and the rehearsal are about a draft: before there is one they wait.
+  const ofDraft = (key: CheckKey): Check => check(key, !hasDraft ? "later" : reasons.has(key) ? "todo" : "done");
+  const checks: Check[] = [check("draft", hasDraft ? "done" : "todo")];
+  if (reasons.has("passages")) checks.push(check("passages", "todo"));
+  checks.push(
+    check("questions", reasons.has("questions") ? "todo" : hasDraft ? "done" : "later"),
+    ofDraft("decisions"),
+    ofDraft("goal"),
+    ofDraft("rehearsal"),
+  );
+  return checks;
+}
+
+/** The one thing this page says is happening now, and what the person can do about it. */
+export type Now =
+  | { kind: "writing-first" }
+  | { kind: "updating" }
+  | { kind: "questions"; count: number }
+  | { kind: "your-turn" }
+  | { kind: "failed-turn" }
+  | { kind: "ready" }
+  | { kind: "quick" }
+  | { kind: "created" }
+  | { kind: "ended" };
+
+export function nowOf(view: Drafting): Now {
+  const stage = stageOf(view);
+  if (stage === "done") return { kind: "created" };
+  if (stage === "failed") return { kind: "ended" };
+  if (stage === "quick") return { kind: "quick" };
+  if (stage === "ready") return { kind: "ready" };
+  if (stage === "founder") return view.draft ? { kind: "updating" } : { kind: "writing-first" };
+  if (view.questions.length > 0) return { kind: "questions", count: view.questions.length };
+  if (view.failure) return { kind: "failed-turn" };
+  return { kind: "your-turn" };
+}

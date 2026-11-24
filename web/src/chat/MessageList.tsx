@@ -1,6 +1,6 @@
 /** The scrolling chat: stored messages, local notices, messages being sent, and replies being written. */
 import { MessageCircle } from "lucide-react";
-import { AlertCircle, CheckCircle2, Loader2, RotateCw, Square, X } from "lucide-react";
+import { AlertCircle, ArrowDown, CheckCircle2, Loader2, RotateCw, Square, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Message } from "../api/client";
 import { useAuth } from "../auth";
@@ -9,7 +9,9 @@ import { Empty, Loading } from "../panels/kit";
 import { formatValue } from "../lib/format";
 import { AgentAvatar, useAgentName } from "../squad/names";
 import { t } from "../strings";
+import { placements } from "./layout";
 import { MessageItem, type MessageHandlers } from "./MessageItem";
+import { useMinute } from "./RelativeTime";
 import type { ChatState, Notice, PendingMessage, Typing } from "./state";
 
 interface Props {
@@ -149,6 +151,11 @@ export function MessageList({
   /** The oldest message shown when an earlier page was asked for, and where it sat in the view. */
   const held = useRef<{ id: string; top: number } | null>(null);
   const [loadingEarlier, setLoadingEarlier] = useState(false);
+  /** Scrolled up, away from the newest message, and how many arrived since. */
+  const [away, setAway] = useState(false);
+  const [unseen, setUnseen] = useState(0);
+  const lastCount = useRef(0);
+  const minute = useMinute();
   const { messages, notices, pending, typing, header, cards } = state;
   const myName = useAuth().person?.name;
   const firstId = messages[0]?.id ?? 0;
@@ -188,6 +195,28 @@ export function MessageList({
     return counts;
   }, [messages]);
 
+  const shown = useMemo(
+    () => placements(messages, new Date(minute), { today: t.chat.today, yesterday: t.chat.yesterday }),
+    [messages, minute],
+  );
+
+  // Messages that arrive while the person reads further up are counted on the "jump" button.
+  useEffect(() => {
+    const added = messages.length - lastCount.current;
+    lastCount.current = messages.length;
+    if (added > 0 && !stick.current && state.loaded) setUnseen((count) => count + added);
+  }, [messages.length, state.loaded]);
+
+  const toLatest = (): void => {
+    const element = scroller.current;
+    if (!element) return;
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    element.scrollTo({ top: element.scrollHeight, behavior: calm ? "auto" : "smooth" });
+    stick.current = true;
+    setAway(false);
+    setUnseen(0);
+  };
+
   const typingLength = typing.reduce((sum, item) => sum + item.text.length, 0);
   useEffect(() => {
     const element = scroller.current;
@@ -198,6 +227,8 @@ export function MessageList({
     const element = scroller.current;
     if (!element) return;
     stick.current = element.scrollHeight - element.scrollTop - element.clientHeight < NEAR_BOTTOM_PX;
+    setAway(!stick.current);
+    if (stick.current) setUnseen(0);
   };
 
   const noticesAfter = (id: number, last: boolean): Notice[] =>
@@ -232,7 +263,12 @@ export function MessageList({
         ? notices.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)
         : lead.map((notice) => <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />)}
       {messages.map((message: Message, index) => (
-        <div key={message.id} className="message-slot">
+        <div key={message.id} className={shown[index]?.continued ? "message-slot is-continued" : "message-slot"}>
+          {shown[index]?.day ? (
+            <div className="day-divider" role="separator" aria-label={shown[index]?.day ?? ""}>
+              <span>{shown[index]?.day}</span>
+            </div>
+          ) : null}
           <MessageItem
             message={message}
             parent={message.reply_to !== null ? byId.get(message.reply_to) : undefined}
@@ -243,6 +279,9 @@ export function MessageList({
             request={subjectOf(message, "request", state.requests)}
             example={state.examples[message.id]}
             mine={message.author_kind === "person" && message.author === myName}
+            parentMine={isMine(message.reply_to !== null ? byId.get(message.reply_to) : undefined, myName)}
+            continued={shown[index]?.continued ?? false}
+            showQuote={shown[index]?.quote ?? true}
           />
           {noticesAfter(message.id, index === messages.length - 1).map((notice) => (
             <NoticeItem key={notice.key} notice={notice} onDismiss={() => onDismissNotice(notice.key)} />
@@ -260,8 +299,20 @@ export function MessageList({
       {typing.map((item) => (
         <TypingItem key={item.runId} typing={item} doing={doingFor(item.seat)} onInterrupt={onInterrupt} />
       ))}
+      {away ? (
+        <div className="jump-latest">
+          <button type="button" className="button small jump-latest-button" onClick={toLatest} data-testid="jump-latest">
+            <ArrowDown size={14} aria-hidden="true" />
+            {unseen > 0 ? t.chat.newMessages(unseen) : t.chat.jumpToLatest}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
+}
+
+function isMine(message: Message | undefined, myName: string | undefined): boolean {
+  return message !== undefined && message.author_kind === "person" && myName !== undefined && message.author === myName;
 }
 
 /** How far below the top edge of the scrolling list an element sits now. */

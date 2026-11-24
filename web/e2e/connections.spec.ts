@@ -5,7 +5,7 @@
  * It runs after app.spec.ts (one worker, files in name order) and reuses its signed-in session.
  */
 import { expect, test, type Page } from "@playwright/test";
-import { STATE_FILE, createProject, expectAccessible, openPanel } from "./helpers";
+import { STATE_FILE, createProject, expectAccessible } from "./helpers";
 
 test.describe.configure({ mode: "serial" });
 
@@ -77,9 +77,28 @@ test("a variable shows its value, and a pasted .env is reviewed before saving (C
   expect(await page.content()).not.toContain(VALUE);
 });
 
-test("a project's Connections panel attaches what is yours, with the roles chosen (CON-4)", async () => {
+test("the project's More menu shows every panel in full and opens Connections from it (CON-15)", async () => {
   await createProject(page, "Connections demo");
-  await openPanel(page, "Connections");
+  await page.getByTestId("project-more").click();
+  const menu = page.getByRole("menu", { name: "More project tools" });
+  const items = menu.getByRole("menuitem");
+  await expect(items).toHaveCount(8);
+  for (const item of await items.all()) {
+    await expect(item).toBeInViewport();
+    // The item is the element on top at its own centre: nothing around the menu clips or covers it.
+    const onTop = await item.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return hit !== null && element.contains(hit);
+    });
+    expect(onTop, await item.innerText()).toBe(true);
+  }
+  await shot("04-project-more-menu");
+  await menu.getByRole("menuitem", { name: "Connections" }).click();
+  await expect(page.getByTestId("panel").getByRole("heading", { name: "Connections", exact: true })).toBeVisible();
+});
+
+test("a project's Connections panel attaches what is yours, with the roles chosen (CON-4)", async () => {
   const panel = page.getByTestId("connections-panel");
   await expect(panel.getByText("Ready to attach")).toBeVisible();
   const row = panel.getByTestId("connection").filter({ hasText: "region" });

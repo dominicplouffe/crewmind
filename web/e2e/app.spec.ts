@@ -95,7 +95,11 @@ test("a sent message shows as delivered and the reply streams in (CHAT-3, CHAT-1
   expect(seen.join(" ")).toContain("Here");
   await expect(reply.locator("strong")).toHaveText("plan");
   await expect(reply.locator("pre code.hljs")).toContainText("print(1)");
-  await expect(reply.getByRole("button", { name: /In reply to Admin/ })).toContainText("Please make a plan");
+  // The reply is threaded to the question (CHAT-11). It sits right under it, so no quote repeats it.
+  const asked = page.getByTestId("message-person").filter({ hasText: "Please make a plan" }).first();
+  const askedId = ((await asked.getAttribute("id")) ?? "").replace("message-", "");
+  await expect(reply).toHaveAttribute("data-reply-to", askedId);
+  await expect(reply.getByRole("button", { name: /In reply to/ })).toHaveCount(0);
 });
 
 test("/hold changes the header and /resume changes it back (CHAT-5, CHAT-18)", async () => {

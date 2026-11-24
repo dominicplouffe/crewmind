@@ -3,37 +3,30 @@
  * `/draft` starts a conversation, `/draft/:draftingId` goes on with one, and
  * `/draft/:draftingId/review` is the whole draft on one screen before it is created.
  *
- * Three columns on a wide screen: every decision and where it stands, the conversation with the
- * round of questions, and the draft. What is left to decide is always in view.
+ * The page leads with what is happening now and the one thing to do (P18). Below it, the
+ * conversation, and beside it what is left before the project can be created, every decision,
+ * and the draft as it stands. It uses the full width: the columns follow the room the page has.
  */
-import { ArrowRight } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ErrorNote, Loading } from "../components/common";
 import { usePageTitle } from "../needs/NeedsYou";
 import { t } from "../strings";
 import { settingsWords } from "../strings.settings";
-import { AcceptRest } from "./AcceptRest";
 import { Conversation } from "./Conversation";
 import { DecisionRail } from "./DecisionRail";
 import { DraftComposer, type ComposerMode } from "./DraftComposer";
 import { DraftNeeds } from "./DraftNeeds";
 import { DraftRail } from "./DraftRail";
 import { FounderSetupNote, isNoModelFailure, lastSaid } from "./FounderSetupNote";
-import { draftSummary, gradeOf, readinessReasons, stageOf, stepOf, visibleLines, type Drafting as View } from "./logic";
+import { draftSummary, gradeOf, nowOf, stageOf, stepOf, visibleLines } from "./logic";
+import { NowStrip } from "./NowStrip";
 import { QuickProgress } from "./QuickProgress";
 import { Readiness } from "./Readiness";
+import { ReadyChecklist } from "./ReadyChecklist";
 import { RoundForm } from "./RoundForm";
 import { StartForm } from "./StartForm";
 import { Steps } from "./Steps";
 import { useDrafting } from "./useDrafting";
-import { WorkingLine } from "./WorkingLine";
-
-/** Reasons the draft is not ready that the list of decisions does not already show. */
-function otherReasons(view: View): string[] {
-  return view.not_ready_because.filter(
-    (reason) => !reason.startsWith("Not yet decided") && !/question\(s\) are waiting/.test(reason),
-  );
-}
 
 export function DraftLoading({ loadError }: { loadError: unknown }): JSX.Element {
   const words = t.founder;
@@ -66,7 +59,6 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
   const talking = view.state === "drafting" && !view.quick;
   const asking = talking && stage === "you" && view.questions.length > 0;
   const mode: ComposerMode = stage === "founder" ? "working" : asking ? "questions" : "open";
-  const blockers = stage === "you" && view.questions.length === 0 ? otherReasons(view) : [];
   const start = (): void => {
     void actions.start().then((projectId) => {
       if (projectId) navigate(`/projects/${projectId}?squad=hired`);
@@ -78,17 +70,20 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
       <header className="draft-top">
         <div className="draft-title">
           <p className="eyebrow">{words.page.draftTitle}</p>
-          <h1 data-testid="draft-heading">{draft?.name || words.page.draftTitle}</h1>
+          <h1 data-testid="draft-heading">{draft?.name || words.brief.untitled}</h1>
         </div>
         <Steps current={stepOf(view, false)} />
       </header>
+      <NowStrip
+        now={nowOf(view)}
+        draftingId={draftingId}
+        busy={busy}
+        working={state.working}
+        workingSince={state.workingSince}
+        offerRest={talking && stage === "you" && (draft !== null || view.questions.length > 0)}
+        onAcceptRest={actions.acceptRest}
+      />
       <div className="draft-grid">
-        <aside className="draft-left" aria-label={words.decide.title}>
-          <DecisionRail decisions={view.decisions} ledger={view.ledger} />
-          {talking && stage === "you" && (draft || view.questions.length > 0) ? (
-            <AcceptRest busy={busy} onAccept={actions.acceptRest} />
-          ) : null}
-        </aside>
         <main className="draft-main" aria-label={words.page.mainLabel}>
           {state.dropped && !state.live ? (
             <p className="offline" role="status">
@@ -96,7 +91,6 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
             </p>
           ) : null}
           <Conversation lines={visibleLines(view.lines, talking ? view.questions : [])} reply={reply} />
-          {stage === "founder" && !reply ? <WorkingLine doing={state.working} since={state.workingSince} /> : null}
           {view.failure && view.state === "drafting" && stage !== "founder" ? (
             isNoModelFailure(view.failure) ? (
               <FounderSetupNote
@@ -115,28 +109,6 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
           ) : null}
           {view.quick ? <QuickProgress state={view.state} /> : null}
           {asking ? <RoundForm questions={view.questions} busy={busy} onSubmit={actions.answerAll} /> : null}
-          {blockers.length > 0 ? (
-            <section className="note" aria-labelledby="blockers-title" data-testid="not-ready-because">
-              <h2 id="blockers-title">{words.ready.notReady}</h2>
-              <ul>
-                {readinessReasons(blockers).map((reason) => (
-                  <li key={reason.text}>{reason.text}</li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-          {stage === "ready" ? (
-            <section className="note note-success ready-banner" aria-labelledby="ready-title" data-testid="readiness">
-              <div>
-                <h2 id="ready-title">{words.review.readyTitle}</h2>
-                <p>{words.review.readyIntro}</p>
-              </div>
-              <Link to={`/draft/${draftingId}/review`} className="button primary large">
-                {words.review.go}
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </section>
-          ) : null}
           <ErrorNote error={error} />
           {stage === "done" || stage === "failed" ? (
             <Readiness
@@ -151,9 +123,15 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
           {talking ? <DraftComposer mode={mode} busy={busy} onSend={actions.say} /> : null}
           {view.state !== "drafting" && !view.quick ? <p className="quiet">{words.talk.closed}</p> : null}
         </main>
-        <aside className="draft-right" aria-label={words.page.sideLabel}>
-          <DraftRail draft={draft} grade={gradeOf(view.grade)} rehearsal={view.rehearsal} rulesHit={view.rules_hit} />
-          <DraftNeeds needs={view.needs ?? []} />
+        <aside className="draft-side" aria-label={words.page.sideLabel}>
+          <div className="draft-progress">
+            <ReadyChecklist view={view} stage={stage} grade={gradeOf(view.grade)} />
+            <DecisionRail decisions={view.decisions} ledger={view.ledger} />
+          </div>
+          <div className="draft-brief">
+            <DraftRail draft={draft} rulesHit={view.rules_hit} />
+            <DraftNeeds needs={view.needs ?? []} />
+          </div>
         </aside>
       </div>
     </div>

@@ -1,7 +1,7 @@
 /**
- * Every decision a project rests on, in the order they are asked, and where each one stands
- * (FND-4, FND-5): settled with its value and where it came from, being asked now, or not asked
- * yet. It stays in view while the person drafts, so what is left is never a guess.
+ * Every decision a project rests on and where each one stands (FND-4, FND-5): what is decided,
+ * with its value and where it came from (your words, your answer, or assumed), and what is still to
+ * decide, the one being asked now marked. Settled first, because that is what the draft says.
  */
 import { Check, Circle, CircleDot } from "lucide-react";
 import { t } from "../strings";
@@ -13,11 +13,25 @@ interface Props {
   ledger: LedgerLine[];
 }
 
-const ICONS = { settled: Check, asked: CircleDot, open: Circle };
+function Settled({ settles, value, source }: { settles: string; value: string; source: string | null }): JSX.Element {
+  return (
+    <li className="decision decision-settled" data-testid="ledger-line" data-settles={settles} data-source={source ?? undefined}>
+      <Check size={16} aria-hidden="true" className="decision-icon" />
+      <div className="decision-body">
+        <p className="decision-name">
+          <span>{decisionName(settles)}</span>
+          {source ? <span className={`badge source-${source}`}>{sourceTag(source)}</span> : null}
+        </p>
+        <p className="decision-value">{value}</p>
+      </div>
+    </li>
+  );
+}
 
 export function DecisionRail({ decisions, ledger }: Props): JSX.Element {
   const words = t.founder.decide;
-  const settled = settledCount(decisions);
+  const settled = decisions.filter((decision) => decision.state === "settled");
+  const open = decisions.filter((decision) => decision.state !== "settled");
   const keys = new Set(decisions.map((decision) => decision.key));
   const passages = ledger.filter((line) => !keys.has(line.settles));
   return (
@@ -25,61 +39,52 @@ export function DecisionRail({ decisions, ledger }: Props): JSX.Element {
       <header className="rail-head">
         <h2 id="decisions-title">{words.title}</h2>
         <span className="rail-count" data-testid="decisions-progress">
-          {words.progress(settled, decisions.length)}
+          {words.progress(settledCount(decisions), decisions.length)}
         </span>
       </header>
-      <progress className="decide-meter" max={decisions.length} value={settled} aria-label={words.progressLabel} />
-      <ol className="decision-list">
-        {decisions.map((decision) => {
-          const Icon = ICONS[decision.state as keyof typeof ICONS] ?? Circle;
-          return (
-            <li
-              key={decision.key}
-              className={`decision decision-${decision.state}`}
-              data-testid={decision.state === "settled" ? "ledger-line" : "decision-open"}
-              data-settles={decision.key}
-              data-source={decision.source ?? undefined}
-            >
-              <Icon size={16} aria-hidden="true" className="decision-icon" />
-              <div className="decision-body">
-                <p className="decision-name">
+      {settled.length === 0 ? <p className="quiet small">{words.nothingDecided}</p> : null}
+      {settled.length > 0 ? (
+        <>
+          <h3 className="rail-subtitle">{words.decided}</h3>
+          <ul className="decision-list">
+            {settled.map((decision) => (
+              <Settled key={decision.key} settles={decision.key} value={decision.value ?? ""} source={decision.source ?? null} />
+            ))}
+          </ul>
+        </>
+      ) : null}
+      {open.length > 0 ? (
+        <>
+          <h3 className="rail-subtitle">{words.toDecide}</h3>
+          <ul className="decision-open-list">
+            {open.map((decision) => {
+              const asked = decision.state === "asked";
+              const Icon = asked ? CircleDot : Circle;
+              return (
+                <li
+                  key={decision.key}
+                  className={`decision-open decision-${decision.state}`}
+                  data-testid="decision-open"
+                  data-settles={decision.key}
+                >
+                  <Icon size={14} aria-hidden="true" className="decision-icon" />
                   <span>{decisionName(decision.key)}</span>
-                  {decision.source ? (
-                    <span className={`badge source-${decision.source}`}>{sourceTag(decision.source)}</span>
-                  ) : null}
-                  <span className="visually-hidden"> {words.state[decision.state] ?? decision.state}</span>
-                </p>
-                {decision.state === "settled" ? (
-                  <p className="decision-value">{decision.value}</p>
-                ) : (
-                  <p className="decision-note">{decision.state === "asked" ? words.askedNow : words.notYet}</p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+                  {asked ? <span className="badge asked-now">{words.askedNow}</span> : null}
+                  <span className="visually-hidden"> ({words.state[decision.state] ?? decision.state})</span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      ) : decisions.length > 0 ? (
+        <p className="quiet small">{words.allDecided}</p>
+      ) : null}
       {passages.length > 0 ? (
         <>
           <h3 className="rail-subtitle">{words.fromDocument}</h3>
           <ul className="decision-list">
             {passages.map((line) => (
-              <li
-                key={line.settles}
-                className="decision decision-settled"
-                data-testid="ledger-line"
-                data-settles={line.settles}
-                data-source={line.source}
-              >
-                <Check size={16} aria-hidden="true" className="decision-icon" />
-                <div className="decision-body">
-                  <p className="decision-name">
-                    <span>{decisionName(line.settles)}</span>
-                    <span className={`badge source-${line.source}`}>{sourceTag(line.source)}</span>
-                  </p>
-                  <p className="decision-value">{line.value}</p>
-                </div>
-              </li>
+              <Settled key={line.settles} settles={line.settles} value={line.value} source={line.source} />
             ))}
           </ul>
         </>
