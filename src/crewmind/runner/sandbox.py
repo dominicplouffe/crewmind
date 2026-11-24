@@ -27,6 +27,7 @@ from crewmind.runner.containers import (
     RUN_LABEL,
     WORKSPACE,
     confinement,
+    container_user,
     cpus_granted,
     docker_client,
     hand_over,
@@ -381,7 +382,10 @@ class ContainerSandbox:
         spec.workspace.mkdir(parents=True, exist_ok=True)
 
         user, group = container_user()
-        private = f"size={PRIVATE_DIR_BYTES},mode=0700,uid={user},gid={group},noexec,nosuid"
+        private = f"size={PRIVATE_DIR_BYTES},mode=0700,uid={user},gid={group},noexec,nosuid,nodev"
+        # The run's secret files live here (CON-7): only its own user may read them, so
+        # this replaces the shared confinement's world-writable private directory.
+        confined = {**confinement(), "tmpfs": {PRIVATE_DIR: private}}
 
         def run() -> Any:
             hand_over(spec.workspace)
@@ -397,7 +401,6 @@ class ContainerSandbox:
                         "PATH": CONTAINER_PATH,
                         "CREWMIND_PRIVATE_DIR": PRIVATE_DIR,
                     },
-                    tmpfs={PRIVATE_DIR: private},
                     working_dir=WORKSPACE,
                     volumes={str(spec.workspace): {"bind": WORKSPACE, "mode": "rw"}},
                     network=self._join(spec.project_id, spec.api_url),
@@ -406,7 +409,7 @@ class ContainerSandbox:
                     memswap_limit=self._memory,
                     labels={**self._label, RUN_LABEL: spec.run_id},
                     extra_hosts={"host.docker.internal": "host-gateway"},
-                    **confinement(),
+                    **confined,
                 )
 
         container = await asyncio.to_thread(run)
