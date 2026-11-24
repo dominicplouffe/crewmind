@@ -160,8 +160,10 @@ export const startDialog = {
       ? "Something the crew needs is missing."
       : `${plural(count, "agent needs", "agents need")} something the project doesn't have yet.`,
   who: (names: string[]): string => `Waits: ${names.join(", ")}`,
+  markDone: "It's added",
+  markDoneFor: (what: string): string => `It's added: ${what}`,
   after:
-    "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
+    "Added it under other names, such as a user name and a password apart? Choose It's added: the agents work out which is which. Or start without it and only those agents wait until it is added.",
   notNow: "Not now",
   addNow: "Add them now",
   startWithout: "Start without it",

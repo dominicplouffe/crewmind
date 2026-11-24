@@ -197,7 +197,14 @@ export const connectionWords = {
   importProblems: (count: number): string => `${plural(count, "line needs", "lines need")} fixing or skipping.`,
   project: {
     missingTitle: "Missing",
-    missingHelp: "The crew needs these. The agents named wait until they are added.",
+    missingHelp:
+      "The crew needs these. Add each under any names you like (one secret, or a user name and a password apart), then choose It's added. The agents named wait until then, and work out which is which.",
+    markDone: "It's added",
+    markDoneFor: (name: string): string => `It's added: ${name}`,
+    doneTitle: "Taken care of",
+    doneHelp: "You said these are added. The agents work out which of what they are given serves each.",
+    reopen: "Not added after all",
+    reopenFor: (name: string): string => `Not added after all: ${name}`,
     waits: (names: string[]): string => `Waits: ${names.join(", ")}`,
     waived: "Started without it",
     addIt: (kind: string): string => `Add ${kind}`,

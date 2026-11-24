@@ -98,12 +98,19 @@ async def environment(context: Context, payload: Empty) -> RunEnvironment:
 
 async def context_section(session: AsyncSession, view: AgentView) -> str | None:
     """CON-3, CON-7, CON-14: the pack names what the run may use (what it is given, the
-    sites its secrets are sent to, its MCP tools) and what its role needs but lacks; never
-    a secret's value."""
+    sites its secrets are sent to, its MCP tools), what its role needs but lacks, and which
+    needs the chairman marked done; never a secret's value. The names are the chairman's
+    choice: the agent works out which serves what (CON-5)."""
     given = await delivery.given_for_run(session, None, view.run)
     sent = await sending.sites_for(session, view.run)
     tools = await mcp_calls.offered(session, view.run)
-    lacking = needs.unmet_for(await needs.preview(session, view.project), view.role.slug)
+    current = await needs.preview(session, view.project)
+    lacking = needs.unmet_for(current, view.role.slug)
+    covered = [
+        need
+        for need in current
+        if need.state == needs.NeedState.DONE and view.role.slug in (need.roles or [])
+    ]
     if not (given or sent or tools or lacking):
         return None
     lines = ["# What you are given", ""]
@@ -125,6 +132,16 @@ async def context_section(session: AsyncSession, view: AgentView) -> str | None:
         by_server.setdefault(tool.connection.name, []).append(tool.name)
     for server, names in by_server.items():
         lines.append(f"- {server} (MCP server): your tools {', '.join(names)}")
+    if given or sent or tools:
+        lines += [
+            "",
+            "The chairman chose these names. Work out from each name and description which "
+            "one serves what your work needs; several may together make one login, such as "
+            "a user name and a password. When two could fit, try the likelier first.",
+        ]
+    if covered:
+        lines += ["", "The chairman says these needs of your role are in what you are given:"]
+        lines += [f"- {needs.describe(need)}" for need in covered]
     if given:
         lines += [
             "",

@@ -1,5 +1,5 @@
-"""Operations on what a project has and needs: readiness, attaching, grants and the
-project's view of its connections (CON-4, CON-5, CON-14, PRJ-1)."""
+"""Operations on what a project has and needs: readiness, attaching, grants, marking a need
+done and the project's view of its connections (CON-4, CON-5, CON-14, PRJ-1)."""
 
 from __future__ import annotations
 
@@ -10,17 +10,28 @@ from crewmind.catalog.caller import Authority
 from crewmind.catalog.define import PERSON_AND_MCP, operation
 from crewmind.catalog.execute import Context
 from crewmind.catalog.operation import Reversibility
+from crewmind.catalog.refusal import Refusal, RefusalKind
 from crewmind.domain.connections import attach, holds, needs, service
 from crewmind.domain.connections.model import Scope
 from crewmind.domain.connections.views import ConnectionView, item_view
 from crewmind.domain.projects.access import view_of
 from crewmind.domain.projects.operations import ProjectRef
-from crewmind.storage.models import Connection, Project
+from crewmind.storage.models import Connection, Project, ProjectNeed
+
+
+class NeedRef(BaseModel):
+    kind: str = Field(description="secret, variable or mcp_server.")
+    name: str = Field(description="What the need is called, such as wordpress.")
 
 
 class BlockerItem(BaseModel):
     text: str = Field(description="What is missing, or why a seat cannot run, in plain words.")
     seats: list[str] = Field(description="The names of the agents who would wait for it.")
+    need: NeedRef | None = Field(
+        default=None,
+        description="The need that is missing, to mark it done once it is added; none when "
+        "a seat cannot run for another reason.",
+    )
 
 
 class Readiness(BaseModel):
@@ -44,7 +55,14 @@ async def readiness(context: Context, payload: ProjectRef) -> Readiness:
     found = await holds.blockers(context.session, project, context.now, context.caller, keep=False)
     return Readiness(
         ready=not found,
-        waiting=[BlockerItem(text=item.text, seats=item.seats) for item in found],
+        waiting=[
+            BlockerItem(
+                text=item.text,
+                seats=item.seats,
+                need=NeedRef(kind=item.need[0], name=item.need[1]) if item.need else None,
+            )
+            for item in found
+        ],
     )
 
 
@@ -78,7 +96,10 @@ class NeedView(BaseModel):
     kind: str
     name: str
     roles: list[str] = Field(description="The roles that need it.")
-    state: str = Field(description="met, open (missing) or waived (started without it).")
+    state: str = Field(
+        description="open (missing), done (the chairman marked it done), met (a connection of "
+        "its name is attached) or waived (started without it)."
+    )
     seats: list[str] = Field(description="The agents who wait while it is missing.")
 
 
@@ -197,7 +218,7 @@ async def for_project(context: Context, payload: ProjectRef) -> ProjectConnectio
             roles=[str(role) for role in need.roles or []],
             state=need.state,
             seats=[seat.display_name for seat, role in seats if role.slug in (need.roles or [])]
-            if need.state != needs.NeedState.MET
+            if need.state in needs.UNMET
             else [],
         )
         for need in await needs.preview(session, project)
@@ -209,3 +230,89 @@ async def for_project(context: Context, payload: ProjectRef) -> ProjectConnectio
         needs=need_views,
         roles=[RoleOption(slug=role.slug, name=role.name) for role in roster],
     )
+
+
+class NeedInput(ProjectRef):
+    need: str = Field(description="What the need is called, such as wordpress.")
+    kind: str | None = Field(
+        default=None, description="secret, variable or mcp_server, when two needs share a name."
+    )
+
+
+class NeedChanged(BaseModel):
+    kind: str
+    name: str
+    state: str = Field(description="The need's state now.")
+
+
+async def _need(context: Context, project: Project, payload: NeedInput) -> ProjectNeed:
+    current = await needs.sync(context.session, project, context.now, context.caller)
+    found = [
+        need
+        for need in current
+        if need.name.lower() == payload.need.lower()
+        and (payload.kind is None or need.kind == payload.kind)
+        and need.state != needs.NeedState.DROPPED
+    ]
+    if len(found) == 1:
+        return found[0]
+    if found:
+        raise Refusal(
+            "need_ambiguous",
+            f"More than one need is called {payload.need}.",
+            rule=needs.CON_5.id,
+            hint="Say which kind: secret, variable or mcp_server.",
+        )
+    listed = ", ".join(
+        sorted({need.name for need in current if need.state != needs.NeedState.DROPPED})
+    )
+    raise Refusal(
+        "need_not_found",
+        f"No role of this project needs {payload.need}.",
+        kind=RefusalKind.NOT_FOUND,
+        rule=needs.CON_5.id,
+        hint=f"Needs here: {listed or 'none'}.",
+    )
+
+
+@operation(
+    "connections.mark_need_done",
+    summary="Say a need is taken care of: what it asks for is added, under any names.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def mark_need_done(context: Context, payload: NeedInput) -> NeedChanged:
+    """CON-5: the chairman's word is final; nothing compares names to second-guess it. The
+    agents that waited for it go back to work by themselves, and work out from the names
+    and descriptions of what they are granted which is which."""
+    project = await _project(context)
+    need = await _need(context, project, payload)
+    if need.state not in (needs.NeedState.MET, needs.NeedState.DONE):
+        needs.mark_done(context.session, need, context.now, context.caller)
+        await service.refresh(context.session, project, context.now, context.caller)
+    return NeedChanged(kind=need.kind, name=need.name, state=need.state)
+
+
+@operation(
+    "connections.reopen_need",
+    summary="Take back a need marked done: it is missing again.",
+    authority=Authority.PROJECT_CHAIR,
+    reversibility=Reversibility.REVERSIBLE,
+)
+async def reopen_need(context: Context, payload: NeedInput) -> NeedChanged:
+    """CON-5: only a need the chairman marked done is reopened; one met by a connection of
+    its name is reopened by detaching that connection. A started project holds the seats
+    that need it again."""
+    project = await _project(context)
+    need = await _need(context, project, payload)
+    if need.state != needs.NeedState.DONE:
+        raise Refusal(
+            "need_not_done",
+            f"{need.name} is not marked done.",
+            rule=needs.CON_5.id,
+            hint="Only a need marked done can be reopened. One met by a connection of its "
+            "name opens again when that connection is detached.",
+        )
+    needs.reopen(context.session, need, context.now, context.caller)
+    await service.refresh(context.session, project, context.now, context.caller)
+    return NeedChanged(kind=need.kind, name=need.name, state=need.state)

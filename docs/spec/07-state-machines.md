@@ -412,11 +412,13 @@ The artifact status label (draft, in review, verified, delivered; ART-1) is deri
 | From | To | Trigger | Who |
 | --- | --- | --- | --- |
 | (new) | open | Declared by a role, a spec or an approved agent request | Platform; chairman |
-| open | met | A connection is attached and granted to the roles that need it | Chairman |
+| open | met | A connection of its name is attached and granted to the roles that need it | Chairman |
 | open | waived | The project starts without it; the seats that need it are held | Chairman |
 | waived | met | The connection is attached; the holds lift | Chairman |
 | met | open | The connection is detached, revoked, deleted or expires | Chairman; owner; platform |
-| open, waived, met | dropped | The roles that needed it leave the roster | Chairman; CEO |
+| open, waived | done | The chairman marks it done: what it asks for is added, under any names; the holds lift | Chairman |
+| done | open | The chairman reopens it | Chairman |
+| open, waived, met, done | dropped | The roles that needed it leave the roster | Chairman; CEO |
 | dropped | open | A role that needs it joins the roster again | Chairman; CEO |
 
 **Mailbox**, project or agent (INT-6, INT-10):

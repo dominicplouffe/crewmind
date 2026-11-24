@@ -161,6 +161,39 @@ async def test_CON_14_a_run_is_told_what_it_may_use_and_what_its_role_lacks(app:
 
 
 @pytest.mark.attack("CON-14")
+async def test_CON_5_a_run_is_told_the_chairman_marked_its_need_done(app: App) -> None:
+    """CON-5, CON-14, CON-8: secrets given under the chairman's own names (a user name and a
+    password apart) are listed with their descriptions, and the run is told the chairman says
+    its need is among them, so the agent works out which is which. No value is in the pack."""
+    owner = await app.person("owner@example.com")
+    project = await running_project(app, owner)
+    await app.ok(
+        "roster.hire_team", owner, project_id=project, team="Desk", role=BLOG_WRITER, members=1
+    )
+    for name, value in (("WP_USER", "wp-user-name-0451"), ("WP_PASS", VALUE)):
+        await app.ok(
+            "connections.add_secret", owner, name=name, description=f"WordPress {name}.",
+            value=value, delivery="given", scope="project", project_id=project,
+            roles=["blog-writer"],
+        )  # fmt: skip
+    await app.ok("connections.mark_need_done", owner, project_id=project, need="wordpress")
+    app.script("*", {"text": "done"})
+    from tests.support import wake
+
+    await wake(app, project, seat="Desk")
+    await app.work()
+    async with app.runtime.sessions() as session:
+        packs = [run.context_pack or "" for run in await session.scalars(select(Run))]
+    pack = next(pack for pack in packs if "WP_PASS" in pack)
+    assert "WP_USER (secret, the environment variable WP_USER)" in pack
+    assert "The chairman says these needs of your role are in what you are given" in pack
+    assert "the secret wordpress, for blog-writer" in pack
+    assert "does not have yet" not in pack
+    assert VALUE not in "".join(packs)
+    assert "wp-user-name-0451" not in "".join(packs)
+
+
+@pytest.mark.attack("CON-14")
 async def test_CON_14_a_broken_connection_shows_in_project_health_with_its_fix(app: App) -> None:
     """CON-14, CON-16: an expired secret and a missing need of a started project each show
     in the project's health, naming the thing and the fix."""

@@ -1231,6 +1231,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/connections/mark_need_done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Say a need is taken care of: what it asks for is added, under any names.
+         * @description Requires: project_chair.
+         */
+        post: operations["connections.mark_need_done"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/connections/presets": {
         parameters: {
             query?: never;
@@ -1245,6 +1265,26 @@ export interface paths {
         get: operations["connections.presets"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/connections/reopen_need": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take back a need marked done: it is missing again.
+         * @description Requires: project_chair.
+         */
+        post: operations["connections.reopen_need"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4763,7 +4803,7 @@ export interface components {
             /**
              * Key
              * Format: password
-             * @description The API key. It is encrypted and never shown again.
+             * @description The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.
              */
             key: string;
             /**
@@ -5368,6 +5408,8 @@ export interface components {
         };
         /** BlockerItem */
         BlockerItem: {
+            /** @description The need that is missing, to mark it done once it is added; none when a seat cannot run for another reason. */
+            need?: components["schemas"]["NeedRef"] | null;
             /**
              * Seats
              * @description The names of the agents who would wait for it.
@@ -7717,6 +7759,49 @@ export interface components {
             /** Seats */
             seats: components["schemas"]["SeatModel"][];
         };
+        /** NeedChanged */
+        NeedChanged: {
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+            /**
+             * State
+             * @description The need's state now.
+             */
+            state: string;
+        };
+        /** NeedInput */
+        NeedInput: {
+            /**
+             * Kind
+             * @description secret, variable or mcp_server, when two needs share a name.
+             */
+            kind?: string | null;
+            /**
+             * Need
+             * @description What the need is called, such as wordpress.
+             */
+            need: string;
+            /**
+             * Project Id
+             * @description The project's id, from `projects list`.
+             */
+            project_id: string;
+        };
+        /** NeedRef */
+        NeedRef: {
+            /**
+             * Kind
+             * @description secret, variable or mcp_server.
+             */
+            kind: string;
+            /**
+             * Name
+             * @description What the need is called, such as wordpress.
+             */
+            name: string;
+        };
         /** NeedView */
         NeedView: {
             /** Kind */
@@ -7735,7 +7820,7 @@ export interface components {
             seats: string[];
             /**
              * State
-             * @description met, open (missing) or waived (started without it).
+             * @description open (missing), done (the chairman marked it done), met (a connection of its name is attached) or waived (started without it).
              */
             state: string;
         };
@@ -8305,10 +8390,20 @@ export interface components {
         ProviderItem: {
             /** Ceiling */
             ceiling: number | null;
+            /**
+             * Credential
+             * @description key, or login for a command-line agent (LLM-2).
+             */
+            credential: string;
             /** Images */
             images: boolean;
             /** Label */
             label: string;
+            /**
+             * Login Hint
+             * @description What to paste as a login, in plain words.
+             */
+            login_hint: string;
             /** Name */
             name: string;
             /** Needs Base Url */
@@ -12190,6 +12285,39 @@ export interface operations {
             };
         };
     };
+    "connections.mark_need_done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NeedInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NeedChanged"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "connections.presets": {
         parameters: {
             query?: never;
@@ -12206,6 +12334,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PresetList"];
+                };
+            };
+        };
+    };
+    "connections.reopen_need": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NeedInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NeedChanged"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

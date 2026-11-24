@@ -1,6 +1,7 @@
 """What broke in a project's connections, each with its fix (CON-14, CON-16): an expired
 secret, an MCP server that needs sign-in or is failing, and a need with nothing to meet it
-once the project has started. Read only; the holds themselves come from the needs."""
+once the project has started. Read only; the holds themselves come from the needs, and a
+need the chairman marked done holds nobody (CON-5)."""
 
 from __future__ import annotations
 
@@ -24,8 +25,7 @@ async def findings(session: AsyncSession, project: Project) -> list[str]:
         kind = KIND_WORDS.get(Kind(item.kind), item.kind)
         if item.state == ConnectionState.EXPIRED:
             found.append(
-                f"The {kind} {item.name} has expired: runs no longer receive it, and seats "
-                f"whose role needs it are held. "
+                f"The {kind} {item.name} has expired: runs no longer receive it. "
                 f"{FIX} and replace its value."
             )
             continue
@@ -37,7 +37,7 @@ async def findings(session: AsyncSession, project: Project) -> list[str]:
         if server.state == ServerState.NEEDS_SIGN_IN:
             found.append(
                 f"The MCP server {item.name} needs you to sign in again: its tools are not "
-                f"offered, and seats whose role needs it are held. {FIX} and sign in."
+                f"offered. {FIX} and sign in."
             )
         elif server.state == ServerState.FAILING:
             reason = f": {server.last_error}" if server.last_error else ""
@@ -55,7 +55,7 @@ async def findings(session: AsyncSession, project: Project) -> list[str]:
     for need in rows:
         found.append(
             f"Missing {needs.describe(need)}: their seats are held until it is added. "
-            f"{FIX} and add it."
+            f"{FIX}, add it under any names and mark it done."
         )
     return found
 

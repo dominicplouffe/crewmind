@@ -125,7 +125,7 @@
       "title": "Base Url"
      },
      "key": {
-      "description": "The API key. It is encrypted and never shown again.",
+      "description": "The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.",
       "format": "password",
       "title": "Key",
       "type": "string",
@@ -1310,6 +1310,17 @@
    },
    "BlockerItem": {
     "properties": {
+     "need": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/NeedRef"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "The need that is missing, to mark it done once it is added; none when a seat cannot run for another reason."
+     },
      "seats": {
       "description": "The names of the agents who would wait for it.",
       "items": {
@@ -6461,6 +6472,82 @@
     "title": "ModelsView",
     "type": "object"
    },
+   "NeedChanged": {
+    "properties": {
+     "kind": {
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "state": {
+      "description": "The need's state now.",
+      "title": "State",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "name",
+     "state"
+    ],
+    "title": "NeedChanged",
+    "type": "object"
+   },
+   "NeedInput": {
+    "properties": {
+     "kind": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "secret, variable or mcp_server, when two needs share a name.",
+      "title": "Kind"
+     },
+     "need": {
+      "description": "What the need is called, such as wordpress.",
+      "title": "Need",
+      "type": "string"
+     },
+     "project_id": {
+      "description": "The project's id, from `projects list`.",
+      "title": "Project Id",
+      "type": "string"
+     }
+    },
+    "required": [
+     "project_id",
+     "need"
+    ],
+    "title": "NeedInput",
+    "type": "object"
+   },
+   "NeedRef": {
+    "properties": {
+     "kind": {
+      "description": "secret, variable or mcp_server.",
+      "title": "Kind",
+      "type": "string"
+     },
+     "name": {
+      "description": "What the need is called, such as wordpress.",
+      "title": "Name",
+      "type": "string"
+     }
+    },
+    "required": [
+     "kind",
+     "name"
+    ],
+    "title": "NeedRef",
+    "type": "object"
+   },
    "NeedView": {
     "properties": {
      "kind": {
@@ -6488,7 +6575,7 @@
       "type": "array"
      },
      "state": {
-      "description": "met, open (missing) or waived (started without it).",
+      "description": "open (missing), done (the chairman marked it done), met (a connection of its name is attached) or waived (started without it).",
       "title": "State",
       "type": "string"
      }
@@ -7865,12 +7952,22 @@
       ],
       "title": "Ceiling"
      },
+     "credential": {
+      "description": "key, or login for a command-line agent (LLM-2).",
+      "title": "Credential",
+      "type": "string"
+     },
      "images": {
       "title": "Images",
       "type": "boolean"
      },
      "label": {
       "title": "Label",
+      "type": "string"
+     },
+     "login_hint": {
+      "description": "What to paste as a login, in plain words.",
+      "title": "Login Hint",
       "type": "string"
      },
      "name": {
@@ -7887,7 +7984,9 @@
      "label",
      "needs_base_url",
      "images",
-     "ceiling"
+     "ceiling",
+     "credential",
+     "login_hint"
     ],
     "title": "ProviderItem",
     "type": "object"
@@ -15136,6 +15235,48 @@
     ]
    }
   },
+  "/v1/connections/mark_need_done": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "connections.mark_need_done",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NeedInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NeedChanged"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Say a need is taken care of: what it asks for is added, under any names.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
   "/v1/connections/presets": {
    "get": {
     "description": "Requires: person.",
@@ -15153,6 +15294,48 @@
      }
     },
     "summary": "List well-known MCP servers, to fill in the add form.",
+    "tags": [
+     "connections"
+    ]
+   }
+  },
+  "/v1/connections/reopen_need": {
+   "post": {
+    "description": "Requires: project_chair.",
+    "operationId": "connections.reopen_need",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/NeedInput"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/NeedChanged"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Take back a need marked done: it is missing again.",
     "tags": [
      "connections"
     ]

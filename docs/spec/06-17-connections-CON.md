@@ -6,7 +6,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - A connection is a **secret**, a **variable** or an **MCP server**, and lives in one of three scopes: the **install** (added by an admin, attachable by anyone), a **person** (added by its owner, attachable to any project they chair), or a **project** (added in that project, used only there).
   - The owner changes or deletes a person connection; an admin an install connection; the chairman or a co-chair a project connection.
   - Deleting a connection first lists every project that uses it.
-  - A name starts with a letter and holds letters, digits, `_`, `-` and `.`. Names are unique per owner whatever their case, and a need (CON-5) is met by a connection of the same kind whose name matches it whatever its case.
+  - A name starts with a letter and holds letters, digits, `_`, `-` and `.`. Names are unique per owner whatever their case.
 - **CON-2 Secrets.**
   - A secret has a name, a one-line description of what it is for (agents read it), and a value.
   - **Values are write-only.** Once saved, a value is never shown again to anyone, admins included, on any surface. It can be replaced.
@@ -24,9 +24,12 @@ A project reaches the outside world through its connections: secrets, variables 
   - A run receives only what is granted to its seat's role in its own project.
   - Detaching, revoking, replacing or changing takes effect at each seat's next run, and ends its warm chat process.
 - **CON-5 Needs and starting.**
-  - A role declares what it needs by name and kind: a secret (for a site, or given), a variable, or an MCP server. A spec may add needs. An agent may request one.
-  - The platform keeps each project's needs: met by an attached connection, open, or waived for now.
-  - **Start with open needs** shows them, each with a way to add it, and offers to start without them. Starting without them holds exactly the seats whose roles need what is missing, each hold naming the missing connection (EXE-4), and puts one item on the desk. Attaching the connection lifts the hold by itself.
+  - A role declares what it needs by name and kind: a secret (for a site, or given), a variable, or an MCP server. A spec may add needs. An agent may request one. A need's name says what it is for (such as `wordpress`); it does not fix the names of what fills it.
+  - The platform keeps each project's needs: open, done, met, or waived for now.
+  - **The chairman marks a need done** once they have added what it asks for, under any names, as one connection or several, granted to the roles they choose (CON-4). Their word is final: nothing compares names to second-guess it. A done need stays done until the chairman reopens it or no role on the roster needs it.
+  - A need is also **met** with no word from the chairman when an attached connection of its kind, whose name matches it whatever its case, is granted to every role that needs it.
+  - Agents work out what serves which purpose from the names and descriptions of what they are granted, listed in their context pack (CON-14). A role's instructions describe the job, never the name or format of a connection. An agent that finds it lacks something says so and may request it (CON-14).
+  - **Start with open needs** shows them, each with a way to add it or mark it done, and offers to start without them. Starting without them holds exactly the seats whose roles need what is missing, each hold naming the missing connection (EXE-4), and puts one item on the desk. Attaching the connection lifts the hold by itself.
   - No seat is run while a need of its role is open.
 - **CON-6 Secrets sent for you.**
   - A run that has a secret sent for it has its HTTP and HTTPS traffic go through the platform's egress proxy, which identifies the run by its run token. A run with none reaches the web directly, so the proxy can never stand in the way of ordinary traffic.
@@ -81,7 +84,7 @@ A project reaches the outside world through its connections: secrets, variables 
   - The Founder lists the connections the chairman can attach, by name and description, states the crew's needs in its first reply, and drafts the grants. The review screen shows each need as met or missing, with a way to add it.
   - Each run's context pack lists what it may use and what its role needs but lacks.
   - Any agent may request a connection or a tool by name; the request is an approval for the chairman (HUM-2, default deny). An approved tool is allowed (by the person, IF-5.6); an approved connection is listed among the project's needs, not yet in place, with Add beside it, holding nobody.
-  - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and the seats that depend on it are held, not left to fail.
+  - A project whose connection is deleted, expires or needs sign-in shows what broke and the fix, and runs stop receiving it. A need it met by name is open again, so the seats that depend on it are held, not left to fail. A need the chairman marked done stays done: the agents are told what they lack and may request it.
 - **CON-15 Surfaces.**
   - The web app has a Connections area in Settings (install and personal) and a Connections panel in each project (under More, and opened from anything that is missing), sharing one design: the empty state explains the three kinds; one flow adds any kind; each item shows health, where it is used and when it was last used; a secret shows its history, never its value.
   - Adding an MCP server tests the connection and lists its tools before anything is saved. A curated, editable list of well-known servers (library content) fills in the address or command, auth kind and needed secrets. It ships in `content/mcp-servers/`; an admin edits it for an install with files of the same shape in the data directory's `mcp-servers/` folder, which replace a shipped entry by its slug or hide it.

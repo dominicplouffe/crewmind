@@ -2,6 +2,11 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.32 (24 Nov 2026): needs are marked done by the chairman
+
+- **CON-5, CON-1, 7.18:** the chairman marks a need done once they have added what it asks for, under any names and as one connection or several; nothing compares names to second-guess them. A connection whose name matches still meets a need by itself. Agents work out what serves which purpose from the names and descriptions they are granted; a role's instructions never fix a connection's name or format.
+- **CON-14:** a broken connection reopens only a need it met by name; a need the chairman marked done stays done, and the agents say what they lack.
+
 ## Revision 2.31 (23 Nov 2026): connections, part 7B.8
 
 - **CON-8:** values sent for a run are masked too, with the headers they travel in: a site that echoes the header it received cannot carry the value to the model.

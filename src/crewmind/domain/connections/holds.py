@@ -39,6 +39,8 @@ class Blocker:
 
     text: str
     seats: list[str]
+    need: tuple[str, str] | None = None
+    """The missing need's kind and name; None when a seat cannot run for another reason."""
 
 
 def _need_key(need: ProjectNeed) -> str:
@@ -134,7 +136,13 @@ async def blockers(
         if need.state != needs.NeedState.OPEN:
             continue
         names = [seat.display_name for seat, role in on_roster if role.slug in (need.roles or [])]
-        found.append(Blocker(text=needs.describe(need).capitalize() + " is missing.", seats=names))
+        found.append(
+            Blocker(
+                text=needs.describe(need).capitalize() + " is missing.",
+                seats=names,
+                need=(need.kind, need.name),
+            )
+        )
     unmet = {slug for need in current if need.state in needs.UNMET for slug in need.roles or []}
     for seat, role in on_roster:
         if role.slug in unmet:
@@ -165,8 +173,9 @@ async def start_check(
         "start_blocked",
         f"Some of the crew could not work yet. {listed}",
         rule=CON_5.id,
-        hint="Add what is missing, or start without it: the agents who need it wait until "
-        "it is added (`projects start --without-missing`).",
+        hint="Add what is missing under any names and mark it done "
+        "(`connections mark-need-done`), or start without it: the agents who need it wait "
+        "until then (`projects start --without-missing`).",
     )
 
 

@@ -297,6 +297,12 @@ async def test_INV_21_every_write_operation_records_an_event(
         "connections.set_grants", alice, project_id=project, connection="region", roles=["*"]
     )
     await write("connections.detach", alice, project_id=project, connection="region")
+    await app.ok(
+        "roster.hire_team", alice, project_id=project, team="Desk",
+        role="Marketing Blog Writer", members=1,
+    )  # fmt: skip
+    await write("connections.mark_need_done", alice, project_id=project, need="wordpress")
+    await write("connections.reopen_need", alice, project_id=project, need="wordpress")
     await write("connections.import_env", alice, text="TIMEZONE=UTC")
     await write("connections.delete", alice, connection="site-key")
     from tests.attack.mcp_support import URL, serving
