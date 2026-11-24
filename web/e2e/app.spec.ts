@@ -58,7 +58,12 @@ test("a setup link sets the password, shows the server's refusal, then signs in"
 
   await page.getByLabel("Password").fill(PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
+  // A new install's admin is sent to the setup screens first, once (FND-1, LLM-14).
+  await expect(page.getByRole("heading", { name: "Welcome to nightsquad" })).toBeVisible();
+  await page.getByRole("link", { name: "Finish later" }).click();
   await expect(page.getByRole("heading", { name: "Projects" })).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByTestId("setup-prompt")).toBeVisible();
   await page.context().storageState({ path: STATE_FILE });
 });
 

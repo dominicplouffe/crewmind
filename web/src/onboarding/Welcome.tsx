@@ -22,6 +22,7 @@ import { NameForm } from "../settings/NameForm";
 import { settingsWords } from "../strings.settings";
 import { LogoMark } from "../ui/Logo";
 import { Skeleton } from "../ui/Skeleton";
+import { markWelcomeSeen } from "./firstRun";
 import { orList, useAdminNames } from "./useAdminNames";
 import { founderReadyWith, usableModelKeys } from "./useSetupStatus";
 
@@ -154,6 +155,8 @@ export function Welcome(): JSX.Element {
   useEffect(() => {
     document.title = words.documentTitle;
   }, [words.documentTitle]);
+
+  useEffect(markWelcomeSeen, []);
 
   // Coming back: skip what is already done.
   useEffect(() => {
