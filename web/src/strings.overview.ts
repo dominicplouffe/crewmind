@@ -200,6 +200,14 @@ export const story = {
   rail: {
     label: "The company at work",
     now: "Now",
+    atWork: (count: number): string => (count === 1 ? "1 at work" : `${count} at work`),
+    openWork: "Work",
+    progress: "Progress",
+    openPlan: "Plan",
+    met: (met: number, total: number): string => `${met} of ${plural(total, "requirement", "requirements")} met`,
+    inProgress: (count: number): string => `${count} in progress`,
+    openActivity: "Activity",
+    openBudget: "Details",
     delivered: "Just delivered",
     deliveredEmpty: "No files yet.",
     budget: "Budget",
@@ -207,7 +215,7 @@ export const story = {
     needs: (count: number): string => `${plural(count, "decision waits", "decisions wait")} for you`,
     review: "Review",
     overview: "Overview",
-    allFiles: "All deliverables",
+    allFiles: "All files",
   },
 };
 
