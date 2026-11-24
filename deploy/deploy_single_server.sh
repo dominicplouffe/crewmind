@@ -143,7 +143,7 @@ ok "ready: the database answers and its schema is current"
 say "Setup"
 setup=(setup)
 [ -z "$ADMIN_EMAIL" ] || setup+=(--admin-email "$ADMIN_EMAIL")
-SETUP_OUT="$(nightsquad "${setup[@]}")" || die "squad setup failed: $SETUP_OUT"
+SETUP_OUT="$(squad "${setup[@]}")" || die "squad setup failed: $SETUP_OUT"
 printf '%s\n' "$SETUP_OUT" | grep -E '^\s+- ' | sed 's/^ *- /    /'
 LINK="$(printf '%s\n' "$SETUP_OUT" | sed -n 's/^setup_link: //p')"
 
