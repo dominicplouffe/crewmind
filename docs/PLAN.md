@@ -101,6 +101,7 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 ## Phase 8: Breadth (after v2.0)
 
 - **Order:** project email (managed via Stalwart, manual, agent mailboxes), then the agent browser, OpenTelemetry export, Agent Skills, A2A, Slack, extra harnesses, host-jail mode, TOTP and SSO.
+- **Extra harnesses (LLM-2, LLM-8):** a driver for each command-line agent paid by a login: **Codex** (ChatGPT login), **Gemini CLI** (Google login) and **OpenCode** (its own login). Claude Code already has one (`runner/cli/claude.py`). Their provider entries are in `gateway/providers.toml` marked `planned = true`, so they are not offered and a login for one is refused with the reason (24 Nov 2026). For each: a driver in `runner/cli/` that starts the agent with only the tools its grants allow and the agent API mounted through the tools server, and reads its output into text, usage, a final answer or a failure; its entry in `HARNESS_MODULES`; then `planned` removed. Done when its driver tests pass the way Claude Code's do, and one real run on a real login posts in a project and reports its usage.
 - **Exit:** the remaining acceptance items pass, Standards and Slack parity included.
 - **Ids:** EXE-17; LIB-6; INT-1, INT-2, INT-3, INT-5, INT-6, INT-9, INT-10, INT-11; ACC-7; IF-7.1, IF-7.2; NFR-22
 

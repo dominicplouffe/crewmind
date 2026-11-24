@@ -1,6 +1,7 @@
 """Secrets that expire (CON-2, 7.18): the chairman of every project using one is told
-`secret.expiry_warning` before and on the day; the day after, it expires, its needs are
-open again and the seats that depend on it are held (CON-14)."""
+`secret.expiry_warning` before and on the day; the day after, it expires and runs stop
+receiving it. A need it met by name is open again and its seats are held; a need the
+chairman marked done stays done (CON-14)."""
 
 from __future__ import annotations
 
@@ -73,7 +74,7 @@ async def check(session: AsyncSession, settings: SettingsService, now: datetime)
                 alerts.queue(
                     session, project,
                     f"{service.label(item).capitalize()} has expired. Replace its value or "
-                    "move its expiry date; the agents that use it wait until then.",
+                    "move its expiry date; until then, runs no longer receive it.",
                     now, level=alerts.ALARM,
                 )  # fmt: skip
                 await service.refresh(session, project, now, EXPIRY)

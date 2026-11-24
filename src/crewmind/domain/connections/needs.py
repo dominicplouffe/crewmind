@@ -1,8 +1,10 @@
 """What a project's roles need from outside, and whether they have it (CON-5, 7.18).
 
 A role declares the connections it needs by name. A spec may add needs. The platform keeps
-one row per need and project: open until a connection meets it, waived when the chairman
-starts without it, dropped when no role on the roster needs it any more.
+one row per need and project: open until the chairman marks it done or a connection of its
+name meets it, waived when the chairman starts without it, dropped when no role on the
+roster needs it any more. A need's name says what it is for, not what fills it: the
+chairman may fill it under any names, and the agents work out which is which.
 """
 
 from __future__ import annotations
@@ -33,6 +35,9 @@ NEED_CHANGED = event_type("need.state_changed", "A project's need changed state 
 class NeedState(StrEnum):
     OPEN = "open"
     MET = "met"
+    """Met by an attached connection of its name, with no word from the chairman."""
+    DONE = "done"
+    """Marked done by the chairman: what it asks for is added, under any names."""
     WAIVED = "waived"
     DROPPED = "dropped"
 
@@ -53,10 +58,14 @@ NEED_MACHINE = StateMachine(
         (N.OPEN, N.WAIVED),
         (N.WAIVED, N.MET),
         (N.MET, N.OPEN),
+        (N.OPEN, N.DONE),
+        (N.WAIVED, N.DONE),
+        (N.DONE, N.OPEN),
         (N.OPEN, N.DROPPED),
         (N.WAIVED, N.DROPPED),
         (N.DROPPED, N.OPEN),
         (N.MET, N.DROPPED),
+        (N.DONE, N.DROPPED),
     ],
 )
 UNMET = (N.OPEN, N.WAIVED)
@@ -185,8 +194,8 @@ async def sync(
         if key not in wanted and row.state != N.DROPPED:
             _move(session, row, N.DROPPED, now, caller)
             continue
-        if row.state == N.DROPPED:
-            continue
+        if row.state in (N.DROPPED, N.DONE):
+            continue  # the chairman's word is final; nothing second-guesses it (CON-5)
         met = await _is_met(session, project, row)
         if met and row.state in UNMET:
             _move(session, row, N.MET, now, caller)
@@ -207,12 +216,12 @@ async def preview(session: AsyncSession, project: Project) -> list[ProjectNeed]:
     found: list[ProjectNeed] = []
     for (kind, name), roles in (await declared(session, project)).items():
         row = stored.get((kind, name))
-        state = row.state if row is not None and row.state == N.WAIVED else N.OPEN
+        state = row.state if row is not None and row.state in (N.WAIVED, N.DONE) else N.OPEN
         need = ProjectNeed(
             project_id=project.id, kind=kind, name=name, roles=sorted(roles), source="role",
             state=state,
         )  # fmt: skip
-        if await _is_met(session, project, need):
+        if state != N.DONE and await _is_met(session, project, need):
             need.state = N.MET
         found.append(need)
     return found
@@ -231,6 +240,16 @@ def waive_open(
     for need in waived:
         _move(session, need, N.WAIVED, now, caller)
     return waived
+
+
+def mark_done(session: AsyncSession, need: ProjectNeed, now: datetime, caller: Caller) -> None:
+    """CON-5: the chairman says what the need asks for is added. Their word is final."""
+    _move(session, need, N.DONE, now, caller)
+
+
+def reopen(session: AsyncSession, need: ProjectNeed, now: datetime, caller: Caller) -> None:
+    """CON-5: the chairman takes back a done mark; the need is open again."""
+    _move(session, need, N.OPEN, now, caller)
 
 
 KIND_WORDS = {

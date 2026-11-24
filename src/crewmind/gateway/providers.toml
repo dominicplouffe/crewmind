@@ -109,6 +109,9 @@ default_lineup = { frontier = "mock-frontier", balanced = "mock-balanced", fast 
 # not an API key: the agent runs inside the sandbox and holds it there, so the gateway
 # makes no call with it. `default_harness` names the agent. A lineup entry of "default"
 # means the agent's own default model.
+#
+# `planned = true` keeps a provider for a later phase without offering it: no driver runs
+# its agent yet (docs/PLAN.md, phase 8). Only Claude Code has one.
 
 [providers.claude_code]
 label = "Claude Code (subscription login)"
@@ -130,6 +133,7 @@ images = true
 native_search = true
 default_harness = "codex"
 credential = "login"
+planned = true
 login_hint = "Run `codex login` on your own machine and paste the contents of ~/.codex/auth.json."
 classes = []
 default_lineup = { frontier = "default", balanced = "default", fast = "default" }
@@ -142,6 +146,7 @@ images = true
 native_search = true
 default_harness = "gemini_cli"
 credential = "login"
+planned = true
 login_hint = "Sign in with `gemini` on your own machine and paste the contents of ~/.gemini/oauth_creds.json."
 classes = [["flash-lite", "fast"], ["flash", "balanced"], ["pro", "frontier"]]
 default_lineup = { frontier = "default", balanced = "default", fast = "default" }
@@ -154,6 +159,7 @@ images = false
 native_search = false
 default_harness = "opencode"
 credential = "login"
+planned = true
 login_hint = "Run `opencode auth login` on your own machine and paste the contents of ~/.local/share/opencode/auth.json."
 classes = []
 default_lineup = { frontier = "default", balanced = "default", fast = "default" }

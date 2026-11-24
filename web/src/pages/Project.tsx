@@ -410,6 +410,20 @@ export function Project(): JSX.Element {
               await actions.projectAction("start", { withoutMissing: true });
               setStartWaiting(null);
             }}
+            onMarkDone={async (need) => {
+              try {
+                await post("/v1/connections/mark_need_done", { project_id: projectId, need: need.name, kind: need.kind });
+                const found = await get("/v1/projects/readiness", { project_id: projectId });
+                if (found.ready) {
+                  setStartWaiting(null);
+                  await actions.projectAction("start");
+                } else {
+                  setStartWaiting(found.waiting);
+                }
+              } catch (reason: unknown) {
+                actions.reportError(reason);
+              }
+            }}
           />
         ) : null}
         <div className="project-body">

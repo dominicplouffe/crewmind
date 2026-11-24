@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Any
+from typing import Any, cast
 
 from crewmind.runner.cli.base import Driver, Event, Failed, Final, Said, Setup, Start, Used, main
 from crewmind.runner.cli.tools_server import SERVER_NAME
@@ -24,6 +24,17 @@ OWN_TOOLS = {
 
 EFFORTS = {"low", "medium", "high", "max"}
 TRANSIENT_STATUSES = (429, 500, 502, 503, 504, 529)
+
+
+def _object(value: Any) -> dict[str, Any]:
+    """A JSON object from Claude Code's output, or an empty one for anything else."""
+    return cast(dict[str, Any], value) if isinstance(value, dict) else {}
+
+
+def _objects(value: Any) -> list[dict[str, Any]]:
+    """The JSON objects of a list from Claude Code's output; anything else is skipped."""
+    items = cast(list[Any], value) if isinstance(value, list) else []
+    return [_object(item) for item in items if isinstance(item, dict)]
 
 
 def _status_kind(status: Any) -> str | None:
@@ -80,15 +91,13 @@ class ClaudeCode(Driver):
     def parse(self, record: dict[str, Any]) -> list[Event]:
         kind = record.get("type")
         if kind == "assistant":
-            blocks = (record.get("message") or {}).get("content") or []
+            blocks = _objects(_object(record.get("message")).get("content"))
             return [
-                Said(str(block.get("text", "")))
-                for block in blocks
-                if isinstance(block, dict) and block.get("type") == "text"
+                Said(str(block.get("text", ""))) for block in blocks if block.get("type") == "text"
             ]
         if kind != "result":
             return []
-        usage = record.get("usage") or {}
+        usage = _object(record.get("usage"))
         events: list[Event] = [
             Used(
                 input=int(usage.get("input_tokens") or 0),

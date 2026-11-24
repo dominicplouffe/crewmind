@@ -12,6 +12,8 @@ from sqlalchemy import select, text
 from crewmind.catalog import Principal, catalog
 from crewmind.catalog.refusal import Refusal
 from crewmind.catalog.secret import one_time_secret_fields
+from crewmind.domain.founder.operations import DecisionView
+from crewmind.domain.models.operations import ProviderItem
 from crewmind.domain.secrets.store import MasterKey, SecretStore, ensure_master_key
 from crewmind.storage.models import Base, StoredSecret
 from tests.support import PASSWORD, App
@@ -42,12 +44,19 @@ NOT_SECRET = {
     "missing_credentials",
     "credentials",
 }
+NOT_SECRET_FIELDS = {
+    (DecisionView, "key"): "a Founder decision's name, such as budget",
+    (ProviderItem, "credential"): "the kind of credential a provider takes: key or login",
+}
+"""Fields whose name looks like a secret but is not, named by the model that holds them, so
+the same name on any other model is still checked."""
 
 
 def _fields(model: type[BaseModel], prefix: str = "") -> list[str]:
     names: list[str] = []
     for name, field in model.model_fields.items():
-        names.append(prefix + name)
+        if (model, name) not in NOT_SECRET_FIELDS:
+            names.append(prefix + name)
         for inner in getattr(field.annotation, "__args__", ()) or ():
             if isinstance(inner, type) and issubclass(inner, BaseModel):
                 names.extend(_fields(inner, f"{prefix}{name}."))

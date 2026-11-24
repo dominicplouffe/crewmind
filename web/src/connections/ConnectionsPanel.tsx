@@ -1,10 +1,11 @@
 /**
  * A project's connections (CON-4, CON-5, CON-14, CON-15). It leads with what the crew needs and
- * lacks, each with Add in place, pre-filled with the need; then what is attached, with who may
- * use it as chips edited in place; then what is ready to attach.
+ * lacks, each with Add in place, pre-filled with the need, and It's added for what the chairman
+ * added under other names; then what is attached, with who may use it as chips edited in place;
+ * then what is ready to attach; then the needs the chairman said are taken care of.
  */
 import { useState } from "react";
-import { AlertTriangle, ClipboardPaste, Plus } from "lucide-react";
+import { AlertTriangle, Check, ClipboardPaste, Plus } from "lucide-react";
 import { get, post, type Schemas } from "../api/client";
 import { ErrorNote } from "../components/common";
 import { useLoad } from "../lib/useLoad";
@@ -36,7 +37,17 @@ function roleNames(slugs: string[], roles: Role[]): string[] {
   return slugs.map((slug) => roles.find((role) => role.slug === slug)?.name ?? slug);
 }
 
-function NeedRow({ need, roles, onAdd }: { need: Need; roles: Role[]; onAdd(): void }): JSX.Element {
+function NeedRow({
+  need,
+  roles,
+  onAdd,
+  onDone,
+}: {
+  need: Need;
+  roles: Role[];
+  onAdd(): void;
+  onDone(): void;
+}): JSX.Element {
   const kind = kindWord(need.kind).toLowerCase();
   return (
     <li className="need-row" data-testid="need-missing">
@@ -50,11 +61,17 @@ function NeedRow({ need, roles, onAdd }: { need: Need; roles: Role[]; onAdd(): v
         <p className="quiet small">{words.project.needFor(roleNames(need.roles, roles))}</p>
         {need.seats.length > 0 ? <p className="small need-waits">{words.project.waits(need.seats)}</p> : null}
       </div>
-      <button type="button" className="button small primary" onClick={onAdd}>
-        <Plus size={16} aria-hidden="true" />
-        {words.project.addIt(kind)}
-        <span className="visually-hidden"> {need.name}</span>
-      </button>
+      <div className="row">
+        <button type="button" className="button small" onClick={onDone} aria-label={words.project.markDoneFor(need.name)}>
+          <Check size={16} aria-hidden="true" />
+          {words.project.markDone}
+        </button>
+        <button type="button" className="button small primary" onClick={onAdd}>
+          <Plus size={16} aria-hidden="true" />
+          {words.project.addIt(kind)}
+          <span className="visually-hidden"> {need.name}</span>
+        </button>
+      </div>
     </li>
   );
 }
@@ -201,7 +218,13 @@ export function ConnectionsPanel({ projectId, changes, onChanged }: Props): JSX.
   };
   const data = view.data;
   const roles = data?.roles ?? [];
-  const missing = (data?.needs ?? []).filter((need) => need.state !== "met");
+  const missing = (data?.needs ?? []).filter((need) => need.state === "open" || need.state === "waived");
+  const done = (data?.needs ?? []).filter((need) => need.state === "done");
+  const setNeed = (need: Need, path: "/v1/connections/mark_need_done" | "/v1/connections/reopen_need"): void => {
+    void post(path, { project_id: projectId, need: need.name, kind: need.kind })
+      .then(() => changed())
+      .catch((reason: unknown) => setActionError(reason));
+  };
   const nothing = data && data.attached.length === 0 && missing.length === 0 && data.available.length === 0;
 
   return (
@@ -226,6 +249,7 @@ export function ConnectionsPanel({ projectId, changes, onChanged }: Props): JSX.
                 key={`${need.kind}:${need.name}`}
                 need={need}
                 roles={roles}
+                onDone={() => setNeed(need, "/v1/connections/mark_need_done")}
                 onAdd={() =>
                   setAdding({
                     kind: kindOf(need.kind),
@@ -298,6 +322,36 @@ export function ConnectionsPanel({ projectId, changes, onChanged }: Props): JSX.
                 )}
                 onChanged={() => changed(words.attached(item.name))}
               />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {done.length > 0 ? (
+        <section className="connections-group" aria-labelledby="done-title">
+          <h3 id="done-title" className="group-title">
+            {words.project.doneTitle}
+          </h3>
+          <p className="quiet small">{words.project.doneHelp}</p>
+          <ul className="plain need-list">
+            {done.map((need) => (
+              <li key={`${need.kind}:${need.name}`} className="need-row" data-testid="need-done">
+                <Check size={18} aria-hidden="true" className="need-icon" />
+                <div className="need-main">
+                  <p className="need-name">
+                    <span>{need.name}</span>
+                    <span className="quiet small"> · {kindWord(need.kind).toLowerCase()}</span>
+                  </p>
+                  <p className="quiet small">{words.project.needFor(roleNames(need.roles, roles))}</p>
+                </div>
+                <button
+                  type="button"
+                  className="button small ghost"
+                  aria-label={words.project.reopenFor(need.name)}
+                  onClick={() => setNeed(need, "/v1/connections/reopen_need")}
+                >
+                  {words.project.reopen}
+                </button>
+              </li>
             ))}
           </ul>
         </section>

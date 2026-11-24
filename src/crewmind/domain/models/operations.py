@@ -31,7 +31,7 @@ from crewmind.domain.settings.registry import Scope
 from crewmind.domain.settings.service import Subject
 from crewmind.gateway import outbound
 from crewmind.gateway.protocol import CompletionRequest, Turn
-from crewmind.gateway.registry import Effort, ModelClass, providers
+from crewmind.gateway.registry import Effort, ModelClass, known_providers, providers
 from crewmind.services import services_of
 from crewmind.storage.events import event_type
 from crewmind.storage.models import (
@@ -225,6 +225,15 @@ async def add_credential(context: Context, payload: AddCredentialInput) -> Crede
     """LLM-2, INT-8, ACC-6: stored encrypted, listed by name only. The search service key
     is install-wide, so only an admin adds it."""
     is_search = payload.provider in SEARCH_PROVIDERS
+    planned = known_providers().get(payload.provider)
+    if planned is not None and planned.planned:
+        logins = [info.label for info in providers().values() if info.is_login]
+        raise Refusal(
+            "provider_not_yet",
+            f"{planned.label} is not supported yet: crewmind cannot run its agent.",
+            rule=LLM_2.id,
+            hint=f"Logins supported now: {', '.join(logins) or 'none'}. Or add an API key.",
+        )
     if not is_search and payload.provider not in providers():
         known = ", ".join([*providers(), *SEARCH_PROVIDERS])
         raise Refusal(

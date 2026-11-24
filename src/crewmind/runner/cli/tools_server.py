@@ -12,7 +12,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from mcp import types
@@ -35,43 +35,69 @@ def refusal_text(refused: dict[str, Any]) -> str:
     return " ".join(parts)
 
 
-def build(client: httpx.AsyncClient) -> Server[Any, Any]:
-    server: Server[Any, Any] = Server(SERVER_NAME)
+STOPPED = "This run has been stopped. Make no more calls and end now."
+"""The run token no longer works: the run was stopped, or it reached a cap."""
+
+
+def _text(text: str, *, error: bool = False) -> types.CallToolResult:
+    return types.CallToolResult(content=[types.TextContent(type="text", text=text)], is_error=error)
+
+
+def _answer(response: httpx.Response) -> types.CallToolResult:
+    """An agent API answer as the model reads it. Every refusal, a bad argument included,
+    is text it can act on, never an exception that ends the call."""
+    if response.status_code == 401:
+        return _text(STOPPED, error=True)
+    if response.status_code >= 500:
+        return _text(
+            f"The crewmind server failed ({response.status_code}). Try again shortly.", error=True
+        )
+    try:
+        body: Any = response.json()
+    except ValueError:
+        body = None
+    if response.status_code >= 400:
+        refused = cast(dict[str, Any], body) if isinstance(body, dict) else {}
+        return _text(refusal_text(refused), error=True)
+    return _text(json.dumps(body))
+
+
+def build(client: httpx.AsyncClient) -> Server[Any]:
+    """One MCP tool per agent API tool the run may use, listed from the server each time."""
     paths: dict[str, str] = {}
 
-    @server.list_tools()
-    async def list_tools() -> list[types.Tool]:  # pyright: ignore[reportUnusedFunction]
-        listed = (await client.get(TOOLS_PATH)).json()
-        paths.update(listed["paths"])
-        return [
-            types.Tool(
-                name=tool["name"],
-                description=tool.get("description", ""),
-                inputSchema=tool.get("input_schema") or {"type": "object", "properties": {}},
-            )
-            for tool in listed["tools"]
-        ]
-
-    @server.call_tool()
-    async def call_tool(  # pyright: ignore[reportUnusedFunction]
-        name: str, arguments: dict[str, Any]
-    ) -> list[types.TextContent]:
-        if not paths:
-            await list_tools()
-        if name not in paths:
-            return [types.TextContent(type="text", text=f"There is no tool named {name}.")]
-        response = await client.post(paths[name], json=arguments or {})
+    async def fetch() -> list[dict[str, Any]] | None:
+        """The run's tools, or None once its token no longer works."""
+        response = await client.get(TOOLS_PATH)
         if response.status_code == 401:
-            # The run token no longer works: the run was stopped, or it reached a cap.
-            text = "This run has been stopped. Make no more calls and end now."
-        elif response.status_code == 403:
-            text = refusal_text(response.json())
-        else:
-            response.raise_for_status()
-            text = json.dumps(response.json())
-        return [types.TextContent(type="text", text=text)]
+            return None
+        response.raise_for_status()
+        listed = response.json()
+        paths.update(listed["paths"])
+        return list(listed["tools"])
 
-    return server
+    async def list_tools(
+        _context: Any, _params: types.PaginatedRequestParams | None
+    ) -> types.ListToolsResult:
+        return types.ListToolsResult(
+            tools=[
+                types.Tool(
+                    name=tool["name"],
+                    description=tool.get("description", ""),
+                    input_schema=tool.get("input_schema") or {"type": "object", "properties": {}},
+                )
+                for tool in await fetch() or []
+            ]
+        )
+
+    async def call_tool(_context: Any, params: types.CallToolRequestParams) -> types.CallToolResult:
+        if not paths and await fetch() is None:
+            return _text(STOPPED, error=True)
+        if params.name not in paths:
+            return _text(f"There is no tool named {params.name}.", error=True)
+        return _answer(await client.post(paths[params.name], json=dict(params.arguments or {})))
+
+    return Server(SERVER_NAME, on_list_tools=list_tools, on_call_tool=call_tool)
 
 
 async def _main() -> int:

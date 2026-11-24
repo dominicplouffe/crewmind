@@ -432,6 +432,6 @@ async def needs_sign_in(
     for _, project in await service.attachments(session, item.id):
         alerts.queue(
             session, project,
-            f"{item.name} needs someone to sign in again; the agents that use it wait until then.",
+            f"{item.name} needs someone to sign in again; until then, its tools are not offered.",
             now, level=alerts.ALARM,
         )  # fmt: skip

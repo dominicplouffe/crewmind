@@ -185,4 +185,27 @@ describe("ConnectionsPanel (CON-5, CON-14)", () => {
     expect(within(sheet).getByLabelText("Name")).toHaveProperty("value", "wordpress");
     expect(within(sheet).getByLabelText("Blog writer")).toHaveProperty("checked", true);
   });
+
+  it("marks a need done when it was added under other names, and takes it back", async () => {
+    answers["/v1/connections/for_project"] = {
+      attached: [],
+      available: [],
+      needs: [
+        { kind: "secret", name: "wordpress", roles: ["blog-writer"], state: "open", seats: ["Ada"] },
+        { kind: "variable", name: "site", roles: ["blog-writer"], state: "done", seats: [] },
+      ],
+      roles: [{ slug: "blog-writer", name: "Blog writer" }],
+    };
+    const onChanged = vi.fn();
+    render(<ConnectionsPanel projectId="p1" changes={0} onChanged={onChanged} />);
+    const missing = await screen.findByTestId("need-missing");
+    await userEvent.click(within(missing).getByRole("button", { name: "It's added: wordpress" }));
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    const marked = calls.find((call) => call.url === "/v1/connections/mark_need_done");
+    expect(marked?.body).toEqual({ project_id: "p1", need: "wordpress", kind: "secret" });
+    const done = screen.getByTestId("need-done");
+    expect(within(done).getByText("site")).toBeTruthy();
+    await userEvent.click(within(done).getByRole("button", { name: "Not added after all: site" }));
+    await waitFor(() => expect(calls.some((call) => call.url === "/v1/connections/reopen_need")).toBe(true));
+  });
 });
