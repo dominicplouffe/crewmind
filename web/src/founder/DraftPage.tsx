@@ -78,8 +78,6 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
         now={nowOf(view)}
         draftingId={draftingId}
         busy={busy}
-        working={state.working}
-        workingSince={state.workingSince}
         offerRest={talking && stage === "you" && (draft !== null || view.questions.length > 0)}
         onAcceptRest={actions.acceptRest}
       />
@@ -90,7 +88,11 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
               {words.talk.offline}
             </p>
           ) : null}
-          <Conversation lines={visibleLines(view.lines, talking ? view.questions : [])} reply={reply} />
+          <Conversation
+            lines={visibleLines(view.lines, talking ? view.questions : [])}
+            reply={reply}
+            thinking={stage === "founder" ? { doing: state.working, since: state.workingSince } : null}
+          />
           {view.failure && view.state === "drafting" && stage !== "founder" ? (
             isNoModelFailure(view.failure) ? (
               <FounderSetupNote
