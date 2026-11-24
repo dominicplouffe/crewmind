@@ -13,7 +13,7 @@ from nightsquad.storage.engine import Database, create_engine, database_of, sync
 from nightsquad.storage.migrate import alembic_config, migrate
 from nightsquad.storage.models import Base
 
-HEAD = "0017"
+HEAD = "0018"
 
 
 async def test_NFR_10_migrations_apply_and_are_safe_to_repeat(database_url: str) -> None:
@@ -178,3 +178,61 @@ def test_LIB_2_the_migration_renames_the_library_table_and_its_events(database_u
         ("squad.saved", "squad", "my-crew"),
         ("project.created", "project", "p1"),
     ]
+
+
+def test_CHAT_3_the_migration_gives_old_platform_lines_the_new_name(database_url: str) -> None:
+    """CHAT-3, ART-1, NFR-10: chat lines and artifact versions the platform wrote before
+    the rename (ADR-0011) carry its new name; a person or agent with that old name as
+    their own name keeps it."""
+    from alembic import command
+
+    old = "crew" + "mind"
+    command.upgrade(alembic_config(database_url), "0017")
+    engine = sqlalchemy.create_engine(sync_url(database_url))
+    try:
+        with engine.begin() as connection:
+            tables = sqlalchemy.MetaData()
+            tables.reflect(
+                connection,
+                only=[
+                    "persons",
+                    "projects",
+                    "channels",
+                    "messages",
+                    "artifacts",
+                    "artifact_versions",
+                ],
+            )
+            persons, projects, channels, messages, artifacts, versions = (
+                tables.tables[name]
+                for name in (
+                    "persons", "projects", "channels", "messages", "artifacts", "artifact_versions"
+                )
+            )  # fmt: skip
+            connection.execute(persons.insert().values(_row(persons, id="a1")))
+            connection.execute(projects.insert().values(_row(projects, id="p1", created_by="a1")))
+            connection.execute(channels.insert().values(_row(channels, id="c1", project_id="p1")))
+            connection.execute(artifacts.insert().values(_row(artifacts, id="f1", project_id="p1")))
+            for message_id, kind in ((1, "platform"), (2, "agent")):
+                connection.execute(
+                    messages.insert().values(
+                        _row(messages, id=message_id, project_id="p1", channel_id="c1",
+                             author_kind=kind, author_name=old)
+                    )
+                )  # fmt: skip
+            connection.execute(
+                versions.insert().values(
+                    _row(versions, id=1, artifact_id="f1", project_id="p1", version=1,
+                         author_kind="platform", author_name=old)
+                )
+            )  # fmt: skip
+        migrate(database_url)
+        with engine.connect() as connection:
+            lines = connection.execute(
+                text("SELECT author_kind, author_name FROM messages ORDER BY id")
+            ).all()
+            written = connection.execute(text("SELECT author_name FROM artifact_versions")).all()
+    finally:
+        engine.dispose()
+    assert [tuple(line) for line in lines] == [("platform", "nightsquad"), ("agent", old)]
+    assert [row[0] for row in written] == ["nightsquad"]

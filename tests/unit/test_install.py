@@ -228,3 +228,29 @@ def test_EXE_12_a_container_is_given_no_more_cpus_than_the_host_has() -> None:
     # A runtime that does not say how many it has is asked for what was wanted.
     assert containers.cpus_granted(Host(0), 2) == 2 * one
     assert containers.cpus_granted(Host(ConnectionError("no answer")), 2) == 2 * one
+
+
+def test_NFR_5_doctor_names_what_is_left_from_before_the_rename(tmp_path: Path) -> None:
+    """NFR-5, NFR-7: an install from before the rename (ADR-0011) would start empty under
+    the new names. Doctor names each old variable with its new name, an old data directory
+    with where it goes, and an old SQLite file with its new name; a clean install has none."""
+    from nightsquad.domain.install import old_name
+
+    home = tmp_path / "home"
+    (home / f".{old_name.OLD_NAME}").mkdir(parents=True)
+    config = load_config({"NIGHTSQUAD_DATA_DIR": str(tmp_path / "data")})
+    config.data_dir.mkdir()
+    (config.data_dir / old_name.OLD_DATABASE_FILE).write_text("")
+    env = {f"{old_name.OLD_PREFIX}TOKEN": "x", "NIGHTSQUAD_PORT": "8420"}
+
+    found = old_name.leftovers(config, env, home)
+    assert len(found) == 3
+    assert "to NIGHTSQUAD_TOKEN" in found[0]
+    assert str(home / f".{old_name.OLD_NAME}") in found[1]
+    assert str(config.data_dir) in found[1]
+    assert "nightsquad.sqlite" in found[2]
+
+    clean = tmp_path / "clean"
+    clean.mkdir()
+    fresh = load_config({"NIGHTSQUAD_DATA_DIR": str(clean)})
+    assert old_name.leftovers(fresh, {"NIGHTSQUAD_PORT": "8420"}, clean) == []

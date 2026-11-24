@@ -134,9 +134,10 @@ async def test_LIB_2_a_file_written_before_the_rename_still_loads(app: App) -> N
     owner = await app.person("owner@example.com")
     saved = await app.ok("roles.save", owner, **{f"{old}_role": 1, **ROLE})
     assert saved["changed"] is True
+    team = {"name": "Checks", "role": "fact-checker", "members": ["Fay"]}
     squad = {
         "slug": "check-it", "name": "Check it", "outcome": "A checked document.",
-        "ceo_role": "ceo", "teams": [{"name": "Checks", "role": "fact-checker", "members": ["Fay"]}],
+        "ceo_role": "ceo", "teams": [team],
     }  # fmt: skip
     await app.ok("squads.save", owner, **{f"{old}_crew": 1, **squad})
     shown = await app.ok("squads.show", owner, squad="check-it")
