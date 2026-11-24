@@ -1,6 +1,6 @@
 # ADR-0008: The project is named crewmind
 
-- **Status:** Accepted (21 Nov 2026, owner: Dominic)
+- **Status:** Superseded by [ADR-0011](ADR-0011-renamed-nightsquad.md) (24 Nov 2026). Accepted 21 Nov 2026, owner: Dominic
 - **Spec:** all sections (formerly "yaaf")
 
 ## Context

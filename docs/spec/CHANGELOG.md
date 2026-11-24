@@ -2,6 +2,10 @@
 
 Newest first. One line per change, citing the ids touched.
 
+## Revision 2.32 (24 Nov 2026): the product is renamed Nightsquad
+
+- **All sections, LIB-2, SPD-9, IF-4.1:** the product is Nightsquad, the CLI command is `squad` (also installed as `nightsquad`), operational variables are `NIGHTSQUAD_*`, and the library's ready-made job is a **squad** (was crew). No requirement changes meaning (ADR-0011).
+
 ## Revision 2.31 (23 Nov 2026): connections, part 7B.8
 
 - **CON-8:** values sent for a run are masked too, with the headers they travel in: a site that echoes the header it received cannot carry the value to the model.

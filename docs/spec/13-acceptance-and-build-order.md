@@ -2,7 +2,7 @@
 
 The rebuild is acceptable when all of the following pass on a clean install. Reference specs for the scenarios ship in the repository's `acceptance/` folder: one each for Explore, Deliver and Operate, plus a raw one-paragraph brief and a reference goal with its hand-graded grammar.
 
-- **Golden path, each type.** Each reference spec, run by the scripted crew, gets from creation to its first verified close with no human input beyond what its authority settings require.
+- **Golden path, each type.** Each reference spec, run by the scripted squad, gets from creation to its first verified close with no human input beyond what its authority settings require.
   - Deliver claims its first task within 10 minutes, publishes a first usable version, passes its final gap review, reaches ready and writes a receipt.
   - Explore ends its bets with findings and produces a findings report.
   - Operate rolls two cycles with scorecards.
@@ -12,7 +12,7 @@ The rebuild is acceptable when all of the following pass on a clean install. Ref
 - **Losing.** A scripted CEO that stays quiet while a metric moves away from target fails the floors: a losing-ground flag opens and must be raised.
 - **Speed.** The Deliver reference spec with concurrency 4 completes in no more than 1.3 × (its longest dependency chain × median scripted run duration). No ready task waits more than 10 seconds for a lease when limits allow.
 - **Chaos.** Killing runners mid-run, dropping database connections and racing runners violate none of INV-8 to INV-16.
-- **Surface parity.** The conformance test (IF-1.3) passes. A person can create, steer, inspect and configure a project end to end four ways: only the app chat, only the CLI (including `crewmind chat`), only an MCP client with the four scopes, and (for the Slack column of the parity matrix in section 9.8) only Slack.
+- **Surface parity.** The conformance test (IF-1.3) passes. A person can create, steer, inspect and configure a project end to end four ways: only the app chat, only the CLI (including `squad chat`), only an MCP client with the four scopes, and (for the Slack column of the parity matrix in section 9.8) only Slack.
 - **Multi-provider.** The same project runs seats on at least three providers, including one local OpenAI-compatible model. A subscription credential is added to this test in phase 8, with the harness it needs. The ledger shows each provider's tokens against the one budget. No sandbox ever holds a provider key, except the stated subscription-harness exception.
 - **Founder.** The reference goal grades ready. The raw brief does not, and is missing exactly the elements the hand-graded reference names. Quick mode creates and starts a project in under 2 minutes. A reference document seeded with two contradictions, one illustrative number and one requirement nobody can verify yields a question on each, one at a time, before any draft (FND-15). The same document grilled in a running project also surfaces its planted conflict with a standing order (FND-16).
 - **Budget.** At the wall with no eligible reserve, the project pauses within one scheduler tick, nothing new is leased, in-flight runs finish within `run.max_tokens`, and the overspend is no more than the in-flight runs (INV-9). At 90%, new scope is refused and the budget checkpoint opens. A Deliver project that is 80% done reaches the wall, draws the CEO reserve instead of pausing, tells the chairman, and completes within budget plus reserve. A project only 50% done has its draw refused.
@@ -22,15 +22,15 @@ The rebuild is acceptable when all of the following pass on a clean install. Ref
   - A scripted agent signs in to a local test site with a role credential, and the value appears in no trace or span. A payment form submitted without an open purchase is refused.
   - Traces from a golden-path run arrive at a test OpenTelemetry collector with no secret value and no content unless capture is on.
   - A test A2A agent on the allowlist sends a task, which arrives as a suggestion. A call from, or to, an agent not on the allowlist is refused.
-- **Slim.** The Deliver golden path passes in slim mode on SQLite. The same project, moved with `crewmind migrate --to postgres`, continues on a full server with nothing lost.
+- **Slim.** The Deliver golden path passes in slim mode on SQLite. The same project, moved with `squad migrate --to postgres`, continues on a full server with nothing lost.
 
 **Build order.** Each phase ends shippable and tested.
 
 1. **Core.** Operation catalog and adapters (API, CLI, MCP read scope); accounts, membership and tokens; event log; settings registry; projects and lifecycle (section 7.1); both databases and slim mode from the first commit.
-2. **Chat and execution.** Project chat (app and `crewmind chat`) with streaming, slash commands, uploads and artifacts; model gateway with metering; model credentials (API keys), lineups with overrides, the quality dial, circuit breakers and web search; harness interface with the mock and the vendor-neutral loop; container sandboxes; dispatcher, leasing, heartbeats and reaping; agent API (context, messages, team); directives and action cards; token budget and the wall.
+2. **Chat and execution.** Project chat (app and `squad chat`) with streaming, slash commands, uploads and artifacts; model gateway with metering; model credentials (API keys), lineups with overrides, the quality dial, circuit breakers and web search; harness interface with the mock and the vendor-neutral loop; container sandboxes; dispatcher, leasing, heartbeats and reaping; agent API (context, messages, team); directives and action cards; token budget and the wall.
 3. **Listening.** Pinned memory, standing orders, decisions, corrections and examples; recall memory on Mem0 (pgvector, or an embedded store on SQLite); the communication lint.
 4. **Verification.** Success tests with red-first and pinned files; platform checks; independent read; figures basis; final gap review; outside evidence; side effects and watches.
 5. **Planning and speed.** Requirements and readiness; throughput and projection; commitments (Deliver); bets and time boxes (Explore); cycles (Operate); speed flags and time attribution.
 6. **Chairman loop.** Decision items, desk, daily brief, since-you-were-away, agenda, status reviews, alerts; real-world spend; the steer, create and configure MCP scopes; OAuth for MCP; two-phase confirmation.
-7. **Founder and rehearsal.** Goal grammar grader, drafting in chat, quick mode, specs, role and crew libraries; clone and export.
+7. **Founder and rehearsal.** Goal grammar grader, drafting in chat, quick mode, specs, role and squad libraries; clone and export.
 8. **Breadth.** Subscription logins, the vendor agent SDK harness and other harnesses; Agent Skills; data-source gateway; webhooks; Slack channel bridge; email; agent browser; A2A; OpenTelemetry export; desktop install; second factor.
