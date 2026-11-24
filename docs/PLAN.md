@@ -87,14 +87,14 @@ Keep sessions lean: read the three always-read files plus the phase's files, not
 ## Phase 7: Founder and rehearsal (v2.0 release candidate)
 
 - **Goal:** start a project by talking. A pasted document is grilled before anything is drafted.
-- **Includes:** importing v1 content from `content/` (roles, crews, doctrine, goal grammar).
+- **Includes:** importing v1 content from `content/` (roles, squads, doctrine, goal grammar).
 - **Exit demo:** the Founder acceptance scenario passes, grilling included. The full v2.0 acceptance suite passes; the Standards item and the Slack column of surface parity are deferred.
 - **Ids:** PRJ-9; IF-4.6, IF-4.7; FND-1, FND-2, FND-3, FND-4, FND-5, FND-6, FND-7, FND-8, FND-9, FND-10, FND-11, FND-12, FND-13, FND-14, FND-15, FND-16; RHS-1, RHS-2, RHS-3, RHS-4; LIB-1, LIB-2, LIB-3, LIB-4, LIB-5
 
 ## Phase 7.B: Secrets, variables and MCP servers (inserted 23 Nov 2026)
 
 - **Why:** the first real project could not do its job. Nothing accepts a role's secret, nothing connects an MCP server, and nothing stopped it starting. Most real projects need one or the other.
-- **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the crew know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
+- **Goal:** a project can be given the secrets, variables and MCP servers its work needs; the Founder and the squad know what they have; a project that lacks what it needs cannot start; no secret value reaches a model, a trace, a chat, an artifact, an export or a log.
 - **Plan:** `docs/phases/phase-7b-plan.md`, with the code review that found how this was missed and the owner's answers (23 Nov 2026).
 - **Ids:** CON-1 to CON-16 (new section 6.17); EXE-13 (the half never built); INT-4 (moved from phase 8); EXE-14 (the egress proxy); PRJ-1 (the start checks); FND-13; IF-4.7; INV-6 (sandboxes and masking).
 

@@ -64,7 +64,7 @@ UNMET = (N.OPEN, N.WAIVED)
 
 assume_met: ContextVar[bool] = ContextVar("assume_met", default=False)
 """Set by the rehearsal (RHS-1): a fire drill treats every need as provided, and lists
-the needs as setup still to do instead of holding the scripted crew."""
+the needs as setup still to do instead of holding the scripted squad."""
 
 Meets = Callable[[AsyncSession, Project, ProjectNeed], Awaitable[bool]]
 meets: list[Meets] = []

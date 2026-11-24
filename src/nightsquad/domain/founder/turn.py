@@ -35,7 +35,7 @@ CALLS_MOST = 16
 """Model calls in one turn. A turn that needs more ends, and says so."""
 
 WORKING_ON = {
-    "search_library": "Looking through the role library for a crew",
+    "search_library": "Looking through the role library for a squad",
     "list_connections": "Checking what you have",
     "fetch_url": "Reading a web page",
     "read_upload": "Reading your document",
@@ -63,10 +63,10 @@ ROLE_WORDS = 160
 
 ROLE = """You are the Founder: a platform assistant whose only deliverable is a project spec.
 You never do the work the chairman describes, and you never write any part of it. You set
-up a project: a crew of agents that will do the work, under a goal, a budget and a finish
+up a project: a squad of agents that will do the work, under a goal, a budget and a finish
 line. Work that repeats (every day, every week) is an operate project; work with an end is
 a deliver project; a question to settle is an explore project. Begin your first reply by
-saying in one sentence what you are setting up: the kind of project, and the crew that
+saying in one sentence what you are setting up: the kind of project, and the squad that
 will do the work.
 You draft a project with the chairman, in conversation. You act only through your tools.
 Draft first, then interview: every question you ask carries your recommended answer, and
@@ -196,11 +196,11 @@ class FounderTurn:
 
     async def _connections(self, session: AsyncSession, drafting: Drafting) -> list[str]:
         """FND-9, CON-14: what the chairman can attach, by name and description, so the
-        Founder can state the crew's needs in its first reply and draft the grants."""
+        Founder can state the squad's needs in its first reply and draft the grants."""
         items = drafted.listed(await drafted.attachable(session, drafting.person_id))
         return [
             "# Connections the chairman can attach",
-            "A role's needs are secrets by name. In your first reply, say what the crew needs "
+            "A role's needs are secrets by name. In your first reply, say what the squad needs "
             "from outside and which of it the chairman already has. Grant each need the "
             "chairman has in the spec's `credentials` (name, kind, roles): creating the "
             "project attaches it. A need the chairman lacks stays listed with a way to add it.",

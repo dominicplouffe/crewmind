@@ -17,9 +17,9 @@ Sidebar (desktop) / tab bar (phone)
 │           ├── Chat           the conversation (default), the most urgent decisions pinned above it,
 │           │                  and a rail: who is doing what now, just delivered, budget, next
 │           ├── Overview       a headline sentence, what is blocked, who is doing what, progress per
-│           │                  requirement, budget burn, crew, a timeline of what matters, latest files
+│           │                  requirement, budget burn, squad, a timeline of what matters, latest files
 │           ├── Work           requirements, then the board; plan details folded below
-│           ├── Crew           org view; agent sheet: model, runs, files, "Message"
+│           ├── Squad           org view; agent sheet: model, runs, files, "Message"
 │           ├── Deliverables   gallery with inline previews; file sheet with versions and compare
 │           └── More ▾         Activity · Search · Budget · Runs · Memory · Models · Settings
 ├── Settings                   Profile & appearance · Notifications · Models & keys · Founder · People · Defaults
@@ -39,9 +39,9 @@ Primary destinations: **Home** and **Projects** (plus Settings). Everything else
 | Activity | **Overview** timeline | More → Activity; ⌘K |
 | Search | **⌘K** | More → Search |
 | Budget | **Overview** burn chart; header budget meter | More → Budget; header meter opens it |
-| Models | **Crew** (each agent's model in its sheet); **Settings → Models & keys** | More → Models |
+| Models | **Squad** (each agent's model in its sheet); **Settings → Models & keys** | More → Models |
 | Settings | **More → Settings** (project); **Settings** (install, people, you) | ⌘K |
-| Runs | **Crew** (each agent's runs, as sentences) | More → Runs; "How this was made" on a message |
+| Runs | **Squad** (each agent's runs, as sentences) | More → Runs; "How this was made" on a message |
 | Memory | **More → Memory** | ⌘K |
 | Board | **Work** tab → Board | ⌘K "Open Board" |
 | Plan | **Work** tab → Plan | ⌘K "Open Plan"; Overview progress |
@@ -57,7 +57,7 @@ Primary destinations: **Home** and **Projects** (plus Settings). Everything else
 | `/desk` | redirects to `/` |
 | `/projects` (`?new=form`) | Projects (with the form open) |
 | `/projects/:id` | Project, Chat |
-| `/projects/:id/overview` · `work` · `crew` · `deliverables` | Project tabs (deep-linkable) |
+| `/projects/:id/overview` · `work` · `squad` · `deliverables` | Project tabs (deep-linkable) |
 | `/draft`, `/draft/:id` | Start a project with the Founder |
 | `/settings/:section?` | Settings |
 | `/welcome` | First-run setup |

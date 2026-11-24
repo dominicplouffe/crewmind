@@ -1,5 +1,5 @@
 /**
- * A project's connections (CON-4, CON-5, CON-14, CON-15). It leads with what the crew needs and
+ * A project's connections (CON-4, CON-5, CON-14, CON-15). It leads with what the squad needs and
  * lacks, each with Add in place, pre-filled with the need; then what is attached, with who may
  * use it as chips edited in place; then what is ready to attach.
  */

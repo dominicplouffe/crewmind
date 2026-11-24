@@ -26,7 +26,7 @@ export const founder = {
   },
   page: {
     title: "Start a project",
-    pageTitle: "Start a project · nightsquad",
+    pageTitle: "Start a project · Nightsquad",
     draftTitle: "Draft a project",
     projectsLink: "Projects",
     mainLabel: "Conversation with the Founder",
@@ -60,7 +60,7 @@ export const founder = {
   },
   talk: {
     logLabel: "What was said",
-    authors: { person: "You", founder: "The Founder", platform: "nightsquad" } as Record<string, string>,
+    authors: { person: "You", founder: "The Founder", platform: "Nightsquad" } as Record<string, string>,
     avatarName: "Founder",
     lineLabel: (author: string, when: string): string => `${author}, ${when}`,
     writing: "The Founder is writing.",
@@ -143,7 +143,7 @@ export const founder = {
   draftRail: {
     title: "The draft",
     project: "Project",
-    crew: "Crew",
+    squad: "Squad",
     seats: (count: number): string => plural(count, "agent", "agents"),
     goal: "Goal",
     goalShow: "Read the goal",
@@ -227,7 +227,7 @@ export const founder = {
       message || (rule ? `${rule}: ${code}` : code),
   },
   needs: {
-    title: "What the crew needs",
+    title: "What the squad needs",
     intro: "Secrets, variables and MCP servers the roles of this draft use.",
     kinds: { secret: "secret", variable: "variable", mcp_server: "MCP server" } as Record<string, string>,
     line: (kind: string, roles: string[]): string => `${kind}, for ${roles.join(", ")}`,
@@ -254,7 +254,7 @@ export const founder = {
     nothingMissing: "Nothing is missing. It can start.",
     start: "Start the project",
     startWithout: "Start without it",
-    waitingTitle: "Some of the crew can't work yet",
+    waitingTitle: "Some of the squad can't work yet",
     waitingAfter:
       "Start without it and only those agents wait; everyone else gets to work. They start by themselves as soon as it is added.",
     addMissing: "Add what's missing",
@@ -281,7 +281,7 @@ export const founder = {
   },
   rehearse: {
     intro:
-      "A rehearsal walks this project through its rules with a stand-in crew. It spends no tokens and changes nothing.",
+      "A rehearsal walks this project through its rules with a stand-in squad. It spends no tokens and changes nothing.",
     run: "Rehearse",
     again: "Rehearse again",
     running: "Rehearsing. This takes about 5 seconds.",

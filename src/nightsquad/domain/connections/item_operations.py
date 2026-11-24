@@ -75,7 +75,7 @@ class Placement(BaseModel):
 class SecretUse(BaseModel):
     delivery: Delivery = Field(
         default=Delivery.SENT_FOR_YOU,
-        description="sent_for_you (nightsquad adds it to requests to the sites; agents never "
+        description="sent_for_you (Nightsquad adds it to requests to the sites; agents never "
         "see it) or given (placed in the agent's sandbox, masked in everything it writes).",
     )
     sites: list[str] = Field(

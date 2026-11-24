@@ -145,7 +145,7 @@ async def build(
     channels = ", ".join(c.name for c in await conversation.channels_of(session, seat))
     sections.append(
         f"# Who you are\n\nYou are {_called(seat)}, the {view.role.name}. "
-        f"Channels: {channels}.\n\nThe crew:\n{roster}"
+        f"Channels: {channels}.\n\nThe squad:\n{roster}"
     )
 
     for section in added_sections:

@@ -51,7 +51,7 @@ export function byPriority(left: DeskEntry, right: DeskEntry): number {
   return (left.item?.id ?? 0) - (right.item?.id ?? 0);
 }
 
-/** The page title with the count in front, as mail apps do: "(2) Home · nightsquad". */
+/** The page title with the count in front, as mail apps do: "(2) Home · Nightsquad". */
 export function titled(base: string, count: number): string {
   return count > 0 ? `(${count}) ${base}` : base;
 }

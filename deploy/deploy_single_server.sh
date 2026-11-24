@@ -11,7 +11,7 @@
 #   deploy/deploy_single_server.sh --admin-email you@example.com   # first install
 #   deploy/deploy_single_server.sh                       # this machine only: https://localhost
 #   deploy/deploy_single_server.sh --bind 192.168.1.50   # reach it at https://192.168.1.50
-#   deploy/deploy_single_server.sh --bind 0.0.0.0 --public-url https://crew.example.com \
+#   deploy/deploy_single_server.sh --bind 0.0.0.0 --public-url https://squad.example.com \
 #                                  --tls you@example.com # a public name, real certificate
 #   deploy/deploy_single_server.sh --port 8443           # another TLS port
 #   deploy/deploy_single_server.sh --state-root ~/nightsquad-data

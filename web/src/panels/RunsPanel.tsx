@@ -10,7 +10,7 @@ import { formatDateTime, formatNumber, formatValue } from "../lib/format";
 import { tokens } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { AgentAvatar, useAgentName } from "../squad/names";
 import { Pill } from "../ui/Status";
 import { Empty, Loading } from "./kit";
 import { aboutWords, runSentence, runStateWords, runTone, type RunLike } from "./runWords";

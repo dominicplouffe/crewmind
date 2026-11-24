@@ -211,7 +211,7 @@ async def authority(session: AsyncSession, store: SecretStore, now: datetime) ->
     certificate = await store.reveal(session, AUTHORITY_OWNER, AUTHORITY_CERTIFICATE)
     if key is not None and certificate is not None:
         return Authority(key.encode(), certificate.encode())
-    made = Authority.create("nightsquad egress proxy")
+    made = Authority.create("Nightsquad egress proxy")
     await store.put(session, AUTHORITY_OWNER, AUTHORITY_KEY, made.key_pem.decode(), now)
     await store.put(
         session, AUTHORITY_OWNER, AUTHORITY_CERTIFICATE, made.certificate_pem.decode(), now

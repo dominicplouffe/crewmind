@@ -19,7 +19,7 @@ e2e/start-backend.sh 8433 /tmp/nightsquad-dev   # prints when ready; setup link 
 e2e/stop-backend.sh /tmp/nightsquad-dev
 ```
 
-To see the app with a crew at work, seed a busy demo project on that throwaway server (five agents,
+To see the app with a squad at work, seed a busy demo project on that throwaway server (five agents,
 tasks in every state, delivered files, half the budget spent, decisions waiting):
 
 ```bash
@@ -83,7 +83,7 @@ src/home/        Home's inbox items and project cards
 src/project/     the project header, tabs, chat rail, work view, needs sheet
 src/chat/        chat state, history paging, messages and their actions, action cards, composer
 src/overview/    the project overview: progress, budget burn chart, timeline
-src/crew/        the crew: org view, agent sheet, crew strip
+src/squad/        the squad: org view, agent sheet, squad strip
 src/deliverables/  the gallery of files with inline previews
 src/settings/    Settings (profile, notifications, models and keys, Founder, people, install)
 src/onboarding/  first-run setup (/welcome) and the setup status hook

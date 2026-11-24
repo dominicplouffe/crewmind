@@ -8,7 +8,7 @@ import { formatDateTime } from "../../lib/format";
 import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { ServerNote, Tag, TextForm, stateName, useAct, type TabProps } from "./parts";
-import { useAgentName } from "../../crew/names";
+import { useAgentName } from "../../squad/names";
 
 interface Props extends TabProps {
   onJump(messageId: number): void;

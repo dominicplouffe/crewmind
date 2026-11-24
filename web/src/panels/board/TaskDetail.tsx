@@ -9,7 +9,7 @@ import { useLoad } from "../../lib/useLoad";
 import { t } from "../../strings";
 import { isClosed, whoChecked } from "./logic";
 import { AgentText, CheckLabel, StateTag, type BoardTabProps } from "./parts";
-import { useAgentName } from "../../crew/names";
+import { useAgentName } from "../../squad/names";
 
 interface Props extends BoardTabProps {
   taskId: number;

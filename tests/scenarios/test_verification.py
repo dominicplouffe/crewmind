@@ -1,4 +1,4 @@
-"""Scripted crews for phase 4: a competent crew that finishes a verified job, and a
+"""Scripted squads for phase 4: a competent squad that finishes a verified job, and a
 rule-breaker that must not get anywhere (section 13, NFR-19, P5, P10)."""
 
 from __future__ import annotations
@@ -17,20 +17,20 @@ SCRIPTS = Path(__file__).parents[2] / "acceptance" / "scripts"
 
 def load(app: App, name: str) -> None:
     """Give the mock provider one of the reference scripts."""
-    crew: dict[str, Any] = json.loads((SCRIPTS / f"{name}.json").read_text())
-    for key, turns in crew.items():
+    squad: dict[str, Any] = json.loads((SCRIPTS / f"{name}.json").read_text())
+    for key, turns in squad.items():
         if key != "about":
             app.script(key, *turns)
 
 
 async def settle(app: App, rounds: int = 6) -> None:
-    """Let the crew run until nothing is due."""
+    """Let the squad run until nothing is due."""
     for _ in range(rounds):
         if await app.work() == 0:
             return
 
 
-async def test_scenario_a_competent_crew_finishes_a_verified_job(app: App) -> None:
+async def test_scenario_a_competent_squad_finishes_a_verified_job(app: App) -> None:
     """Golden path (WRK-1 to WRK-8, INV-2, P5): the CEO hires a team and creates a task with
     a command test; the lead claims it, does the work and completes it; the platform runs
     the pinned check and closes it as verified. Nobody is refused anything on the way."""
@@ -39,7 +39,7 @@ async def test_scenario_a_competent_crew_finishes_a_verified_job(app: App) -> No
     workspace = app.runtime.config.data_dir / "workspaces" / project
     workspace.mkdir(parents=True, exist_ok=True)
     (workspace / "check.sh").write_text("grep -q 41 report.txt\n")
-    load(app, "competent-crew")
+    load(app, "competent-squad")
     await app.ok("chat.command", owner, project_id=project, text="/do Plan the quarterly report.")
     assert await app.work() >= 1
     app.script("CEO/work", {"text": "Nothing more to plan."})
@@ -67,21 +67,21 @@ async def test_scenario_the_rule_breaker_gets_nowhere(app: App) -> None:
     re-argue a closed decision, create its own task and write a standing order. Each call
     is refused, the refusal cap ends the run and revokes its token, and nothing it wanted
     is reached. With a run token it also cannot do anything only the chairman may."""
-    from tests.attack.work_support import OBSERVABLE, Crew
+    from tests.attack.work_support import OBSERVABLE, Squad
     from tests.support import agent_call, live_run
 
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
-    crew = Crew(app, owner, project)
-    crew.requirement = await crew.add_requirement()
-    await crew.ok("CEO", "agent.hire_team", team="build", role="Generalist")
-    task = await crew.task()
+    squad = Squad(app, owner, project)
+    squad.requirement = await squad.add_requirement()
+    await squad.ok("CEO", "agent.hire_team", team="build", role="Generalist")
+    task = await squad.task()
     await app.ok("decisions.decide", owner, project_id=project, text="Launch: in spring.")
     await app.ok(
         "artifacts.upload", owner, project_id=project, name="plan.md", content_base64="b3Vycw=="
     )
     await app.ok("artifacts.lock", owner, project_id=project, name="plan.md")
-    await crew.finish("CEO")
+    await squad.finish("CEO")
 
     token = (await live_run(app, project, seat="build")).token
     reserved = {
@@ -98,7 +98,7 @@ async def test_scenario_the_rule_breaker_gets_nowhere(app: App) -> None:
     for name, values in reserved.items():
         answer = await app.call(name, token, project_id=project, **values)
         assert answer.status_code in (401, 403), name
-    await crew.finish("build")
+    await squad.finish("build")
 
     load(app, "rule-breaker")
     from tests.support import wake

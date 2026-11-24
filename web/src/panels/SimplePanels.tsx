@@ -16,7 +16,7 @@ import { RelativeTime } from "../chat/RelativeTime";
 import { groupByDay } from "../desk/logic";
 import { Empty, Loading } from "./kit";
 import { listeningLine } from "./memory/PinnedTab";
-import { roleLabel } from "../crew/names";
+import { roleLabel } from "../squad/names";
 
 interface Props {
   projectId: string;

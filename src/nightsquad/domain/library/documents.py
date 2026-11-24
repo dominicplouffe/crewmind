@@ -1,4 +1,4 @@
-"""The file formats of the library: one role, one crew (LIB-1, LIB-2, LIB-3)."""
+"""The file formats of the library: one role, one squad (LIB-1, LIB-2, LIB-3)."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from pydantic import (
 
 from nightsquad.catalog.refusal import Refusal
 from nightsquad.catalog.rules import Rule, rules
+from nightsquad.domain.library.legacy import renamed_markers
 from nightsquad.gateway.registry import ModelClass
 
 LIB_1 = rules.register(
@@ -40,6 +41,7 @@ class RoleDoc(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def names_no_model(cls, document: Any) -> Any:
+        document = renamed_markers(document)
         if not isinstance(document, dict):
             return document
         fields = cast(dict[str, Any], document)
@@ -75,7 +77,7 @@ class RoleDoc(BaseModel):
     charter: str = Field(min_length=1, max_length=40_000, description="Its standing brief.")
 
 
-class CrewTeam(BaseModel):
+class SquadTeam(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=60)
@@ -90,18 +92,24 @@ class Estimate(BaseModel):
     tokens: int = Field(ge=1)
 
 
-class CrewDoc(BaseModel):
-    """One crew, as a file (LIB-2)."""
+class SquadDoc(BaseModel):
+    """One squad, as a file (LIB-2)."""
 
     model_config = ConfigDict(extra="forbid")
 
-    nightsquad_crew: Literal[1] = 1
+    nightsquad_squad: Literal[1] = 1
+
+    @model_validator(mode="before")
+    @classmethod
+    def old_marker(cls, document: Any) -> Any:
+        return renamed_markers(document)
+
     slug: Slug
     name: str = Field(min_length=1, max_length=200)
-    outcome: str = Field(min_length=1, max_length=2000, description="What the crew delivers.")
+    outcome: str = Field(min_length=1, max_length=2000, description="What the squad delivers.")
     ceo_role: Slug
     domains: list[str] = Field(default_factory=list[str])
-    teams: list[CrewTeam]
+    teams: list[SquadTeam]
     estimate: Estimate | None = Field(
         None, description="Reference runs and tokens for the job, when known (GOV-4)."
     )

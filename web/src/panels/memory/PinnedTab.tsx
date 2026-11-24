@@ -9,7 +9,7 @@ import { useLoad } from "../../lib/useLoad";
 import { Meter } from "../../ui/Progress";
 import { t } from "../../strings";
 import type { TabProps } from "./parts";
-import { roleLabel, useAgentName } from "../../crew/names";
+import { roleLabel, useAgentName } from "../../squad/names";
 
 /** "2 corrections in 40 replies (score 5)", or "no replies yet" while the score is unknown. */
 export function listeningLine(seat: Pick<Seat, "replies" | "corrections" | "listening_score">): string {

@@ -107,7 +107,7 @@ async def update(context: Context, payload: UpdateInput) -> UpdatePlan:
     if root is None:
         raise Refusal(
             "not_a_checkout",
-            "nightsquad is installed as a package here, not from a source checkout.",
+            "Nightsquad is installed as a package here, not from a source checkout.",
             rule=NFR_3.id,
             hint="Run `uv tool upgrade nightsquad`; `squad up` then migrates on start.",
         )

@@ -9,7 +9,7 @@ import { fromNow } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { t } from "../strings";
 import { FileView } from "./FileView";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 type Kind = Schemas["Kind"];
 const KINDS: Kind[] = ["deliverable", "working", "upload", "report"];

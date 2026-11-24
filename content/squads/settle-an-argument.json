@@ -1,0 +1,35 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "settle-an-argument",
+  "name": "Settle an argument",
+  "outcome": "A sourced answer to a question two people disagree about.",
+  "ceo_role": "ceo",
+  "domains": [
+    "general"
+  ],
+  "teams": [
+    {
+      "name": "Research",
+      "role": "researcher",
+      "members": [
+        "Rey",
+        "Sol"
+      ]
+    },
+    {
+      "name": "Editorial",
+      "role": "writer",
+      "members": [
+        "Ada"
+      ]
+    },
+    {
+      "name": "Review",
+      "role": "editor",
+      "members": [
+        "Kit"
+      ]
+    }
+  ],
+  "estimate": null
+}

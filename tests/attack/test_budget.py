@@ -96,9 +96,9 @@ async def test_INV_9_spend_past_the_wall_is_bounded_by_the_runs_in_flight(app: A
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"budget.tokens": 1_000_000})
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=3
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=3
     )
-    in_flight = [await live_run(app, project, seat=seat) for seat in ("CEO", "crew-1", "crew-2")]
+    in_flight = [await live_run(app, project, seat=seat) for seat in ("CEO", "squad-1", "squad-2")]
     app.script("*", {"text": "x", "usage": {"input": 400_000, "output": 0}})
     for run in in_flight:
         code, _ = await complete(app, run.token)
@@ -108,7 +108,7 @@ async def test_INV_9_spend_past_the_wall_is_bounded_by_the_runs_in_flight(app: A
         assert await run_state(app, run.run_id) == "running"
         assert (await agent_call(app, run.token, "agent.whoami")).status_code == 200
 
-    await wake(app, project, seat="crew-3")
+    await wake(app, project, seat="squad-3")
     await app.dispatcher.tick()
     assert await app.runner().step() == 0
     spent = (await app.ok("budget.show", owner, project_id=project))["spent"]
@@ -148,7 +148,7 @@ async def test_INV_8_every_model_call_is_metered_whatever_the_runs_ending(
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner)
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=2
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=2
     )
     app.script(
         "*",
@@ -158,7 +158,7 @@ async def test_INV_8_every_model_call_is_metered_whatever_the_runs_ending(
         },
     )
     killed, reaped, failed = [
-        await live_run(app, project, seat=s) for s in ("CEO", "crew-1", "crew-2")
+        await live_run(app, project, seat=s) for s in ("CEO", "squad-1", "squad-2")
     ]
     for run in (killed, reaped, failed):
         assert (await complete(app, run.token))[0] == 200

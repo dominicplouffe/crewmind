@@ -1,4 +1,4 @@
-"""Helpers for the planning tests: a solo crew that meets requirements quickly, and
+"""Helpers for the planning tests: a solo squad that meets requirements quickly, and
 direct control of spend and run length so the arithmetic can be asserted exactly."""
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from typing import Any
 from sqlalchemy import update
 
 from nightsquad.storage.models import LedgerLine, Requirement
-from tests.attack.work_support import Crew
+from tests.attack.work_support import Squad
 from tests.conftest import FakeClock
 from tests.support import App
 
@@ -22,26 +22,26 @@ TASK = {
 }
 
 
-async def view(crew: Crew) -> dict[str, Any]:
-    return await crew.app.ok("plan.show", crew.owner, project_id=crew.project)
+async def view(squad: Squad) -> dict[str, Any]:
+    return await squad.app.ok("plan.show", squad.owner, project_id=squad.project)
 
 
-async def command_requirement(crew: Crew, name: str, runs: int = 2, **fields: Any) -> int:
+async def command_requirement(squad: Squad, name: str, runs: int = 2, **fields: Any) -> int:
     """Scope the chairman adds that is met when `<name>.txt` exists in the workspace."""
-    return await crew.add_requirement(
+    return await squad.add_requirement(
         text=f"The {name} page is published.", test_kind="command",
         success_test=f"test -f {name}.txt", estimate_runs=runs, **fields,
     )  # fmt: skip
 
 
-async def meet(crew: Crew, clock: FakeClock, requirement: int, name: str) -> None:
+async def meet(squad: Squad, clock: FakeClock, requirement: int, name: str) -> None:
     """Do one task under a command requirement and let the platform find it met."""
-    crew.write(f"{name}.txt", "done")
-    task = await crew.ok("CEO", "agent.create_task", requirement_id=requirement, **TASK)
-    await crew.ok("CEO", "agent.claim_task", task_id=task["id"])
-    await crew.ok("CEO", "agent.complete_task", task_id=task["id"], evidence="The file is there.")
+    squad.write(f"{name}.txt", "done")
+    task = await squad.ok("CEO", "agent.create_task", requirement_id=requirement, **TASK)
+    await squad.ok("CEO", "agent.claim_task", task_id=task["id"])
+    await squad.ok("CEO", "agent.complete_task", task_id=task["id"], evidence="The file is there.")
     clock.advance(minutes=1)
-    await crew.app.planning.tick()
+    await squad.app.planning.tick()
 
 
 async def spend(app: App, project: str, tokens: int, at: datetime | None = None) -> None:

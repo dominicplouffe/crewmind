@@ -163,7 +163,7 @@ async def start_check(
     listed = " ".join(f"{index}. {item.text}" for index, item in enumerate(found, 1))
     raise Refusal(
         "start_blocked",
-        f"Some of the crew could not work yet. {listed}",
+        f"Some of the squad could not work yet. {listed}",
         rule=CON_5.id,
         hint="Add what is missing, or start without it: the agents who need it wait until "
         "it is added (`projects start --without-missing`).",

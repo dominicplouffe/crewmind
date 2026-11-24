@@ -12,6 +12,7 @@ from nightsquad.catalog.refusal import Refusal
 from nightsquad.catalog.rules import Rule, rules
 from nightsquad.domain.conversation.orders import MAX_CHARACTERS as ORDER_MAX_CHARACTERS
 from nightsquad.domain.library.documents import MEMBERS_MAX, RoleDoc, Slug
+from nightsquad.domain.library.legacy import renamed_markers
 from nightsquad.domain.projects.model import GOAL_MAX_LENGTH, ProjectType
 
 LIB_4 = rules.register(
@@ -84,6 +85,12 @@ class ProjectSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     nightsquad_spec: Literal[1] = 1
+
+    @model_validator(mode="before")
+    @classmethod
+    def old_marker(cls, document: Any) -> Any:
+        return renamed_markers(document)
+
     name: str = Field(min_length=1, max_length=200)
     goal: str = Field(min_length=1, max_length=GOAL_MAX_LENGTH)
     type: ProjectType

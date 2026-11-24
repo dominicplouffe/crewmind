@@ -8,7 +8,7 @@ import type { Task } from "../../api/client";
 import { t } from "../../strings";
 import { boardColumns, showsCheckLabel, slug, type BoardColumn, type ColumnId } from "./logic";
 import { AgentText, CheckLabel, StateTag } from "./parts";
-import { AgentAvatar, useAgentName } from "../../crew/names";
+import { AgentAvatar, useAgentName } from "../../squad/names";
 
 /** The state each column is named for; a card in another state also shows its own. */
 const PRIMARY: Record<ColumnId, string | null> = {

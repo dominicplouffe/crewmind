@@ -1,6 +1,6 @@
 {
-  "name": "nightsquad",
-  "short_name": "nightsquad",
+  "name": "Nightsquad",
+  "short_name": "Nightsquad",
   "description": "Run a team of AI agents from one chat.",
   "start_url": "/",
   "scope": "/",

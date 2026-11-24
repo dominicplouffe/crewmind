@@ -108,7 +108,7 @@ def host(docker: Any, tmp_path: Path) -> Iterator[Host]:
     built.clean()
 
 
-def test_EXE_12_a_real_crew_finishes_a_verified_job_in_containers(
+def test_EXE_12_a_real_squad_finishes_a_verified_job_in_containers(
     docker: Any, tmp_path: Path
 ) -> None:
     """EXE-12, WRK-7, INV-2, P3: with agents and checks as containers, the CEO's container

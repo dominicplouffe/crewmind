@@ -7,7 +7,7 @@ import { useAuth } from "../auth";
 import { Markdown, Pre } from "../components/common";
 import { Empty, Loading } from "../panels/kit";
 import { formatValue } from "../lib/format";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { AgentAvatar, useAgentName } from "../squad/names";
 import { t } from "../strings";
 import { MessageItem, type MessageHandlers } from "./MessageItem";
 import type { ChatState, Notice, PendingMessage, Typing } from "./state";

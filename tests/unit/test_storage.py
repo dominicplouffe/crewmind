@@ -13,7 +13,7 @@ from nightsquad.storage.engine import Database, create_engine, database_of, sync
 from nightsquad.storage.migrate import alembic_config, migrate
 from nightsquad.storage.models import Base
 
-HEAD = "0016"
+HEAD = "0017"
 
 
 async def test_NFR_10_migrations_apply_and_are_safe_to_repeat(database_url: str) -> None:
@@ -126,3 +126,55 @@ def test_EXE_18_the_migration_names_the_seats_that_exist(database_url: str) -> N
     assert shown["Reviewer"] in names.POOL
     assert shown["CEO"] != shown["Reviewer"]
     assert shown["CEO"] == names.draw("p1", {"CEO", "Reviewer", "Rey"})
+
+
+def test_LIB_2_the_migration_renames_the_library_table_and_its_events(database_url: str) -> None:
+    """LIB-2, INV-21, NFR-10: on a database from before the rename (ADR-0011), the library
+    table is `squads`, the starter squad whose slug held the old word is renamed, and past
+    events carry the new type and subject kind. A custom squad keeps its own slug, no event
+    is lost, and events of other kinds are untouched."""
+    from alembic import command
+
+    command.upgrade(alembic_config(database_url), "0016")
+    engine = sqlalchemy.create_engine(sync_url(database_url))
+    try:
+        with engine.begin() as connection:
+            tables = sqlalchemy.MetaData()
+            tables.reflect(connection, only=["crews", "events"])
+            library, events = tables.tables["crews"], tables.tables["events"]
+            for row_id, slug, name, source in (
+                ("c1", "an-overnight-crew", "An overnight crew", "starter"),
+                ("c2", "my-crew", "My crew", "custom"),
+            ):
+                connection.execute(
+                    library.insert().values(
+                        _row(library, id=row_id, slug=slug, name=name, source=source)
+                    )
+                )
+            for event_id, kind, subject_kind, subject_id in (
+                (1, "crew.saved", "crew", "an-overnight-crew"),
+                (2, "crew.saved", "crew", "my-crew"),
+                (3, "project.created", "project", "p1"),
+            ):
+                connection.execute(
+                    events.insert().values(
+                        _row(events, id=event_id, type=kind, subject_kind=subject_kind,
+                             subject_id=subject_id)
+                    )
+                )  # fmt: skip
+        migrate(database_url)
+        with engine.connect() as connection:
+            names = set(sqlalchemy.inspect(connection).get_table_names())
+            squads = dict(connection.execute(text("SELECT slug, name FROM squads")).all())
+            logged = connection.execute(
+                text("SELECT type, subject_kind, subject_id FROM events ORDER BY id")
+            ).all()
+    finally:
+        engine.dispose()
+    assert "crews" not in names
+    assert squads == {"an-overnight-squad": "An overnight squad", "my-crew": "My crew"}
+    assert [tuple(row) for row in logged] == [
+        ("squad.saved", "squad", "an-overnight-squad"),
+        ("squad.saved", "squad", "my-crew"),
+        ("project.created", "project", "p1"),
+    ]

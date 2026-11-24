@@ -14,7 +14,7 @@ const plural = (count: number, one: string, many: string): string => `${count} $
 
 export const t = {
   app: {
-    name: "nightsquad",
+    name: "Nightsquad",
     signOut: "Sign out",
   },
   common: {
@@ -36,7 +36,7 @@ export const t = {
     blocked: "Alerts are blocked for this site. Allow notifications in your browser settings.",
   },
   signIn: {
-    title: "Sign in to nightsquad",
+    title: "Sign in to Nightsquad",
     email: "Email",
     password: "Password",
     submit: "Sign in",
@@ -74,7 +74,7 @@ export const t = {
   },
   project: {
     fallbackName: "Project",
-    pageTitle: (name: string): string => `${name} · nightsquad`,
+    pageTitle: (name: string): string => `${name} · Nightsquad`,
   },
   header: {
     label: "Project status",
@@ -120,10 +120,10 @@ export const t = {
     emptyNextDraft: "This project has not started. Choose “Start” above, then say what you want done.",
     reconnecting: "Live updates stopped. Checking for new messages every few seconds while reconnecting.",
     messageLabel: (author: string, when: string): string => `${author}, ${when}`,
-    authorKinds: { person: "", agent: "agent", platform: "nightsquad" },
+    authorKinds: { person: "", agent: "agent", platform: "Nightsquad" },
     you: "You",
     agentRole: "Agent",
-    platformName: "nightsquad",
+    platformName: "Nightsquad",
     actionsLabel: (author: string): string => `Actions for the message from ${author}`,
     delivered: "Delivered",
     sending: "Sending…",
@@ -165,7 +165,7 @@ export const t = {
   composer: {
     formLabel: "Write a message",
     label: "Message",
-    placeholder: "Message the crew… / for commands, @ to mention",
+    placeholder: "Message the squad… / for commands, @ to mention",
     hint: "Enter to send · Shift+Enter for a new line · ↑ for your last message · Esc stops a reply",
     send: "Send",
     attach: "Attach files",
@@ -201,7 +201,7 @@ export const t = {
     listLabel: "Activity, newest first",
     you: "You",
     person: "Someone in the project",
-    Nightsquad: "nightsquad",
+    nightsquad: "Nightsquad",
     dayLabel: (day: string): string => `Activity on ${day}`,
     emptyTitle: "Nothing has happened yet.",
     emptyNext: "Every change in the project will be listed here. Start the project or send a message.",
@@ -237,7 +237,7 @@ export const t = {
     levels: {
       warn: (at: string, share: string): string => `At ${at} tokens (${share}) the CEO is warned and a line goes in the chat.`,
       wrapup: (at: string, share: string): string =>
-        `At ${at} tokens (${share}) the crew wraps up: no new scope, only work already under way, and you are asked whether to raise the budget or let the project land.`,
+        `At ${at} tokens (${share}) the squad wraps up: no new scope, only work already under way, and you are asked whether to raise the budget or let the project land.`,
       wall: (at: string): string => `At ${at} tokens all work stops until you raise the limit.`,
     },
     passed: "Passed",

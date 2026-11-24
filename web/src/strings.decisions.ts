@@ -10,7 +10,7 @@ const plural = (count: number, one: string, many: string): string => `${count} $
 export const decisions = {
   desk: {
     title: "Desk",
-    pageTitle: "Desk · nightsquad",
+    pageTitle: "Desk · Nightsquad",
     link: (count: number): string => `Desk (${count})`,
     linkPlain: "Desk",
     linkLabel: (count: number): string =>
@@ -109,7 +109,7 @@ export const decisions = {
     askedBy: {
       ceo: "The CEO asks",
       agent: "An agent asks",
-      platform: "nightsquad asks",
+      platform: "Nightsquad asks",
       named: (name: string): string => `${name} asks`,
       namedRole: (name: string, role: string): string => `${name}, the ${role}, asks`,
     },
@@ -239,7 +239,7 @@ export const decisions = {
     who: {
       ceo: "CEO",
       agent: "An agent",
-      platform: "nightsquad",
+      platform: "Nightsquad",
       namedRole: (name: string, role: string): string => `${name} · ${role}`,
     },
     discuss: "Discuss in chat",

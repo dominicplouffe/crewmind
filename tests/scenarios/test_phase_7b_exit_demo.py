@@ -1,5 +1,5 @@
 """The phase 7.B exit demo, end to end through the public operations (docs/phases/
-phase-7b-plan.md): the Founder names what the crew needs; start says what is missing; the
+phase-7b-plan.md): the Founder names what the squad needs; start says what is missing; the
 chairman adds a secret sent for the agent, a variable and one MCP server of each kind; the
 writer posts with plain curl and never holds the password; tools are used and asked for;
 no value is anywhere; a replaced password is used at once; a revoked sign-in raises one
@@ -123,7 +123,7 @@ async def test_phase_7b_exit_demo(
     await credential(app, owner, "main")
     mcp_support.created.clear()
 
-    # 1. The Founder drafts the crew and names what it needs; nothing is had yet.
+    # 1. The Founder drafts the squad and names what it needs; nothing is had yet.
     teams = [*SPEC["teams"], {"name": "Desk", "role": WRITER_ROLE, "members": ["Wren"]}]
     grants = [
         {"name": "wordpress", "roles": [WRITER_ROLE]},

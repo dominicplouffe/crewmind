@@ -56,4 +56,4 @@ fi
 say "Starting the server"
 compose up -d --no-build >/dev/null || die "compose up failed"
 wait_for_server 300
-ok "nightsquad is back, on the restored data: $PUBLIC_URL"
+ok "Nightsquad is back, on the restored data: $PUBLIC_URL"

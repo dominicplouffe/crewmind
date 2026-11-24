@@ -1,5 +1,5 @@
 /**
- * The draft as it stands, beside the conversation: what the project is, who is on the crew, how
+ * The draft as it stands, beside the conversation: what the project is, who is on the squad, how
  * the goal grades and what the rehearsal found. Short by default; the long parts (the goal's
  * text, the grade of each element, steps the Founder redid) open on request.
  */
@@ -66,15 +66,15 @@ export function ProjectFacts({ draft }: { draft: DraftSummary }): JSX.Element {
   );
 }
 
-export function CrewList({ draft }: { draft: DraftSummary }): JSX.Element {
+export function SquadList({ draft }: { draft: DraftSummary }): JSX.Element {
   const words = t.founder.side;
   if (draft.teams.length === 0) return <p className="quiet">{words.noTeams}</p>;
   return (
-    <ul className="crew-list">
+    <ul className="squad-list">
       {draft.teams.map((team) => (
         <li key={team.name} data-testid="draft-team">
-          <p className="crew-team">{words.team(team.name, team.role)}</p>
-          <p className="crew-members">{team.members.join(", ")}</p>
+          <p className="squad-team">{words.team(team.name, team.role)}</p>
+          <p className="squad-members">{team.members.join(", ")}</p>
         </li>
       ))}
     </ul>
@@ -123,12 +123,12 @@ export function DraftRail({ draft, grade, rehearsal, rulesHit, open = false }: P
         )}
       </section>
       {draft ? (
-        <section className="rail-card" aria-labelledby="crew-title">
+        <section className="rail-card" aria-labelledby="squad-title">
           <header className="rail-head">
-            <h2 id="crew-title">{rail.crew}</h2>
+            <h2 id="squad-title">{rail.squad}</h2>
             <span className="rail-count">{rail.seats(seats)}</span>
           </header>
-          <CrewList draft={draft} />
+          <SquadList draft={draft} />
         </section>
       ) : null}
       <section className="rail-card" aria-labelledby="checks-title">

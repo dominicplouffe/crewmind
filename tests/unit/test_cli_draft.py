@@ -101,7 +101,7 @@ WORDPRESS = "The secret wordpress, for blog-writer is missing."
 def test_IF_4_7_after_creation_missing_credentials_are_asked_for_and_start_is_offered() -> None:
     """IF-4.7, FND-13, IF-4.5: once the ledger is confirmed and the project created, each
     missing credential is asked for with hidden input and may be skipped; what is still
-    missing is listed; who in the crew would wait is listed, and starting then means starting
+    missing is listed; who in the squad would wait is listed, and starting then means starting
     without it (CON-5)."""
     ledger = [{"settles": "finish_line", "value": "The signed proof", "source": "answer"}]
     created = {

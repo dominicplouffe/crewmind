@@ -35,7 +35,7 @@ CHUNK = 64 * 1024
 """How much is read from a socket at a time."""
 HTTPS_PORT = 443
 HTTP_PORT = 80
-REALM = 'Basic realm="nightsquad egress"'
+REALM = 'Basic realm="Nightsquad egress"'
 DROPPED = {b"proxy-authorization", b"proxy-connection"}
 
 

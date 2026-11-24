@@ -547,7 +547,7 @@ class Toolbox:
         )
         if history.median_tokens is None:
             return (
-                f"This install has too few finished runs to estimate from, and the crews "
+                f"This install has too few finished runs to estimate from, and the squads "
                 f"carry no reference estimate. The default for a {spec.type} project is "
                 f"{default:,} tokens: propose it as a default, not as an estimate."
             )
@@ -575,7 +575,7 @@ _OBJECT: dict[str, Any] = {"type": "object", "properties": {}}
 TOOL_SPECS = [
     ToolSpec(
         name="search_library",
-        description="Find roles and crews that fit a piece of work.",
+        description="Find roles and squads that fit a piece of work.",
         input_schema={
             "type": "object",
             "properties": {"query": {"type": "string"}},

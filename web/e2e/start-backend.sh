@@ -34,10 +34,10 @@ echo $! > "$RUN_DIR/server.pid"
 
 for _ in $(seq 1 120); do
   if curl -fs "http://127.0.0.1:$PORT/readyz" > /dev/null 2>&1; then
-    echo "nightsquad is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
+    echo "Nightsquad is ready at http://127.0.0.1:$PORT (run directory: $RUN_DIR)"
     exit 0
   fi
   sleep 0.5
 done
-echo "nightsquad did not become ready; see $RUN_DIR/up.log" >&2
+echo "Nightsquad did not become ready; see $RUN_DIR/up.log" >&2
 exit 1

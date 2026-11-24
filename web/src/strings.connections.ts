@@ -10,9 +10,9 @@ export function kindWord(kind: string): string {
 export const connectionWords = {
   sectionTitle: "Connections",
   listTitle: { person: "Your connections", install: "The install's connections" },
-  sectionHelp: "Secrets and variables your crews use to reach the outside world.",
+  sectionHelp: "Secrets and variables your squads use to reach the outside world.",
   intro:
-    "Your crew reaches the outside world through connections: a secret Nightsquad sends for you, a secret given to the agent, a plain variable, or an MCP server's tools.",
+    "Your squad reaches the outside world through connections: a secret Nightsquad sends for you, a secret given to the agent, a plain variable, or an MCP server's tools.",
   scopes: { person: "Yours", install: "Whole install", project: "This project" },
   scopeHelp: {
     person: "Only you can see these. Attach them to any project you chair.",
@@ -197,7 +197,7 @@ export const connectionWords = {
   importProblems: (count: number): string => `${plural(count, "line needs", "lines need")} fixing or skipping.`,
   project: {
     missingTitle: "Missing",
-    missingHelp: "The crew needs these. The agents named wait until they are added.",
+    missingHelp: "The squad needs these. The agents named wait until they are added.",
     waits: (names: string[]): string => `Waits: ${names.join(", ")}`,
     waived: "Started without it",
     addIt: (kind: string): string => `Add ${kind}`,

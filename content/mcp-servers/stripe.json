@@ -8,7 +8,7 @@
   "auth_kind": "bearer",
   "value_needed": {
     "name": "stripe-key",
-    "description": "A Stripe restricted API key with only the permissions the crew needs. Prefer a test-mode key."
+    "description": "A Stripe restricted API key with only the permissions the squad needs. Prefer a test-mode key."
   },
   "docs": "https://docs.stripe.com/mcp"
 }

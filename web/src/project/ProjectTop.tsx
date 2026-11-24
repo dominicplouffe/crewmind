@@ -32,8 +32,8 @@ import { Meter } from "../ui/Progress";
 import { Pill } from "../ui/Status";
 import { STATE_TONE } from "../home/ProjectCard";
 
-export type ProjectTab = "chat" | "overview" | "work" | "crew" | "deliverables";
-export const TAB_ORDER: ProjectTab[] = ["chat", "overview", "work", "crew", "deliverables"];
+export type ProjectTab = "chat" | "overview" | "work" | "squad" | "deliverables";
+export const TAB_ORDER: ProjectTab[] = ["chat", "overview", "work", "squad", "deliverables"];
 
 /** Which button fits which state. The server still decides whether the action is allowed. */
 const ACTION_FOR_STATE: Record<string, "start" | "hold" | "resume"> = {
@@ -114,7 +114,7 @@ export function ProjectTop({ projectId, name, header, tab, needs, onTab, onPanel
           {projectLayout.needsYou(needs)}
         </button>
         <span className="divider" aria-hidden="true" />
-        <button type="button" className="status-chip" onClick={() => onTab("crew")} data-testid="now">
+        <button type="button" className="status-chip" onClick={() => onTab("squad")} data-testid="now">
           {working.length > 0 ? (
             <>
               <span className="avatar-stack" aria-hidden="true">

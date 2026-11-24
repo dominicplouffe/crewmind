@@ -4,7 +4,7 @@
  */
 
 export const oauth = {
-  pageTitle: "Approve an AI client · nightsquad",
+  pageTitle: "Approve an AI client · Nightsquad",
   title: "An AI client asks to act for you",
   intro:
     "A program outside Nightsquad wants to use your account. It will be able to do what you tick below, as you, until you revoke it.",
@@ -17,7 +17,7 @@ export const oauth = {
     create: { name: "Create", allows: "Create projects." },
     configure: { name: "Configure", allows: "Change settings, hire teams and set models." },
   } as Record<string, { name: string; allows: string }>,
-  unknownScope: "nightsquad does not know this permission.",
+  unknownScope: "Nightsquad does not know this permission.",
   noneAsked: "The client asked for no permissions.",
   noneTicked: "Tick at least one permission to approve, or deny the request.",
   approve: "Approve",

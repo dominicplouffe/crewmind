@@ -1,6 +1,6 @@
 /**
  * The whole draft on one screen, before it becomes a project (FND-5, FND-13): what it is, the
- * goal in full, the crew, every decision with where it came from, how the goal grades and what
+ * goal in full, the squad, every decision with where it came from, how the goal grades and what
  * the rehearsal found. Creating the project here confirms the ledger.
  */
 import { ArrowLeft } from "lucide-react";
@@ -9,7 +9,7 @@ import { ErrorNote, Markdown } from "../components/common";
 import { usePageTitle } from "../needs/NeedsYou";
 import { t } from "../strings";
 import { DraftLoading } from "./DraftPage";
-import { CrewList, ProjectFacts, SettingsList } from "./DraftRail";
+import { SquadList, ProjectFacts, SettingsList } from "./DraftRail";
 import { GoalGrade } from "./GoalGrade";
 import { decisionName, draftSummary, gradeOf, sourceTag, stageOf, stepOf } from "./logic";
 import { Readiness } from "./Readiness";
@@ -35,7 +35,7 @@ function Review({ draftingId }: { draftingId: string }): JSX.Element {
   );
   const start = (): void => {
     void actions.start().then((projectId) => {
-      if (projectId) navigate(`/projects/${projectId}?crew=hired`);
+      if (projectId) navigate(`/projects/${projectId}?squad=hired`);
     });
   };
 
@@ -104,11 +104,11 @@ function Review({ draftingId }: { draftingId: string }): JSX.Element {
                 </>
               ) : null}
             </section>
-            <section className="rail-card" aria-labelledby="review-crew">
+            <section className="rail-card" aria-labelledby="review-squad">
               <header className="rail-head">
-                <h2 id="review-crew">{words.draftRail.crew}</h2>
+                <h2 id="review-squad">{words.draftRail.squad}</h2>
               </header>
-              <CrewList draft={draft} />
+              <SquadList draft={draft} />
             </section>
             <section className="rail-card" aria-labelledby="review-rehearsal">
               <header className="rail-head">

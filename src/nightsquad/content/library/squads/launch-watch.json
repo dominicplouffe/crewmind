@@ -1,0 +1,27 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "launch-watch",
+  "name": "A launch watch",
+  "outcome": "A new product's first ninety days watched daily, with one change to make tomorrow and a retrospective at the end.",
+  "ceo_role": "ceo",
+  "domains": [
+    "data"
+  ],
+  "teams": [
+    {
+      "name": "Analytics",
+      "role": "ppc-analyst",
+      "members": [
+        "Rae"
+      ]
+    },
+    {
+      "name": "Strategy",
+      "role": "ppc-strategist",
+      "members": [
+        "Idris"
+      ]
+    }
+  ],
+  "estimate": null
+}

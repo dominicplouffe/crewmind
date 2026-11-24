@@ -260,7 +260,7 @@ async def test_IF_5_1_nightsquad_marks_its_own_reading_tools_so_clients_can_tell
     app: App,
 ) -> None:
     """IF-5.1, CON-12: Nightsquad's own MCP tools say whether they only read and whether they
-    can be undone, so a client (nightsquad included) allows its readers and asks about writers."""
+    can be undone, so a client (Nightsquad included) allows its readers and asks about writers."""
     owner = await app.person("owner@example.com")
     minted = await app.ok("mcp_clients.mint", owner, client_name="Reader", scopes=["steer"])
     caller = await mcp_caller(app, minted["token"])

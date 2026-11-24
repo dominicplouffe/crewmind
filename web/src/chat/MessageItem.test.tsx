@@ -68,7 +68,7 @@ describe("message actions (CHAT-8)", () => {
     expect(screen.getByTestId("marker-example")).toBeTruthy();
   });
 
-  it("has no menu on a status line from nightsquad", () => {
+  it("has no menu on a status line from Nightsquad", () => {
     show(message({ author_kind: "platform", author: "nightsquad", kind: "status" }));
     expect(screen.queryByRole("button", { name: /More/ })).toBeNull();
   });

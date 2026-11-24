@@ -1,5 +1,5 @@
 /**
- * Starting a project when some of the crew could not work yet (CON-5, PRJ-1). Lists what is
+ * Starting a project when some of the squad could not work yet (CON-5, PRJ-1). Lists what is
  * missing and who would wait for it, and offers to start without it: exactly those agents
  * wait, and go to work by themselves once it is added.
  */

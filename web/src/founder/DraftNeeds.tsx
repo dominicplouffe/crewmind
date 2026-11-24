@@ -1,5 +1,5 @@
 /**
- * What the drafted crew needs from outside (FND-9, CON-14): each secret, variable or MCP server,
+ * What the drafted squad needs from outside (FND-9, CON-14): each secret, variable or MCP server,
  * whether you have it, and whether creating the project attaches it. A missing one links to
  * Connections, in a new tab so the conversation stays where it is.
  */

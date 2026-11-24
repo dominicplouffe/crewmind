@@ -134,7 +134,7 @@ def demo(install: Install) -> tuple[str, list[dict[str, Any]], str]:
         "settings", "change-project", "--project-id", project,
         "--changes", "run.concurrency=6", "--reason", "More parallel work.",
     )  # fmt: skip
-    # No model key is added, so the crew cannot work: start says so and names who waits
+    # No model key is added, so the squad cannot work: start says so and names who waits
     # (PRJ-1, LLM-6, CON-5). The demo starts without it; the record is what it shows.
     refused = install.run("projects", "start", "--project-id", project, check=False)
     assert json.loads(refused.stderr)["code"] == "start_blocked"

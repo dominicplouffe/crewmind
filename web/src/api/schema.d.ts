@@ -1179,7 +1179,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Show what a project has, what its crew needs, and what could be attached.
+         * Show what a project has, what its squad needs, and what could be attached.
          * @description Requires: project_observer.
          */
         get: operations["connections.for_project"];
@@ -1605,66 +1605,6 @@ export interface paths {
          * @description Requires: person.
          */
         post: operations["credentials.smoke"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List the ready-made crews: each is a job with a team already on it.
-         * @description Requires: person.
-         */
-        get: operations["crews.list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add a crew from a file, or replace one that exists.
-         * @description Requires: person.
-         */
-        post: operations["crews.save"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/crews/show": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Show one crew in full, as the file it can be saved to.
-         * @description Requires: person.
-         */
-        get: operations["crews.show"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2441,7 +2381,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Load the roles and crews shipped with this version of Nightsquad again.
+         * Load the roles and squads shipped with this version of Nightsquad again.
          * @description Requires: admin.
          */
         post: operations["library.reload"];
@@ -2459,7 +2399,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Find roles and crews that fit a piece of work.
+         * Find roles and squads that fit a piece of work.
          * @description Requires: person.
          */
         get: operations["library.search"];
@@ -3559,7 +3499,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Show what the crew would wait for if the project started now, and who.
+         * Show what the squad would wait for if the project started now, and who.
          * @description Requires: project_observer.
          */
         get: operations["projects.readiness"];
@@ -4531,6 +4471,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/squads/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the ready-made squads: each is a job with a team already on it.
+         * @description Requires: person.
+         */
+        get: operations["squads.list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/squads/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a squad from a file, or replace one that exists.
+         * @description Requires: person.
+         */
+        post: operations["squads.save"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/squads/show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Show one squad in full, as the file it can be saved to.
+         * @description Requires: person.
+         */
+        get: operations["squads.show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/tasks/list": {
         parameters: {
             query?: never;
@@ -4763,7 +4763,7 @@ export interface components {
             /**
              * Key
              * Format: password
-             * @description The API key. It is encrypted and never shown again.
+             * @description The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.
              */
             key: string;
             /**
@@ -4927,7 +4927,7 @@ export interface components {
              */
             basic_user?: string | null;
             /**
-             * @description sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
+             * @description sent_for_you (Nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes).
              * @default sent_for_you
              */
             delivery?: components["schemas"]["Delivery"];
@@ -5976,7 +5976,7 @@ export interface components {
             type: string;
             /**
              * Waiting
-             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).
+             * @description Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).
              */
             waiting?: string[];
         };
@@ -6005,7 +6005,7 @@ export interface components {
             state: string;
             /**
              * Waiting
-             * @description Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).
+             * @description Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).
              */
             waiting: string[];
         };
@@ -6058,67 +6058,6 @@ export interface components {
              * @description The credential's name.
              */
             name: string;
-        };
-        /**
-         * CrewDoc
-         * @description One crew, as a file (LIB-2).
-         */
-        CrewDoc: {
-            /** Ceo Role */
-            ceo_role: string;
-            /**
-             * Nightsquad Crew
-             * @default 1
-             * @constant
-             */
-            nightsquad_crew?: 1;
-            /** Domains */
-            domains?: string[];
-            /** @description Reference runs and tokens for the job, when known (GOV-4). */
-            estimate?: components["schemas"]["Estimate"] | null;
-            /** Name */
-            name: string;
-            /**
-             * Outcome
-             * @description What the crew delivers.
-             */
-            outcome: string;
-            /** Slug */
-            slug: string;
-            /** Teams */
-            teams: components["schemas"]["CrewTeam"][];
-        };
-        /** CrewItem */
-        CrewItem: {
-            /** Domains */
-            domains: string[];
-            /** Estimate Tokens */
-            estimate_tokens: number | null;
-            /** Name */
-            name: string;
-            /** Outcome */
-            outcome: string;
-            /**
-             * Seats
-             * @description Seats in its teams, not counting the CEO.
-             */
-            seats: number;
-            /** Slug */
-            slug: string;
-        };
-        /** CrewList */
-        CrewList: {
-            /** Items */
-            items: components["schemas"]["CrewItem"][];
-        };
-        /** CrewTeam */
-        CrewTeam: {
-            /** Members */
-            members: string[];
-            /** Name */
-            name: string;
-            /** Role */
-            role: string;
         };
         /** CycleView */
         CycleView: {
@@ -6455,7 +6394,7 @@ export interface components {
             lines: components["schemas"]["Line"][];
             /**
              * Needs
-             * @description What the drafted crew needs from outside, and whether you have it (FND-9).
+             * @description What the drafted squad needs from outside, and whether you have it (FND-9).
              */
             needs?: components["schemas"]["DraftNeed"][];
             /** Not Ready Because */
@@ -8205,12 +8144,6 @@ export interface components {
             controlled_domains?: string[];
             /** Credentials */
             credentials?: components["schemas"]["CredentialGrant"][];
-            /**
-             * Nightsquad Spec
-             * @default 1
-             * @constant
-             */
-            nightsquad_spec?: 1;
             deadline?: components["schemas"]["Deadline"] | null;
             /** Goal */
             goal: string;
@@ -8218,6 +8151,12 @@ export interface components {
             integrations?: string[];
             /** Name */
             name: string;
+            /**
+             * Nightsquad Spec
+             * @default 1
+             * @constant
+             */
+            nightsquad_spec?: 1;
             /**
              * Paying Credential
              * @description The credential that pays, by name.
@@ -8305,10 +8244,20 @@ export interface components {
         ProviderItem: {
             /** Ceiling */
             ceiling: number | null;
+            /**
+             * Credential
+             * @description key, or login for a command-line agent (LLM-2).
+             */
+            credential: string;
             /** Images */
             images: boolean;
             /** Label */
             label: string;
+            /**
+             * Login Hint
+             * @description What to paste as a login, in plain words.
+             */
+            login_hint: string;
             /** Name */
             name: string;
             /** Needs Base Url */
@@ -8720,12 +8669,6 @@ export interface components {
              * @description The credentials it receives, by name only.
              */
             credential_names?: string[];
-            /**
-             * Nightsquad Role
-             * @default 1
-             * @constant
-             */
-            nightsquad_role?: 1;
             /** Description */
             description: string;
             /** Domains */
@@ -8745,6 +8688,12 @@ export interface components {
              * @default false
              */
             needs_vision?: boolean;
+            /**
+             * Nightsquad Role
+             * @default 1
+             * @constant
+             */
+            nightsquad_role?: 1;
             /**
              * Skills
              * @description Skills it may use, each pinned by version.
@@ -8958,7 +8907,7 @@ export interface components {
         SearchHit: {
             /**
              * Kind
-             * @description role or crew.
+             * @description role or squad.
              */
             kind: string;
             /** Name */
@@ -9321,6 +9270,67 @@ export interface components {
             monthly_cap: number;
             /** Purchases */
             purchases: components["schemas"]["PurchaseLine"][];
+        };
+        /**
+         * SquadDoc
+         * @description One squad, as a file (LIB-2).
+         */
+        SquadDoc: {
+            /** Ceo Role */
+            ceo_role: string;
+            /** Domains */
+            domains?: string[];
+            /** @description Reference runs and tokens for the job, when known (GOV-4). */
+            estimate?: components["schemas"]["Estimate"] | null;
+            /** Name */
+            name: string;
+            /**
+             * Nightsquad Squad
+             * @default 1
+             * @constant
+             */
+            nightsquad_squad?: 1;
+            /**
+             * Outcome
+             * @description What the squad delivers.
+             */
+            outcome: string;
+            /** Slug */
+            slug: string;
+            /** Teams */
+            teams: components["schemas"]["SquadTeam"][];
+        };
+        /** SquadItem */
+        SquadItem: {
+            /** Domains */
+            domains: string[];
+            /** Estimate Tokens */
+            estimate_tokens: number | null;
+            /** Name */
+            name: string;
+            /** Outcome */
+            outcome: string;
+            /**
+             * Seats
+             * @description Seats in its teams, not counting the CEO.
+             */
+            seats: number;
+            /** Slug */
+            slug: string;
+        };
+        /** SquadList */
+        SquadList: {
+            /** Items */
+            items: components["schemas"]["SquadItem"][];
+        };
+        /** SquadTeam */
+        SquadTeam: {
+            /** Members */
+            members: string[];
+            /** Name */
+            name: string;
+            /** Role */
+            role: string;
         };
         /** Step */
         Step: {
@@ -10204,7 +10214,7 @@ export interface components {
             project_id: string;
             /**
              * Without Missing
-             * @description Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).
+             * @description Start even though some of the squad cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).
              * @default false
              */
             without_missing?: boolean;
@@ -12791,91 +12801,6 @@ export interface operations {
             };
         };
     };
-    "crews.list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewList"];
-                };
-            };
-        };
-    };
-    "crews.save": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CrewDoc"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewItem"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "crews.show": {
-        parameters: {
-            query: {
-                /** @description The crew's slug, from `crews list`. */
-                crew: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrewDoc"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "cycles.set_due": {
         parameters: {
             query?: never;
@@ -14119,7 +14044,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CrewList"];
+                    "application/json": components["schemas"]["SquadList"];
                 };
             };
             /** @description Validation Error */
@@ -17487,6 +17412,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SpendView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "squads.list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadList"];
+                };
+            };
+        };
+    };
+    "squads.save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SquadDoc"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "squads.show": {
+        parameters: {
+            query: {
+                /** @description The squad's slug, from `squads list`. */
+                squad: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SquadDoc"];
                 };
             };
             /** @description Validation Error */

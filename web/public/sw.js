@@ -66,7 +66,7 @@ self.addEventListener("push", (event) => {
   } catch (error) {
     payload = { body: event.data ? event.data.text() : "" };
   }
-  const title = typeof payload.title === "string" && payload.title ? payload.title : "nightsquad";
+  const title = typeof payload.title === "string" && payload.title ? payload.title : "Nightsquad";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: typeof payload.body === "string" ? payload.body : "",

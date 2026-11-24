@@ -54,7 +54,7 @@ class ProjectRef(BaseModel):
 class StartInput(ProjectRef):
     without_missing: bool = Field(
         False,
-        description="Start even though some of the crew cannot work yet. They wait, with the "
+        description="Start even though some of the squad cannot work yet. They wait, with the "
         "reason shown, until what they need is added (CON-5).",
     )
 

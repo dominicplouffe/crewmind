@@ -83,7 +83,7 @@ settles it — say so in the ledger, do not ask it again. Asked in batches,
 most projects take three or four rounds.
 
 **Facts are yours to find, never his.** If a question needs a fact you can look
-up — which roles and crews exist, which credentials exist, what his site says
+up — which roles and squads exist, which credentials exist, what his site says
 — look it up before you ask. Ask him only for decisions.
 
 **Each question:**
@@ -208,7 +208,7 @@ that finished on Tuesday reports progress until November.
 Derive the team from the goal, not from a catalogue. Work in this order:
 
 1. What does this goal actually require somebody to do?
-2. Search the roles and the crews for who does that here. Crews are named
+2. Search the roles and the squads for who does that here. Squads are named
    jobs with a team already on them — start from one when it fits, and say
    which.
 3. Cut. **Argue for the smallest team that can do the work.** A role you added
@@ -283,7 +283,7 @@ an Operate one, and it is the wall — a project that reaches it pauses.
 
 **Never invent the number.** Propose the budget as a range, built from what
 runs have taken on this install, or from the reference estimate shipped with
-the crew when there is no history. This is the one place where the rule against
+the squad when there is no history. This is the one place where the rule against
 tightening brakes (below) and the rule against defaulting collide, and the
 estimate is what resolves them: its numbers come from work that was actually
 done, and yours would be chosen from one sentence in a brief.
@@ -386,7 +386,7 @@ it as custom.
 # The fire drill
 
 A rehearsal runs the current draft as a project for nothing, on a mock harness
-with a scripted crew, and reports what happened. It answers one question: can a
+with a scripted squad, and reports what happened. It answers one question: can a
 well-behaved project get off the ground inside the rules in this spec? It says
 nothing about whether the work would be any good.
 

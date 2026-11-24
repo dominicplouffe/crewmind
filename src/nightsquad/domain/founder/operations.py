@@ -137,7 +137,7 @@ class DraftingView(BaseModel):
     project_id: str | None
     needs: list[drafted.DraftNeed] = Field(
         default_factory=list[drafted.DraftNeed],
-        description="What the drafted crew needs from outside, and whether you have it (FND-9).",
+        description="What the drafted squad needs from outside, and whether you have it (FND-9).",
     )
 
 
@@ -163,7 +163,7 @@ class CreatedProject(BaseModel):
         description="Model credentials the roster needs that you do not have yet."
     )
     waiting: list[str] = Field(
-        description="Who in the crew could not work yet, and why: a connection their role "
+        description="Who in the squad could not work yet, and why: a connection their role "
         "needs, or a seat that cannot run. Starting now means starting without it (CON-5)."
     )
     can_start: bool = Field(description="The project is a draft and can be started.")
@@ -588,7 +588,7 @@ async def create(context: Context, payload: ConfirmDraftInput) -> CreatedProject
     ]
     started = False
     # Quick mode asks nothing, so it starts without what is missing and says who waits.
-    # A chairman who asked to start is never started past what would hold the crew.
+    # A chairman who asked to start is never started past what would hold the squad.
     if drafting.quick or (payload.start and not waiting):
         await _call(
             context, "projects.start", project_id=project.id, without_missing=drafting.quick

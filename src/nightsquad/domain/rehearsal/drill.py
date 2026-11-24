@@ -1,5 +1,5 @@
 """The fire drill: a project spec run through the real rules, dispatcher and scheduler,
-with a crew in code, on a database of its own (RHS-1, RHS-2).
+with a squad in code, on a database of its own (RHS-1, RHS-2).
 
 It runs as its own process: `python -m nightsquad.domain.rehearsal.drill` reads a spec
 as JSON on standard input and prints what happened as JSON. The process is given no
@@ -26,7 +26,7 @@ from nightsquad.domain.decisions import agenda
 from nightsquad.domain.install.config import Config
 from nightsquad.domain.library.spec import ProjectSpec
 from nightsquad.domain.planning.model import BetState, RequirementState
-from nightsquad.domain.rehearsal.crew import DrillCrew, Roster
+from nightsquad.domain.rehearsal.squad import DrillSquad, Roster
 from nightsquad.jobs.dispatcher import Dispatcher
 from nightsquad.jobs.planning import PlanningJobs
 from nightsquad.jobs.scheduler import Scheduler
@@ -104,8 +104,10 @@ class Drill:
             sandbox_mode="unisolated",
             memory_engine="in-process",
         )
-        self.crew = DrillCrew(Roster("deliver", [], {}, set(), True))
-        self.runtime: Runtime = build_runtime(config, self.clock, mock_default=True, mock=self.crew)
+        self.squad = DrillSquad(Roster("deliver", [], {}, set(), True))
+        self.runtime: Runtime = build_runtime(
+            config, self.clock, mock_default=True, mock=self.squad
+        )
         event.listen(self.runtime.engine.sync_engine, "connect", _no_sync)
         self.waits: list[dict[str, Any]] = []
         self.jumps: list[dict[str, Any]] = []
@@ -119,13 +121,13 @@ class Drill:
         self.run_time = timedelta(0)
 
     async def _needs(self) -> list[str]:
-        """What the crew will need from outside, assumed in place for the drill (CON-5)."""
+        """What the squad will need from outside, assumed in place for the drill (CON-5)."""
         async with self.runtime.sessions() as session:
             project = await session.get(Project, self.project_id)
             assert project is not None
             wanted = await needs.declared(session, project)
         return [
-            f"The crew will need the {needs.KIND_WORDS[needs.NeedKind(kind)]} {name}, for "
+            f"The squad will need the {needs.KIND_WORDS[needs.NeedKind(kind)]} {name}, for "
             f"{', '.join(sorted(roles))}. The rehearsal assumed it was in place."
             for (kind, name), roles in sorted(wanted.items())
         ]
@@ -188,7 +190,7 @@ class Drill:
             for name, team in teams.items()
             if any(kinds.get(member) in ("worker", "lead") for member in team.members)
         ]
-        self.crew.roster = Roster(
+        self.squad.roster = Roster(
             type=self.spec.type,
             worker_teams=workers,
             seat_team=seat_team,
@@ -327,7 +329,7 @@ class Drill:
             "started_at": _at(START),
             "ended_at": _at(self.clock()),
             "idle_seconds": int(self.compressed.total_seconds()),
-            "model_calls": self.crew.calls,
+            "model_calls": self.squad.calls,
             "state": None,
             "events": [],
             "seats": [],
@@ -368,7 +370,7 @@ class Drill:
                     "name": seat.name,
                     "kind": seat.kind,
                     "role": role.slug,
-                    "team": self.crew.roster.seat_team.get(seat.name),
+                    "team": self.squad.roster.seat_team.get(seat.name),
                     "runs": len([run for run in runs if run.seat_id == seat.id]),
                 }
                 for seat, role in seats

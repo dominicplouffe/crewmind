@@ -45,7 +45,7 @@ def test_NFR_23_slim_mode_is_sqlite(tmp_path: Path) -> None:
     base = {"NIGHTSQUAD_DATA_DIR": str(tmp_path)}
     assert load_config(base, slim=True).database is Database.SQLITE
     with pytest.raises(ConfigError, match="Slim mode runs on SQLite"):
-        load_config({**base, "NIGHTSQUAD_DATABASE_URL": "postgresql://u:p@db/crew"}, slim=True)
+        load_config({**base, "NIGHTSQUAD_DATABASE_URL": "postgresql://u:p@db/squad"}, slim=True)
 
 
 async def test_NFR_2_setup_is_idempotent_and_never_overwrites_the_master_key(

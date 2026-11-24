@@ -1,4 +1,4 @@
-"""Helpers for the work tests: a small crew and its workspace."""
+"""Helpers for the work tests: a small squad and its workspace."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ OBSERVABLE = {
 }
 
 
-class Crew:
+class Squad:
     """A running project with a CEO, a reviewer and one team: a lead and a member."""
 
     def __init__(self, app: App, owner: Actor, project: str) -> None:
@@ -37,7 +37,7 @@ class Crew:
         type: str = "deliver",
         settings: dict[str, Any] | None = None,
         owner: Actor | None = None,
-    ) -> Crew:
+    ) -> Squad:
         owner = owner or await app.person("owner@example.com")
         # These tests wake the same agent many times in one clock hour.
         settings = {"agent.max_wakes_per_hour": 60, **(settings or {})}
@@ -52,22 +52,22 @@ class Crew:
                 )  # fmt: skip
             await app.ok("projects.start", owner, project_id=project)
             await quiet_start(app, project)
-        crew = cls(app, owner, project)
-        crew.workspace.mkdir(parents=True, exist_ok=True)
+        squad = cls(app, owner, project)
+        squad.workspace.mkdir(parents=True, exist_ok=True)
         if type != "explore":
-            crew.requirement = await crew.add_requirement()
+            squad.requirement = await squad.add_requirement()
         else:
-            crew.bet = await crew.open_bet()
+            squad.bet = await squad.open_bet()
         if team:
-            hired = await crew.call(
+            hired = await squad.call(
                 "CEO", "agent.hire_team", team="build", role="Generalist", members=2
             )
             assert hired.status_code == 200, hired.text
-        return crew
+        return squad
 
     async def call(self, seat: str, name: str, /, **values: Any) -> httpx.Response:
         """Call an agent operation as `seat`, in a work run of its own. A new top-level
-        task serves the crew's requirement unless the test names another."""
+        task serves the squad's requirement unless the test names another."""
         if name == "agent.create_task":
             values = {**self.scope(), **values}
         run = await live_run(self.app, self.project, seat=seat)

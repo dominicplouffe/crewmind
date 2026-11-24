@@ -50,7 +50,7 @@ async def test_LIB_4_a_spec_never_holds_or_yields_a_secret(app: App) -> None:
     """LIB-4, INV-6, PRJ-9: a spec that carries a credential value is refused, whoever
     wrote it. An export and a clone name the paying credential and never hold its value,
     and a spec that names a credential the person lacks creates the project and says so.
-    A secret its roles need is listed as what the crew waits for (CON-5)."""
+    A secret its roles need is listed as what the squad waits for (CON-5)."""
     owner = await app.person("owner@example.com")
     smuggling: list[dict[str, Any]] = [
         {**SPEC, "credentials": [{"name": "maps-api", "roles": [], "value": KEY}]},

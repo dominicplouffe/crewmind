@@ -196,7 +196,7 @@ export const settingWords: Record<string, SettingWords> = {
   "email.mode": {
     label: "Email",
     help: "Whether agents can send and receive email, and how.",
-    options: { off: "Off", managed: "Managed by nightsquad", manual: "Your own mailbox", install_alias: "Shared install address" },
+    options: { off: "Off", managed: "Managed by Nightsquad", manual: "Your own mailbox", install_alias: "Shared install address" },
   },
   "email.max_per_day": { label: "Emails per day", help: "The most emails agents may send in a day.", noun: ["email", "emails"] },
   "search.max_per_day": {
@@ -411,7 +411,7 @@ export const settingsWords = {
   },
   page: {
     title: "Settings",
-    documentTitle: "Settings · nightsquad",
+    documentTitle: "Settings · Nightsquad",
     intro: "Your profile, model keys, people and the rules every project starts from.",
     nav: "Settings sections",
     backToList: "All settings",
@@ -424,7 +424,7 @@ export const settingsWords = {
     profile: { label: "Profile & appearance", help: "Your name, theme and how agents talk to you." },
     notifications: { label: "Notifications", help: "Alerts on this device and your daily brief." },
     models: { label: "Models & keys", help: "The AI model keys your agents use." },
-    connections: { label: "Connections", help: "Secrets and variables your crews use." },
+    connections: { label: "Connections", help: "Secrets and variables your squads use." },
     founder: { label: "Founder", help: "The key and quality the Founder uses." },
     people: { label: "People", help: "Invite teammates and manage roles." },
     install: { label: "Install settings", help: "Limits and record keeping for every project." },
@@ -436,9 +436,9 @@ export const settingsWords = {
     nameNote: "To change your email, ask an admin.",
     seededName: "Admin",
     nameLabel: "Your name",
-    namePlaceholder: "What should the crew call you?",
-    nameHint: "Shown to your crew and your teammates.",
-    nameSaved: "Saved. The crew will call you by this name.",
+    namePlaceholder: "What should the squad call you?",
+    nameHint: "Shown to your squad and your teammates.",
+    nameSaved: "Saved. The squad will call you by this name.",
     appearance: "Appearance",
     appearanceHelp: "Choose a theme, or follow your device.",
     theme: { system: "System", light: "Light", dark: "Dark" },
@@ -504,7 +504,7 @@ export const settingsWords = {
     failed: "The key was saved, but the test call failed.",
     failedFix: {
       auth: "The provider didn't accept this key. Check that you copied all of it and that it hasn't been revoked.",
-      network: "nightsquad couldn't reach the provider. Check the endpoint address and this server's internet access.",
+      network: "Nightsquad couldn't reach the provider. Check the endpoint address and this server's internet access.",
       notFound: "The provider doesn't offer the model it tried. Check the endpoint address, or try again later.",
       quota: "The provider refused for billing or rate limits. Check the account's credit and limits.",
       other: "Check the key and the provider, then try again.",
@@ -566,7 +566,7 @@ export const settingsWords = {
     inviteSubmit: "Create invite link",
     inviting: "Creating…",
     linkTitle: (name: string): string => `Send this link to ${name}`,
-    linkBody: (until: string): string => `nightsquad doesn't send email. The link works once, until ${until}.`,
+    linkBody: (until: string): string => `Nightsquad doesn't send email. The link works once, until ${until}.`,
     linkLabel: (name: string): string => `Sign-in link for ${name}`,
     done: "Done",
   },
@@ -593,7 +593,7 @@ export const settingsWords = {
     fixedTitle: "The Founder has a model now.",
   },
   welcome: {
-    documentTitle: "Set up nightsquad",
+    documentTitle: "Set up Nightsquad",
     steps: "Setup steps",
     stepOf: (current: number, total: number): string => `Step ${current} of ${total}`,
     exit: "Finish later",
@@ -606,7 +606,7 @@ export const settingsWords = {
       goal: "Your goal",
     },
     intro: {
-      title: "Welcome to nightsquad",
+      title: "Welcome to Nightsquad",
       lead: "A team of AI agents, run like a company. You're the chairman.",
       body: "A few steps and your first project is under way:",
       points: [

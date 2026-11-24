@@ -1,4 +1,4 @@
-"""Tables for the crew library (LIB-2). Roles are in the execution tables."""
+"""Tables for the squad library (LIB-2). Roles are in the execution tables."""
 
 from __future__ import annotations
 
@@ -11,10 +11,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from nightsquad.storage.models.base import Base, UtcDateTime, new_id
 
 
-class Crew(Base):
+class Squad(Base):
     """A named, ready-made job with a team already on it (LIB-2)."""
 
-    __tablename__ = "crews"
+    __tablename__ = "squads"
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     slug: Mapped[str] = mapped_column(String(100), unique=True)

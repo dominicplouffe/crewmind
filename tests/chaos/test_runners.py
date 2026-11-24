@@ -27,9 +27,9 @@ async def test_INV_12_racing_runners_never_take_the_same_run(app: App) -> None:
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"run.concurrency": 16, "teams.max": 2})
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=8
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=8
     )
-    for seat in ["CEO", *[f"crew-{n}" for n in range(1, 9)]]:
+    for seat in ["CEO", *[f"squad-{n}" for n in range(1, 9)]]:
         await wake(app, project, seat=seat)
     await app.dispatcher.tick()
 
@@ -56,9 +56,9 @@ async def test_INV_13_one_work_run_per_agent_and_no_lease_past_the_concurrency_l
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"run.concurrency": 2})
     await app.ok(
-        "roster.hire_team", owner, project_id=project, team="crew", role="Generalist", members=3
+        "roster.hire_team", owner, project_id=project, team="squad", role="Generalist", members=3
     )
-    for seat in ("CEO", "crew-1", "crew-2", "crew-3"):
+    for seat in ("CEO", "squad-1", "squad-2", "squad-3"):
         await wake(app, project, seat=seat)
         await wake(app, project, seat=seat, kind="second notice")
     await app.dispatcher.tick()
@@ -222,15 +222,15 @@ async def test_INV_16_a_runner_killed_while_its_agent_holds_a_claim_strands_no_w
     """INV-16, WRK-4, INV-12: a runner dies while its agent holds a claimed task. The run is
     reaped, the claim returns the task to ready after 2 x `run.timeout`, and the work is
     claimed and finished afterwards. The task is never left held by nobody."""
-    from tests.attack.work_support import OBSERVABLE, Crew
+    from tests.attack.work_support import OBSERVABLE, Squad
 
     owner = await app.person("owner@example.com")
     project = await running_project(app, owner, **{"agent.max_wakes_per_hour": 60})
-    crew = Crew(app, owner, project)
-    crew.requirement = await crew.add_requirement()
-    await crew.ok("CEO", "agent.hire_team", team="build", role="Generalist")
-    task = await crew.ok("CEO", "agent.create_task", **OBSERVABLE, team="build")
-    await crew.finish("CEO")
+    squad = Squad(app, owner, project)
+    squad.requirement = await squad.add_requirement()
+    await squad.ok("CEO", "agent.hire_team", team="build", role="Generalist")
+    task = await squad.ok("CEO", "agent.create_task", **OBSERVABLE, team="build")
+    await squad.finish("CEO")
 
     claim = {"name": "agent_claim_task", "arguments": {"task_id": task["id"]}}
     app.script("build/work", {"tools": [claim]}, {"text": "x" * 10, "word_delay_ms": 60_000})
@@ -240,21 +240,21 @@ async def test_INV_16_a_runner_killed_while_its_agent_holds_a_claim_strands_no_w
     assert await doomed.step() >= 1
     for _ in range(100):
         await asyncio.sleep(0.02)
-        if (await crew.show(task["id"]))["state"] == "claimed":
+        if (await squad.show(task["id"]))["state"] == "claimed":
             break
-    assert (await crew.show(task["id"]))["claimant"] == "build"
+    assert (await squad.show(task["id"]))["claimant"] == "build"
     await doomed.crash()
 
     clock.advance(seconds=100)
     await app.scheduler.tick()
     await app.work_jobs.keep_work_moving()
-    assert (await crew.show(task["id"]))["state"] == "claimed"
+    assert (await squad.show(task["id"]))["state"] == "claimed"
     clock.advance(hours=4)
     await app.scheduler.tick()
     await app.work_jobs.keep_work_moving()
     owner = await app.login(owner.email)
-    crew.owner = owner
-    back = await crew.show(task["id"])
+    squad.owner = owner
+    back = await squad.show(task["id"])
     assert (back["state"], back["claimant"]) == ("ready", None)
 
     complete = {
@@ -264,4 +264,4 @@ async def test_INV_16_a_runner_killed_while_its_agent_holds_a_claim_strands_no_w
     app.script("build/work", {"tools": [claim]}, {"tools": [complete]}, {"text": "Sent."})
     for _ in range(4):
         await app.work()
-    assert (await crew.show(task["id"]))["state"] == "review"
+    assert (await squad.show(task["id"]))["state"] == "review"

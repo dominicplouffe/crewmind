@@ -186,7 +186,7 @@ async def test_section_13_each_reference_spec_reaches_its_first_verified_close(
     app: App, name: str, ends_with: str
 ) -> None:
     """Section 13 (golden path, each type), RHS-1, LIB-5: each reference spec in
-    `acceptance/`, run by the crew in code under the real rules, gets from creation to
+    `acceptance/`, run by the squad in code under the real rules, gets from creation to
     its first verified close with no human input beyond what its authority settings
     require, hits no rule on the way, and has a goal with no date in its prose."""
     from nightsquad.domain.founder import grammar

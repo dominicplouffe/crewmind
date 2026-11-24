@@ -49,7 +49,7 @@ def route_path(operation_name: str) -> str:
 
 
 def reads_a_document(operation: Operation) -> bool:
-    """A read whose input is a whole document (a role, a crew, a project spec) cannot be
+    """A read whose input is a whole document (a role, a squad, a project spec) cannot be
     sent in a query string."""
     return operation.reversibility is Reversibility.READ and takes_a_document(operation.input)
 

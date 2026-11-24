@@ -1,0 +1,34 @@
+{
+  "nightsquad_squad": 1,
+  "slug": "ppc-audit",
+  "name": "An advertising audit",
+  "outcome": "One audit of the advertising account a non-technical owner can act on: where money is going to waste, what to fix first, and what it is worth.",
+  "ceo_role": "ceo",
+  "domains": [
+    "data"
+  ],
+  "teams": [
+    {
+      "name": "Analytics",
+      "role": "ppc-analyst",
+      "members": [
+        "Rae"
+      ]
+    },
+    {
+      "name": "Strategy",
+      "role": "ppc-strategist",
+      "members": [
+        "Idris"
+      ]
+    },
+    {
+      "name": "Executability",
+      "role": "executability-checker",
+      "members": [
+        "Nadia"
+      ]
+    }
+  ],
+  "estimate": null
+}

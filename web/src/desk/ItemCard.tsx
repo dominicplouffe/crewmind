@@ -25,7 +25,7 @@ import { ItemFields } from "./ItemFields";
 import { textField, type Item } from "./logic";
 import { Snooze } from "./Snooze";
 import { askerOf, deadlineWords } from "./when";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 export interface ItemProject {
   id: string;

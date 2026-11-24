@@ -171,7 +171,7 @@ class Session:
                 self.say(f"  - {line}")
         waiting = list(created.get("waiting", []))
         if waiting:
-            self.say("\nSome of the crew could not work yet:")
+            self.say("\nSome of the squad could not work yet:")
             for line in waiting:
                 self.say(f"  - {line}")
         if created.get("state") != "draft":

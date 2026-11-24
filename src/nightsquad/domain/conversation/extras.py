@@ -422,7 +422,7 @@ def _plain(event: Event) -> str:
     if kind == "project.created":
         return "The project was created."
     if kind == "seat.created":
-        return f"{after.get('display_name') or event.subject_id} joined the crew."
+        return f"{after.get('display_name') or event.subject_id} joined the squad."
     if kind == "seat.renamed":
         return f"{before.get('display_name')} is now called {after.get('display_name')}."
     if kind == "guard.changed":

@@ -95,7 +95,7 @@ _CONFIGURE_GROUPS = (
     "models",
     "credentials",
     "roles",
-    "crews",
+    "squads",
     "connections",
 )
 _STEER_GROUPS = (

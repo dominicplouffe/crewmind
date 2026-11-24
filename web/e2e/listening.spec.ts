@@ -123,7 +123,7 @@ test("a long message is proposed shortened; discard it, and retire an order (MSG
   await ask(long, "Here is the plan");
   await chooseAction(personMessage("Whenever you write for me"), "Pin as a standing order");
   const dialog = page.getByRole("dialog", { name: "Proposed standing order" });
-  await expect(dialog).toContainText("nightsquad is shortening it");
+  await expect(dialog).toContainText("Nightsquad is shortening it");
   await dialog.getByRole("button", { name: "Decide later" }).click();
   await expect(dialog).toHaveCount(0);
 

@@ -7,8 +7,8 @@ first one not yet used in the project, walking the pool from a start point that 
 the project id decides, so the same project always draws the same names.
 
 The pool is data: short, easy to read, from many cultures, no famous people and no titles.
-It leaves out the names the shipped crews and the demo already give their members, so a
-crew's own names never collide with a drawn one.
+It leaves out the names the shipped squads and the demo already give their members, so a
+squad's own names never collide with a drawn one.
 """
 
 from __future__ import annotations

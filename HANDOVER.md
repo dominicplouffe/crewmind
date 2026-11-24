@@ -20,7 +20,7 @@ For whoever continues this build, person or coding agent. Everything needed is i
 ## Before anything else
 
 1. **Run the Founder against a real model.** Set `founder.credential`, draft one real project, and run `squad founder eval` (the README has the commands). Record what you find in `docs/phases/phase-7-plan.md`.
-2. **The owner answers Q-012 to Q-018** in `docs/spec-questions.md` (v1 effort levels, crew estimates, dropped v1 settings, the reworded charters and doctrine, the new settings).
+2. **The owner answers Q-012 to Q-018** in `docs/spec-questions.md` (v1 effort levels, squad estimates, dropped v1 settings, the reworded charters and doctrine, the new settings).
 3. **Copy `ci/github-actions.yml` to `.github/workflows/`** so both databases run on every push. CI has never run. It now builds the agent image first, so the container tests run there.
 4. **The owner answers Q-019:** how a slim install on Linux reaches its sandboxes.
 

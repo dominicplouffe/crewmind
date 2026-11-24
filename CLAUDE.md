@@ -48,7 +48,7 @@ web/                  TypeScript/React app
 deploy/               Dockerfiles, Compose file and shell scripts for a full server
 tests/
   unit/  contract/  attack/  chaos/  scenarios/  acceptance/
-content/              imported v1 roles, crews, doctrine, goal grammar
+content/              imported v1 roles, squads, doctrine, goal grammar
 acceptance/           reference specs used by the acceptance suite
 ```
 

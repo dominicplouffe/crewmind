@@ -135,7 +135,7 @@ describe("needs-you agreement across surfaces (HUM-10, CHAT-18)", () => {
     await waitFor(() => expect(screen.getByTestId("home-summary").textContent).toBe("Nothing needs you right now."));
     const now = shown();
     expect([now.nav, now.tab, now.inbox]).toEqual(["0", "0", "0"]);
-    expect(now.title).toBe("Home · nightsquad");
+    expect(now.title).toBe("Home · Nightsquad");
   });
 
   it("every count matches the desk, per project and in total, and follows it when it changes", async () => {
@@ -152,7 +152,7 @@ describe("needs-you agreement across surfaces (HUM-10, CHAT-18)", () => {
     expect(now.summary).toContain("3 decisions wait on you across 2 projects");
     expect(now.cards).toEqual({ "Launch site": "2 need you", "Market scan": "1 needs you" });
     expect(now.sidebar).toEqual({ "Launch site": "2", "Market scan": "1" });
-    expect(now.title).toBe("(3) Home · nightsquad");
+    expect(now.title).toBe("(3) Home · Nightsquad");
     expect(screen.getAllByTestId("desk-entry")).toHaveLength(3);
 
     desk = [entry(second, "Thread 3 is frozen")];
@@ -164,6 +164,6 @@ describe("needs-you agreement across surfaces (HUM-10, CHAT-18)", () => {
     expect([now.nav, now.tab, now.inbox]).toEqual(["1", "1", "1"]);
     expect(now.cards).toEqual({ "Launch site": "", "Market scan": "1 needs you" });
     expect(now.sidebar).toEqual({ "Launch site": "0", "Market scan": "1" });
-    expect(now.title).toBe("(1) Home · nightsquad");
+    expect(now.title).toBe("(1) Home · Nightsquad");
   });
 });

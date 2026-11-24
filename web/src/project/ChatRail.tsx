@@ -19,7 +19,7 @@ import { FileIcon, Load, NowList } from "../overview/parts";
 import { story } from "../strings.overview";
 import { Meter } from "../ui/Progress";
 import type { ProjectTab } from "./ProjectTop";
-import { useAgentName } from "../crew/names";
+import { useAgentName } from "../squad/names";
 
 const NOW_SHOWN = 4;
 const FILES_SHOWN = 3;

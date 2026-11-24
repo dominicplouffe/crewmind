@@ -1,4 +1,4 @@
-"""The role and crew libraries: load, save, look up and search (LIB-1, LIB-2, LIB-3)."""
+"""The role and squad libraries: load, save, look up and search (LIB-1, LIB-2, LIB-3)."""
 
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from nightsquad.catalog.refusal import Refusal, RefusalKind
 from nightsquad.domain.library.documents import (
     LIB_1,
-    CrewDoc,
-    CrewTeam,
     Estimate,
     RoleDoc,
+    SquadDoc,
+    SquadTeam,
     parse,
 )
-from nightsquad.storage.models import Crew, Role
+from nightsquad.storage.models import Role, Squad
 
 __all__ = ["LIB_1", "Role"]
 
@@ -42,8 +42,8 @@ def starter_roles() -> list[RoleDoc]:
     return [parse(RoleDoc, document, "role") for document in _packaged("roles")]
 
 
-def starter_crews() -> list[CrewDoc]:
-    return [parse(CrewDoc, document, "crew") for document in _packaged("crews")]
+def starter_squads() -> list[SquadDoc]:
+    return [parse(SquadDoc, document, "squad") for document in _packaged("squads")]
 
 
 def role_doc(role: Role) -> RoleDoc:
@@ -65,17 +65,17 @@ def role_doc(role: Role) -> RoleDoc:
     )
 
 
-def crew_doc(crew: Crew) -> CrewDoc:
+def squad_doc(squad: Squad) -> SquadDoc:
     estimate = None
-    if crew.estimate_runs is not None and crew.estimate_tokens is not None:
-        estimate = Estimate(runs=crew.estimate_runs, tokens=crew.estimate_tokens)
-    return CrewDoc(
-        slug=crew.slug,
-        name=crew.name,
-        outcome=crew.outcome,
-        ceo_role=crew.ceo_role,
-        domains=[str(domain) for domain in crew.domains],
-        teams=[CrewTeam.model_validate(team) for team in crew.teams],
+    if squad.estimate_runs is not None and squad.estimate_tokens is not None:
+        estimate = Estimate(runs=squad.estimate_runs, tokens=squad.estimate_tokens)
+    return SquadDoc(
+        slug=squad.slug,
+        name=squad.name,
+        outcome=squad.outcome,
+        ceo_role=squad.ceo_role,
+        domains=[str(domain) for domain in squad.domains],
+        teams=[SquadTeam.model_validate(team) for team in squad.teams],
         estimate=estimate,
     )
 
@@ -115,38 +115,38 @@ async def save_role(session: AsyncSession, doc: RoleDoc, source: str, now: datet
     return role
 
 
-async def save_crew(session: AsyncSession, doc: CrewDoc, source: str, now: datetime) -> Crew:
-    """Store a crew, replacing one of the same slug. Every role it names must exist (LIB-2)."""
+async def save_squad(session: AsyncSession, doc: SquadDoc, source: str, now: datetime) -> Squad:
+    """Store a squad, replacing one of the same slug. Every role it names must exist (LIB-2)."""
     for slug in {doc.ceo_role, *(team.role for team in doc.teams)}:
         await role_named(session, slug)
     ceo = await role_named(session, doc.ceo_role)
     if ceo.seat_kind != "ceo":
         raise Refusal("not_a_ceo_role", f"{doc.ceo_role} is not a role that can be the CEO.")
-    crew = await session.scalar(select(Crew).where(Crew.slug == doc.slug))
-    if crew is None:
-        crew = Crew(slug=doc.slug)
-        session.add(crew)
-    crew.name, crew.outcome, crew.ceo_role = doc.name, doc.outcome, doc.ceo_role
-    crew.domains = list(doc.domains)
-    crew.teams = [team.model_dump() for team in doc.teams]
-    crew.estimate_runs = doc.estimate.runs if doc.estimate else None
-    crew.estimate_tokens = doc.estimate.tokens if doc.estimate else None
-    crew.source, crew.updated_at = source, now
+    squad = await session.scalar(select(Squad).where(Squad.slug == doc.slug))
+    if squad is None:
+        squad = Squad(slug=doc.slug)
+        session.add(squad)
+    squad.name, squad.outcome, squad.ceo_role = doc.name, doc.outcome, doc.ceo_role
+    squad.domains = list(doc.domains)
+    squad.teams = [team.model_dump() for team in doc.teams]
+    squad.estimate_runs = doc.estimate.runs if doc.estimate else None
+    squad.estimate_tokens = doc.estimate.tokens if doc.estimate else None
+    squad.source, squad.updated_at = source, now
     await session.flush()
-    return crew
+    return squad
 
 
 async def load_starter(session: AsyncSession, now: datetime) -> None:
     """Load the library shipped with Nightsquad. A role whose shipped text has changed gets
     a new version (LIB-3). Cheap when nothing is missing."""
-    roles, crews = starter_roles(), starter_crews()
+    roles, squads = starter_roles(), starter_squads()
     have_roles = await session.scalar(
         select(func.count(func.distinct(Role.slug))).where(Role.source == STARTER)
     )
-    have_crews = await session.scalar(
-        select(func.count()).select_from(Crew).where(Crew.source == STARTER)
+    have_squads = await session.scalar(
+        select(func.count()).select_from(Squad).where(Squad.source == STARTER)
     )
-    if (have_roles or 0) >= len(roles) and (have_crews or 0) >= len(crews):
+    if (have_roles or 0) >= len(roles) and (have_squads or 0) >= len(squads):
         return
     await reload_starter(session, now)
 
@@ -154,8 +154,8 @@ async def load_starter(session: AsyncSession, now: datetime) -> None:
 async def reload_starter(session: AsyncSession, now: datetime) -> None:
     for doc in starter_roles():
         await save_role(session, doc, STARTER, now)
-    for crew in starter_crews():
-        await save_crew(session, crew, STARTER, now)
+    for squad in starter_squads():
+        await save_squad(session, squad, STARTER, now)
 
 
 async def role_named(session: AsyncSession, ref: str) -> Role:
@@ -206,16 +206,16 @@ async def current_roles(session: AsyncSession) -> list[Role]:
     return list(rows)
 
 
-async def crew_named(session: AsyncSession, slug: str) -> Crew:
-    crew = await session.scalar(select(Crew).where(Crew.slug == slug.strip().lower()))
-    if crew is None:
+async def squad_named(session: AsyncSession, slug: str) -> Squad:
+    squad = await session.scalar(select(Squad).where(Squad.slug == slug.strip().lower()))
+    if squad is None:
         raise Refusal(
-            "crew_not_found",
-            f"There is no crew named {slug}.",
+            "squad_not_found",
+            f"There is no squad named {slug}.",
             kind=RefusalKind.NOT_FOUND,
-            hint="List the crews with `squad crews list`.",
+            hint="List the squads with `squad squads list`.",
         )
-    return crew
+    return squad
 
 
 @dataclass(frozen=True)
@@ -238,7 +238,7 @@ def _score(words: set[str], *texts: str) -> int:
 
 
 async def search(session: AsyncSession, query: str, limit: int) -> list[Hit]:
-    """Roles and crews whose name, category, domains or description share words with the
+    """Roles and squads whose name, category, domains or description share words with the
     query, best first (LIB-3)."""
     words = set(WORD.findall(query.lower()))
     hits: list[Hit] = []
@@ -251,14 +251,14 @@ async def search(session: AsyncSession, query: str, limit: int) -> list[Hit]:
             role.description,
         )
         hits.append(Hit("role", role.slug, role.name, role.description, score))
-    crews = await session.scalars(select(Crew).order_by(Crew.slug))
-    for crew in crews:
+    squads = await session.scalars(select(Squad).order_by(Squad.slug))
+    for squad in squads:
         score = _score(
             words,
-            f"{crew.slug} {crew.name}",
-            " ".join(str(domain) for domain in crew.domains),
-            crew.outcome,
+            f"{squad.slug} {squad.name}",
+            " ".join(str(domain) for domain in squad.domains),
+            squad.outcome,
         )
-        hits.append(Hit("crew", crew.slug, crew.name, crew.outcome, score))
+        hits.append(Hit("squad", squad.slug, squad.name, squad.outcome, score))
     found = [hit for hit in hits if hit.score > 0]
     return sorted(found, key=lambda hit: (-hit.score, hit.kind, hit.slug))[:limit]

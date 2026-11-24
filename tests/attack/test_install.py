@@ -28,13 +28,13 @@ def test_NFR_6_binding_beyond_localhost_needs_tls_and_a_public_url(tmp_path: Pat
     public URL."""
     base = {"NIGHTSQUAD_DATA_DIR": str(tmp_path)}
     assert load_config(base).host == "127.0.0.1"
-    for extra in ({}, {"NIGHTSQUAD_PUBLIC_URL": "http://crew.example"}):
+    for extra in ({}, {"NIGHTSQUAD_PUBLIC_URL": "http://squad.example"}):
         with pytest.raises(ConfigError, match="TLS"):
             load_config({**base, "NIGHTSQUAD_HOST": "0.0.0.0", **extra})
     published = load_config(
-        {**base, "NIGHTSQUAD_HOST": "0.0.0.0", "NIGHTSQUAD_PUBLIC_URL": "https://crew.example"}
+        {**base, "NIGHTSQUAD_HOST": "0.0.0.0", "NIGHTSQUAD_PUBLIC_URL": "https://squad.example"}
     )
-    assert published.base_url == "https://crew.example"
+    assert published.base_url == "https://squad.example"
 
 
 @pytest.mark.attack("NFR-4")

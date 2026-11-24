@@ -125,7 +125,7 @@
       "title": "Base Url"
      },
      "key": {
-      "description": "The API key. It is encrypted and never shown again.",
+      "description": "The API key, or for a command-line agent its login: the token or the contents of its login file. It is encrypted and never shown again.",
       "format": "password",
       "title": "Key",
       "type": "string",
@@ -417,7 +417,7 @@
      "delivery": {
       "$ref": "#/components/schemas/Delivery",
       "default": "sent_for_you",
-      "description": "sent_for_you (nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
+      "description": "sent_for_you (Nightsquad adds it to requests to the sites; agents never see it) or given (placed in the agent's sandbox, masked in everything it writes)."
      },
      "description": {
       "description": "What it is for, in one line. Agents read it.",
@@ -2683,7 +2683,7 @@
       "type": "string"
      },
      "waiting": {
-      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).",
+      "description": "Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run (CON-5).",
       "items": {
        "type": "string"
       },
@@ -2737,7 +2737,7 @@
       "type": "string"
      },
      "waiting": {
-      "description": "Who in the crew could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).",
+      "description": "Who in the squad could not work yet, and why: a connection their role needs, or a seat that cannot run. Starting now means starting without it (CON-5).",
       "items": {
        "type": "string"
       },
@@ -2867,172 +2867,6 @@
      "name"
     ],
     "title": "CredentialRef",
-    "type": "object"
-   },
-   "CrewDoc": {
-    "additionalProperties": false,
-    "description": "One crew, as a file (LIB-2).",
-    "properties": {
-     "ceo_role": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Ceo Role",
-      "type": "string"
-     },
-     "nightsquad_crew": {
-      "const": 1,
-      "default": 1,
-      "title": "Nightsquad Crew",
-      "type": "integer"
-     },
-     "domains": {
-      "items": {
-       "type": "string"
-      },
-      "title": "Domains",
-      "type": "array"
-     },
-     "estimate": {
-      "anyOf": [
-       {
-        "$ref": "#/components/schemas/Estimate"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "description": "Reference runs and tokens for the job, when known (GOV-4)."
-     },
-     "name": {
-      "maxLength": 200,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "outcome": {
-      "description": "What the crew delivers.",
-      "maxLength": 2000,
-      "minLength": 1,
-      "title": "Outcome",
-      "type": "string"
-     },
-     "slug": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Slug",
-      "type": "string"
-     },
-     "teams": {
-      "items": {
-       "$ref": "#/components/schemas/CrewTeam"
-      },
-      "title": "Teams",
-      "type": "array"
-     }
-    },
-    "required": [
-     "slug",
-     "name",
-     "outcome",
-     "ceo_role",
-     "teams"
-    ],
-    "title": "CrewDoc",
-    "type": "object"
-   },
-   "CrewItem": {
-    "properties": {
-     "domains": {
-      "items": {
-       "type": "string"
-      },
-      "title": "Domains",
-      "type": "array"
-     },
-     "estimate_tokens": {
-      "anyOf": [
-       {
-        "type": "integer"
-       },
-       {
-        "type": "null"
-       }
-      ],
-      "title": "Estimate Tokens"
-     },
-     "name": {
-      "title": "Name",
-      "type": "string"
-     },
-     "outcome": {
-      "title": "Outcome",
-      "type": "string"
-     },
-     "seats": {
-      "description": "Seats in its teams, not counting the CEO.",
-      "title": "Seats",
-      "type": "integer"
-     },
-     "slug": {
-      "title": "Slug",
-      "type": "string"
-     }
-    },
-    "required": [
-     "slug",
-     "name",
-     "outcome",
-     "domains",
-     "seats",
-     "estimate_tokens"
-    ],
-    "title": "CrewItem",
-    "type": "object"
-   },
-   "CrewList": {
-    "properties": {
-     "items": {
-      "items": {
-       "$ref": "#/components/schemas/CrewItem"
-      },
-      "title": "Items",
-      "type": "array"
-     }
-    },
-    "required": [
-     "items"
-    ],
-    "title": "CrewList",
-    "type": "object"
-   },
-   "CrewTeam": {
-    "additionalProperties": false,
-    "properties": {
-     "members": {
-      "items": {
-       "type": "string"
-      },
-      "maxItems": 12,
-      "minItems": 1,
-      "title": "Members",
-      "type": "array"
-     },
-     "name": {
-      "maxLength": 60,
-      "minLength": 1,
-      "title": "Name",
-      "type": "string"
-     },
-     "role": {
-      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
-      "title": "Role",
-      "type": "string"
-     }
-    },
-    "required": [
-     "name",
-     "role",
-     "members"
-    ],
-    "title": "CrewTeam",
     "type": "object"
    },
    "CycleView": {
@@ -3743,7 +3577,7 @@
       "type": "array"
      },
      "needs": {
-      "description": "What the drafted crew needs from outside, and whether you have it (FND-9).",
+      "description": "What the drafted squad needs from outside, and whether you have it (FND-9).",
       "items": {
        "$ref": "#/components/schemas/DraftNeed"
       },
@@ -7613,12 +7447,6 @@
       "title": "Credentials",
       "type": "array"
      },
-     "nightsquad_spec": {
-      "const": 1,
-      "default": 1,
-      "title": "Nightsquad Spec",
-      "type": "integer"
-     },
      "deadline": {
       "anyOf": [
        {
@@ -7647,6 +7475,12 @@
       "minLength": 1,
       "title": "Name",
       "type": "string"
+     },
+     "nightsquad_spec": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Spec",
+      "type": "integer"
      },
      "paying_credential": {
       "anyOf": [
@@ -7865,12 +7699,22 @@
       ],
       "title": "Ceiling"
      },
+     "credential": {
+      "description": "key, or login for a command-line agent (LLM-2).",
+      "title": "Credential",
+      "type": "string"
+     },
      "images": {
       "title": "Images",
       "type": "boolean"
      },
      "label": {
       "title": "Label",
+      "type": "string"
+     },
+     "login_hint": {
+      "description": "What to paste as a login, in plain words.",
+      "title": "Login Hint",
       "type": "string"
      },
      "name": {
@@ -7887,7 +7731,9 @@
      "label",
      "needs_base_url",
      "images",
-     "ceiling"
+     "ceiling",
+     "credential",
+     "login_hint"
     ],
     "title": "ProviderItem",
     "type": "object"
@@ -8828,12 +8674,6 @@
       "title": "Credential Names",
       "type": "array"
      },
-     "nightsquad_role": {
-      "const": 1,
-      "default": 1,
-      "title": "Nightsquad Role",
-      "type": "integer"
-     },
      "description": {
       "maxLength": 2000,
       "minLength": 1,
@@ -8878,6 +8718,12 @@
       "default": false,
       "title": "Needs Vision",
       "type": "boolean"
+     },
+     "nightsquad_role": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Role",
+      "type": "integer"
      },
      "skills": {
       "description": "Skills it may use, each pinned by version.",
@@ -9502,7 +9348,7 @@
    "SearchHit": {
     "properties": {
      "kind": {
-      "description": "role or crew.",
+      "description": "role or squad.",
       "title": "Kind",
       "type": "string"
      },
@@ -10343,6 +10189,172 @@
      "purchases"
     ],
     "title": "SpendView",
+    "type": "object"
+   },
+   "SquadDoc": {
+    "additionalProperties": false,
+    "description": "One squad, as a file (LIB-2).",
+    "properties": {
+     "ceo_role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Ceo Role",
+      "type": "string"
+     },
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate": {
+      "anyOf": [
+       {
+        "$ref": "#/components/schemas/Estimate"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "description": "Reference runs and tokens for the job, when known (GOV-4)."
+     },
+     "name": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "nightsquad_squad": {
+      "const": 1,
+      "default": 1,
+      "title": "Nightsquad Squad",
+      "type": "integer"
+     },
+     "outcome": {
+      "description": "What the squad delivers.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Outcome",
+      "type": "string"
+     },
+     "slug": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Slug",
+      "type": "string"
+     },
+     "teams": {
+      "items": {
+       "$ref": "#/components/schemas/SquadTeam"
+      },
+      "title": "Teams",
+      "type": "array"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "ceo_role",
+     "teams"
+    ],
+    "title": "SquadDoc",
+    "type": "object"
+   },
+   "SquadItem": {
+    "properties": {
+     "domains": {
+      "items": {
+       "type": "string"
+      },
+      "title": "Domains",
+      "type": "array"
+     },
+     "estimate_tokens": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Estimate Tokens"
+     },
+     "name": {
+      "title": "Name",
+      "type": "string"
+     },
+     "outcome": {
+      "title": "Outcome",
+      "type": "string"
+     },
+     "seats": {
+      "description": "Seats in its teams, not counting the CEO.",
+      "title": "Seats",
+      "type": "integer"
+     },
+     "slug": {
+      "title": "Slug",
+      "type": "string"
+     }
+    },
+    "required": [
+     "slug",
+     "name",
+     "outcome",
+     "domains",
+     "seats",
+     "estimate_tokens"
+    ],
+    "title": "SquadItem",
+    "type": "object"
+   },
+   "SquadList": {
+    "properties": {
+     "items": {
+      "items": {
+       "$ref": "#/components/schemas/SquadItem"
+      },
+      "title": "Items",
+      "type": "array"
+     }
+    },
+    "required": [
+     "items"
+    ],
+    "title": "SquadList",
+    "type": "object"
+   },
+   "SquadTeam": {
+    "additionalProperties": false,
+    "properties": {
+     "members": {
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Members",
+      "type": "array"
+     },
+     "name": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+     },
+     "role": {
+      "pattern": "^[a-z0-9][a-z0-9-]{0,98}[a-z0-9]$|^[a-z0-9]$",
+      "title": "Role",
+      "type": "string"
+     }
+    },
+    "required": [
+     "name",
+     "role",
+     "members"
+    ],
+    "title": "SquadTeam",
     "type": "object"
    },
    "Step": {
@@ -12321,7 +12333,7 @@
      },
      "without_missing": {
       "default": false,
-      "description": "Start even though some of the crew cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).",
+      "description": "Start even though some of the squad cannot work yet. They wait, with the reason shown, until what they need is added (CON-5).",
       "title": "Without Missing",
       "type": "boolean"
      }
@@ -15018,7 +15030,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Show what a project has, what its crew needs, and what could be attached.",
+    "summary": "Show what a project has, what its squad needs, and what could be attached.",
     "tags": [
      "connections"
     ]
@@ -15915,115 +15927,6 @@
     "summary": "Make one tiny real call with a credential, to see that it works. It is metered.",
     "tags": [
      "credentials"
-    ]
-   }
-  },
-  "/v1/crews/list": {
-   "get": {
-    "description": "Requires: person.",
-    "operationId": "crews.list",
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewList"
-        }
-       }
-      },
-      "description": "Successful Response"
-     }
-    },
-    "summary": "List the ready-made crews: each is a job with a team already on it.",
-    "tags": [
-     "crews"
-    ]
-   }
-  },
-  "/v1/crews/save": {
-   "post": {
-    "description": "Requires: person.",
-    "operationId": "crews.save",
-    "requestBody": {
-     "content": {
-      "application/json": {
-       "schema": {
-        "$ref": "#/components/schemas/CrewDoc"
-       }
-      }
-     },
-     "required": true
-    },
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewItem"
-        }
-       }
-      },
-      "description": "Successful Response"
-     },
-     "422": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/HTTPValidationError"
-        }
-       }
-      },
-      "description": "Validation Error"
-     }
-    },
-    "summary": "Add a crew from a file, or replace one that exists.",
-    "tags": [
-     "crews"
-    ]
-   }
-  },
-  "/v1/crews/show": {
-   "get": {
-    "description": "Requires: person.",
-    "operationId": "crews.show",
-    "parameters": [
-     {
-      "description": "The crew's slug, from `crews list`.",
-      "in": "query",
-      "name": "crew",
-      "required": true,
-      "schema": {
-       "description": "The crew's slug, from `crews list`.",
-       "title": "Crew",
-       "type": "string"
-      }
-     }
-    ],
-    "responses": {
-     "200": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/CrewDoc"
-        }
-       }
-      },
-      "description": "Successful Response"
-     },
-     "422": {
-      "content": {
-       "application/json": {
-        "schema": {
-         "$ref": "#/components/schemas/HTTPValidationError"
-        }
-       }
-      },
-      "description": "Validation Error"
-     }
-    },
-    "summary": "Show one crew in full, as the file it can be saved to.",
-    "tags": [
-     "crews"
     ]
    }
   },
@@ -17675,7 +17578,7 @@
       "content": {
        "application/json": {
         "schema": {
-         "$ref": "#/components/schemas/CrewList"
+         "$ref": "#/components/schemas/SquadList"
         }
        }
       },
@@ -17692,7 +17595,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Load the roles and crews shipped with this version of Nightsquad again.",
+    "summary": "Load the roles and squads shipped with this version of Nightsquad again.",
     "tags": [
      "library"
     ]
@@ -17751,7 +17654,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Find roles and crews that fit a piece of work.",
+    "summary": "Find roles and squads that fit a piece of work.",
     "tags": [
      "library"
     ]
@@ -20263,7 +20166,7 @@
       "description": "Validation Error"
      }
     },
-    "summary": "Show what the crew would wait for if the project started now, and who.",
+    "summary": "Show what the squad would wait for if the project started now, and who.",
     "tags": [
      "projects"
     ]
@@ -22569,6 +22472,115 @@
     "summary": "Show real-world spend: the cap, what is committed this month, and each purchase.",
     "tags": [
      "spend"
+    ]
+   }
+  },
+  "/v1/squads/list": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "squads.list",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadList"
+        }
+       }
+      },
+      "description": "Successful Response"
+     }
+    },
+    "summary": "List the ready-made squads: each is a job with a team already on it.",
+    "tags": [
+     "squads"
+    ]
+   }
+  },
+  "/v1/squads/save": {
+   "post": {
+    "description": "Requires: person.",
+    "operationId": "squads.save",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SquadDoc"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadItem"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Add a squad from a file, or replace one that exists.",
+    "tags": [
+     "squads"
+    ]
+   }
+  },
+  "/v1/squads/show": {
+   "get": {
+    "description": "Requires: person.",
+    "operationId": "squads.show",
+    "parameters": [
+     {
+      "description": "The squad's slug, from `squads list`.",
+      "in": "query",
+      "name": "squad",
+      "required": true,
+      "schema": {
+       "description": "The squad's slug, from `squads list`.",
+       "title": "Squad",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/SquadDoc"
+        }
+       }
+      },
+      "description": "Successful Response"
+     },
+     "422": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      },
+      "description": "Validation Error"
+     }
+    },
+    "summary": "Show one squad in full, as the file it can be saved to.",
+    "tags": [
+     "squads"
     ]
    }
   },

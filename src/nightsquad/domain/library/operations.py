@@ -1,4 +1,4 @@
-"""What people do with the role and crew libraries (LIB-1, LIB-2, LIB-3)."""
+"""What people do with the role and squad libraries (LIB-1, LIB-2, LIB-3)."""
 
 from __future__ import annotations
 
@@ -11,12 +11,12 @@ from nightsquad.catalog.execute import Context
 from nightsquad.catalog.operation import Reversibility
 from nightsquad.catalog.refusal import Refusal
 from nightsquad.domain.library import service
-from nightsquad.domain.library.documents import LIB_1, CrewDoc, RoleDoc
+from nightsquad.domain.library.documents import LIB_1, RoleDoc, SquadDoc
 from nightsquad.storage.events import event_type
-from nightsquad.storage.models import Crew
+from nightsquad.storage.models import Squad
 
 ROLE_SAVED = event_type("role.saved", "A role, or a new version of one, was saved (LIB-1).")
-CREW_SAVED = event_type("crew.saved", "A crew was saved (LIB-2).")
+SQUAD_SAVED = event_type("squad.saved", "A squad was saved (LIB-2).")
 LIBRARY_RELOADED = event_type("library.reloaded", "The shipped library was loaded again (LIB-3).")
 
 SEARCH_LIMIT_MOST = 50
@@ -33,11 +33,11 @@ class RoleSaved(BaseModel):
     changed: bool = Field(description="False when the same content was already the newest.")
 
 
-class CrewRef(BaseModel):
-    crew: str = Field(description="The crew's slug, from `crews list`.")
+class SquadRef(BaseModel):
+    squad: str = Field(description="The squad's slug, from `squads list`.")
 
 
-class CrewItem(BaseModel):
+class SquadItem(BaseModel):
     slug: str
     name: str
     outcome: str
@@ -46,8 +46,8 @@ class CrewItem(BaseModel):
     estimate_tokens: int | None
 
 
-class CrewList(BaseModel):
-    items: list[CrewItem]
+class SquadList(BaseModel):
+    items: list[SquadItem]
 
 
 class SearchInput(BaseModel):
@@ -56,7 +56,7 @@ class SearchInput(BaseModel):
 
 
 class SearchHit(BaseModel):
-    kind: str = Field(description="role or crew.")
+    kind: str = Field(description="role or squad.")
     slug: str
     name: str
     summary: str
@@ -128,64 +128,64 @@ async def save_role(context: Context, payload: RoleDoc) -> RoleSaved:
     return RoleSaved(slug=role.slug, name=role.name, version=role.version, changed=changed)
 
 
-def _crew_item(crew: Crew) -> CrewItem:
-    return CrewItem(
-        slug=crew.slug,
-        name=crew.name,
-        outcome=crew.outcome,
-        domains=[str(domain) for domain in crew.domains],
-        seats=sum(len(team["members"]) for team in crew.teams),
-        estimate_tokens=crew.estimate_tokens,
+def _squad_item(squad: Squad) -> SquadItem:
+    return SquadItem(
+        slug=squad.slug,
+        name=squad.name,
+        outcome=squad.outcome,
+        domains=[str(domain) for domain in squad.domains],
+        seats=sum(len(team["members"]) for team in squad.teams),
+        estimate_tokens=squad.estimate_tokens,
     )
 
 
 @operation(
-    "crews.list",
-    summary="List the ready-made crews: each is a job with a team already on it.",
+    "squads.list",
+    summary="List the ready-made squads: each is a job with a team already on it.",
     authority=Authority.PERSON,
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
 )
-async def list_crews(context: Context, payload: Empty) -> CrewList:
+async def list_squads(context: Context, payload: Empty) -> SquadList:
     await service.load_starter(context.session, context.now)
-    rows = await context.session.scalars(select(Crew).order_by(Crew.slug))
-    return CrewList(items=[_crew_item(row) for row in rows])
+    rows = await context.session.scalars(select(Squad).order_by(Squad.slug))
+    return SquadList(items=[_squad_item(row) for row in rows])
 
 
 @operation(
-    "crews.show",
-    summary="Show one crew in full, as the file it can be saved to.",
+    "squads.show",
+    summary="Show one squad in full, as the file it can be saved to.",
     authority=Authority.PERSON,
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
     mcp_scope="read",
 )
-async def show_crew(context: Context, payload: CrewRef) -> CrewDoc:
+async def show_squad(context: Context, payload: SquadRef) -> SquadDoc:
     await service.load_starter(context.session, context.now)
-    return service.crew_doc(await service.crew_named(context.session, payload.crew))
+    return service.squad_doc(await service.squad_named(context.session, payload.squad))
 
 
 @operation(
-    "crews.save",
-    summary="Add a crew from a file, or replace one that exists.",
+    "squads.save",
+    summary="Add a squad from a file, or replace one that exists.",
     authority=Authority.PERSON,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def save_crew(context: Context, payload: CrewDoc) -> CrewItem:
-    """LIB-2: every role a crew names must be in the library."""
+async def save_squad(context: Context, payload: SquadDoc) -> SquadItem:
+    """LIB-2: every role a squad names must be in the library."""
     await service.load_starter(context.session, context.now)
-    current = await context.session.scalar(select(Crew).where(Crew.slug == payload.slug))
-    if current is not None and service.crew_doc(current) != payload:
-        _may_replace(context, "crew", payload.slug)
-    crew = await service.save_crew(context.session, payload, service.CUSTOM, context.now)
-    context.record(CREW_SAVED, subject=("crew", crew.slug), after={"name": crew.name})
-    return _crew_item(crew)
+    current = await context.session.scalar(select(Squad).where(Squad.slug == payload.slug))
+    if current is not None and service.squad_doc(current) != payload:
+        _may_replace(context, "squad", payload.slug)
+    squad = await service.save_squad(context.session, payload, service.CUSTOM, context.now)
+    context.record(SQUAD_SAVED, subject=("squad", squad.slug), after={"name": squad.name})
+    return _squad_item(squad)
 
 
 @operation(
     "library.search",
-    summary="Find roles and crews that fit a piece of work.",
+    summary="Find roles and squads that fit a piece of work.",
     authority=Authority.PERSON,
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
@@ -205,13 +205,13 @@ async def search(context: Context, payload: SearchInput) -> SearchResult:
 
 @operation(
     "library.reload",
-    summary="Load the roles and crews shipped with this version of Nightsquad again.",
+    summary="Load the roles and squads shipped with this version of Nightsquad again.",
     authority=Authority.ADMIN,
     reversibility=Reversibility.REVERSIBLE,
 )
-async def reload(context: Context, payload: Empty) -> CrewList:
+async def reload(context: Context, payload: Empty) -> SquadList:
     """LIB-3: a shipped role whose text has changed becomes its next version."""
     await service.reload_starter(context.session, context.now)
     context.record(LIBRARY_RELOADED, subject=("library", "starter"))
-    rows = await context.session.scalars(select(Crew).order_by(Crew.slug))
-    return CrewList(items=[_crew_item(row) for row in rows])
+    rows = await context.session.scalars(select(Squad).order_by(Squad.slug))
+    return SquadList(items=[_squad_item(row) for row in rows])

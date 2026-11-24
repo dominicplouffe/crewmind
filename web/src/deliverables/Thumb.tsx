@@ -10,7 +10,7 @@ import { Markdown } from "../components/common";
 import { parseCsv } from "../lib/csv";
 import { codeLanguage, isTextKind, previewKind, sandboxedDocument, type PreviewKind } from "../lib/files";
 import { highlight } from "../lib/markdown";
-import { deliverables as words } from "../strings.crew";
+import { deliverables as words } from "../strings.squad";
 import { excerptLines, markdownExcerpt } from "./logic";
 
 /** Text files larger than this show an icon instead of an excerpt, so a card never pulls a big file. */

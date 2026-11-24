@@ -14,7 +14,7 @@ This repository is the rebuild (v2). It starts from the specification, with no v
 | [HANDOVER.md](HANDOVER.md) | Where the build stands and how to carry it on |
 | [CLAUDE.md](CLAUDE.md) | Rules for coding agents |
 | [acceptance/](acceptance/README.md) | Reference specs the acceptance suite runs |
-| [content/](content/README.md) | The role and crew library, example specs, the Founder's doctrine and the goal grammar |
+| [content/](content/README.md) | The role and squad library, example specs, the Founder's doctrine and the goal grammar |
 
 Status: phases 2 to 7 are built: chat and execution, listening, verification, planning, the chairman loop, and the Founder with rehearsal. This is the v2.0 release candidate. You can draft a project by talking to the Founder, and rehearse it at no cost before it starts. You can talk to a CEO agent in the web app or the terminal. What you say once sticks; agents recall earlier work; tasks are done only when the platform or another agent has checked them; every task serves scope you can see; and everything that waits on you is one kind of item, with a deadline and a stated outcome if you do nothing. The desk lists what waits on you, the daily brief and the agenda are built from the record at no cost, and an AI client of your own can steer a project over MCP within the scopes you grant. The Founder and integrations (Slack, mail, data sources) come in later phases. See [docs/PLAN.md](docs/PLAN.md) for the phases, [docs/phases/](docs/phases/) for what each phase did and did not finish, and [SECURITY.md](SECURITY.md) for what is and is not protected.
 
@@ -106,7 +106,7 @@ The Founder drafts first and then asks one decision at a time, each with its rec
 uv run squad founder eval --goal acceptance/reference-goal.md --grades acceptance/reference-goal.grades.json --goal acceptance/raw-brief.md --grades acceptance/raw-brief.grades.json
 ```
 
-A project is one portable file, a spec. `squad projects export` writes it, `projects import-spec` and `projects clone` create from it, and a rehearsal runs it through the real rules with a crew in code, spending nothing:
+A project is one portable file, a spec. `squad projects export` writes it, `projects import-spec` and `projects clone` create from it, and a rehearsal runs it through the real rules with a squad in code, spending nothing:
 
 ```bash
 uv run squad projects rehearse --project-id <id>
@@ -139,7 +139,7 @@ People then sign in at `https://192.168.1.50`. Running the script again is safe:
 Each takes `--help`.
 
 - **The address must match.** Sign in only at the address the script prints. The server refuses a browser session from any other.
-- **The certificate.** The TLS front signs its own certificate, so a browser asks you to accept it once. Until the certificate is trusted, push alerts and the installable app do not work. For a public host name, use `--bind 0.0.0.0 --public-url https://crew.example.com --tls you@example.com` and it gets a certificate from Let's Encrypt.
+- **The certificate.** The TLS front signs its own certificate, so a browser asks you to accept it once. Until the certificate is trusted, push alerts and the installable app do not work. For a public host name, use `--bind 0.0.0.0 --public-url https://squad.example.com --tls you@example.com` and it gets a certificate from Let's Encrypt.
 - **Docker ignores `ufw`.** A port Docker publishes is open whatever the firewall says. The listen address is what keeps it private.
 - **Back up the master key.** It is `master.key` in the state directory (`/var/lib/nightsquad` unless you pass `--state-root`). Without it no stored model key can be read. The backup script includes it.
 - **The `squad` command** runs inside the server:
@@ -167,4 +167,4 @@ uv run ruff check && uv run ruff format --check && uv run pyright
 
 The web app has its own checks; see [web/README.md](web/README.md).
 
-`uv run pytest -m slow` runs the few tests that start a real server, among them the speed criterion: a scripted crew in `acceptance/scripts/deliver-reference.json` must take a four-page project from start to ready in no more than 1.3 times its longest chain of runs. A mock script file is a list of turns replayed in every run, or `{"runs": [[...], [...]], "then": [...]}` to give each run of a seat its own turns; a turn may set `delay_ms` to take time.
+`uv run pytest -m slow` runs the few tests that start a real server, among them the speed criterion: a scripted squad in `acceptance/scripts/deliver-reference.json` must take a four-page project from start to ready in no more than 1.3 times its longest chain of runs. A mock script file is a list of turns replayed in every run, or `{"runs": [[...], [...]], "then": [...]}` to give each run of a seat its own turns; a turn may set `delay_ms` to take time.

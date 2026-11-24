@@ -73,7 +73,7 @@ Motion explains a change; it never decorates.
 | `--duration-base` | 200 ms | tabs, fades |
 | `--duration-slow` | 320 ms | sheets, cards entering, progress |
 | `--ease-out` | cubic-bezier(.2,.8,.2,1) | most transitions |
-| `--ease-spring` | cubic-bezier(.34,1.4,.64,1) | the crew-hired moment only |
+| `--ease-spring` | cubic-bezier(.34,1.4,.64,1) | the squad-hired moment only |
 
 Named animations: `pop-in` (menus, palette), `rise-in` (cards entering), `sheet-in` / `sheet-up` (sheets), `pulse-ring` (an agent working), `shimmer` (skeletons). Under `prefers-reduced-motion: reduce` every duration drops to near zero (bottom of `base.css`).
 
@@ -96,8 +96,8 @@ Named animations: `pop-in` (menus, palette), `rise-in` (cards entering), `sheet-
 | Needs stack | `project/NeedsStack.tsx` | The most urgent decisions pinned above the conversation (two on a desktop, one on a phone), "+N more" opens the rest. |
 | Note | `desk/ItemNote.tsx` | A heads-up or flag in the chat: an icon, who, their words as plain text, Acknowledge. Never a card. |
 | Board | `panels/board/Kanban.tsx` | Ready, In progress, In review, Blocked (with the reason), Done; columns snap sideways on a phone. |
-| Crew assembled | `crew/CrewAssembled.tsx` | The signature moment: the crew gathers around the mark once, after the Founder starts a project or on the first visit to Crew. A still card under reduced motion. |
-| Agent card | `crew/` | Avatar, name, role, status, what it is doing now. |
+| Squad assembled | `squad/SquadAssembled.tsx` | The signature moment: the squad gathers around the mark once, after the Founder starts a project or on the first visit to Squad. A still card under reduced motion. |
+| Agent card | `squad/` | Avatar, name, role, status, what it is doing now. |
 | Progress | `ui/Progress.tsx` `SegmentBar`, `Meter` | Always paired with a text legend or label. |
 | Burn chart | `overview/BurnChart.tsx` | SVG, labelled, with a text summary and a data table for screen readers. |
 | Sheet | `ui/Sheet.tsx` | `<dialog>`: focus trapped, Esc closes; right side on desktop, bottom sheet on phones. |
@@ -113,7 +113,7 @@ Named animations: `pop-in` (menus, palette), `rise-in` (cards entering), `sheet-
 
 - **Desktop (≥ 900 px):** a 240 px sidebar (search, Home, Projects, Settings, the person's projects with live dots and needs-you counts, the user menu) beside the page.
 - **Phone (< 900 px):** a top bar (logo, search, user menu) and a bottom tab bar (Home, Projects, New, Settings). Inside a project the tab bar steps aside so the conversation and composer get the height.
-- **Project:** a title line, a status line (needs you, who is working, next, budget), tabs (Chat, Overview, Work, Crew, Deliverables) and **More** for the rest. Tools open as a wide docked panel (640–704 px) on large screens and full screen below 1100 px. At 1280 px and wider the chat has a rail with what needs you, the crew and the budget.
+- **Project:** a title line, a status line (needs you, who is working, next, budget), tabs (Chat, Overview, Work, Squad, Deliverables) and **More** for the rest. Tools open as a wide docked panel (640–704 px) on large screens and full screen below 1100 px. At 1280 px and wider the chat has a rail with what needs you, the squad and the budget.
 
 ## Keyboard
 

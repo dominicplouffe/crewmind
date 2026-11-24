@@ -37,7 +37,7 @@ class Created(BaseModel):
     )
     waiting: list[str] = Field(
         default_factory=list[str],
-        description="Who in the crew could not work yet, and why: a connection their role "
+        description="Who in the squad could not work yet, and why: a connection their role "
         "needs, or a seat that cannot run (CON-5).",
     )
 

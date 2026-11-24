@@ -32,7 +32,7 @@ class Readiness(BaseModel):
 
 @operation(
     "projects.readiness",
-    summary="Show what the crew would wait for if the project started now, and who.",
+    summary="Show what the squad would wait for if the project started now, and who.",
     authority=Authority.PROJECT_OBSERVER,
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,
@@ -155,7 +155,7 @@ async def detach_connection(context: Context, payload: DetachInput) -> Connectio
 
 @operation(
     "connections.for_project",
-    summary="Show what a project has, what its crew needs, and what could be attached.",
+    summary="Show what a project has, what its squad needs, and what could be attached.",
     authority=Authority.PROJECT_OBSERVER,
     reversibility=Reversibility.READ,
     principals=PERSON_AND_MCP,

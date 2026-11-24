@@ -28,7 +28,7 @@ import { ChatItemCard } from "../desk/ItemCard";
 import { ChatItemNote } from "../desk/ItemNote";
 import { formatDateTime } from "../lib/format";
 import { t } from "../strings";
-import { AgentAvatar, useAgentName } from "../crew/names";
+import { AgentAvatar, useAgentName } from "../squad/names";
 import { ActionCard } from "./ActionCard";
 import { Markers, StatusActions, detailOf, isReopenLine, type MessageDetail } from "./MessageExtras";
 import { MessageMenu, type MenuAction } from "./MessageMenu";

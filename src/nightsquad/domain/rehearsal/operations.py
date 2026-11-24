@@ -143,7 +143,7 @@ async def rehearse(context: Context, spec: ProjectSpec) -> RehearsalReport:
     mcp_scope="read",
 )
 async def rehearse_spec(context: Context, payload: ProjectSpec) -> RehearsalReport:
-    """RHS-1 to RHS-4: the real rules, dispatcher and scheduler run the spec with a crew
+    """RHS-1 to RHS-4: the real rules, dispatcher and scheduler run the spec with a squad
     in code, on a database made for the drill. Nothing is created here."""
     return await rehearse(context, payload)
 

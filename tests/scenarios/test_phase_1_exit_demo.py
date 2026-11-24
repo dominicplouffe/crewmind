@@ -326,7 +326,7 @@ async def test_INV_21_every_write_operation_records_an_event(
     }  # fmt: skip
     await write("roles.save", alice, **role)
     await write(
-        "crews.save", alice, slug="check-it", name="Check it", outcome="A checked document.",
+        "squads.save", alice, slug="check-it", name="Check it", outcome="A checked document.",
         ceo_role="ceo", teams=[{"name": "Checks", "role": "fact-checker", "members": ["Fay"]}],
     )  # fmt: skip
     await write("roster.hire_team", alice, project_id=project, team="checks", role="fact-checker")

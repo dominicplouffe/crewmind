@@ -58,7 +58,7 @@ from nightsquad.storage.models.founder import (
     GrillItem,
     LedgerEntry,
 )
-from nightsquad.storage.models.library import Crew
+from nightsquad.storage.models.library import Squad
 from nightsquad.storage.models.models import (
     Lineup,
     ModelCredential,
@@ -121,7 +121,6 @@ __all__ = [
     "ConnectionSecret",
     "ConnectionVariable",
     "Correction",
-    "Crew",
     "Cycle",
     "DecisionItem",
     "Directive",
@@ -181,6 +180,7 @@ __all__ = [
     "SettingValue",
     "SideEffect",
     "Snooze",
+    "Squad",
     "StandingOrder",
     "StoredSecret",
     "Suggestion",

@@ -69,7 +69,7 @@ function Drafting({ draftingId }: { draftingId: string }): JSX.Element {
   const blockers = stage === "you" && view.questions.length === 0 ? otherReasons(view) : [];
   const start = (): void => {
     void actions.start().then((projectId) => {
-      if (projectId) navigate(`/projects/${projectId}?crew=hired`);
+      if (projectId) navigate(`/projects/${projectId}?squad=hired`);
     });
   };
 

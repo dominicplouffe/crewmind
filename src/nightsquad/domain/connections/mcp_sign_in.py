@@ -226,7 +226,7 @@ async def sign_in(context: Context, payload: SignInInput) -> SignInStart:
         authorize_url=mcp_oauth.authorize_url(
             endpoints, found.client_id, found.redirect, state, challenge
         ),
-        acts_as=f"nightsquad will act as your account at {urlsplit(endpoints.issuer).hostname} "
+        acts_as=f"Nightsquad will act as your account at {urlsplit(endpoints.issuer).hostname} "
         f"when agents use {item.name}.",
     )
 
