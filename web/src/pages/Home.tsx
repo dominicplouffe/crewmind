@@ -5,7 +5,7 @@
  */
 import { useId, useRef, useState } from "react";
 import { BellRing, CheckCircle2, Newspaper, Plus, Sparkles, WifiOff } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { get } from "../api/client";
 import { useAuth } from "../auth";
 import { Brief } from "../desk/Brief";
@@ -17,6 +17,7 @@ import { useListKeys } from "../home/useListKeys";
 import { firstName, greeting } from "../lib/humanize";
 import { useLoad } from "../lib/useLoad";
 import { useNeedsYou, usePageTitle } from "../needs/NeedsYou";
+import { opensWelcome, welcomeSeen } from "../onboarding/firstRun";
 import { useSetupStatus } from "../onboarding/useSetupStatus";
 import { sortProjects, useProjects, LIVE_STATES } from "../shell/projects";
 import { useAlerts } from "../shell/useAlerts";
@@ -130,6 +131,11 @@ export function Home(): JSX.Element {
     brief.reload();
   };
   const hello = home.greeting(greeting(), firstName(person?.name));
+  const firstRun =
+    ready &&
+    projects.data !== undefined &&
+    opensWelcome({ isAdmin: setup.isAdmin, founderReady: setup.founderReady, projects: list.length, seen: welcomeSeen() });
+  if (firstRun) return <Navigate to="/welcome" replace />;
 
   return (
     <main className="content home" aria-labelledby="home-title">
